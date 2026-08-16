@@ -262,6 +262,15 @@ class ApiService {
     };
   }
 
+  async updateProfile(updates) {
+    if (!this.uid) throw new Error('Authentication required');
+    await updateDoc(doc(db, 'users', this.uid), {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+    return { success: true };
+  }
+
   // Computed live from the user's favorites + progress subcollections (the
   // static users/{uid}.stats field was never maintained).
   async getUserStats() {

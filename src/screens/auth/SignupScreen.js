@@ -30,6 +30,8 @@ export const SignupScreen = ({ navigation }) => {
     try {
       setError(''); setSubmitting(true);
       await signupWithEmail(email.trim(), password, displayName.trim());
+      // Navigate to profile setup after successful signup
+      navigation.navigate('ProfileSetup');
     } catch (e) {
       setError(getAuthErrorMessage(e.code, 'signup'));
     } finally { setSubmitting(false); }

@@ -75,10 +75,30 @@ export const ProfileScreen = () => {
   const listenTime = `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
   const streak = stats?.streak ?? userStats?.streak ?? 0;
 
+  // Profile details from Firestore
+  const profile = userStats || {};
+  const fullName = profile.fullName || name;
+  const phone = profile.phone || 'Not provided';
+  const gender = profile.gender || 'Not specified';
+  const age = profile.age ? `${profile.age} years` : 'Not specified';
+  const favoriteGenre = profile.favoriteGenre || 'Not set';
+
   const StatCard = ({ value, label }) => (
     <View style={[styles.statCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
       <AppText variant="h2" color="accent">{value}</AppText>
       <AppText variant="caption" color="textSecondary" style={{ marginTop: 4 }}>{label}</AppText>
+    </View>
+  );
+
+  const ProfileInfoItem = ({ icon, label, value }) => (
+    <View style={styles.infoRow}>
+      <View style={[styles.infoIcon, { backgroundColor: theme.accentSoft }]}>
+        <Icon name={icon} size={18} color={theme.accent} />
+      </View>
+      <View style={styles.infoContent}>
+        <AppText variant="caption" color="textTertiary">{label}</AppText>
+        <AppText variant="label" color="text" style={{ marginTop: 2 }}>{value}</AppText>
+      </View>
     </View>
   );
 
@@ -110,8 +130,18 @@ export const ProfileScreen = () => {
         >
           <AppText variant="displayM" style={{ color: '#fff' }}>{initial}</AppText>
         </LinearGradient>
-        <AppText variant="h2" style={{ marginTop: 14 }}>{name}</AppText>
+        <AppText variant="h2" style={{ marginTop: 14 }}>{fullName}</AppText>
         <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>{user.email}</AppText>
+      </View>
+
+      {/* Profile Details */}
+      <View style={[styles.profileCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <AppText variant="label" color="text" style={styles.profileCardTitle}>Profile Details</AppText>
+        <ProfileInfoItem icon="person" label="Full Name" value={fullName} />
+        <ProfileInfoItem icon="mail" label="Phone" value={phone} />
+        <ProfileInfoItem icon="gender" label="Gender" value={gender} />
+        <ProfileInfoItem icon="calendar" label="Age" value={age} />
+        <ProfileInfoItem icon="heart" label="Favorite Genre" value={favoriteGenre} />
       </View>
 
       {/* Streak card */}
@@ -231,6 +261,37 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     padding: 15,
+  },
+  profileCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    gap: 12,
+  },
+  profileCardTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border,
+  },
+  infoIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoContent: {
+    flex: 1,
   },
   section: { marginTop: 28 },
   sectionLabel: {

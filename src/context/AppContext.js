@@ -115,6 +115,20 @@ export const AppContextProvider = ({ children }) => {
     return favorites.some(f => f.id === storyId);
   };
 
+  const updateUserProfile = async (updates) => {
+    try {
+      await apiService.updateProfile(updates);
+      // Refresh user stats after update
+      if (user) {
+        const stats = await apiService.getUserStats();
+        setUserStats(stats);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -127,7 +141,8 @@ export const AppContextProvider = ({ children }) => {
         resetPassword,
         signOut,
         toggleFavorite,
-        isInFavorites
+        isInFavorites,
+        updateUserProfile
       }}
     >
       {children}

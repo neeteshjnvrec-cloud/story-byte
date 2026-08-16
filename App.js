@@ -22,6 +22,7 @@ import { StoryDetailScreen } from './src/screens/StoryDetailScreen';
 import { LoginScreen } from './src/screens/auth/LoginScreen';
 import { SignupScreen } from './src/screens/auth/SignupScreen';
 import { ForgotPasswordScreen } from './src/screens/auth/ForgotPasswordScreen';
+import { ProfileSetupScreen } from './src/screens/auth/ProfileSetupScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { FloatingAudioPlayer } from './src/components/FloatingAudioPlayer';
@@ -49,6 +50,7 @@ function AuthStack({ onCompleteOnboarding }) {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
     </Stack.Navigator>
   );
 }
@@ -61,6 +63,7 @@ function MainStack({ isNewUser }) {
         <Stack.Screen name="Main" component={AppNavigator} />
         <Stack.Screen name="StoryDetail" component={StoryDetailScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
         {isNewUser ? (
           <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         ) : null}
@@ -72,13 +75,25 @@ function MainStack({ isNewUser }) {
 }
 
 function Root() {
-  const { user, loading } = useAppContext();
+  const { user, loading, userStats } = useAppContext();
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
+  const [checkProfileComplete, setCheckProfileComplete] = useState(false);
 
   useEffect(() => {
     checkOnboardingStatus().then(setHasCompletedOnboarding);
   }, []);
+
+  // Check if user profile is complete
+  useEffect(() => {
+    if (user) {
+      const checkProfile = async () => {
+        const profile = await (require('./src/services/api').default).getUserProfile();
+        setCheckProfileComplete(profile?.profileComplete || false);
+      };
+      checkProfile();
+    }
+  }, [user]);
 
   // Show a minimal splash while auth state is being restored.
   if (loading) {
@@ -90,6 +105,19 @@ function Root() {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
         <OnboardingScreen onComplete={() => setIsFirstLogin(true)} />
+      </GestureHandlerRootView>
+    );
+  }
+
+  // Show profile setup if user hasn't completed profile
+  if (user && !checkProfileComplete) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
       </GestureHandlerRootView>
     );
   }
