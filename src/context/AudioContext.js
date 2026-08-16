@@ -108,13 +108,16 @@ export const AudioProvider = ({ children }) => {
       if (resumeTimeRef.current && resumeTimeRef.current > 0 && status.currentTime === 0) {
         const savedTime = resumeTimeRef.current;
         resumeTimeRef.current = 0; // Clear it
-        player.seekTo(savedTime).then(() => {
-          const newProgress = savedTime / status.duration;
-          setProgress(newProgress);
-        }).catch(err => {
-          console.warn('Failed to seek to saved position:', err);
-          setProgress(0);
-        });
+        const currentPlayer = playerRef.current;
+        if (currentPlayer) {
+          currentPlayer.seekTo(savedTime).then(() => {
+            const newProgress = savedTime / status.duration;
+            setProgress(newProgress);
+          }).catch(err => {
+            console.warn('Failed to seek to saved position:', err);
+            setProgress(0);
+          });
+        }
       } else {
         setProgress(status.currentTime / status.duration);
       }
