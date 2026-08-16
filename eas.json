@@ -6,18 +6,46 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyD4bbhwLjqkCGYU3MspzKbeOD4CjDvWeXs",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "storybyte-76716.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "storybyte-76716",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "storybyte-76716.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "74586701348",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:74586701348:web:7a1b72463ba8d1d162e2b1",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "74586701348-jb2e7lnrodgu8747jl4gpcro0og00ll0.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "74586701348-lk5akva1brs30arf1ai68smif1cok520.apps.googleusercontent.com"
+      }
     },
     "preview": {
       "distribution": "internal",
       "channel": "preview",
-      "android": {
-        "buildType": "apk"
+      "android": { "buildType": "apk" },
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyD4bbhwLjqkCGYU3MspzKbeOD4CjDvWeXs",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "storybyte-76716.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "storybyte-76716",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "storybyte-76716.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "74586701348",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:74586701348:web:7a1b72463ba8d1d162e2b1",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "74586701348-jb2e7lnrodgu8747jl4gpcro0og00ll0.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "74586701348-lk5akva1brs30arf1ai68smif1cok520.apps.googleusercontent.com"
       }
     },
     "production": {
       "channel": "production",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyD4bbhwLjqkCGYU3MspzKbeOD4CjDvWeXs",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "storybyte-76716.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "storybyte-76716",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "storybyte-76716.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "74586701348",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:74586701348:web:7a1b72463ba8d1d162e2b1",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "74586701348-jb2e7lnrodgu8747jl4gpcro0og00ll0.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "74586701348-lk5akva1brs30arf1ai68smif1cok520.apps.googleusercontent.com"
+      }
     }
   },
   "submit": {
