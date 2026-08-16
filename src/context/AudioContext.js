@@ -121,17 +121,33 @@ export const AudioProvider = ({ children }) => {
   // Play a story with optional starting page
   const playStory = useCallback(async (story, startPage = 0) => {
     try {
-      // Instantly pause any currently playing story — don't wait for full
-      // cleanup (which is async and causes a delay). The old player will be
-      // torn down lazily below once the new one is ready.
-      if (playerRef.current) {
+      // Save current story's progress before switching
+      if (playerRef.current && currentStoryRef.current) {
+        try {
+          const player = playerRef.current;
+          const uid = uidRef.current;
+          const currentStory = currentStoryRef.current;
+          if (uid && currentStory?.id && player.durationIsReady && player.duration > 0) {
+            const savedProgress = player.currentTime / player.duration;
+            await setDoc(doc(db, 'users', uid, 'progress', currentStory.id), {
+              progress: savedProgress,
+              currentTime: player.currentTime,
+              duration: player.duration,
+              pagesCompleted: Math.floor(savedProgress * totalPages),
+              speed,
+              lastUpdated: serverTimestamp()
+            }, { merge: true });
+          }
+        } catch (e) {
+          console.warn('Failed to save progress before switch:', e);
+        }
+
+        // Pause old player
         try { playerRef.current.pause(); } catch (_) {}
       }
 
       currentStoryRef.current = story;
       setCurrentStory(story);
-      setProgress(0);
-      setDuration(0);
       setCurrentPage(startPage);
 
       // Determine page count from story data
@@ -148,11 +164,32 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
+      // Load saved progress for this story
+      let resumeProgress = 0;
+      let resumeCurrentTime = 0;
+      if (story.id && uidRef.current) {
+        try {
+          const progressDoc = await getDoc(doc(db, 'users', uidRef.current, 'progress', story.id));
+          if (progressDoc.exists()) {
+            const data = progressDoc.data();
+            resumeProgress = Math.min(1, Math.max(0, data.progress || 0));
+            resumeCurrentTime = data.currentTime || 0;
+            // If progress is high enough, consider it "finished"
+            if (resumeProgress >= 0.98) {
+              resumeProgress = 0;
+              resumeCurrentTime = 0;
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to load saved progress:', e);
+        }
+      }
+
+      // Create new player with resumed position
       const player = createAudioPlayer({ uri: audioUrl });
       playerRef.current = player;
 
-      // Tear down the old player now that the new one is created.
-      // Subscription and progress timer are replaced below.
+      // Tear down old subscriptions/timer now that the new player is ready.
       if (subscriptionRef.current) {
         subscriptionRef.current.remove();
         subscriptionRef.current = null;
@@ -171,6 +208,17 @@ export const AudioProvider = ({ children }) => {
         'playbackStatusUpdate',
         onPlaybackStatusUpdate
       );
+
+      // Seek to saved position if exists
+      if (resumeCurrentTime > 0 && player.durationIsReady) {
+        await player.seekTo(resumeCurrentTime);
+        setProgress(resumeProgress);
+        setDuration(player.duration || story.duration || 0);
+      } else {
+        setProgress(0);
+        setDuration(0);
+      }
+
       player.play();
       setIsPlaying(true);
 
@@ -185,7 +233,7 @@ export const AudioProvider = ({ children }) => {
     } catch (error) {
       console.error('Error playing story:', error);
     }
-  }, [speed, startProgressSaveTimer, onPlaybackStatusUpdate]);
+  }, [speed, startProgressSaveTimer, onPlaybackStatusUpdate, totalPages]);
 
   // Navigate to a specific page
   const goToPage = useCallback(async (pageIndex) => {
