@@ -3,7 +3,8 @@
  */
 
 // API base URL - uses Firebase Functions
-const BASE_URL = process.env.REACT_APP_API_URL || 'https://us-central1-storybyte-app.cloudfunctions.net';
+// Expo only exposes EXPO_PUBLIC_-prefixed env vars to the client bundle.
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://us-central1-storybyte-76716.cloudfunctions.net';
 
 // API version - v2 for new Firebase backend
 const API_VERSION = 'v2';
@@ -25,6 +26,10 @@ export const API_ENDPOINTS = {
   USER_FAVORITE_ADD: (storyId) => `/api/${API_VERSION}/user/favorites/${storyId}`,
   USER_FAVORITE_REMOVE: (storyId) => `/api/${API_VERSION}/user/favorites/${storyId}`,
   USER_FAVORITE_CHECK: (storyId) => `/api/${API_VERSION}/user/favorites/${storyId}/check`,
+
+  // Password Reset
+  SEND_RESET_CODE: '/send-reset-code',
+  VERIFY_RESET_CODE: '/verify-reset-code',
 
   // Authentication
   AUTH_SIGNIN: `/api/${API_VERSION}/auth/signin`,

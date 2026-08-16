@@ -386,19 +386,30 @@ exports.verifyResetCode = functions.https.onRequest(async (req, res) => {
         return res.status(400).json({ error: 'Too many attempts. Request a new code.' });
       }
 
-      // Verify code
+      // Verify code (only allow verification — password update happens separately)
       if (data.code !== code) {
         await docRef.update({ attempts: admin.firestore.FieldValue.increment(1) });
         return res.status(400).json({ error: 'Invalid code. Please try again.' });
       }
 
-      // Code is valid - update password in Firebase Auth
-      await admin.auth().updateUser(userRecord.uid, { password: newPassword });
+      // If newPassword is provided, update the password — otherwise just verify.
+      if (newPassword) {
+        if (newPassword.length < 8) {
+          return res.status(400).json({ error: 'Password must be at least 8 characters' });
+        }
 
-      // Delete the reset code (single use)
-      await docRef.delete();
+        // Update password in Firebase Auth
+        await admin.auth().updateUser(userRecord.uid, { password: newPassword });
 
-      res.json({ success: true, message: 'Password reset successful' });
+        // Delete the reset code (single use)
+        await docRef.delete();
+
+        return res.json({ success: true, message: 'Password reset successful' });
+      }
+
+      // Code is valid — allow frontend to proceed to password entry.
+      // Don't delete yet — delete on actual password set.
+      res.json({ success: true, message: 'Code verified' });
     } catch (error) {
       console.error('Verify reset code error:', error);
       res.status(500).json({ error: 'Failed to verify code' });

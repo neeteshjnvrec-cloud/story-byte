@@ -1,9 +1,10 @@
 // App Context for Story Byte
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, firebaseSignOut, onAuthStateChanged, sendPasswordResetEmail } from '../services/firebase';
+import { auth, firebaseSignOut, onAuthStateChanged } from '../services/firebase';
 import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import apiService from '../services/api';
+import { loginWithEmail as authServiceLogin, signupWithEmail as authServiceSignup, signOutUser, sendResetEmail } from '../services/auth';
 
 const AppContext = createContext();
 
@@ -42,15 +43,8 @@ export const AppContextProvider = ({ children }) => {
   const loginWithEmail = async (email, password) => {
     setLoading(true);
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      setUser(result.user);
-      // Load user data
-      const profile = await apiService.getUserProfile();
-      const stats = await apiService.getUserStats();
-      const favoritesData = await apiService.getFavorites();
-      setUserStats(stats);
-      setFavorites(favoritesData);
-      return result.user;
+      await authServiceLogin(email, password);
+      return auth.currentUser;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -62,21 +56,8 @@ export const AppContextProvider = ({ children }) => {
   const signupWithEmail = async (email, password, displayName) => {
     setLoading(true);
     try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      const firebaseUser = result.user;
-
-      // Create the Firestore user document with displayName
-      await setDoc(doc(db, 'users', firebaseUser.uid), {
-        email: firebaseUser.email,
-        displayName: displayName || '',
-        createdAt: serverTimestamp(),
-        stats: { plays: 0, favorites: 0, minutesListened: 0 }
-      });
-
-      setUser(firebaseUser);
-      setUserStats({ plays: 0, favorites: 0, minutesListened: 0 });
-      setFavorites([]);
-      return firebaseUser;
+      await authServiceSignup(email, password, displayName);
+      return auth.currentUser;
     } catch (error) {
       console.error('Signup error:', error);
       throw error;
@@ -87,10 +68,8 @@ export const AppContextProvider = ({ children }) => {
 
   const resetPassword = async (email) => {
     try {
-      await sendPasswordResetEmail(auth, email, {
-        url: 'https://storybyte-76716.firebaseapp.com/auth/reset-password',
-        handleCodeInApp: true
-      });
+      // Firebase sends a reset link to the email; the hosted page handles the rest.
+      await sendResetEmail(email);
       return { success: true };
     } catch (error) {
       console.error('Password reset error:', error);

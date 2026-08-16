@@ -12,6 +12,7 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
+  confirmPasswordReset,
   onAuthStateChanged
 } from '@firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -48,4 +49,4 @@ try {
 export { auth };
 export const db = getFirestore(app);
 
-export { signInWithEmailAndPassword, createUserWithEmailAndPassword, firebaseSignOut, sendPasswordResetEmail, onAuthStateChanged };
+export { signInWithEmailAndPassword, createUserWithEmailAndPassword, firebaseSignOut, sendPasswordResetEmail, confirmPasswordReset, onAuthStateChanged };

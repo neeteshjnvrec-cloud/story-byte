@@ -6,14 +6,15 @@ import React, { useState } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAppContext } from '../../context/AppContext';
 import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { sendPasswordResetEmail } from '../../services/firebase';
 
 export const ForgotPasswordScreen = ({ navigation }) => {
+  const { resetPassword } = useAppContext();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
@@ -24,19 +25,13 @@ export const ForgotPasswordScreen = ({ navigation }) => {
     if (!email.trim()) { setError('Please enter your email address'); return; }
     try {
       setError(''); setSubmitting(true);
-      // Send a reset link to the registered email. handleCodeInApp lets the
-      // link land on our ResetPassword screen with the oobCode embedded.
-      await sendPasswordResetEmail(auth, email.trim(), {
-        url: 'https://storybyte-76716.firebaseapp.com/auth/reset-password',
-        handleCodeInApp: true
-      });
-      Alert.alert('Check your inbox', "We've sent a reset link to your email. Enter the code on the next screen.",
-        [{ text: 'OK', onPress: () => navigation.navigate('ResetPassword', { email: email.trim() }) }]);
+      await resetPassword(email.trim());
+      Alert.alert('Check your inbox', "We've sent a password reset link to your email. Open it to set a new password.",
+        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]);
     } catch (e) {
-      let msg = 'Failed to send reset email. Please try again.';
-      if (e.code === 'auth/user-not-found') msg = 'No account found with this email';
-      else if (e.code === 'auth/invalid-email') msg = 'Please enter a valid email address';
-      else if (e.code === 'auth/missing-continue-uri') msg = 'Reset link not configured. Please try again later';
+      let msg = e.message || 'Failed to send reset link. Please try again.';
+      if (e.code === 'auth/invalid-email') msg = 'Please enter a valid email address';
+      else if (e.code === 'auth/user-not-found') msg = 'No account found with this email';
       setError(msg);
     } finally { setSubmitting(false); }
   };
