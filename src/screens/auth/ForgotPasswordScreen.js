@@ -1,17 +1,19 @@
 // Forgot password — matches the warm auth design.
+// Step 1: user enters email → we send a reset link (not a password) to the
+// registered address. Step 2: they open the link, enter the code, and set a
+// new password. This file only handles step 1.
 import React, { useState } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAppContext } from '../../context/AppContext';
 import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { sendPasswordResetEmail } from '../../services/firebase';
 
 export const ForgotPasswordScreen = ({ navigation }) => {
-  const { resetPassword } = useAppContext();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
@@ -22,13 +24,19 @@ export const ForgotPasswordScreen = ({ navigation }) => {
     if (!email.trim()) { setError('Please enter your email address'); return; }
     try {
       setError(''); setSubmitting(true);
-      await resetPassword(email.trim());
-      Alert.alert('Check your inbox', "We've sent a link to reset your password.",
-        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]);
+      // Send a reset link to the registered email. handleCodeInApp lets the
+      // link land on our ResetPassword screen with the oobCode embedded.
+      await sendPasswordResetEmail(auth, email.trim(), {
+        url: 'https://storybyte-76716.firebaseapp.com/auth/reset-password',
+        handleCodeInApp: true
+      });
+      Alert.alert('Check your inbox', "We've sent a reset link to your email. Enter the code on the next screen.",
+        [{ text: 'OK', onPress: () => navigation.navigate('ResetPassword', { email: email.trim() }) }]);
     } catch (e) {
       let msg = 'Failed to send reset email. Please try again.';
       if (e.code === 'auth/user-not-found') msg = 'No account found with this email';
       else if (e.code === 'auth/invalid-email') msg = 'Please enter a valid email address';
+      else if (e.code === 'auth/missing-continue-uri') msg = 'Reset link not configured. Please try again later';
       setError(msg);
     } finally { setSubmitting(false); }
   };
@@ -45,7 +53,7 @@ export const ForgotPasswordScreen = ({ navigation }) => {
           </LinearGradient>
           <AppText variant="displayM">Reset password</AppText>
           <AppText variant="body" color="textSecondary" style={{ marginTop: 4, textAlign: 'center' }}>
-            Enter your email and we'll send you a reset link.
+            Enter your email and we'll send a reset link.
           </AppText>
         </View>
 

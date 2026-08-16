@@ -19,7 +19,8 @@
     "groq-sdk": "^0.4.0",
     "@google-cloud/text-to-speech": "^5.0.0",
     "node-cron": "^3.0.3",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "nodemailer": "^6.9.13"
   },
   "private": true
 }
