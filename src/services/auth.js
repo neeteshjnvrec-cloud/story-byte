@@ -25,7 +25,10 @@ export const signupWithEmail = async (email, password, displayName) => {
   const firebaseUser = result.user;
 
   // Create the Firestore user document (owner-only per security rules).
+  // `userId` must mirror the doc id: the rules check
+  // `request.resource.data.userId == userId` on create/update.
   await setDoc(doc(db, 'users', firebaseUser.uid), {
+    userId: firebaseUser.uid,
     email: firebaseUser.email,
     displayName: displayName || '',
     createdAt: serverTimestamp(),

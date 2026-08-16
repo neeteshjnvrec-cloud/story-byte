@@ -32,22 +32,21 @@ export const AppContextProvider = ({ children }) => {
           apiService.getFavorites()
         ]);
         
-        setUserStats(stats);
+        setUserStats(profile);
         setFavorites(favoritesData);
         setProfileCache(profile);
         setLastProfileFetch(now);
       } else {
         // Use cached data
-        const stats = await apiService.getUserStats();
         const favoritesData = await apiService.getFavorites();
-        setUserStats(stats);
+        setUserStats(profileCache);
         setFavorites(favoritesData);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
       // Fallback to cached data on error
       if (profileCache) {
-        setUserStats(profileCache.stats || null);
+        setUserStats(profileCache);
       }
     }
   }, [profileCache, lastProfileFetch]);
@@ -146,10 +145,11 @@ export const AppContextProvider = ({ children }) => {
   const updateUserProfile = useCallback(async (updates) => {
     try {
       await apiService.updateProfile(updates);
-      // Refresh user stats after update
+      // Refresh the profile doc (fullName, phone, gender, …) so screens that
+      // read `userStats` show the saved values immediately.
       if (user) {
-        const stats = await apiService.getUserStats();
-        setUserStats(stats);
+        const profile = await apiService.getUserProfile();
+        setUserStats(profile);
         // Invalidate cache to force fresh data on next load
         setProfileCache(null);
       }

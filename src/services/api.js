@@ -302,8 +302,11 @@ class ApiService {
 
   async updateProfile(updates) {
     if (!this.uid) throw new Error('Authentication required');
+    // MUST include userId — the security rules reject updates where
+    // request.resource.data.userId != userId.
     await updateDoc(doc(db, 'users', this.uid), {
       ...updates,
+      userId: this.uid,
       updatedAt: serverTimestamp(),
     });
     // Clear profile cache after update

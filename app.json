@@ -21,6 +21,8 @@
       "bundleIdentifier": "com.storybyte.app",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "This app uses the microphone for voice search.",
+        "NSCameraUsageDescription": "StoryByte uses the camera so you can take a profile picture.",
+        "NSPhotoLibraryUsageDescription": "StoryByte uses your photo library so you can choose a profile picture.",
         "UIBackgroundModes": [
           "audio"
         ]
@@ -35,7 +37,8 @@
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.FOREGROUND_SERVICE",
-        "android.permission.WAKE_LOCK"
+        "android.permission.WAKE_LOCK",
+        "android.permission.CAMERA"
       ]
     },
     "web": {
@@ -54,7 +57,14 @@
       "expo-image",
       "expo-web-browser",
       "@react-native-google-signin/google-signin",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "StoryByte uses your photo library so you can choose a profile picture.",
+          "cameraPermission": "StoryByte uses the camera so you can take a profile picture."
+        }
+      ]
     ],
     "extra": {
       "firebase": {

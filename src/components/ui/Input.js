@@ -33,9 +33,9 @@ export function Input({ icon, secure, value, onChangeText, placeholder, style, .
 const styles = StyleSheet.create({
   field: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    borderRadius: 14, borderWidth: 1, paddingHorizontal: 15, paddingVertical: 4, marginBottom: 12,
+    borderRadius: 14, borderWidth: 1, paddingHorizontal: 15, paddingVertical: 6, marginBottom: 12,
   },
-  input: { flex: 1, fontFamily: FONTS.body, fontSize: 15, paddingVertical: 12 },
+  input: { flex: 1, fontFamily: FONTS.body, fontSize: 15, paddingVertical: 13 },
 });
 
 export default Input;

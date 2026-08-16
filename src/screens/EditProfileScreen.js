@@ -8,11 +8,14 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  Image,
+  Alert,
   ActivityIndicator
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../hooks/useTheme';
 import { AppText } from '../components/ui/AppText';
@@ -36,6 +39,7 @@ export const EditProfileScreen = () => {
   const [age, setAge] = useState('');
   const [favoriteGenre, setFavoriteGenre] = useState('');
   const [bio, setBio] = useState('');
+  const [profilePic, setProfilePic] = useState(null);
   
   // UI state
   const [loading, setLoading] = useState(false);
@@ -52,6 +56,7 @@ export const EditProfileScreen = () => {
       setAge(userStats.age ? String(userStats.age) : '');
       setFavoriteGenre(userStats.favoriteGenre || '');
       setBio(userStats.bio || '');
+      setProfilePic(userStats.profilePic || userStats.photoURL || user?.photoURL || null);
     } else if (user) {
       setFullName(user.displayName || '');
     }
@@ -66,8 +71,9 @@ export const EditProfileScreen = () => {
     if (age !== (userStats?.age ? String(userStats.age) : '')) newChanges.age = age;
     if (favoriteGenre !== (userStats?.favoriteGenre || '')) newChanges.favoriteGenre = favoriteGenre;
     if (bio !== (userStats?.bio || '')) newChanges.bio = bio;
+    if (profilePic !== (userStats?.profilePic || userStats?.photoURL || user?.photoURL || null)) newChanges.profilePic = profilePic;
     setChanges(newChanges);
-  }, [fullName, phone, gender, age, favoriteGenre, bio, userStats, user]);
+  }, [fullName, phone, gender, age, favoriteGenre, bio, profilePic, userStats, user]);
 
   // Real-time save with debounce
   const debouncedSave = useCallback(
@@ -116,6 +122,85 @@ export const EditProfileScreen = () => {
     
     await debouncedSave(changes);
   }, [changes, debouncedSave]);
+
+  // --- Profile picture -------------------------------------------------------
+
+  // Convert a picked asset into a renderable, persistable data-URI.
+  const assetToDataUri = useCallback(async (asset) => {
+    if (asset.base64) {
+      return `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
+    }
+    if (asset.uri) {
+      // Some platforms omit base64 even when requested — convert manually.
+      const res = await fetch(asset.uri);
+      const blob = await res.blob();
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+    return null;
+  }, []);
+
+  const pickImage = useCallback(async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission required', 'Please allow photo library access to change your profile picture');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        // Square crop keeps the stored photo small (Firestore caps docs at 1 MiB).
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.4,
+        base64: true,
+      });
+      if (!result.canceled && result.assets?.[0]) {
+        const uri = await assetToDataUri(result.assets[0]);
+        if (uri) setProfilePic(uri);
+      }
+    } catch (err) {
+      console.error('Image pick error:', err);
+      Alert.alert('Failed', 'Could not load image');
+    }
+  }, [assetToDataUri]);
+
+  const takePhoto = useCallback(async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission required', 'Please allow camera access to take a profile picture');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.4,
+        base64: true,
+      });
+      if (!result.canceled && result.assets?.[0]) {
+        const uri = await assetToDataUri(result.assets[0]);
+        if (uri) setProfilePic(uri);
+      }
+    } catch (err) {
+      console.error('Camera error:', err);
+      Alert.alert('Failed', 'Could not take photo');
+    }
+  }, [assetToDataUri]);
+
+  const onChangeAvatar = useCallback(() => {
+    Alert.alert('Change Profile Picture', 'Choose an option', [
+      { text: 'Take Photo', onPress: takePhoto },
+      { text: 'Choose from Gallery', onPress: pickImage },
+      ...(profilePic ? [{ text: 'Remove', onPress: () => setProfilePic(null) }] : []),
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  }, [profilePic, pickImage, takePhoto]);
 
   // Memoized pill components
   const GenrePill = React.memo(({ label, selected, onPress }) => (
@@ -168,7 +253,7 @@ export const EditProfileScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 16 }]}
+        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 48 }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -195,17 +280,30 @@ export const EditProfileScreen = () => {
 
         {/* Avatar Section */}
         <View style={styles.avatarSection}>
-          <LinearGradient
-            colors={[theme.gradientStart || '#B5613A', theme.gradientEnd || '#E0913A']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.avatar}
-          >
-            <AppText variant="displayM" style={{ color: '#fff' }}>
-              {(fullName[0] || 'U').toUpperCase()}
-            </AppText>
-          </LinearGradient>
-          <AppText variant="h2" style={{ marginTop: 12 }}>{fullName || 'Your Name'}</AppText>
+          <Pressable onPress={onChangeAvatar} style={styles.avatarWrap} accessibilityLabel="Change profile picture">
+            {profilePic ? (
+              <Image source={{ uri: profilePic }} style={styles.avatar} resizeMode="cover" />
+            ) : (
+              <LinearGradient
+                colors={[theme.gradientStart || '#B5613A', theme.gradientEnd || '#E0913A']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.avatar}
+              >
+                <AppText variant="displayM" style={{ color: '#fff' }}>
+                  {(fullName[0] || 'U').toUpperCase()}
+                </AppText>
+              </LinearGradient>
+            )}
+            {/* Camera badge */}
+            <View style={[styles.avatarBadge, { backgroundColor: theme.accent }]}>
+              <Icon name="camera" size={16} color="#fff" />
+            </View>
+          </Pressable>
+          <AppText variant="caption" color="textSecondary" style={{ marginTop: 8 }}>
+            Tap to change photo
+          </AppText>
+          <AppText variant="h2" style={{ marginTop: 8 }}>{fullName || 'Your Name'}</AppText>
         </View>
 
         {/* Form */}
@@ -363,7 +461,10 @@ const styles = StyleSheet.create({
   },
   avatarSection: {
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 24,
+  },
+  avatarWrap: {
+    position: 'relative',
   },
   avatar: {
     width: 78,
@@ -371,22 +472,35 @@ const styles = StyleSheet.create({
     borderRadius: 39,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#EADFCC',
   },
-  form: { marginTop: 16 },
+  avatarBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  form: { marginTop: 20 },
   label: {
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: 20,
+    marginBottom: 10,
     paddingLeft: 2,
   },
   pillRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 16,
+    gap: 10,
+    marginBottom: 20,
   },
   pill: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
   },
