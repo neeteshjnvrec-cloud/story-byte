@@ -351,15 +351,30 @@ export const AudioProvider = ({ children }) => {
 
   const seekForward = useCallback(async () => {
     const player = playerRef.current;
-    if (!player || !player.durationIsReady) return;
-    const newTime = Math.min(player.currentTime + 10, player.duration);
+    if (!player) return;
+
+    // Get current time (default to 0 if not ready)
+    const currentTime = player.currentTime || 0;
+
+    // Calculate new time - use player duration if ready, otherwise story duration
+    const duration = player.durationIsReady && player.duration > 0
+      ? player.duration
+      : (currentStoryRef.current?.duration || 0);
+
+    const newTime = Math.min(currentTime + 10, duration);
     await player.seekTo(newTime);
   }, []);
 
   const seekBackward = useCallback(async () => {
     const player = playerRef.current;
     if (!player) return;
-    const newTime = Math.max(player.currentTime - 10, 0);
+
+    const currentTime = player.currentTime || 0;
+    const duration = player.durationIsReady && player.duration > 0
+      ? player.duration
+      : (currentStoryRef.current?.duration || 0);
+
+    const newTime = Math.max(currentTime - 10, 0);
     await player.seekTo(newTime);
   }, []);
 
