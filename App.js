@@ -113,11 +113,13 @@ function Root() {
   if (user && !checkProfileComplete) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <ThemeProvider>
+          <NavigationContainer>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </ThemeProvider>
       </GestureHandlerRootView>
     );
   }
