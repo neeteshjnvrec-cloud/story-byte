@@ -58,9 +58,30 @@ function AuthStack() {
 
 // Main app stack shown when signed in: 4 tabs + StoryDetail + Settings + Onboarding
 function MainStack({ isNewUser }) {
+  const navigationRef = React.useRef(null);
+  const [ready, setReady] = React.useState(false);
+  const { userStats } = useAppContext();
+
+  // Check if mandatory profile fields are filled
+  const needsProfile = React.useMemo(() => {
+    if (!userStats) return true; // no data yet = needs profile
+    return !userStats.fullName || !userStats.gender || !userStats.favoriteGenre;
+  }, [userStats]);
+
+  // Auto-open EditProfile when profile is incomplete
+  React.useEffect(() => {
+    if (needsProfile && ready && navigationRef.current) {
+      navigationRef.current.navigate('EditProfile');
+    }
+  }, [needsProfile, ready]);
+
   return (
     <>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        ref={navigationRef}
+        screenOptions={{ headerShown: false }}
+        onReady={() => setReady(true)}
+      >
         <Stack.Screen name="Main" component={AppNavigator} />
         <Stack.Screen name="StoryDetail" component={StoryDetailScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ presentation: 'modal' }} />
@@ -70,14 +91,13 @@ function MainStack({ isNewUser }) {
           <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         ) : null}
       </Stack.Navigator>
-      {/* Floating player floats above the whole navigator */}
       <FloatingAudioPlayer />
     </>
   );
 }
 
 function Root() {
-  const { user, loading } = useAppContext();
+  const { user, loading, userStats } = useAppContext();
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
 

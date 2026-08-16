@@ -1,4 +1,4 @@
-// Edit Profile Screen — full-screen modal, Base64 images, compressed layout
+// Edit Profile Screen — auto-save every field change
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -22,10 +22,18 @@ import { useTheme } from '../hooks/useTheme';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
 
 const GENRES = ['Romance', 'Mystery', 'Drama', 'Fantasy', 'Thriller', 'Comedy', 'Horror', 'Slice of Life'];
 const GENDERS = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
+
+// Debounce helper
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 export const EditProfileScreen = () => {
   const navigation = useNavigation();
@@ -43,7 +51,7 @@ export const EditProfileScreen = () => {
   const [profilePic, setProfilePic] = useState(null);
 
   // UI state
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [uploadingPic, setUploadingPic] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -63,7 +71,110 @@ export const EditProfileScreen = () => {
     }
   }, [userStats, user]);
 
-  // Pick image from gallery
+  // Generic auto-save function
+  const autoSave = useCallback(debounce(async (field, value) => {
+    try {
+      setSaving(true);
+      setError('');
+      await updateUserProfile({ [field]: value });
+      setSuccess('Saved');
+      setTimeout(() => setSuccess(''), 1200);
+    } catch (err) {
+      console.error('Auto-save error:', err);
+      setError('Failed to save');
+      setTimeout(() => setError(''), 2000);
+    } finally {
+      setSaving(false);
+    }
+  }, 800), [updateUserProfile]);
+
+  // Field change handlers — update state + auto-save
+  const handleFullNameChange = useCallback((text) => {
+    setFullName(text);
+    autoSave('fullName', text.trim() || null);
+  }, [autoSave]);
+
+  const handlePhoneChange = useCallback((text) => {
+    setPhone(text);
+    autoSave('phone', text.trim() || null);
+  }, [autoSave]);
+
+  const handleAgeChange = useCallback((text) => {
+    setAge(text);
+    autoSave('age', text ? parseInt(text, 10) : null);
+  }, [autoSave]);
+
+  const handleBioChange = useCallback((text) => {
+    setBio(text);
+    autoSave('bio', text.trim() || null);
+  }, [autoSave]);
+
+  // Gender — instant save
+  const handleGenderChange = useCallback(async (g) => {
+    const newValue = gender === g ? '' : g;
+    setGender(newValue);
+    try {
+      setSaving(true);
+      await updateUserProfile({ gender: newValue || null });
+      setSuccess('Saved');
+      setTimeout(() => setSuccess(''), 1200);
+    } catch {
+      setError('Failed to save');
+      setTimeout(() => setError(''), 2000);
+    } finally {
+      setSaving(false);
+    }
+  }, [gender, updateUserProfile]);
+
+  // Genre — instant save
+  const handleGenreChange = useCallback(async (g) => {
+    const newValue = favoriteGenre === g ? '' : g;
+    setFavoriteGenre(newValue);
+    try {
+      setSaving(true);
+      await updateUserProfile({ favoriteGenre: newValue || null });
+      setSuccess('Saved');
+      setTimeout(() => setSuccess(''), 1200);
+    } catch {
+      setError('Failed to save');
+      setTimeout(() => setError(''), 2000);
+    } finally {
+      setSaving(false);
+    }
+  }, [favoriteGenre, updateUserProfile]);
+
+  // Save image instantly
+  const saveImage = useCallback(async (base64Image) => {
+    try {
+      setSaving(true);
+      await updateUserProfile({ profilePic: base64Image });
+      setSuccess('Picture saved');
+      setTimeout(() => setSuccess(''), 1200);
+    } catch {
+      setError('Failed to save picture');
+      setTimeout(() => setError(''), 2000);
+    } finally {
+      setSaving(false);
+    }
+  }, [updateUserProfile]);
+
+  // Remove image instantly
+  const removeImage = useCallback(async () => {
+    setProfilePic(null);
+    try {
+      setSaving(true);
+      await updateUserProfile({ profilePic: null });
+      setSuccess('Picture removed');
+      setTimeout(() => setSuccess(''), 1200);
+    } catch {
+      setError('Failed to remove picture');
+      setTimeout(() => setError(''), 2000);
+    } finally {
+      setSaving(false);
+    }
+  }, [updateUserProfile]);
+
+  // Pick image
   const pickImage = useCallback(async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -83,19 +194,20 @@ export const EditProfileScreen = () => {
         const base64 = await FileSystem.readAsStringAsync(uri, {
           encoding: FileSystem.EncodingType.Base64,
         });
-        setProfilePic(`data:image/jpeg;base64,${base64}`);
-        setSuccess('Picture selected!');
-        setTimeout(() => setSuccess(''), 1500);
+        const base64Image = `data:image/jpeg;base64,${base64}`;
+        setProfilePic(base64Image);
         setUploadingPic(false);
+        // Auto-save image
+        await saveImage(base64Image);
       }
     } catch (err) {
       console.error('pickImage error:', err);
       setError('Failed to pick image');
       setUploadingPic(false);
     }
-  }, []);
+  }, [saveImage]);
 
-  // Take photo with camera
+  // Take photo
   const takePhoto = useCallback(async () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -114,47 +226,22 @@ export const EditProfileScreen = () => {
         const base64 = await FileSystem.readAsStringAsync(uri, {
           encoding: FileSystem.EncodingType.Base64,
         });
-        setProfilePic(`data:image/jpeg;base64,${base64}`);
-        setSuccess('Picture captured!');
-        setTimeout(() => setSuccess(''), 1500);
+        const base64Image = `data:image/jpeg;base64,${base64}`;
+        setProfilePic(base64Image);
         setUploadingPic(false);
+        // Auto-save image
+        await saveImage(base64Image);
       }
     } catch (err) {
       console.error('takePhoto error:', err);
       setError('Failed to capture photo');
       setUploadingPic(false);
     }
-  }, []);
+  }, [saveImage]);
 
-  // Save
-  const handleSave = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const updates = {};
-      if (fullName.trim()) updates.fullName = fullName.trim();
-      updates.phone = phone.trim() || null;
-      updates.gender = gender || null;
-      updates.age = age ? parseInt(age, 10) : null;
-      updates.favoriteGenre = favoriteGenre || null;
-      updates.bio = bio || null;
-      if (profilePic !== (userStats?.profilePic || userStats?.photoURL || null)) {
-        updates.profilePic = profilePic;
-      }
-      await updateUserProfile(updates);
-      setSuccess('Profile saved!');
-      setTimeout(() => navigation.goBack(), 800);
-    } catch (err) {
-      setError('Failed to save profile');
-    } finally {
-      setLoading(false);
-    }
-  }, [fullName, phone, gender, age, favoriteGenre, bio, profilePic, userStats, updateUserProfile, navigation]);
-
-  // Pill components
   const GenrePill = ({ label, selected }) => (
     <Pressable
-      onPress={() => setFavoriteGenre(selected ? '' : label)}
+      onPress={() => handleGenreChange(label)}
       style={[styles.pill, {
         backgroundColor: selected ? theme.accent : theme.card,
         borderColor: selected ? theme.accent : theme.border,
@@ -166,7 +253,7 @@ export const EditProfileScreen = () => {
 
   const GenderPill = ({ label, selected }) => (
     <Pressable
-      onPress={() => setGender(selected ? '' : label)}
+      onPress={() => handleGenderChange(label)}
       style={[styles.pill, {
         backgroundColor: selected ? theme.accent : theme.card,
         borderColor: selected ? theme.accent : theme.border,
@@ -181,13 +268,15 @@ export const EditProfileScreen = () => {
       style={{ flex: 1, backgroundColor: theme.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* Header — same style as Settings */}
+      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8, borderBottomColor: theme.border }]}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12} style={styles.headerSide}>
           <Icon name="chev-left" size={26} color={theme.text} />
         </Pressable>
         <AppText variant="h3">Edit Profile</AppText>
-        <View style={styles.headerSide} />
+        <View style={styles.headerSide}>
+          {saving ? <ActivityIndicator size="small" color={theme.accent} /> : null}
+        </View>
       </View>
 
       <ScrollView
@@ -218,7 +307,7 @@ export const EditProfileScreen = () => {
               Alert.alert('Change Picture', '', [
                 { text: 'Camera', onPress: takePhoto },
                 { text: 'Gallery', onPress: pickImage },
-                { text: 'Remove', onPress: () => setProfilePic(null) },
+                { text: 'Remove', onPress: removeImage },
                 { text: 'Cancel', style: 'cancel' },
               ]);
             }}
@@ -236,35 +325,36 @@ export const EditProfileScreen = () => {
         ) : null}
         {success ? (
           <View style={[styles.msg, { backgroundColor: theme.successSoft, marginHorizontal: 20 }]}>
-            <AppText variant="caption" color="success">{success}</AppText>
+            <AppText variant="caption" color="success">✓ {success}</AppText>
           </View>
         ) : null}
 
-        {/* Form card — same grouped style as Settings */}
+        {/* PERSONAL */}
         <View style={styles.formSection}>
           <AppText variant="micro" color="textTertiary" style={styles.groupLabel}>PERSONAL</AppText>
           <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <View style={styles.row}>
               <AppText variant="body" color="text" style={styles.rowLabel}>Name</AppText>
               <View style={styles.rowInput}>
-                <Input icon="user" placeholder="Full name" value={fullName} onChangeText={setFullName} autoCapitalize="words" style={styles.inputNoBorder} />
+                <Input icon="user" placeholder="Full name" value={fullName} onChangeText={handleFullNameChange} autoCapitalize="words" style={styles.inputNoBorder} />
               </View>
             </View>
             <View style={[styles.row, { borderBottomWidth: 1, borderBottomColor: theme.divider }]}>
               <AppText variant="body" color="text" style={styles.rowLabel}>Phone</AppText>
               <View style={styles.rowInput}>
-                <Input icon="phone" placeholder="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" style={styles.inputNoBorder} />
+                <Input icon="phone" placeholder="Phone" value={phone} onChangeText={handlePhoneChange} keyboardType="phone-pad" style={styles.inputNoBorder} />
               </View>
             </View>
             <View style={styles.rowLast}>
               <AppText variant="body" color="text" style={styles.rowLabel}>Age</AppText>
               <View style={styles.rowInput}>
-                <Input icon="calendar" placeholder="Age" value={age} onChangeText={setAge} keyboardType="number-pad" style={styles.inputNoBorder} />
+                <Input icon="calendar" placeholder="Age" value={age} onChangeText={handleAgeChange} keyboardType="number-pad" style={styles.inputNoBorder} />
               </View>
             </View>
           </View>
         </View>
 
+        {/* GENDER */}
         <View style={styles.formSection}>
           <AppText variant="micro" color="textTertiary" style={styles.groupLabel}>GENDER</AppText>
           <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
@@ -274,6 +364,7 @@ export const EditProfileScreen = () => {
           </View>
         </View>
 
+        {/* FAVORITE GENRE */}
         <View style={styles.formSection}>
           <AppText variant="micro" color="textTertiary" style={styles.groupLabel}>FAVORITE GENRE</AppText>
           <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
@@ -283,6 +374,7 @@ export const EditProfileScreen = () => {
           </View>
         </View>
 
+        {/* BIO */}
         <View style={styles.formSection}>
           <AppText variant="micro" color="textTertiary" style={styles.groupLabel}>BIO</AppText>
           <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
@@ -292,7 +384,7 @@ export const EditProfileScreen = () => {
                   icon="edit"
                   placeholder="Tell us about yourself..."
                   value={bio}
-                  onChangeText={setBio}
+                  onChangeText={handleBioChange}
                   multiline
                   numberOfLines={3}
                   style={[styles.inputNoBorder, { minHeight: 70 }]}
@@ -300,11 +392,6 @@ export const EditProfileScreen = () => {
               </View>
             </View>
           </View>
-        </View>
-
-        {/* Save button */}
-        <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
-          <Button title="Save Profile" onPress={handleSave} loading={loading} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -320,7 +407,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 1,
   },
-  headerSide: { width: 40, alignItems: 'flex-start' },
+  headerSide: { width: 40, alignItems: 'flex-start', justifyContent: 'center' },
   avatarSection: {
     alignItems: 'center',
     paddingVertical: 24,
@@ -394,9 +481,6 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     marginBottom: 0,
     borderRadius: 0,
-  },
-  inputInner: {
-    paddingVertical: 10,
   },
   pillRow: {
     flexDirection: 'row',

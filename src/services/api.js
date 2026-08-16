@@ -350,6 +350,51 @@ class ApiService {
   async getUserHistory() {
     return [];
   }
+
+  // --- Account Deletion (archive + delete) -----------------------------------
+
+  // Archive all user data to 'deleted_users' collection, then delete from
+  // Firestore. The Firebase Auth account deletion must be done separately.
+  async archiveAndDeleteUser() {
+    if (!this.uid) throw new Error('Authentication required');
+
+    const userId = this.uid;
+
+    // 1. Fetch all user data to archive
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    const userData = userDoc.exists() ? userDoc.data() : {};
+
+    // Fetch favorites
+    const favSnap = await getDocs(collection(db, 'users', userId, 'favorites'));
+    const favorites = [];
+    favSnap.forEach((d) => favorites.push(d.data()));
+
+    // Fetch progress
+    const progSnap = await getDocs(collection(db, 'users', userId, 'progress'));
+    const progress = [];
+    progSnap.forEach((d) => progress.push(d.data()));
+
+    // 2. Write to deleted_users collection with timestamp
+    const archiveData = {
+      ...userData,
+      userId,
+      favorites,
+      progress,
+      deletedAt: serverTimestamp(),
+      reason: 'user_requested',
+    };
+    await setDoc(doc(db, 'deleted_users', userId), archiveData);
+
+    // 3. Delete subcollections (favorites + progress)
+    const favDeletes = favSnap.docs.map((d) => deleteDoc(d.ref));
+    const progDeletes = progSnap.docs.map((d) => deleteDoc(d.ref));
+    await Promise.all([...favDeletes, ...progDeletes]);
+
+    // 4. Delete user document
+    await deleteDoc(doc(db, 'users', userId));
+
+    return { success: true };
+  }
 }
 
 export default new ApiService();

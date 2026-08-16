@@ -7,14 +7,17 @@ import {
   Pressable,
   StyleSheet,
   Alert,
+  Linking,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../hooks/useTheme';
+import { useAppContext } from '../context/AppContext';
+import apiService from '../services/api';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 
-// Inline pill toggle — 44x26 track, 20x20 knob. ON = accent, OFF = border.
+// Inline pill toggle
 const Toggle = ({ value, onValueChange, theme }) => (
   <Pressable
     onPress={() => onValueChange(!value)}
@@ -33,19 +36,13 @@ const Toggle = ({ value, onValueChange, theme }) => (
   </Pressable>
 );
 
-// Small uppercase group heading.
 const GroupLabel = ({ children }) => (
-  <AppText
-    variant="micro"
-    color="textTertiary"
-    style={styles.groupLabel}
-  >
+  <AppText variant="micro" color="textTertiary" style={styles.groupLabel}>
     {children}
   </AppText>
 );
 
-// A single row: accent icon + label on the left, value/chevron or toggle on the right.
-const Row = ({ theme, icon, label, value, right, onPress, isLast }) => {
+const Row = ({ theme, icon, label, value, right, onPress, isLast, danger }) => {
   const content = (
     <View
       style={[
@@ -54,8 +51,8 @@ const Row = ({ theme, icon, label, value, right, onPress, isLast }) => {
       ]}
     >
       <View style={styles.rowLeft}>
-        <Icon name={icon} size={20} color={theme.accent} />
-        <AppText variant="body" color="text">{label}</AppText>
+        <Icon name={icon} size={20} color={danger ? theme.error : theme.accent} />
+        <AppText variant="body" color={danger ? 'error' : 'text'}>{label}</AppText>
       </View>
       <View style={styles.rowRight}>
         {value != null && (
@@ -79,7 +76,7 @@ const Row = ({ theme, icon, label, value, right, onPress, isLast }) => {
   return content;
 };
 
-// Grouped card wrapper.
+// Grouped card wrapper
 const Group = ({ theme, label, children }) => (
   <View style={styles.group}>
     <GroupLabel>{label}</GroupLabel>
@@ -98,18 +95,76 @@ const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
 const THEME_CYCLE = { system: 'light', light: 'dark', dark: 'system' };
 
 export const SettingsScreen = () => {
-  const { theme, themeMode, changeTheme } = useTheme();
+  const { theme, themeMode, changeTheme } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { user, signOut } = useAppContext();
 
   const [autoplayNext, setAutoplayNext] = useState(true);
   const [wifiOnly, setWifiOnly] = useState(true);
+  const [deleting, setDeleting] = useState(false);
 
-  // Preserved logic: cycle System → Light → Dark and persist via changeTheme.
   const cycleAppearance = () => changeTheme(THEME_CYCLE[themeMode] || 'light');
   const appearanceValue = THEME_LABELS[themeMode] || 'System';
-
   const chevron = <Icon name="chev-right" size={18} color={theme.textTertiary} />;
+
+  // Open privacy policy URL
+  const openPrivacyPolicy = () => {
+    Linking.openURL('https://storybyte-76716.web.app/privacy.html').catch(() => {
+      Alert.alert('Privacy Policy', 'Could not open link. Please visit storybyte-76716.web.app/privacy.html');
+    });
+  };
+
+  // Delete account flow
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your account and all data. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            // Second confirmation
+            Alert.alert(
+              'Are you sure?',
+              'Type "DELETE" in your mind and tap Confirm. Your account, listening history, favorites, and profile will be permanently removed.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Confirm Delete',
+                  style: 'destructive',
+                  onPress: performDelete,
+                },
+              ]
+            );
+          },
+        },
+      ]
+    );
+  };
+
+  const performDelete = async () => {
+    try {
+      setDeleting(true);
+
+      // 1. Archive to deleted_users + delete Firestore data
+      await apiService.archiveAndDeleteUser();
+
+      // 2. Sign out (Firebase Auth account stays — needs server-side deletion)
+      await signOut();
+
+      Alert.alert(
+        'Account Deleted',
+        'Your account and all data have been permanently deleted.'
+      );
+    } catch (err) {
+      console.error('Delete account error:', err);
+      Alert.alert('Error', 'Failed to delete account. Please try again.');
+      setDeleting(false);
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -191,6 +246,40 @@ export const SettingsScreen = () => {
             label="Kids mode"
             right={chevron}
             onPress={() => Alert.alert('Kids mode', 'Coming soon.')}
+            isLast
+          />
+        </Group>
+
+        {/* LEGAL */}
+        <Group theme={theme} label="LEGAL">
+          <Row
+            theme={theme}
+            icon="globe"
+            label="Privacy Policy"
+            right={chevron}
+            onPress={openPrivacyPolicy}
+            isLast
+          />
+        </Group>
+
+        {/* ACCOUNT */}
+        <Group theme={theme} label="ACCOUNT">
+          <Row
+            theme={theme}
+            icon="lock"
+            label="Sign out"
+            right={chevron}
+            onPress={async () => {
+              try { await signOut(); } catch (e) { console.error(e); }
+            }}
+          />
+          <Row
+            theme={theme}
+            icon="close"
+            label={deleting ? 'Deleting...' : 'Delete account'}
+            right={deleting ? null : chevron}
+            onPress={deleting ? null : handleDeleteAccount}
+            danger
             isLast
           />
         </Group>
