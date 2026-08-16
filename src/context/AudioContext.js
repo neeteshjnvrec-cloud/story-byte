@@ -108,15 +108,19 @@ export const AudioProvider = ({ children }) => {
       if (resumeTimeRef.current && resumeTimeRef.current > 0 && status.currentTime === 0) {
         const savedTime = resumeTimeRef.current;
         resumeTimeRef.current = 0; // Clear it
+        console.log('[AudioContext] onPlaybackStatusUpdate: seeking to saved position', savedTime);
         const currentPlayer = playerRef.current;
         if (currentPlayer) {
           currentPlayer.seekTo(savedTime).then(() => {
             const newProgress = savedTime / status.duration;
+            console.log('[AudioContext] onPlaybackStatusUpdate: seek successful, setting progress to', newProgress.toFixed(3));
             setProgress(newProgress);
           }).catch(err => {
-            console.warn('Failed to seek to saved position:', err);
+            console.warn('[AudioContext] onPlaybackStatusUpdate: Failed to seek to saved position:', err);
             setProgress(0);
           });
+        } else {
+          console.warn('[AudioContext] onPlaybackStatusUpdate: playerRef.current is null');
         }
       } else {
         setProgress(status.currentTime / status.duration);
@@ -140,13 +144,16 @@ export const AudioProvider = ({ children }) => {
   const playStory = useCallback(async (story, startPage = 0) => {
     try {
       // Save current story's progress before switching
+      console.log('[AudioContext] playStory: switching from', currentStoryRef.current?.id, 'to', story.id);
       if (playerRef.current && currentStoryRef.current) {
         try {
           const player = playerRef.current;
           const uid = uidRef.current;
           const currentStory = currentStoryRef.current;
+          console.log('[AudioContext] playStory: current player state - duration:', player.duration, 'currentTime:', player.currentTime, 'durationIsReady:', player.durationIsReady);
           if (uid && currentStory?.id && player.durationIsReady && player.duration > 0) {
             const savedProgress = player.currentTime / player.duration;
+            console.log('[AudioContext] playStory: saving progress for', currentStory.id, 'at', savedProgress.toFixed(3), '(', player.currentTime, '/', player.duration, ')');
             await setDoc(doc(db, 'users', uid, 'progress', currentStory.id), {
               progress: savedProgress,
               currentTime: player.currentTime,
@@ -155,9 +162,12 @@ export const AudioProvider = ({ children }) => {
               speed,
               lastUpdated: serverTimestamp()
             }, { merge: true });
+            console.log('[AudioContext] playStory: saved progress for', currentStory.id);
+          } else {
+            console.log('[AudioContext] playStory: skipped save - uid:', !!uid, 'story:', !!currentStory?.id, 'durationIsReady:', player.durationIsReady, 'duration:', player.duration);
           }
         } catch (e) {
-          console.warn('Failed to save progress before switch:', e);
+          console.warn('[AudioContext] playStory: Failed to save progress before switch:', e);
         }
 
         // Pause old player
@@ -188,18 +198,21 @@ export const AudioProvider = ({ children }) => {
       if (story.id && uidRef.current) {
         try {
           const progressDoc = await getDoc(doc(db, 'users', uidRef.current, 'progress', story.id));
+          console.log('[AudioContext] playStory: checking progress for', story.id, '- exists:', progressDoc.exists());
           if (progressDoc.exists()) {
             const data = progressDoc.data();
             resumeProgress = Math.min(1, Math.max(0, data.progress || 0));
             resumeCurrentTime = data.currentTime || 0;
+            console.log('[AudioContext] playStory: loaded saved progress for', story.id, '- progress:', resumeProgress.toFixed(3), 'currentTime:', resumeCurrentTime);
             // If progress is high enough, consider it "finished"
             if (resumeProgress >= 0.98) {
+              console.log('[AudioContext] playStory: story considered finished, resetting');
               resumeProgress = 0;
               resumeCurrentTime = 0;
             }
           }
         } catch (e) {
-          console.warn('Failed to load saved progress:', e);
+          console.warn('[AudioContext] playStory: Failed to load saved progress:', e);
         }
       }
 
@@ -229,7 +242,10 @@ export const AudioProvider = ({ children }) => {
 
       // Store resume time for when player loads
       if (resumeCurrentTime > 0) {
+        console.log('[AudioContext] playStory: setting resumeTimeRef to', resumeCurrentTime);
         resumeTimeRef.current = resumeCurrentTime;
+      } else {
+        console.log('[AudioContext] playStory: no resume time, starting from 0');
       }
 
       player.play();
