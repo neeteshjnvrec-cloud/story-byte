@@ -40,7 +40,7 @@ export const ProfileSetupScreen = ({ navigation }) => {
         favoriteGenre,
         profileComplete: true,
       });
-      navigation.navigate('Main', { screen: 'Profile' });
+      navigation.navigate('Main');
     } catch (e) {
       setError('Failed to save profile. Please try again.');
       console.error(e);
