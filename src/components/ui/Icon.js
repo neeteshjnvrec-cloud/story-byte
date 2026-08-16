@@ -25,6 +25,10 @@ const MAP = {
   headphones: 'headset-outline', speed: 'speedometer-outline', queue: 'list',
   note: 'musical-notes', volume: 'volume-medium', book: 'book-outline',
   plus: 'add', close: 'close', more: 'ellipsis-horizontal',
+  // Semantic aliases for glyphs that don't exist under the same Ionicons name.
+  phone: 'call', edit: 'create', pencil: 'create',
+  'arrow-left': 'chevron-back', 'arrow-right': 'chevron-forward',
+  'arrow-up': 'chevron-up', 'arrow-down': 'chevron-down',
 };
 
 export function Icon({ name, size = 22, color, style }) {

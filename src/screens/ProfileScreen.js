@@ -1,11 +1,12 @@
-// Profile Screen for Story Byte — warm storybook layout.
-import React, { useState, useEffect } from 'react';
+// Profile Screen for Story Byte — warm storybook layout with inline editing.
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   ScrollView,
   Pressable,
   ActivityIndicator,
-  StyleSheet
+  StyleSheet,
+  Image
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +18,7 @@ import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
 import { CompactRow } from '../components/story/StoryCard';
+import { ProfileInfoCard } from '../components/profile/ProfileInfoCard';
 
 export const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -27,14 +29,25 @@ export const ProfileScreen = () => {
   const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
 
+  // Cache for user data to prevent redundant fetches
+  const [statsCache, setStatsCache] = useState(null);
+  const [historyCache, setHistoryCache] = useState([]);
+  const [lastFetchTime, setLastFetchTime] = useState(0);
+
   // Refresh stats every time the tab gains focus (so numbers update live).
+  // Only fetch if data is stale (older than 30 seconds)
   useFocusEffect(
-    React.useCallback(() => {
-      if (user) loadUserData();
-    }, [user])
+    useCallback(() => {
+      if (user) {
+        const now = Date.now();
+        if (now - lastFetchTime > 30000) {
+          loadUserData();
+        }
+      }
+    }, [user, lastFetchTime])
   );
 
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -44,20 +57,26 @@ export const ProfileScreen = () => {
 
       setStats(userStatsData);
       setHistory(userHistory || []);
+      setStatsCache(userStatsData);
+      setHistoryCache(userHistory || []);
+      setLastFetchTime(Date.now());
     } catch (error) {
       console.error('Error loading user data:', error);
+      // Use cached data on error
+      if (statsCache) setStats(statsCache);
+      if (historyCache) setHistory(historyCache);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, statsCache, historyCache]);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     try {
       await signOut();
     } catch (error) {
       console.error('Error signing out:', error);
     }
-  };
+  }, [signOut]);
 
   if (!user) {
     return (
@@ -69,138 +88,127 @@ export const ProfileScreen = () => {
     );
   }
 
-  const name = user.displayName || (user.email ? user.email.split('@')[0] : 'You');
-  const initial = (name[0] || 'U').toUpperCase();
-  const minutes = stats?.minutesListened || 0;
-  const listenTime = `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
-  const streak = stats?.streak ?? userStats?.streak ?? 0;
+  // Memoize derived data to prevent unnecessary recalculations
+  const name = useMemo(() => user.displayName || (user.email ? user.email.split('@')[0] : 'You'), [user.displayName, user.email]);
+  const minutes = useMemo(() => stats?.minutesListened || 0, [stats?.minutesListened]);
+  const listenTime = useMemo(() => `${Math.floor(minutes / 60)}h ${minutes % 60}m`, [minutes]);
+  const streak = useMemo(() => stats?.streak ?? userStats?.streak ?? 0, [stats?.streak, userStats?.streak]);
 
-  // Profile details from Firestore
-  const profile = userStats || {};
-  const fullName = profile.fullName || name;
-  const phone = profile.phone || 'Not provided';
-  const gender = profile.gender || 'Not specified';
-  const age = profile.age ? `${profile.age} years` : 'Not specified';
-  const favoriteGenre = profile.favoriteGenre || 'Not set';
-
-  const StatCard = ({ value, label }) => (
+  // Memoized components to prevent unnecessary re-renders
+  const StatCard = React.memo(({ value, label }) => (
     <View style={[styles.statCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
       <AppText variant="h2" color="accent">{value}</AppText>
       <AppText variant="caption" color="textSecondary" style={{ marginTop: 4 }}>{label}</AppText>
     </View>
-  );
-
-  const ProfileInfoItem = ({ icon, label, value }) => (
-    <View style={[styles.infoRow, { borderBottomColor: theme.border }]}>
-      <View style={[styles.infoIcon, { backgroundColor: theme.accentSoft }]}>
-        <Icon name={icon} size={18} color={theme.accent} />
-      </View>
-      <View style={styles.infoContent}>
-        <AppText variant="caption" color="textTertiary">{label}</AppText>
-        <AppText variant="label" color="text" style={{ marginTop: 2 }}>{value}</AppText>
-      </View>
-    </View>
-  );
+  ));
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.background }]}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Title row */}
-      <View style={[styles.titleRow, { paddingTop: insets.top + 16 }]}>
-        <AppText variant="displayM">Profile</AppText>
-        <Pressable
-          onPress={() => navigation.navigate('Settings')}
-          hitSlop={10}
-          style={[styles.gearBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
-        >
-          <Icon name="gear" size={20} color={theme.text} />
-        </Pressable>
-      </View>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Title row */}
+        <View style={[styles.titleRow, { paddingTop: insets.top + 16 }]}>
+          <AppText variant="displayM">Profile</AppText>
+          <Pressable
+            onPress={() => navigation.navigate('Settings')}
+            hitSlop={10}
+            style={[styles.gearBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
+          >
+            <Icon name="gear" size={20} color={theme.text} />
+          </Pressable>
+        </View>
 
-      {/* Avatar + identity */}
-      <View style={styles.identity}>
+        {/* Profile Card with inline editing capability */}
+        {userStats ? (
+          <ProfileInfoCard
+            user={user}
+            userStats={userStats}
+            onEditPress={() => navigation.navigate('EditProfile')}
+          />
+        ) : (
+          <View style={[styles.profileCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <View style={styles.identity}>
+              <LinearGradient
+                colors={[theme.gradientStart, theme.gradientEnd]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.avatar}
+              >
+                <AppText variant="displayM" style={{ color: '#fff' }}>{initial}</AppText>
+              </LinearGradient>
+              <AppText variant="h2" style={{ marginTop: 14 }}>{name}</AppText>
+              <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>{user.email}</AppText>
+            </View>
+            <Pressable
+              onPress={() => setShowEditor(true)}
+              hitSlop={10}
+              style={[styles.editProfileBtn, { backgroundColor: theme.accentSoft }]}
+            >
+              <Icon name="edit" size={18} color={theme.accent} />
+            </Pressable>
+          </View>
+        )}
+
+        {/* Streak card */}
         <LinearGradient
           colors={[theme.gradientStart, theme.gradientEnd]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.avatar}
+          style={styles.streakCard}
         >
-          <AppText variant="displayM" style={{ color: '#fff' }}>{initial}</AppText>
+          <View style={styles.streakIcon}>
+            <Icon name="flame" size={30} color="#fff" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <AppText variant="displayM" style={{ color: '#fff' }}>{streak}</AppText>
+            <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.9)', marginTop: 2 }}>
+              day listening streak · keep it up!
+            </AppText>
+          </View>
         </LinearGradient>
-        <AppText variant="h2" style={{ marginTop: 14 }}>{fullName}</AppText>
-        <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>{user.email}</AppText>
-      </View>
 
-      {/* Profile Details */}
-      <View style={[styles.profileCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-        <AppText variant="label" color="text" style={styles.profileCardTitle}>Profile Details</AppText>
-        <ProfileInfoItem icon="person" label="Full Name" value={fullName} />
-        <ProfileInfoItem icon="mail" label="Phone" value={phone} />
-        <ProfileInfoItem icon="gender" label="Gender" value={gender} />
-        <ProfileInfoItem icon="calendar" label="Age" value={age} />
-        <ProfileInfoItem icon="heart" label="Favorite Genre" value={favoriteGenre} />
-      </View>
-
-      {/* Streak card */}
-      <LinearGradient
-        colors={[theme.gradientStart, theme.gradientEnd]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.streakCard}
-      >
-        <View style={styles.streakIcon}>
-          <Icon name="flame" size={30} color="#fff" />
-        </View>
-        <View style={{ flex: 1 }}>
-          <AppText variant="displayM" style={{ color: '#fff' }}>{streak}</AppText>
-          <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.9)', marginTop: 2 }}>
-            day listening streak · keep it up!
-          </AppText>
-        </View>
-      </LinearGradient>
-
-      {/* Stats grid */}
-      {loading ? (
-        <ActivityIndicator color={theme.accent} style={{ marginTop: 24 }} />
-      ) : (
-        <View style={styles.statsGrid}>
-          <StatCard value={listenTime} label="Listen time" />
-          <StatCard value={stats?.plays || 0} label="Stories played" />
-          <StatCard value={stats?.favorites || 0} label="Favorites" />
-          <StatCard value={stats?.finished || 0} label="Finished" />
-        </View>
-      )}
-
-      {/* Recently played */}
-      <View style={styles.section}>
-        <AppText variant="micro" color="textTertiary" style={styles.sectionLabel}>
-          RECENTLY PLAYED
-        </AppText>
+        {/* Stats grid */}
         {loading ? (
-          <ActivityIndicator color={theme.accent} style={{ marginTop: 12 }} />
-        ) : history.length === 0 ? (
-          <AppText variant="caption" color="textSecondary" style={{ paddingHorizontal: 20, marginTop: 8 }}>
-            Nothing played yet.
-          </AppText>
+          <ActivityIndicator color={theme.accent} style={{ marginTop: 24 }} />
         ) : (
-          history.slice(0, 5).map((item) => (
-            <CompactRow
-              key={item.storyId}
-              story={item}
-              onPress={() => navigation.navigate('StoryDetail', { storyId: item.storyId, story: { id: item.storyId, ...item } })}
-            />
-          ))
+          <View style={styles.statsGrid}>
+            <StatCard value={listenTime} label="Listen time" />
+            <StatCard value={stats?.plays || 0} label="Stories played" />
+            <StatCard value={stats?.favorites || 0} label="Favorites" />
+            <StatCard value={stats?.finished || 0} label="Finished" />
+          </View>
         )}
-      </View>
 
-      {/* Sign out */}
-      <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
-        <Button title="Sign out" variant="ghost" leftIcon="lock" onPress={handleSignOut} />
-      </View>
-    </ScrollView>
+        {/* Recently played */}
+        <View style={styles.section}>
+          <AppText variant="micro" color="textTertiary" style={styles.sectionLabel}>
+            RECENTLY PLAYED
+          </AppText>
+          {loading ? (
+            <ActivityIndicator color={theme.accent} style={{ marginTop: 12 }} />
+          ) : history.length === 0 ? (
+            <AppText variant="caption" color="textSecondary" style={{ paddingHorizontal: 20, marginTop: 8 }}>
+              Nothing played yet.
+            </AppText>
+          ) : (
+            history.slice(0, 5).map((item) => (
+              <CompactRow
+                key={item.storyId}
+                story={item}
+                onPress={() => navigation.navigate('StoryDetail', { storyId: item.storyId, story: { id: item.storyId, ...item } })}
+              />
+            ))
+          )}
+        </View>
+
+        {/* Sign out */}
+        <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
+          <Button title="Sign out" variant="ghost" leftIcon="lock" onPress={handleSignOut} />
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -214,19 +222,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 8,
   },
-  gearBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+  editBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  profileCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
   },
   identity: { alignItems: 'center', paddingVertical: 12 },
   avatar: {
     width: 78,
     height: 78,
     borderRadius: 39,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editProfileBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gearBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -262,36 +292,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 15,
   },
-  profileCard: {
-    marginHorizontal: 20,
-    marginTop: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-    gap: 12,
-  },
-  profileCardTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-  },
-  infoIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  infoContent: {
-    flex: 1,
-  },
   section: { marginTop: 28 },
   sectionLabel: {
     paddingHorizontal: 20,
@@ -299,3 +299,5 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
 });
+
+export default ProfileScreen;

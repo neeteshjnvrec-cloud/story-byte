@@ -16,6 +16,7 @@ import {
   onAuthStateChanged
 } from '@firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Expo inlines only EXPO_PUBLIC_-prefixed env vars into the client bundle.
@@ -48,5 +49,6 @@ try {
 // Export services
 export { auth };
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 export { signInWithEmailAndPassword, createUserWithEmailAndPassword, firebaseSignOut, sendPasswordResetEmail, confirmPasswordReset, onAuthStateChanged };

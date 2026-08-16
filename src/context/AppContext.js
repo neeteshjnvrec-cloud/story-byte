@@ -1,5 +1,5 @@
 // App Context for Story Byte
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { auth, firebaseSignOut, onAuthStateChanged } from '../services/firebase';
 import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -15,28 +15,56 @@ export const AppContextProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [userStats, setUserStats] = useState(null);
   const [favorites, setFavorites] = useState([]);
+  const [profileCache, setProfileCache] = useState(null);
+  const [lastProfileFetch, setLastProfileFetch] = useState(0);
+
+  // Cache profile data to avoid redundant fetches
+  const loadUserData = useCallback(async (firebaseUser) => {
+    if (!firebaseUser) return;
+    
+    try {
+      const now = Date.now();
+      // Only fetch if cache is stale (older than 5 minutes) or doesn't exist
+      if (!profileCache || now - lastProfileFetch > 300000) {
+        const [profile, stats, favoritesData] = await Promise.all([
+          apiService.getUserProfile(),
+          apiService.getUserStats(),
+          apiService.getFavorites()
+        ]);
+        
+        setUserStats(stats);
+        setFavorites(favoritesData);
+        setProfileCache(profile);
+        setLastProfileFetch(now);
+      } else {
+        // Use cached data
+        const stats = await apiService.getUserStats();
+        const favoritesData = await apiService.getFavorites();
+        setUserStats(stats);
+        setFavorites(favoritesData);
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      // Fallback to cached data on error
+      if (profileCache) {
+        setUserStats(profileCache.stats || null);
+      }
+    }
+  }, [profileCache, lastProfileFetch]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
-      setLoading(false);
-
+      
       if (firebaseUser) {
-        try {
-          const profile = await apiService.getUserProfile();
-          const stats = await apiService.getUserStats();
-          const favoritesData = await apiService.getFavorites();
-
-          setUserStats(stats);
-          setFavorites(favoritesData);
-        } catch (error) {
-          console.error('Error loading user data:', error);
-        }
+        await loadUserData(firebaseUser);
       }
+      
+      setLoading(false);
     });
 
     return unsubscribe;
-  }, []);
+  }, [loadUserData]);
 
   // --- Email/Password Auth ---------------------------------------------------
 
@@ -115,19 +143,21 @@ export const AppContextProvider = ({ children }) => {
     return favorites.some(f => f.id === storyId);
   };
 
-  const updateUserProfile = async (updates) => {
+  const updateUserProfile = useCallback(async (updates) => {
     try {
       await apiService.updateProfile(updates);
       // Refresh user stats after update
       if (user) {
         const stats = await apiService.getUserStats();
         setUserStats(stats);
+        // Invalidate cache to force fresh data on next load
+        setProfileCache(null);
       }
     } catch (error) {
       console.error('Error updating profile:', error);
       throw error;
     }
-  };
+  }, [user]);
 
   return (
     <AppContext.Provider

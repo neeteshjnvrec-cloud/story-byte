@@ -1,5 +1,5 @@
 // Profile Setup — collect additional user details after signup.
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,10 +24,24 @@ export const ProfileSetupScreen = ({ navigation }) => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const handleComplete = async () => {
-    if (!fullName.trim()) return setError('Please enter your full name');
-    if (!gender) return setError('Please select your gender');
-    if (!favoriteGenre) return setError('Please select your favorite genre');
+  // Memoize validation to prevent recalculating on every render
+  const isFormValid = useMemo(() => {
+    return fullName.trim() && gender && favoriteGenre;
+  }, [fullName, gender, favoriteGenre]);
+
+  const getValidationError = useCallback(() => {
+    if (!fullName.trim()) return 'Please enter your full name';
+    if (!gender) return 'Please select your gender';
+    if (!favoriteGenre) return 'Please select your favorite genre';
+    return '';
+  }, [fullName, gender, favoriteGenre]);
+
+  const handleComplete = useCallback(async () => {
+    const validationError = getValidationError();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     try {
       setError('');
@@ -47,9 +61,10 @@ export const ProfileSetupScreen = ({ navigation }) => {
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [fullName, phone, gender, age, favoriteGenre, getValidationError, updateUserProfile, navigation]);
 
-  const GenrePill = ({ label, selected, onPress }) => (
+  // Memoize pill components to prevent unnecessary re-renders
+  const GenrePill = React.memo(({ label, selected, onPress }) => (
     <Pressable
       onPress={onPress}
       style={[
@@ -64,9 +79,9 @@ export const ProfileSetupScreen = ({ navigation }) => {
         {label}
       </Text>
     </Pressable>
-  );
+  ));
 
-  const GenderPill = ({ label, selected, onPress }) => (
+  const GenderPill = React.memo(({ label, selected, onPress }) => (
     <Pressable
       onPress={onPress}
       style={[
@@ -81,7 +96,7 @@ export const ProfileSetupScreen = ({ navigation }) => {
         {label}
       </Text>
     </Pressable>
-  );
+  ));
 
   return (
     <KeyboardAvoidingView

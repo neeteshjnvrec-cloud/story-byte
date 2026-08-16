@@ -37,8 +37,42 @@ function streakFromDays(days) {
 }
 
 class ApiService {
+  constructor() {
+    this.cache = new Map();
+    this.cacheExpiry = new Map();
+    this.CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  }
+
   get uid() {
     return auth.currentUser?.uid || null;
+  }
+
+  // Helper method to get cached data or fetch fresh
+  async getCached(key, fetchFn) {
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    const expiry = this.cacheExpiry.get(key);
+    
+    if (cached && expiry && now < expiry) {
+      return cached;
+    }
+    
+    const data = await fetchFn();
+    this.cache.set(key, data);
+    this.cacheExpiry.set(key, now + this.CACHE_TTL);
+    return data;
+  }
+
+  // Clear cache for a specific key
+  clearCache(key) {
+    this.cache.delete(key);
+    this.cacheExpiry.delete(key);
+  }
+
+  // Clear all cache
+  clearAllCache() {
+    this.cache.clear();
+    this.cacheExpiry.clear();
   }
 
   // --- Stories -------------------------------------------------------------
@@ -251,15 +285,19 @@ class ApiService {
   async getUserProfile() {
     const u = auth.currentUser;
     if (!u) return null;
-    const d = await getDoc(doc(db, 'users', u.uid));
-    const stored = d.exists() ? d.data() : {};
-    return {
-      userId: u.uid,
-      email: u.email,
-      displayName: u.displayName,
-      photoURL: u.photoURL,
-      ...stored
-    };
+    
+    const cacheKey = `userProfile_${u.uid}`;
+    return this.getCached(cacheKey, async () => {
+      const d = await getDoc(doc(db, 'users', u.uid));
+      const stored = d.exists() ? d.data() : {};
+      return {
+        userId: u.uid,
+        email: u.email,
+        displayName: u.displayName,
+        photoURL: u.photoURL,
+        ...stored
+      };
+    });
   }
 
   async updateProfile(updates) {
@@ -268,6 +306,8 @@ class ApiService {
       ...updates,
       updatedAt: serverTimestamp(),
     });
+    // Clear profile cache after update
+    this.clearCache(`userProfile_${this.uid}`);
     return { success: true };
   }
 
@@ -276,26 +316,30 @@ class ApiService {
   async getUserStats() {
     const empty = { plays: 0, favorites: 0, minutesListened: 0, finished: 0, streak: 0 };
     if (!this.uid) return empty;
-    const [favorites, progSnap] = await Promise.all([
-      this.getFavorites(),
-      getDocs(collection(db, 'users', this.uid, 'progress')),
-    ]);
-    let minutes = 0, finished = 0;
-    const days = new Set();
-    progSnap.forEach((d) => {
-      const p = d.data();
-      minutes += (p.currentTime || 0) / 60;
-      if ((p.progress || 0) >= 0.98) finished += 1;
-      const t = p.lastUpdated && p.lastUpdated.toDate ? p.lastUpdated.toDate() : null;
-      if (t) days.add(t.toISOString().slice(0, 10));
+    
+    const cacheKey = `userStats_${this.uid}`;
+    return this.getCached(cacheKey, async () => {
+      const [favorites, progSnap] = await Promise.all([
+        this.getFavorites(),
+        getDocs(collection(db, 'users', this.uid, 'progress')),
+      ]);
+      let minutes = 0, finished = 0;
+      const days = new Set();
+      progSnap.forEach((d) => {
+        const p = d.data();
+        minutes += (p.currentTime || 0) / 60;
+        if ((p.progress || 0) >= 0.98) finished += 1;
+        const t = p.lastUpdated && p.lastUpdated.toDate ? p.lastUpdated.toDate() : null;
+        if (t) days.add(t.toISOString().slice(0, 10));
+      });
+      return {
+        plays: progSnap.size,
+        favorites: favorites.length,
+        minutesListened: Math.round(minutes),
+        finished,
+        streak: streakFromDays(days),
+      };
     });
-    return {
-      plays: progSnap.size,
-      favorites: favorites.length,
-      minutesListened: Math.round(minutes),
-      finished,
-      streak: streakFromDays(days),
-    };
   }
 
   // user_activity is admin-only per the security rules, so history is not

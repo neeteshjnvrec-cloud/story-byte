@@ -23,6 +23,7 @@ import { LoginScreen } from './src/screens/auth/LoginScreen';
 import { SignupScreen } from './src/screens/auth/SignupScreen';
 import { ForgotPasswordScreen } from './src/screens/auth/ForgotPasswordScreen';
 import { ProfileSetupScreen } from './src/screens/auth/ProfileSetupScreen';
+import { EditProfileScreen } from './src/screens/EditProfileScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { FloatingAudioPlayer } from './src/components/FloatingAudioPlayer';
@@ -64,6 +65,7 @@ function MainStack({ isNewUser }) {
         <Stack.Screen name="StoryDetail" component={StoryDetailScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ presentation: 'modal' }} />
         {isNewUser ? (
           <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         ) : null}
