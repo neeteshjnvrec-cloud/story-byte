@@ -103,12 +103,13 @@ export const AudioProvider = ({ children }) => {
 
     if (status.duration > 0) {
       setDuration(status.duration);
-      
+
       // If we have a saved resume time and this is the first load, seek to it
-      if (resumeTimeRef.current && resumeTimeRef.current > 0 && status.currentTime === 0) {
+      // Use < 1 instead of === 0 to handle small floating point values
+      if (resumeTimeRef.current && resumeTimeRef.current > 0 && status.currentTime < 1) {
         const savedTime = resumeTimeRef.current;
         resumeTimeRef.current = 0; // Clear it
-        console.log('[AudioContext] onPlaybackStatusUpdate: seeking to saved position', savedTime);
+        console.log('[AudioContext] onPlaybackStatusUpdate: seeking to saved position', savedTime, '(currentTime:', status.currentTime, ')');
         const currentPlayer = playerRef.current;
         if (currentPlayer) {
           currentPlayer.seekTo(savedTime).then(() => {
