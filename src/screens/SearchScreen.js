@@ -29,12 +29,14 @@ const FILTERS = [
   { id: 'long', label: '15+ min' },
 ];
 
-// 2x2 vertical tiles.
+// 2x2 vertical tiles (real banner art hosted on Firebase Hosting; falls back
+// to the gradient sceneKey if an image fails to load).
+const CDN = 'https://storybyte-76716.web.app/verticals';
 const VERTICALS = [
-  { key: 'fiction', label: 'Fiction' },
-  { key: 'bedtime', label: 'Bedtime' },
-  { key: 'kids', label: 'Kids' },
-  { key: 'hindi', label: 'Hindi' },
+  { key: 'fiction', label: 'Fiction', img: `${CDN}/fiction.jpg` },
+  { key: 'bedtime', label: 'Bedtime', img: `${CDN}/bedtime.jpg` },
+  { key: 'kids', label: 'Kids', img: `${CDN}/kids.jpg` },
+  { key: 'hindi', label: 'Hindi', img: `${CDN}/hindi.jpg` },
 ];
 
 // Genre chips → mapped to existing GENRES ids used by getStories({ genre }).
@@ -260,7 +262,7 @@ export const SearchScreen = () => {
               <View style={styles.verticalGrid}>
                 {VERTICALS.map((v) => (
                   <Pressable key={v.key} style={styles.vTile} onPress={() => handleVerticalPress(v)}>
-                    <Cover sceneKey={v.key} radius={18} style={styles.vCover}>
+                    <Cover story={{ coverImage: v.img }} sceneKey={v.key} radius={18} style={styles.vCover}>
                       <LinearGradient
                         colors={['transparent', 'rgba(0,0,0,0.5)']}
                         style={StyleSheet.absoluteFill}
