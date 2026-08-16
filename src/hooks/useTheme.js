@@ -182,15 +182,24 @@ export const ThemeProvider = ({ children }) => {
 
 // Fallback keeps the app rendering even if a provider is missing.
 export const useTheme = () => {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) {
+  try {
+    const ctx = useContext(ThemeContext);
+    if (!ctx) {
+      return {
+        theme: THEMES.light, tokens, themeMode: 'light', isDark: false,
+        mode: 'normal', vertical: 'general',
+        changeTheme: () => {}, setMode: () => {}, setVertical: () => {},
+      };
+    }
+    return ctx;
+  } catch (e) {
+    // Return fallback if context is not available
     return {
       theme: THEMES.light, tokens, themeMode: 'light', isDark: false,
       mode: 'normal', vertical: 'general',
       changeTheme: () => {}, setMode: () => {}, setVertical: () => {},
     };
   }
-  return ctx;
 };
 
 export const useThemeContext = useTheme;
