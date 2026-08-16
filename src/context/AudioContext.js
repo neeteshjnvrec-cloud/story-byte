@@ -285,6 +285,7 @@ export const AudioProvider = ({ children }) => {
       'playbackStatusUpdate',
       onPlaybackStatusUpdate
     );
+
     player.play();
     setIsPlaying(true);
   }, [currentStory, totalPages, speed, onPlaybackStatusUpdate]);
