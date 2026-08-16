@@ -53,7 +53,7 @@ function parseChapters(text) {
 }
 
 export const FloatingAudioPlayer = () => {
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
   const {
     currentStory, progress, isPlaying, duration, currentPage, totalPages, speed,

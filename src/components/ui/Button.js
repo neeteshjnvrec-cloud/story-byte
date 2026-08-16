@@ -6,7 +6,7 @@ import { AppText } from './AppText';
 import { Icon } from './Icon';
 
 export function Button({ title, onPress, variant = 'primary', loading, disabled, leftIcon, style }) {
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const primary = variant === 'primary';
   const bg = primary ? theme.accent : theme.card;
   const fg = primary ? 'onAccent' : 'text';

@@ -9,7 +9,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { SceneArt } from './SceneArt';
 
 export function Cover({ story = {}, sceneKey, style, radius = 16, children }) {
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const uri = story.coverImage || story.coverUrl;
   const key = sceneKey || story.vertical || story.genre || story.language;
 

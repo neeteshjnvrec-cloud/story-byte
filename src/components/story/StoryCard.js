@@ -20,7 +20,7 @@ export function fmtPlays(n) {
 }
 
 export function PlayFab({ size = 46, solid, onPress, style }) {
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   return (
     <Pressable
       onPress={onPress}
@@ -40,7 +40,7 @@ export function PlayFab({ size = 46, solid, onPress, style }) {
 
 // Vertical rail card (~138 wide).
 export function RailCard({ story, width = 138, onPress, onPlay }) {
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   return (
     <Pressable onPress={onPress} style={{ width }} accessibilityRole="button" accessibilityLabel={story.title}>
       <Cover story={story} style={{ height: width }} radius={16}>
@@ -56,7 +56,7 @@ export function RailCard({ story, width = 138, onPress, onPlay }) {
 
 // Horizontal compact row for lists/search/history.
 export function CompactRow({ story, onPress, subtitle, trailing }) {
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   return (
     <Pressable onPress={onPress} style={styles.row} accessibilityRole="button" accessibilityLabel={story.title}>
       <Cover story={story} style={styles.rowCover} radius={12} />
@@ -73,7 +73,7 @@ export function CompactRow({ story, onPress, subtitle, trailing }) {
 
 // Full-bleed hero.
 export function Hero({ story, badge = "Today's pick", onPress, onPlay }) {
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   return (
     <Pressable onPress={onPress} style={styles.hero} accessibilityRole="button" accessibilityLabel={story.title}>
       <Cover story={story} style={StyleSheet.absoluteFill} radius={24} />

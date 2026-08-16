@@ -28,7 +28,7 @@ const MAP = {
 };
 
 export function Icon({ name, size = 22, color, style }) {
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const ionName = MAP[name] || name;
   return <Ionicons name={ionName} size={size} color={color || theme.text} style={style} />;
 }

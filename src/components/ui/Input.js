@@ -6,7 +6,7 @@ import { FONTS } from '../../theme/tokens';
 import { Icon } from './Icon';
 
 export function Input({ icon, secure, value, onChangeText, placeholder, style, ...rest }) {
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const [hidden, setHidden] = useState(!!secure);
 
   return (
