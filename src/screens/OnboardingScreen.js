@@ -32,7 +32,7 @@ const slides = [
 ];
 
 export const OnboardingScreen = ({ onComplete }) => {
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(0);
