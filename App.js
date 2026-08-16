@@ -30,7 +30,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { FONT_MAP } from './src/theme/tokens';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
-import apiService from './src/services/api';
 
 const Stack = createNativeStackNavigator();
 
