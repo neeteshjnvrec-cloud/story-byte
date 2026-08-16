@@ -36,7 +36,11 @@ export const HomeScreen = () => {
         apiSafe(() => apiService.getUserProgress(), []),
       ]);
       setStories(res.stories || []);
-      setProgress((prog || []).filter((p) => (p.progress || 0) < 0.98).slice(0, 10));
+      setProgress((prog || []).filter((p) => {
+        const rawPct = p.progress;
+        const pct = (typeof rawPct === 'number' && isFinite(rawPct)) ? rawPct : 0;
+        return pct < 0.98;
+      }).slice(0, 10));
     } finally {
       setLoading(false);
       setRefreshing(false);

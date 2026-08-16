@@ -120,7 +120,11 @@ export const FavoritesScreen = () => {
       );
     }
     return history.map((item) => {
-      const pct = item.progress || 0;
+      // Normalize progress to a number between 0 and 1
+      const rawPct = item.progress;
+      const pct = (typeof rawPct === 'number' && isFinite(rawPct))
+        ? Math.min(1, Math.max(0, rawPct))
+        : 0;
       const subtitle = pct >= 0.98 ? 'Finished' : `${Math.round(pct * 100)}% complete`;
       return (
         <CompactRow

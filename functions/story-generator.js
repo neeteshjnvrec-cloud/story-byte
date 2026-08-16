@@ -89,7 +89,8 @@ async function generateDailyStories(date, options = {}) {
 async function generateStoryContent(groq, genre, genrePrompt, langInstruction) {
   const systemPrompt = `You are a professional storyteller. ${genrePrompt} ` +
     `The story should be ${langInstruction} Keep it between 800-1500 words. ` +
-    `Structure it with a clear beginning, middle, and end.`;
+    `Structure it with a clear beginning, middle, and end. ` +
+    `Use paragraph breaks (blank lines between paragraphs) to separate scenes and ideas.`;
 
   try {
     const completion = await groq.chat.completions.create({

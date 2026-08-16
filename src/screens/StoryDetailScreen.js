@@ -1,5 +1,5 @@
 // Story Detail — warm design: cover, meta, play/resume, favorite, transcript.
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +13,78 @@ import { Cover } from '../components/story/Cover';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import apiService from '../services/api';
 
+// ---------------------------------------------------------------------------
+// Chapter parser
+// ---------------------------------------------------------------------------
+
+/**
+ * Try to extract chapters from raw story text.
+ * Supports explicit headings like "Chapter 1", "CHAPTER II:", "Section 3"
+ * Falls back to splitting on double blank lines (\n\n+) into paragraph groups.
+ * If no paragraph breaks, splits by sentences as last resort.
+ * Returns null when no meaningful structure is found (show full text).
+ */
+function parseChapters(text) {
+  if (!text) return null;
+
+  // 1. Check for explicit chapter headings
+  const headingRegex = /^(#{1,3}\s*|#\s*chapter\s*\d+|chapter\s*\d+|chapter\s*[ivxlcdm]+|section\s*\d+|part\s*\d+)[\s:.]*.*$/im;
+  const lines = text.split(/\n+/);
+  const chapterLines = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (headingRegex.test(trimmed)) {
+      chapterLines.push(i);
+    }
+  }
+
+  if (chapterLines.length >= 2) {
+    // Build chapters from heading positions
+    const chapters = chapterLines.map((pos, idx) => {
+      const end = chapterLines[idx + 1] ?? lines.length;
+      const block = lines.slice(pos, end).join('\n').trim();
+      // First line is the title; rest is body
+      const firstNewline = block.indexOf('\n');
+      const title = firstNewline > 0 ? block.slice(0, firstNewline).trim() : block;
+      const body = firstNewline > 0 ? block.slice(firstNewline + 1).trim() : '';
+      return { title, body };
+    });
+    // Require at least one chapter to have substantial body content
+    if (chapters.some(c => c.body.length > 30)) return chapters;
+  }
+
+  // 2. Fallback: split on paragraph breaks (\n\n)
+  const paragraphBlocks = text.split(/\n\s*\n/).map(b => b.trim()).filter(b => b.length > 15);
+
+  if (paragraphBlocks.length >= 2) {
+    return paragraphBlocks.map((body, i) => ({
+      title: i === 0 ? 'Part 1' : `Part ${i + 1}`,
+      body,
+    }));
+  }
+
+  // 3. Last resort: split by sentences if text is long enough
+  // Match sentences ending with . ! ? or Devanagari danda (।) followed by space or end
+  const sentenceMatches = text.match(/[^.!?\u0964]+[.!\u0964]+(?:\s|$)/g);
+  if (sentenceMatches && sentenceMatches.length >= 2) {
+    // Group sentences into chunks
+    const chunkSize = Math.max(2, Math.floor(sentenceMatches.length / 2));
+    const chunks = [];
+    for (let i = 0; i < sentenceMatches.length; i += chunkSize) {
+      chunks.push(sentenceMatches.slice(i, i + chunkSize).join('').trim());
+    }
+    if (chunks.length >= 2) {
+      return chunks.map((body, i) => ({
+        title: i === 0 ? 'Part 1' : `Part ${i + 1}`,
+        body,
+      }));
+    }
+  }
+
+  return null;
+}
+
 export const StoryDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -25,15 +97,37 @@ export const StoryDetailScreen = () => {
   const [loading, setLoading] = useState(!initialStory);
   const [rating, setRating] = useState(initialStory?.rating || 0);
 
+  // Chapter state
+  const [chapters, setChapters] = useState(null);
+  const [activeChapter, setActiveChapter] = useState(0);
+  const chapterScrollViewRef = useRef(null);
+
   useEffect(() => {
     (async () => {
       try {
         const full = await apiService.getStory(storyId);
-        if (full) { setStory(full); if (full.rating) setRating(Math.round(full.rating)); }
+        if (full) {
+          setStory(full);
+          if (full.rating) setRating(Math.round(full.rating));
+        }
       } catch (e) { console.warn('detail load', e?.message); }
       finally { setLoading(false); }
     })();
   }, [storyId]);
+
+  // Parse chapters when story text is available
+  useEffect(() => {
+    const raw = story?.text || story?.description;
+    if (raw) {
+      const parsed = story?.chapters && Array.isArray(story.chapters) && story.chapters.length > 0
+        ? story.chapters
+        : parseChapters(raw);
+      setChapters(parsed);
+      setActiveChapter(0);
+    } else {
+      setChapters(null);
+    }
+  }, [story]);
 
   const isHere = story && currentStory?.id === story.id;
   const isFavorite = story ? isInFavorites?.(story.id) : false;
@@ -57,6 +151,12 @@ export const StoryDetailScreen = () => {
   if (!story) {
     return <View style={[styles.center, { backgroundColor: theme.background }]}><AppText color="textSecondary">Story not found</AppText></View>;
   }
+
+  // Determine which text to show
+  const activeBody = chapters
+    ? (chapters[activeChapter]?.body || '')
+    : null;
+  const showFullText = !chapters && (story.text || story.description);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
@@ -107,12 +207,57 @@ export const StoryDetailScreen = () => {
           </View>
         </View>
 
-        {(story.text || story.description) ? (
+        {/* ---- Transcript with chapters ---- */}
+        {(story.text || story.description) && (
           <View style={styles.section}>
-            <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 8 }}>TRANSCRIPT</AppText>
-            <AppText variant="bodyL" color="textSecondary" style={{ lineHeight: 27 }}>{story.text || story.description}</AppText>
+            <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 12 }}>TRANSCRIPT</AppText>
+
+            {chapters && chapters.length > 1 ? (
+              <>
+                {/* Chapter selector — horizontal scrollable tabs */}
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.chapterTabs}
+                  ref={chapterScrollViewRef}
+                >
+                  {chapters.map((ch, i) => (
+                    <Pressable
+                      key={i}
+                      onPress={() => setActiveChapter(i)}
+                      style={[
+                        styles.chapterTab,
+                        i === activeChapter && { backgroundColor: theme.accent },
+                      ]}
+                    >
+                      <AppText
+                        variant="label"
+                        color={i === activeChapter ? 'onAccent' : 'textSecondary'}
+                        numberOfLines={1}
+                      >
+                        {ch.title}
+                      </AppText>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+
+                {/* Active chapter body */}
+                <View style={[styles.chapterBody, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                  <AppText variant="bodyL" color="textSecondary" style={{ lineHeight: 27 }}>
+                    {activeBody || '(no content)'}
+                  </AppText>
+                </View>
+              </>
+            ) : showFullText ? (
+              // No chapters detected — show full text as before
+              <View style={[styles.chapterBody, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                <AppText variant="bodyL" color="textSecondary" style={{ lineHeight: 27 }}>
+                  {story.text || story.description}
+                </AppText>
+              </View>
+            ) : null}
           </View>
-        ) : null}
+        )}
       </ScrollView>
     </View>
   );
@@ -136,6 +281,26 @@ const styles = StyleSheet.create({
   iconBtn: { width: 52, height: 52, borderRadius: 14, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   section: { marginTop: 26 },
   stars: { flexDirection: 'row', gap: 6, marginTop: 10 },
+
+  // Chapter tabs
+  chapterTabs: { paddingHorizontal: 0, gap: 8, paddingBottom: 4 },
+  chapterTab: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  // Chapter content card
+  chapterBody: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 18,
+    marginTop: 12,
+    minHeight: 80,
+  },
 });
 
 export default StoryDetailScreen;

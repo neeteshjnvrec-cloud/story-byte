@@ -121,7 +121,13 @@ export const AudioProvider = ({ children }) => {
   // Play a story with optional starting page
   const playStory = useCallback(async (story, startPage = 0) => {
     try {
-      cleanupPlayer();
+      // Instantly pause any currently playing story — don't wait for full
+      // cleanup (which is async and causes a delay). The old player will be
+      // torn down lazily below once the new one is ready.
+      if (playerRef.current) {
+        try { playerRef.current.pause(); } catch (_) {}
+      }
+
       currentStoryRef.current = story;
       setCurrentStory(story);
       setProgress(0);
@@ -144,6 +150,17 @@ export const AudioProvider = ({ children }) => {
 
       const player = createAudioPlayer({ uri: audioUrl });
       playerRef.current = player;
+
+      // Tear down the old player now that the new one is created.
+      // Subscription and progress timer are replaced below.
+      if (subscriptionRef.current) {
+        subscriptionRef.current.remove();
+        subscriptionRef.current = null;
+      }
+      if (progressTimerRef.current) {
+        clearInterval(progressTimerRef.current);
+        progressTimerRef.current = null;
+      }
 
       // Set playback speed
       if (speed !== 1) {
@@ -180,13 +197,27 @@ export const AudioProvider = ({ children }) => {
     const pageAudio = pages[pageIndex]?.audioUrl;
     if (!pageAudio) return;
 
-    cleanupPlayer();
+    // Instantly pause the old player — don't wait for full async cleanup.
+    if (playerRef.current) {
+      try { playerRef.current.pause(); } catch (_) {}
+    }
+
     setCurrentPage(pageIndex);
     setProgress(0);
     setDuration(0);
 
     const player = createAudioPlayer({ uri: pageAudio });
     playerRef.current = player;
+
+    // Tear down old subscriptions/timer now that the new player is ready.
+    if (subscriptionRef.current) {
+      subscriptionRef.current.remove();
+      subscriptionRef.current = null;
+    }
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
 
     if (speed !== 1) {
       await player.setPlaybackRate(speed);

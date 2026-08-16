@@ -176,13 +176,31 @@ class ApiService {
     const snap = await getDocs(collection(db, 'users', this.uid, 'progress'));
     const progressDocs = snap.docs.map((d) => ({ storyId: d.id, ...d.data() }));
 
-    // Enrich with story title/cover (only load stories the user actually has progress on)
+    // Enrich with full story data (title, coverImage, genre, duration, plays,
+    // audioUrl, description, etc.) so RailCard renders correctly and playStory
+    // has everything it needs.
     const enriched = await Promise.all(
       progressDocs.map(async (p) => {
         try {
           const story = await this.getStory(p.storyId);
-          return story ? { ...p, title: story.title, coverImage: story.coverImage, genre: story.genre } : null;
+          if (!story) return null;
+          // Ensure progress is a proper number (0-1). Firestore can sometimes
+          // return unexpected types for numeric fields, so normalize here.
+          const rawProgress = p.progress;
+          const progress = typeof rawProgress === 'number' && isFinite(rawProgress)
+            ? Math.min(1, Math.max(0, rawProgress))
+            : 0;
+          return {
+            ...p,
+            ...story,
+            // Keep progress-level fields (they take precedence for UI state)
+            progress,
+            currentTime: typeof p.currentTime === 'number' ? p.currentTime : 0,
+            duration: typeof p.duration === 'number' ? p.duration : story.duration || 0,
+            lastUpdated: p.lastUpdated,
+          };
         } catch (e) {
+          // If story fetch fails, still show the progress entry without story details
           return p;
         }
       })

@@ -1,6 +1,6 @@
 // FloatingAudioPlayer — a docked mini bar + a full-screen player modal,
 // styled to the warm storybook design.
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Pressable, Modal, StyleSheet, ScrollView } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,6 +16,42 @@ const fmtTime = (s) => {
   return `${m}:${sec.toString().padStart(2, '0')}`;
 };
 
+// ---------------------------------------------------------------------------
+// Chapter parser (same logic as StoryDetailScreen)
+// ---------------------------------------------------------------------------
+function parseChapters(text) {
+  if (!text) return null;
+  const headingRegex = /^(#{1,3}\s*|#\s*chapter\s*\d+|chapter\s*\d+|chapter\s*[ivxlcdm]+|section\s*\d+|part\s*\d+)[\s:.]*.*$/im;
+  const lines = text.split(/\n+/);
+  const chapterLines = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (headingRegex.test(lines[i].trim())) chapterLines.push(i);
+  }
+  if (chapterLines.length >= 2) {
+    const chapters = chapterLines.map((pos, idx) => {
+      const end = chapterLines[idx + 1] ?? lines.length;
+      const block = lines.slice(pos, end).join('\n').trim();
+      const firstNewline = block.indexOf('\n');
+      const title = firstNewline > 0 ? block.slice(0, firstNewline).trim() : block;
+      const body = firstNewline > 0 ? block.slice(firstNewline + 1).trim() : '';
+      return { title, body };
+    });
+    if (chapters.some(c => c.body.length > 30)) return chapters;
+  }
+  const paragraphBlocks = text.split(/\n\s*\n/).map(b => b.trim()).filter(b => b.length > 15);
+  if (paragraphBlocks.length >= 2) return paragraphBlocks.map((body, i) => ({ title: i === 0 ? 'Part 1' : 'Part ' + (i+1), body }));
+  const sentenceMatches = text.match(/[^.!\u0964]+[.!\u0964]+(?:\s|$)/g);
+  if (sentenceMatches && sentenceMatches.length >= 2) {
+    const chunkSize = Math.max(2, Math.floor(sentenceMatches.length / 2));
+    const chunks = [];
+    for (let i = 0; i < sentenceMatches.length; i += chunkSize) {
+      chunks.push(sentenceMatches.slice(i, i + chunkSize).join('').trim());
+    }
+    if (chunks.length >= 2) return chunks.map((body, i) => ({ title: i === 0 ? 'Part 1' : 'Part ' + (i+1), body }));
+  }
+  return null;
+}
+
 export const FloatingAudioPlayer = () => {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -24,11 +60,30 @@ export const FloatingAudioPlayer = () => {
     playPause, seek, seekForward, seekBackward, cycleSpeed, stop,
   } = useAudioPlayer();
   const [expanded, setExpanded] = useState(false);
+  const [chapters, setChapters] = useState(null);
+  const [activeChapter, setActiveChapter] = useState(0);
+  const chapterScrollRef = useRef(null);
+
+  // Parse chapters when story changes or modal opens
+  useEffect(() => {
+    const raw = currentStory?.text || currentStory?.description;
+    if (raw) {
+      const parsed = currentStory?.chapters && Array.isArray(currentStory.chapters) && currentStory.chapters.length > 0
+        ? currentStory.chapters
+        : parseChapters(raw);
+      setChapters(parsed);
+      setActiveChapter(0);
+    } else {
+      setChapters(null);
+    }
+  }, [currentStory?.id]);
 
   if (!currentStory) return null;
 
   const pos = (progress || 0) * (duration || 0);
-  const pageText = currentStory.pages?.[currentPage]?.text || currentStory.text || currentStory.description || '';
+
+  const activeBody = chapters ? (chapters[activeChapter]?.body || '') : null;
+  const showFullText = !chapters && (currentStory.text || currentStory.description);
   const miniBottom = (insets.bottom || 10) + 60;
 
   return (
@@ -101,11 +156,57 @@ export const FloatingAudioPlayer = () => {
               <Pressable onPress={cycleSpeed} style={styles.pill} hitSlop={6}><Icon name="speed" size={18} color={theme.textSecondary} /><AppText variant="label" color="textSecondary" style={{ fontSize: 12 }}>{speed}×</AppText></Pressable>
             </View>
 
-            {pageText ? (
-              <View style={[styles.textCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                <AppText variant="bodyL" style={{ lineHeight: 26 }}>{pageText}</AppText>
+            {/* ---- Transcript with chapters ---- */}
+            {(currentStory.text || currentStory.description) && (
+              <View style={styles.transcriptSection}>
+                <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 12 }}>TRANSCRIPT</AppText>
+
+                {chapters && chapters.length > 1 ? (
+                  <>
+                    {/* Chapter tabs */}
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.chapterTabs}
+                      ref={chapterScrollRef}
+                    >
+                      {chapters.map((ch, i) => (
+                        <Pressable
+                          key={i}
+                          onPress={() => setActiveChapter(i)}
+                          style={[
+                            styles.chapterTab,
+                            i === activeChapter && { backgroundColor: theme.accent },
+                          ]}
+                        >
+                          <AppText
+                            variant="label"
+                            color={i === activeChapter ? 'onAccent' : 'textSecondary'}
+                            numberOfLines={1}
+                          >
+                            {ch.title}
+                          </AppText>
+                        </Pressable>
+                      ))}
+                    </ScrollView>
+
+                    {/* Active chapter body */}
+                    <View style={[styles.textCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                      <AppText variant="bodyL" style={{ lineHeight: 26 }}>
+                        {activeBody || '(no content)'}
+                      </AppText>
+                    </View>
+                  </>
+                ) : showFullText ? (
+                  // No chapters detected — show full text
+                  <View style={[styles.textCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                    <AppText variant="bodyL" style={{ lineHeight: 26 }}>
+                      {currentStory.text || currentStory.description}
+                    </AppText>
+                  </View>
+                ) : null}
               </View>
-            ) : null}
+            )}
           </ScrollView>
         </View>
       </Modal>
@@ -132,7 +233,13 @@ const styles = StyleSheet.create({
   },
   foot: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 4 },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  textCard: { marginTop: 22, padding: 18, borderRadius: 18, borderWidth: 1, marginBottom: 10 },
+  textCard: { borderRadius: 16, borderWidth: 1, padding: 18, marginBottom: 10, minHeight: 80 },
+  transcriptSection: { marginTop: 22 },
+  chapterTabs: { paddingBottom: 4, gap: 8 },
+  chapterTab: {
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999,
+    borderWidth: 1, borderColor: 'transparent', minWidth: 80, alignItems: 'center',
+  },
 });
 
 export default FloatingAudioPlayer;
