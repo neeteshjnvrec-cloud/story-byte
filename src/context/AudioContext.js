@@ -26,6 +26,7 @@ export const AudioProvider = ({ children }) => {
   const progressTimerRef = useRef(null);
   const uidRef = useRef(null);
   const currentStoryRef = useRef(null);
+  const resumeTimeRef = useRef(0);
 
   useEffect(() => {
     setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
@@ -102,7 +103,21 @@ export const AudioProvider = ({ children }) => {
 
     if (status.duration > 0) {
       setDuration(status.duration);
-      setProgress(status.currentTime / status.duration);
+      
+      // If we have a saved resume time and this is the first load, seek to it
+      if (resumeTimeRef.current && resumeTimeRef.current > 0 && status.currentTime === 0) {
+        const savedTime = resumeTimeRef.current;
+        resumeTimeRef.current = 0; // Clear it
+        player.seekTo(savedTime).then(() => {
+          const newProgress = savedTime / status.duration;
+          setProgress(newProgress);
+        }).catch(err => {
+          console.warn('Failed to seek to saved position:', err);
+          setProgress(0);
+        });
+      } else {
+        setProgress(status.currentTime / status.duration);
+      }
     }
     setIsPlaying(status.playing);
 
@@ -209,14 +224,9 @@ export const AudioProvider = ({ children }) => {
         onPlaybackStatusUpdate
       );
 
-      // Seek to saved position if exists
-      if (resumeCurrentTime > 0 && player.durationIsReady) {
-        await player.seekTo(resumeCurrentTime);
-        setProgress(resumeProgress);
-        setDuration(player.duration || story.duration || 0);
-      } else {
-        setProgress(0);
-        setDuration(0);
+      // Store resume time for when player loads
+      if (resumeCurrentTime > 0) {
+        resumeTimeRef.current = resumeCurrentTime;
       }
 
       player.play();
