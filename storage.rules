@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Narration audio: public read, admin-only write (pipeline uploads via Admin SDK).
+    match /audio/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Story cover images: public read, admin-only write.
+    match /stories/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // User profile images: public read, owner-only write (images < 5MB).
+    match /users/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // Default deny.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StoryByte Design System</title>
+  <style>
+    :root {
+      /* Light Theme Palette */
+      --bg: #ffffff;
+      --surface: #f8f9fa;
+      --surface-alt: #f0f0f0;
+      --card: #ffffff;
+      --border: #e0e0e0;
+      --border-strong: #d0d0d0;
+      --text: #1a1a1a;
+      --text-secondary: #666666;
+      --text-tertiary: #999999;
+      --accent: #667eea;
+      --accent-2: #ec4899;
+      --accent-3: #8b5cf6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --gradient-start: #667eea;
+      --gradient-end: #764ba2;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+      --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+      --font-mono: "SF Mono", "Fira Code", monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0a0a0a;
+        --surface: #1a1a1a;
+        --surface-alt: #222222;
+        --card: #1e1e1e;
+        --border: #2a2a2a;
+        --border-strong: #3a3a3a;
+        --text: #ffffff;
+        --text-secondary: #b0b0b0;
+        --text-tertiary: #888888;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+        --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+        --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #0a0a0a;
+      --surface: #1a1a1a;
+      --surface-alt: #222222;
+      --card: #1e1e1e;
+      --border: #2a2a2a;
+      --border-strong: #3a3a3a;
+      --text: #ffffff;
+      --text-secondary: #b0b0b0;
+      --text-tertiary: #888888;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding: 0;
+    }
+
+    /* Layout grid */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 32px;
+    }
+
+    /* Typography scale */
+    h1 { font-size: 36px; font-weight: 700; line-height: 1.2; font-family: var(--font-display); }
+    h2 { font-size: 28px; font-weight: 700; line-height: 1.3; margin-bottom: 16px; }
+    h3 { font-size: 20px; font-weight: 600; line-height: 1.4; margin-bottom: 12px; }
+    h4 { font-size: 16px; font-weight: 600; line-height: 1.4; }
+    p { font-size: 16px; line-height: 1.7; margin-bottom: 12px; }
+    .caption { font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
+    .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+    code { font-family: var(--font-mono); font-size: 14px; }
+
+    /* Decorative elements */
+    .hero-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 40px 0;
+    }
+    .section { margin-bottom: 48px; }
+    .palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .swatch {
+      min-width: 80px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .swatch .color {
+      height: 80px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px;
+    }
+    .swatch .name {
+      padding: 6px 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    /* Table for token listing */
+    .token-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .token-table th {
+      background: var(--surface);
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .token-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--text);
+    }
+    .token-table tr:last-child td { border-bottom: none; }
+    .token-table .value-cell {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    /* Gradient show */
+    .gradient-bar {
+      height: 60px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      margin: 12px 0;
+      box-shadow: var(--shadow-md);
+    }
+    /* Component card */
+    .comp-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+    .comp-card.dark { background: var(--surface); }
+    .comp-card .comp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .comp-card .comp-title { font-size: 16px; font-weight: 600; }
+    .comp-card .comp-meta { font-size: 12px; color: var(--text-secondary); }
+    /* Screen mockup frames */
+    .frame-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .frame {
+      background: var(--surface-alt);
+      border: 8px solid var(--border);
+      border-radius: 32px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      flex: 1;
+      min-width: 240px;
+    }
+    .frame .frame-screen {
+      width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+    }
+    .frame .frame-title {
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    .badge-primary { background: var(--accent); color: #fff; }
+    .badge-secondary { background: var(--surface); color: var(--text-secondary); border: 1px solid var(--border); }
+    /* Icon grid */
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .icon-item {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    /* Spec table */
+    .spec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0;
+    }
+    .spec-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .spec-item .spec-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+    .spec-item .spec-value { font-size: 14px; font-weight: 600; margin-top: 4px; }
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container { padding: 24px 16px; }
+      .token-table { font-size: 12px; }
+      h1 { font-size: 28px; }
+    }
+
+    /* Waveform visualization */
+    .waveform {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 40px;
+      margin: 16px 0;
+    }
+    .waveform .bar {
+      flex: 1;
+      background: var(--accent);
+      border-radius: 2px;
+      min-width: 2px;
+      opacity: 0.4;
+    }
+    .waveform .bar.playing { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Hero -->
+    <div style="text-align: center; margin-bottom: 40px;">
+      <h1 style="font-size: 42px; margin-bottom: 8px;">StoryByte Design System</h1>
+      <p class="caption" style="font-size: 16px; max-width: 600px; margin: 0 auto;">Audio storytelling interface &middot; Tokens &middot; Components &middot; Screen specs</p>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Color Palette -->
+    <div class="section">
+      <h2>🎨 Color Palette</h2>
+      <p>The palette draws from twilight storytelling moods — deep indigos (evening calm) and warm magentas (narrative energy). Semantic layers use tonal variations for accessibility in both light and dark contexts.</p>
+
+      <h3>Dark Theme (Primary)</h3>
+      <div class="palette">
+        <div class="swatch"><div class="color" style="background:#0a0a0a;">#0a0a0a</div><div class="name">Background</div></div>
+        <div class="swatch"><div class="color" style="background:#1a1a1a;">#1a1a1a</div><div class="name">Surface</div></div>
+        <div class="swatch"><div class="color" style="background:#1e1e1e;">#1e1e1e</div><div class="name">Card</div></div>
+        <div class="swatch"><div class="color" style="background:#2a2a2a;">#2a2a2a</div><div class="name">Border</div></div>
+        <div class="swatch"><div class="color" style="background:#222222;">#222222</div><div class="name">Surface Alt</div></div>
+      </div>
+
+      <h3>Light Theme</h3>
+      <div class="palette">
+        <div class="swatch"><div class="color" style="background:#ffffff;">#ffffff</div><div class="name">Background</div></div>
+        <div class="swatch"><div class="color" style="background:#f8f9fa;">#f8f9fa</div><div class="name">Surface</div></div>
+        <div class="swatch"><div class="color" style="background:#ffffff;">#ffffff</div><div class="name">Card</div></div>
+        <div class="swatch"><div class="color" style="background:#e0e0e0;">#e0e0e0</div><div class="name">Border</div></div>
+      </div>
+
+      <h3>Accent & Semantic Colors</h3>
+      <div class="palette">
+        <div class="swatch"><div class="color" style="background:#667eea;">#667eea</div><div class="name">Primary</div></div>
+        <div class="swatch"><div class="color" style="background:#ec4899;">#ec4899</div><div class="name">Secondary</div></div>
+        <div class="swatch"><div class="color" style="background:#8b5cf6;">#8b5cf6</div><div class="name">Tertiary</div></div>
+        <div class="swatch"><div class="color" style="background:#10b981;">#10b981</div><div class="name">Success</div></div>
+        <div class="swatch"><div class="color" style="background:#f59e0b;">#f59e0b</div><div class="name">Warning</div></div>
+        <div class="swatch"><div class="color" style="background:#ef4444;">#ef4444</div><div class="name">Error</div></div>
+      </div>
+
+      <div class="gradient-bar"></div>
+      <p class="caption">Gradient: <code>#667eea</code> → <code>#764ba2</code> (135°)</p>
+    </div>
+
+    <!-- Color Token Table -->
+    <table class="token-table">
+      <thead>
+        <tr><th>Token</th><th>Dark</th><th>Light</th><th>Usage</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>--background</td><td>#0a0a0a</td><td>#ffffff</td><td>App background</td></tr>
+        <tr><td>--surface</td><td>#1a1a1a</td><td>#f8f9fa</td><td>Surfaces, cards</td></tr>
+        <tr><td>--surface-alt</td><td>#222222</td><td>#f0f0f0</td><td>Nested surfaces</td></tr>
+        <tr><td>--text</td><td>#ffffff</td><td>#1a1a1a</td><td>Primary text</td></tr>
+        <tr><td>--text-secondary</td><td>#b0b0b0</td><td>#666666</td><td>Secondary text</td></tr>
+        <tr><td>--border</td><td>#2a2a2a</td><td>#e0e0e0</td><td>Dividers, borders</td></tr>
+        <tr><td>--accent</td><td>#667eea</td><td>#667eea</td><td>Primary actions</td></tr>
+        <tr><td>--error</td><td>#ef4444</td><td>#ef4444</td><td>Error states</td></tr>
+        <tr><td>--success</td><td>#10b981</td><td>#10b981</td><td>Success states</td></tr>
+      </tbody>
+    </table>
+
+    <div class="hero-divider"></div>
+
+    <!-- Typography -->
+    <div class="section">
+      <h2>🔤 Typography</h2>
+      <p>Uses system fonts (SF Pro / Roboto) for native performance. Type scale follows modular rhythm optimized for audio content scanning.</p>
+
+      <table class="token-table">
+        <thead>
+          <tr><th>Style</th><th>Size</th><th>Weight</th><th>Line Height</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Display H1</strong></td><td>36px</td><td>700</td><td>1.2</td><td>Screen titles</td></tr>
+          <tr><td><strong>H2</strong></td><td>28px</td><td>700</td><td>1.3</td><td>Section headers</td></tr>
+          <tr><td><strong>H3</strong></td><td>20px</td><td>600</td><td>1.4</td><td>Card titles</td></tr>
+          <tr><td><strong>H4</strong></td><td>16px</td><td>600</td><td>1.4</td><td>Labels</td></tr>
+          <tr><td><strong>Body</strong></td><td>16px</td><td>400</td><td>1.7</td><td>Story descriptions</td></tr>
+          <tr><td><strong>Body Small</strong></td><td>14px</td><td>400</td><td>1.6</td><td>Captions</td></tr>
+          <tr><td><strong>Meta</strong></td><td>12px</td><td>600</td><td>1.5</td><td>Metadata tags</td></tr>
+          <tr><td><strong>Micro</strong></td><td>11px</td><td>600</td><td>1.4</td><td>Time indicators</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Spacing -->
+    <div class="section">
+      <h2>📏 Spacing Scale</h2>
+      <p>Based on 4px grid system for consistent rhythm.</p>
+      <table class="token-table">
+        <thead><tr><th>Token</th><th>Value</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>xs</td><td>4px</td><td>Tight padding</td></tr>
+          <tr><td>sm</td><td>8px</td><td>Icon spacing</td></tr>
+          <tr><td>md</td><td>16px</td><td>Default padding</td></tr>
+          <tr><td>lg</td><td>24px</td><td>Section gaps</td></tr>
+          <tr><td>xl</td><td>32px</td><td>Large gaps</td></tr>
+          <tr><td>xxl</td><td>48px</td><td>Screen margins</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Border Radius -->
+    <div class="section">
+      <h2>⭕ Border Radius</h2>
+      <div class="spec-grid">
+        <div class="spec-item"><div class="spec-label">sm</div><div class="spec-value">8px</div></div>
+        <div class="spec-item"><div class="spec-label">md</div><div class="spec-value">12px</div></div>
+        <div class="spec-item"><div class="spec-label">lg</div><div class="spec-value">16px</div></div>
+        <div class="spec-item"><div class="spec-label">xl</div><div class="spec-value">24px</div></div>
+        <div class="spec-item"><div class="spec-label">full</div><div class="spec-value">9999px</div></div>
+        <div class="spec-item"><div class="spec-label">round</div><div class="spec-value">50%</div></div>
+      </div>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Shadows -->
+    <div class="section">
+      <h2>🌑 Shadows</h2>
+      <div class="comp-card">
+        <div class="comp-header"><span class="comp-title">Small</span><span class="comp-meta">elevation: 2</span></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--shadow-sm);">
+          <p style="font-size:14px;margin-bottom:4px;">--shadow-sm</p>
+          <p class="caption">0px 1px 2px rgba(0,0,0,0.05)</p>
+        </div>
+      </div>
+      <div class="comp-card dark">
+        <div class="comp-header"><span class="comp-title">Medium</span><span class="comp-meta">elevation: 4</span></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow-md);">
+          <p style="font-size:14px;margin-bottom:4px;">--shadow-md</p>
+          <p class="caption">0px 4px 6px rgba(0,0,0,0.1)</p>
+        </div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-header"><span class="comp-title">Large</span><span class="comp-meta">elevation: 8</span></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;box-shadow:var(--shadow-lg);">
+          <p style="font-size:14px;margin-bottom:4px;">--shadow-lg</p>
+          <p class="caption">0px 10px 15px rgba(0,0,0,0.1)</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Components -->
+    <div class="section">
+      <h2>🧩 Components</h2>
+
+      <!-- Buttons -->
+      <div class="comp-card">
+        <div class="comp-header">
+          <span class="comp-title">Buttons</span>
+          <span class="comp-meta">Height: 48px &middot; Border Radius: 16px</span>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button style="background:var(--accent);color:#fff;border:none;padding:0 24px;border-radius:16px;height:48px;font-weight:600;font-size:16px;cursor:pointer;">Primary</button>
+          <button style="background:var(--surface);color:var(--text);border:1px solid var(--border);padding:0 24px;border-radius:16px;height:48px;font-weight:600;font-size:16px;cursor:pointer;">Secondary</button>
+          <button style="background:transparent;color:var(--accent);border:1px solid var(--accent);padding:0 24px;border-radius:16px;height:48px;font-weight:600;font-size:16px;cursor:pointer;">Ghost</button>
+        </div>
+        <p class="caption" style="margin-top:12px;">Primary uses gradient accent. Disabled state: opacity 0.5.</p>
+      </div>
+
+      <!-- Story Card -->
+      <div class="comp-card dark">
+        <div class="comp-header">
+          <span class="comp-title">Story Card</span>
+          <span class="comp-meta">Border Radius: 12px</span>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:100px;height:100px;border-radius:8px;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));min-width:100px;"></div>
+          <div style="flex:1;">
+            <h3 style="margin-bottom:4px;">The Midnight Garden</h3>
+            <p class="caption" style="margin-bottom:8px;">A tale of secrets whispered in moonlight...</p>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span style="background:var(--accent);color:#fff;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;">Fantasy</span>
+              <span class="caption">• 12 min</span>
+            </div>
+          </div>
+        </div>
+        <p class="caption" style="margin-top:12px;">Image ratio: 1:1 &middot; Duration badge bottom-right</p>
+      </div>
+
+      <!-- Audio Player -->
+      <div class="comp-card">
+        <div class="comp-header">
+          <span class="comp-title">Audio Player Bar</span>
+          <span class="comp-meta">Height: 64px (collapsed) &middot; Full screen (expanded)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 16px;">
+          <div style="width:40px;height:40px;border-radius:8px;background:var(--surface-alt);min-width:40px;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;">Story Title</div>
+            <div class="caption">0:42 / 12:34 &middot; Page 2/5</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:20px;">⏪</span>
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">▶</div>
+            <span style="font-size:20px;">⏩</span>
+          </div>
+        </div>
+        <p class="caption" style="margin-top:12px;">Collapsed: fixed at bottom. Expanded: slide-up modal with waveform, text card, speed controls.</p>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="comp-card dark">
+        <div class="comp-header">
+          <span class="comp-title">Search Bar</span>
+          <span class="comp-meta">Height: 50px &middot; Border Radius: 12px</span>
+        </div>
+        <div style="display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0 14px;height:50px;">
+          <span style="font-size:18px;margin-right:10px;">🔍</span>
+          <input type="text" placeholder="Search stories..." style="flex:1;font-size:16px;border:none;outline:none;background:none;color:var(--text);width:100%;">
+        </div>
+      </div>
+
+      <!-- Genre Chip -->
+      <div class="comp-card">
+        <div class="comp-header"><span class="comp-title">Genre Chip</span><span class="comp-meta">Height: 40px</span></div>
+        <div class="icon-grid">
+          <div class="icon-item" style="background:var(--surface);border:1px solid var(--accent);color:var(--accent);">🏔️</div>
+          <div class="icon-item" style="background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));color:#fff;">👻</div>
+          <div class="icon-item">😂</div>
+          <div class="icon-item">💕</div>
+          <div class="icon-item">🐉</div>
+          <div class="icon-item">🚀</div>
+          <div class="icon-item">🔍</div>
+          <div class="icon-item">🔪</div>
+          <div class="icon-item">📜</div>
+          <div class="icon-item">🧚</div>
+          <div class="icon-item">🌙</div>
+        </div>
+        <p class="caption" style="margin-top:12px;">32px × 40px &middot; Icon: 16px &middot; Label: 14px</p>
+      </div>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Screen Inventory -->
+    <div class="section">
+      <h2>📱 Screens</h2>
+      <p>Complete screen inventory for the StoryByte app with key specs and navigation patterns.</p>
+
+      <table class="token-table">
+        <thead><tr><th>Screen</th><th>Purpose</th><th>Auth Required</th><th>Key Elements</th></tr></thead>
+        <tbody>
+          <tr><td>Login</td><td>User authentication</td><td>No</td><td>Logo, email/password, gradient bg, divider</td></tr>
+          <tr><td>Signup</td><td>New account creation</td><td>No</td><td>Name, email, password (4), create button</td></tr>
+          <tr><td>ForgotPassword</td><td>Reset flow</td><td>No</td><td>Email input, reset button, back link</td></tr>
+          <tr><td>Onboarding</td><td>New user guide</td><td>No</td><td>3-page walkthrough, skip, pagination dots</td></tr>
+          <tr><td><strong>Home</strong></td><td>Main content feed</td><td>Yes</td><td>Story cards, category filters, language toggle</td></tr>
+          <tr><td><strong>Search</strong></td><td>Discover content</td><td>Yes</td><td>Search bar, genre chips grid, results list</td></tr>
+          <tr><td><strong>StoryDetail</strong></td><td>Story playback</td><td>Yes</td><td>Cover image, play button, progress bar, rating</td></tr>
+          <tr><td><strong>Favorites</strong></td><td>Saved stories</td><td>Yes</td><td>List of favorited stories, empty state</td></tr>
+          <tr><td><strong>Profile</strong></td><td>User dashboard</td><td>Yes</td><td>Avatar, stats grid, history, settings</td></tr>
+          <tr><td><strong>Player (Expanded)</strong></td><td>Full audio playback</td><td>Yes</td><td>Text card, controls, speed, volume</td></tr>
+          <tr><td>Settings</td><td>App preferences</td><td>Yes</td><td>Theme toggle, language, notifications</td></tr>
+          <tr><td>Listening History</td><td>History list</td><td>Yes</td><td>Recently played, progress tracking</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Screen Details -->
+    <div class="section">
+      <h2>📐 Screen Layouts</h2>
+
+      <!-- Home Screen -->
+      <div class="comp-card">
+        <div class="comp-header">
+          <span class="comp-title">Home Feed</span>
+          <span class="comp-meta">Bottom Tab &middot; Scrollable</span>
+        </div>
+        <div class="spec-grid">
+          <div class="spec-item"><div class="spec-label">Header height</div><div class="spec-value">112px</div></div>
+          <div class="spec-item"><div class="spec-label">Filter bar</div><div class="spec-value">50px</div></div>
+          <div class="spec-item"><div class="spec-label">Category chips</div><div class="spec-value">Horizontal scroll</div></div>
+          <div class="spec-item"><div class="spec-label">Story card height</div><div class="spec-value">250px approx</div></div>
+          <div class="spec-item"><div class="spec-label">Image ratio</div><div class="spec-value">16:9 (cover)</div></div>
+          <div class="spec-item"><div class="spec-label">Gutter</div><div class="spec-value">16px</div></div>
+        </div>
+        <p class="caption" style="margin-top:12px;">Story card: Image top (180px height), content below with title, description, tags. Duration badge bottom-right of image.</p>
+      </div>
+
+      <!-- Story Detail -->
+      <div class="comp-card dark">
+        <div class="comp-header">
+          <span class="comp-title">Story Detail</span>
+          <span class="comp-meta">Stack (Modal) &middot; Scrollable</span>
+        </div>
+        <div class="spec-grid">
+          <div class="spec-item"><div class="spec-label">Cover height</div><div class="spec-value">250px</div></div>
+          <div class="spec-item"><div class="spec-label">Button height</div><div class="spec-value">48px</div></div>
+          <div class="spec-item"><div class="spec-label">Progress bar</div><div class="spec-value">4px height</div></div>
+          <div class="spec-item"><div class="spec-label">Rating stars</div><div class="spec-value">5-star interactive</div></div>
+          <div class="spec-item"><div class="spec-label">Meta grid</div><div class="spec-value">4-item row</div></div>
+          <div class="spec-item"><div class="spec-label">Spacing</div><div class="spec-value">20px padding</div></div>
+        </div>
+        <p class="caption" style="margin-top:12px;">Layout: Cover → Title + Description → Meta Info (4 items) → Play/Favorite buttons → Progress bar → Rating → Story text.</p>
+      </div>
+
+      <!-- Player Expanded -->
+      <div class="comp-card">
+        <div class="comp-header">
+          <span class="comp-title">Expanded Player</span>
+          <span class="comp-meta">Modal &middot; Slide-up</span>
+        </div>
+        <div class="spec-grid">
+          <div class="spec-item"><div class="spec-label">Header</div><div class="spec-value">60px height</div></div>
+          <div class="spec-item"><div class="spec-label">Text card</div><div class="spec-value">Scrollable flex</div></div>
+          <div class="spec-item"><div class="spec-label">Progress section</div><div class="spec-value">Slider + time row</div></div>
+          <div class="spec-item"><div class="spec-label">Main controls</div><div class="spec-value">⏮ ⏪ ▶/⏸ ⏩ ⏭</div></div>
+          <div class="spec-item"><div class="spec-label">Speed button</div><div class="spec-value">0.5x-2x cycle</div></div>
+          <div class="spec-item"><div class="spec-label">Bottom bar</div><div class="spec-value">Volume + close</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Iconography -->
+    <div class="section">
+      <h2>🖼️ Iconography & Emoji</h2>
+      <p>Navigation uses emoji-based icons for rapid recognition. Audio controls use standard media icons.</p>
+      <div class="icon-grid">
+        <div class="icon-item">🏠</div>
+        <div class="icon-item">🔍</div>
+        <div class="icon-item">❤️</div>
+        <div class="icon-item">👤</div>
+        <div class="icon-item">▶</div>
+        <div class="icon-item">⏸</div>
+        <div class="icon-item">⏪</div>
+        <div class="icon-item">⏩</div>
+        <div class="icon-item">⏮</div>
+        <div class="icon-item">⏭</div>
+        <div class="icon-item">🔊</div>
+        <div class="icon-item">✕</div>
+      </div>
+      <p class="caption" style="margin-top:12px;">Size: 22px for nav icons, 18-28px for player controls. No custom icon set (uses system emoji).</p>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Navigation -->
+    <div class="section">
+      <h2>🧭 Navigation Structure</h2>
+      <pre style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;overflow-x:auto;">
+<code><span style="color:#ec4899;">App</span>
+<span style="color:#667eea;">├─</span> <span style="color:#8b5cf6;">AuthStack</span> (headerShown: false)
+<span style="color:#667eea;">│  ├─</span> Login
+<span style="color:#667eea;">│  ├─</span> Signup
+<span style="color:#667eea;">│  └─</span> ForgotPassword
+<span style="color:#667eea;">├─</span> <span style="color:#8b5cf6;">TabNavigator</span>
+<span style="color:#667eea;">│  ├─</span> Home (🏠)
+<span style="color:#667eea;">│  ├─</span> Search (🔍)
+<span style="color:#667eea;">│  ├─</span> Favorites (❤️)
+<span style="color:#667eea;">│  └─</span> Profile (👤)
+<span style="color:#667eea;">├─</span> StoryDetail (Modal presentation)
+<span style="color:#667eea;">└─</span> ExpandedPlayer (Modal)
+  </code></pre>
+      <p class="caption" style="margin-top:12px;">Tab bar always visible in main flow. StoryDetail presents as modal slide-up. Expanded player is an overlay modal.</p>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Figma Spec -->
+    <div class="section">
+      <h2>📄 Figma File Structure</h2>
+      <p>Recommended Figma file organization:</p>
+      <pre style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;overflow-x:auto;">
+<code><span style="color:#ec4899;">Page 1: Design System</span>
+ ├─ Colors
+ ├─ Typography
+ ├─ Spacing & Radius
+ ├─ Shadows
+ ├─ Icons
+ └─ Tokens (export-ready)
+
+<span style="color:#8b5cf6;">Page 2: Components</span>
+ ├─ Buttons
+ ├─ Story Card
+ ├─ Search Bar
+ ├─ Genre Chip
+ ├─ Audio Player (collapsed)
+ ├─ Audio Player (expanded)
+ ├─ Category Filter
+ └─ Tab Bar
+
+<span style="color:#667eea;">Page 3: Screens</span>
+ ├─ Auth Flow
+ │  ├─ Login
+ │  ├─ Signup
+ │  └─ Forgot Password
+ ├─ Main App
+ │  ├─ Home Feed
+ │  ├─ Search
+ │  ├─ Story Detail
+ │  ├─ Favorites
+ │  └─ Profile
+ └─ Modals
+    ├─ Expanded Player
+    └─ Settings</code></pre>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Implementation Notes -->
+    <div class="section">
+      <h2>⚙️ Implementation Notes</h2>
+      <div class="comp-card">
+        <h3>Theme Hook Interface</h3>
+        <pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;font-size:13px;">
+<code>{`import { useTheme } from '../hooks/useTheme';
+
+const { theme, isDark, themeMode, changeTheme } = useTheme();
+// theme.background, theme.text, theme.accent, etc.
+`}</code></pre>
+      </div>
+      <div class="comp-card dark" style="margin-top:16px;">
+        <h3>Component Styling Pattern</h3>
+        <pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;font-size:13px;">
+<code>{`<View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>`}</code></pre>
+        <p class="caption" style="margin-top:8px;">Use StyleSheet for static styles, inline theme tokens for dynamic props.</p>
+      </div>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- Footer -->
+    <footer style="text-align:center;padding:40px 0;color:var(--text-secondary);font-size:13px;">
+      <p>StoryByte Design System &mdash; Audio Storytelling Interface Specification</p>
+      <p class="caption">Designed for native React Native &middot; Expo &middot; Figma handoff ready</p>
+    </footer>
+  </div>
+</body>
+</html>

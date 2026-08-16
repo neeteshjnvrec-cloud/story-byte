@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+
+    // Stories: public read. Clients may NOT create/delete or edit content — the
+    // content pipeline writes via the Admin SDK (which bypasses these rules).
+    // The only client mutation allowed is bumping counters (plays/ratings).
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create, delete: if false;
+      allow update: if isSignedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['plays', 'rating', 'ratingCount', 'lastPlayedAt', 'lastRatedAt', 'lastReview']);
+    }
+
+    // Pre-built home feed + taxonomy: public read, admin-only write.
+    match /feed/{docId}      { allow read: if true; allow write: if false; }
+    match /verticals/{id}    { allow read: if true; allow write: if false; }
+    match /collections/{id}  { allow read: if true; allow write: if false; }
+
+    // User profile: OWNER only (fixes previous public-read of emails).
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.userId == userId;
+      allow delete: if false;
+    }
+
+    // Owner-only per-user subcollections.
+    match /users/{userId}/favorites/{storyId} { allow read, write: if isOwner(userId); }
+    match /users/{userId}/progress/{storyId}  { allow read, write: if isOwner(userId); }
+    match /users/{userId}/downloads/{storyId} { allow read, write: if isOwner(userId); }
+
+    // Admin-only collections (written by the pipeline via the Admin SDK).
+    match /user_activity/{docId}   { allow read, write: if false; }
+    match /generation_logs/{docId} { allow read, write: if false; }
+  }
+}
