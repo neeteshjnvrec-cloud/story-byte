@@ -20,7 +20,6 @@
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview",
       "android": { "buildType": "apk" },
       "env": {
         "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyD4bbhwLjqkCGYU3MspzKbeOD4CjDvWeXs",
@@ -34,7 +33,6 @@
       }
     },
     "production": {
-      "channel": "production",
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyD4bbhwLjqkCGYU3MspzKbeOD4CjDvWeXs",
