@@ -13,7 +13,7 @@ import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 
 export const LoginScreen = ({ navigation }) => {
   const { loginWithEmail } = useAppContext();
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

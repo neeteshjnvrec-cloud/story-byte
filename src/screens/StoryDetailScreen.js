@@ -90,7 +90,7 @@ export const StoryDetailScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { storyId, story: initialStory } = route.params || {};
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const { playStory, playPause, isPlaying, currentStory } = useAudioPlayer();
   const { toggleFavorite, isInFavorites, user } = useAppContext();
   const [story, setStory] = useState(initialStory || null);

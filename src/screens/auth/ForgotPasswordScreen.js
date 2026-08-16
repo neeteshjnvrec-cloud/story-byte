@@ -15,7 +15,7 @@ import { Button } from '../../components/ui/Button';
 
 export const ForgotPasswordScreen = ({ navigation }) => {
   const { resetPassword } = useAppContext();
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');

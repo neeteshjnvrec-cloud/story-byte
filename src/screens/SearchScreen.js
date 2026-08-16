@@ -51,7 +51,7 @@ const GENRE_CHIPS = [
 
 export const SearchScreen = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
   const { playStory } = useAudioPlayer();
   const [query, setQuery] = useState('');

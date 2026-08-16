@@ -13,7 +13,7 @@ import { getAuthErrorMessage } from './LoginScreen';
 
 export const SignupScreen = ({ navigation }) => {
   const { signupWithEmail } = useAppContext();
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');

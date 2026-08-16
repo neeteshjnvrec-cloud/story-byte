@@ -25,7 +25,7 @@ const SEGMENTS = [
 
 export const FavoritesScreen = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
   const { favorites, loading: contextLoading } = useAppContext();
   const { playStory } = useAudioPlayer();
