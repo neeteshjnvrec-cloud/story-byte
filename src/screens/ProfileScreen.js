@@ -21,7 +21,7 @@ import { CompactRow } from '../components/story/StoryCard';
 export const ProfileScreen = () => {
   const navigation = useNavigation();
   const { user, signOut, userStats, loading: contextLoading } = useAppContext();
-  const { theme } = useTheme();
+  const { theme } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
