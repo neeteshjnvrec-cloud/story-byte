@@ -24,9 +24,9 @@ const MAP = {
   flame: 'flame', bell: 'notifications-outline', globe: 'globe-outline',
   headphones: 'headset-outline', speed: 'speedometer-outline', queue: 'list',
   note: 'musical-notes', volume: 'volume-medium', book: 'book-outline',
-  plus: 'add', close: 'close', more: 'ellipsis-horizontal',
+  plus: 'add', close: 'close', 'x': 'close', more: 'ellipsis-horizontal',
   // Semantic aliases for glyphs that don't exist under the same Ionicons name.
-  phone: 'call', edit: 'create', pencil: 'create',
+  phone: 'call', edit: 'create', pencil: 'create', camera: 'camera',
   'arrow-left': 'chevron-back', 'arrow-right': 'chevron-forward',
   'arrow-up': 'chevron-up', 'arrow-down': 'chevron-down',
 };

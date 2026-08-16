@@ -5,8 +5,7 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  StyleSheet,
-  Image
+  StyleSheet
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -90,6 +89,7 @@ export const ProfileScreen = () => {
 
   // Memoize derived data to prevent unnecessary recalculations
   const name = useMemo(() => user.displayName || (user.email ? user.email.split('@')[0] : 'You'), [user.displayName, user.email]);
+  const initial = useMemo(() => (name[0] || 'U').toUpperCase(), [name]);
   const minutes = useMemo(() => stats?.minutesListened || 0, [stats?.minutesListened]);
   const listenTime = useMemo(() => `${Math.floor(minutes / 60)}h ${minutes % 60}m`, [minutes]);
   const streak = useMemo(() => stats?.streak ?? userStats?.streak ?? 0, [stats?.streak, userStats?.streak]);
@@ -142,7 +142,7 @@ export const ProfileScreen = () => {
               <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>{user.email}</AppText>
             </View>
             <Pressable
-              onPress={() => setShowEditor(true)}
+              onPress={() => navigation.navigate('EditProfile')}
               hitSlop={10}
               style={[styles.editProfileBtn, { backgroundColor: theme.accentSoft }]}
             >
