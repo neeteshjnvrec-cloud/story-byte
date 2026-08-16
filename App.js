@@ -99,6 +99,7 @@ function Root() {
   }
 
   return user ? <MainStack isNewUser={false} /> : <AuthStack />;
+}
 
 export default function App() {
   const [fontsLoaded] = useFonts(FONT_MAP);
