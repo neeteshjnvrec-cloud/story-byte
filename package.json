@@ -35,6 +35,7 @@
     "expo-image": "~57.0.3",
     "expo-linear-gradient": "~57.0.1",
     "expo-status-bar": "~57.0.1",
+    "expo-updates": "~57.0.14",
     "expo-web-browser": "~57.0.2",
     "firebase": "^11.0.0",
     "react": "19.2.3",
