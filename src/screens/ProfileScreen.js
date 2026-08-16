@@ -91,7 +91,7 @@ export const ProfileScreen = () => {
   );
 
   const ProfileInfoItem = ({ icon, label, value }) => (
-    <View style={styles.infoRow}>
+    <View style={[styles.infoRow, { borderBottomColor: theme.border }]}>
       <View style={[styles.infoIcon, { backgroundColor: theme.accentSoft }]}>
         <Icon name={icon} size={18} color={theme.accent} />
       </View>
@@ -281,7 +281,6 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
   },
   infoIcon: {
     width: 36,
