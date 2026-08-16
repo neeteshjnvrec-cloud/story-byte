@@ -152,20 +152,27 @@ export const AudioProvider = ({ children }) => {
           const uid = uidRef.current;
           const currentStory = currentStoryRef.current;
           console.log('[AudioContext] playStory: current player state - duration:', player.duration, 'currentTime:', player.currentTime, 'durationIsReady:', player.durationIsReady);
-          if (uid && currentStory?.id && player.durationIsReady && player.duration > 0) {
-            const savedProgress = player.currentTime / player.duration;
-            console.log('[AudioContext] playStory: saving progress for', currentStory.id, 'at', savedProgress.toFixed(3), '(', player.currentTime, '/', player.duration, ')');
+
+          // Calculate progress - use player duration if ready, otherwise story duration as fallback
+          const playerDuration = player.durationIsReady && player.duration > 0 ? player.duration : (currentStory.duration || 0);
+          const currentTime = player.currentTime || 0;
+          const savedProgress = playerDuration > 0 ? currentTime / playerDuration : 0;
+
+          console.log('[AudioContext] playStory: calculating progress - currentTime:', currentTime, 'duration:', playerDuration, 'progress:', savedProgress.toFixed(3));
+
+          if (uid && currentStory?.id && playerDuration > 0) {
+            console.log('[AudioContext] playStory: saving progress for', currentStory.id, 'at', savedProgress.toFixed(3));
             await setDoc(doc(db, 'users', uid, 'progress', currentStory.id), {
               progress: savedProgress,
-              currentTime: player.currentTime,
-              duration: player.duration,
+              currentTime: currentTime,
+              duration: playerDuration,
               pagesCompleted: Math.floor(savedProgress * totalPages),
               speed,
               lastUpdated: serverTimestamp()
             }, { merge: true });
             console.log('[AudioContext] playStory: saved progress for', currentStory.id);
           } else {
-            console.log('[AudioContext] playStory: skipped save - uid:', !!uid, 'story:', !!currentStory?.id, 'durationIsReady:', player.durationIsReady, 'duration:', player.duration);
+            console.log('[AudioContext] playStory: skipped save - uid:', !!uid, 'story:', !!currentStory?.id, 'duration:', playerDuration);
           }
         } catch (e) {
           console.warn('[AudioContext] playStory: Failed to save progress before switch:', e);
