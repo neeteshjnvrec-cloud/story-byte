@@ -44,13 +44,15 @@ async function checkOnboardingStatus() {
 }
 
 // Auth stack shown when the user is signed out.
-function AuthStack({ onCompleteOnboarding }) {
+function AuthStack({ showProfileSetup }) {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-      <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+      {showProfileSetup ? (
+        <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+      ) : null}
     </Stack.Navigator>
   );
 }
@@ -79,6 +81,7 @@ function Root() {
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
   const [checkProfileComplete, setCheckProfileComplete] = useState(false);
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
 
   useEffect(() => {
     checkOnboardingStatus().then(setHasCompletedOnboarding);
@@ -89,6 +92,9 @@ function Root() {
     if (user) {
       const checkProfile = async () => {
         const profile = await (require('./src/services/api').default).getUserProfile();
+        if (!profile?.profileComplete) {
+          setShowProfileSetup(true);
+        }
         setCheckProfileComplete(profile?.profileComplete || false);
       };
       checkProfile();
@@ -110,16 +116,10 @@ function Root() {
   }
 
   // Show profile setup if user hasn't completed profile
-  if (user && !checkProfileComplete) {
+  if (showProfileSetup) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <ThemeProvider>
-          <NavigationContainer>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </ThemeProvider>
+        <AuthStack showProfileSetup={true} />
       </GestureHandlerRootView>
     );
   }
