@@ -1,10 +1,9 @@
 // Profile Setup — collect additional user details after signup.
 import React, { useState } from 'react';
-import { View, ScrollView, KeyboardAvoidingView, Platform, Pressable, StyleSheet } from 'react-native';
+import { View, ScrollView, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppContext } from '../../context/AppContext';
-import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
 import { Input } from '../../components/ui/Input';
@@ -15,7 +14,6 @@ const GENDERS = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
 
 export const ProfileSetupScreen = ({ navigation }) => {
   const { updateUserProfile } = useAppContext();
-  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
 
   const [fullName, setFullName] = useState('');
@@ -42,7 +40,6 @@ export const ProfileSetupScreen = ({ navigation }) => {
         favoriteGenre,
         profileComplete: true,
       });
-      // Navigate to Profile tab in main app
       navigation.navigate('Main', { screen: 'Profile' });
     } catch (e) {
       setError('Failed to save profile. Please try again.');
@@ -58,14 +55,14 @@ export const ProfileSetupScreen = ({ navigation }) => {
       style={[
         styles.genrePill,
         {
-          backgroundColor: selected ? theme.accent : theme.card,
-          borderColor: selected ? theme.accent : theme.border,
+          backgroundColor: selected ? '#B5613A' : '#FCF7EF',
+          borderColor: selected ? '#B5613A' : '#EADFCC',
         },
       ]}
     >
-      <AppText variant="label" color={selected ? 'onAccent' : 'text'} style={{ fontSize: 13 }}>
+      <Text style={{ fontSize: 13, color: selected ? '#FFFFFF' : '#2A2118', fontWeight: '500' }}>
         {label}
-      </AppText>
+      </Text>
     </Pressable>
   );
 
@@ -75,20 +72,20 @@ export const ProfileSetupScreen = ({ navigation }) => {
       style={[
         styles.genderPill,
         {
-          backgroundColor: selected ? theme.accent : theme.card,
-          borderColor: selected ? theme.accent : theme.border,
+          backgroundColor: selected ? '#B5613A' : '#FCF7EF',
+          borderColor: selected ? '#B5613A' : '#EADFCC',
         },
       ]}
     >
-      <AppText variant="label" color={selected ? 'onAccent' : 'text'} style={{ fontSize: 13 }}>
+      <Text style={{ fontSize: 13, color: selected ? '#FFFFFF' : '#2A2118', fontWeight: '500' }}>
         {label}
-      </AppText>
+      </Text>
     </Pressable>
   );
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: theme.background }}
+      style={{ flex: 1, backgroundColor: '#F6EFE4' }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
@@ -98,7 +95,9 @@ export const ProfileSetupScreen = ({ navigation }) => {
       >
         <View style={styles.center}>
           <LinearGradient
-            colors={[theme.gradientStart, theme.gradientEnd]}
+            colors={['#B5613A', '#E0913A']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
             style={styles.badge}
           >
             <Icon name="user" size={38} color="#fff" />
@@ -147,7 +146,6 @@ export const ProfileSetupScreen = ({ navigation }) => {
             value={age}
             onChangeText={setAge}
             keyboardType="number-pad"
-            placeholderTextColor={theme.textTertiary}
           />
 
           <AppText variant="label" color="text" style={styles.label}>
