@@ -1,19 +1,28 @@
-// Profile Screen for Story Byte
+// Profile Screen for Story Byte — warm storybook layout.
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
+  ActivityIndicator,
   StyleSheet
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../hooks/useTheme';
 import apiService from '../services/api';
+import { AppText } from '../components/ui/AppText';
+import { Icon } from '../components/ui/Icon';
+import { Button } from '../components/ui/Button';
+import { CompactRow } from '../components/story/StoryCard';
 
 export const ProfileScreen = () => {
+  const navigation = useNavigation();
   const { user, signOut, userStats, loading: contextLoading } = useAppContext();
-  const { theme, isDark } = useTheme();
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
@@ -30,10 +39,10 @@ export const ProfileScreen = () => {
     try {
       setLoading(true);
       const userStatsData = await apiService.getUserStats();
-      const userHistory = await apiService.getUserHistory();
+      const userHistory = await apiService.getUserProgress();
 
       setStats(userStatsData);
-      setHistory(userHistory);
+      setHistory(userHistory || []);
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
@@ -51,213 +60,180 @@ export const ProfileScreen = () => {
 
   if (!user) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <View style={styles.notLoggedIn}>
-          <Text style={[styles.notLoggedInText, { color: theme.text }]}>
-            Please sign in to view your profile
-          </Text>
-        </View>
+      <View style={[styles.container, styles.center, { backgroundColor: theme.background }]}>
+        <AppText variant="body" color="textSecondary" style={{ textAlign: 'center', paddingHorizontal: 40 }}>
+          Please sign in to view your profile
+        </AppText>
       </View>
     );
   }
 
+  const initial = user.displayName?.charAt(0) || user.email?.charAt(0) || 'U';
+  const minutes = stats?.minutesListened || 0;
+  const listenTime = `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+  const streak = stats?.streak ?? userStats?.streak ?? 0;
+
+  const StatCard = ({ value, label }) => (
+    <View style={[styles.statCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+      <AppText variant="h2" color="accent">{value}</AppText>
+      <AppText variant="caption" color="textSecondary" style={{ marginTop: 4 }}>{label}</AppText>
+    </View>
+  );
+
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* User Header */}
-      <View style={styles.header}>
-        <View style={[styles.avatar, { backgroundColor: theme.primary }]}>
-          <Text style={styles.avatarText}>
-            {user.displayName?.charAt(0) || user.email?.charAt(0) || 'U'}
-          </Text>
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.background }]}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Title row */}
+      <View style={[styles.titleRow, { paddingTop: insets.top + 16 }]}>
+        <AppText variant="displayM">Profile</AppText>
+        <Pressable
+          onPress={() => navigation.navigate('Settings')}
+          hitSlop={10}
+          style={[styles.gearBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
+        >
+          <Icon name="gear" size={20} color={theme.text} />
+        </Pressable>
+      </View>
+
+      {/* Avatar + identity */}
+      <View style={styles.identity}>
+        <LinearGradient
+          colors={[theme.gradientStart, theme.gradientEnd]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.avatar}
+        >
+          <AppText variant="displayM" style={{ color: '#fff' }}>{initial}</AppText>
+        </LinearGradient>
+        <AppText variant="h2" style={{ marginTop: 14 }}>{user.displayName || 'User'}</AppText>
+        <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>{user.email}</AppText>
+      </View>
+
+      {/* Streak card */}
+      <LinearGradient
+        colors={[theme.gradientStart, theme.gradientEnd]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.streakCard}
+      >
+        <View style={styles.streakIcon}>
+          <Icon name="flame" size={30} color="#fff" />
         </View>
-        <Text style={[styles.userName, { color: theme.text }]}>
-          {user.displayName || 'User'}
-        </Text>
-        <Text style={[styles.userEmail, { color: theme.textSecondary }]}>
-          {user.email}
-        </Text>
-      </View>
+        <View style={{ flex: 1 }}>
+          <AppText variant="displayM" style={{ color: '#fff' }}>{streak}</AppText>
+          <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.9)', marginTop: 2 }}>
+            day listening streak · keep it up!
+          </AppText>
+        </View>
+      </LinearGradient>
 
-      {/* Stats */}
-      <View style={[styles.section, { borderBottomColor: theme.divider }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Your Stats</Text>
-        {loading ? (
-          <Text style={{ color: theme.textSecondary }}>Loading...</Text>
-        ) : stats ? (
-          <View style={styles.statsGrid}>
-            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.statValue, { color: theme.accent }]}>
-                {Math.floor((stats.minutesListened || 0) / 60)}h {(stats.minutesListened || 0) % 60}m
-              </Text>
-              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Listen Time</Text>
-            </View>
-            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.statValue, { color: theme.accent }]}>
-                {stats.plays || 0}
-              </Text>
-              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Plays</Text>
-            </View>
-            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.statValue, { color: theme.accent }]}>
-                {stats.favorites || 0}
-              </Text>
-              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Favorites</Text>
-            </View>
-          </View>
-        ) : (
-          <Text style={{ color: theme.textSecondary }}>No stats available</Text>
-        )}
-      </View>
+      {/* Stats grid */}
+      {loading ? (
+        <ActivityIndicator color={theme.accent} style={{ marginTop: 24 }} />
+      ) : (
+        <View style={styles.statsGrid}>
+          <StatCard value={listenTime} label="Listen time" />
+          <StatCard value={stats?.plays || 0} label="Stories played" />
+          <StatCard value={stats?.favorites || 0} label="Favorites" />
+        </View>
+      )}
 
-      {/* Recent History */}
-      <View style={[styles.section, { borderBottomColor: theme.divider }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Recent History</Text>
+      {/* Recently played */}
+      <View style={styles.section}>
+        <AppText variant="micro" color="textTertiary" style={styles.sectionLabel}>
+          RECENTLY PLAYED
+        </AppText>
         {loading ? (
-          <Text style={{ color: theme.textSecondary }}>Loading...</Text>
+          <ActivityIndicator color={theme.accent} style={{ marginTop: 12 }} />
         ) : history.length === 0 ? (
-          <Text style={{ color: theme.textSecondary }}>No listening history</Text>
+          <AppText variant="caption" color="textSecondary" style={{ paddingHorizontal: 20, marginTop: 8 }}>
+            Nothing played yet.
+          </AppText>
         ) : (
-          history.slice(0, 5).map((item, index) => (
-            <View key={index} style={styles.historyItem}>
-              <Text style={[styles.historyTitle, { color: theme.text }]} numberOfLines={1}>
-                {item.title}
-              </Text>
-              <Text style={[styles.historyDate, { color: theme.textSecondary }]}>
-                {new Date(item.lastPlayed).toLocaleDateString()} • {item.playCount} plays
-              </Text>
-            </View>
+          history.slice(0, 5).map((item) => (
+            <CompactRow
+              key={item.storyId}
+              story={item}
+              onPress={() => navigation.navigate('StoryDetail', { storyId: item.storyId, story: { id: item.storyId, ...item } })}
+            />
           ))
         )}
       </View>
 
-      {/* Settings */}
-      <View style={[styles.section, { borderBottomColor: theme.divider }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Settings</Text>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={[styles.settingText, { color: theme.text }]}>Language</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>English</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={[styles.settingText, { color: theme.text }]}>Notifications</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>Enabled</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={[styles.settingText, { color: theme.text }]}>Dark Mode</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>
-            {isDark ? 'On' : 'Off'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.section}>
-        <TouchableOpacity style={[styles.signOutButton, { backgroundColor: theme.error }]} onPress={handleSignOut}>
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </TouchableOpacity>
+      {/* Sign out */}
+      <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
+        <Button title="Sign out" variant="ghost" leftIcon="lock" onPress={handleSignOut} />
       </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
-  header: {
-    padding: 20,
-    paddingTop: 40,
-    alignItems: 'center'
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 32,
-    fontWeight: 'bold'
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 15
-  },
-  userEmail: {
-    fontSize: 14,
-    marginTop: 4
-  },
-  notLoggedIn: {
-    flex: 1,
-    justifyContent: 'center',
+  container: { flex: 1 },
+  center: { justifyContent: 'center', alignItems: 'center' },
+  titleRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 20
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingBottom: 8,
   },
-  notLoggedInText: {
-    fontSize: 16,
-    textAlign: 'center'
+  gearBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  section: {
-    padding: 20,
-    borderBottomWidth: 1
+  identity: { alignItems: 'center', paddingVertical: 12 },
+  avatar: {
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15
+  streakCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 18,
+    padding: 17,
+  },
+  streakIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginTop: 16,
+    gap: 12,
   },
   statCard: {
-    width: '48%',
-    backgroundColor: '#f8f9fa',
+    flexGrow: 1,
+    flexBasis: '30%',
+    minWidth: 100,
+    borderRadius: 16,
+    borderWidth: 1,
     padding: 15,
-    borderRadius: 10,
-    marginBottom: 10
   },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold'
+  section: { marginTop: 28 },
+  sectionLabel: {
+    paddingHorizontal: 20,
+    marginBottom: 8,
+    letterSpacing: 1,
   },
-  statLabel: {
-    fontSize: 14,
-    marginTop: 4
-  },
-  historyItem: {
-    marginBottom: 15
-  },
-  historyTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4
-  },
-  historyDate: {
-    fontSize: 14
-  },
-  settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12
-  },
-  settingText: {
-    fontSize: 16
-  },
-  settingValue: {
-    fontSize: 16
-  },
-  signOutButton: {
-    paddingVertical: 15,
-    borderRadius: 10,
-    alignItems: 'center'
-  },
-  signOutText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold'
-  }
 });

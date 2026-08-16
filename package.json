@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@expo-google-fonts/baloo-2": "^0.4.2",
+    "@expo-google-fonts/fraunces": "^0.4.1",
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo-google-fonts/noto-sans-devanagari": "^0.4.1",
     "@expo-google-fonts/sora": "^0.4.2",
@@ -24,9 +25,9 @@
     "@react-navigation/native": "7.3.16",
     "@react-navigation/native-stack": "7.18.8",
     "@shopify/flash-list": "2.0.2",
-    "expo": "~57.0.12",
+    "expo": "~57.0.13",
     "expo-audio": "~57.0.3",
-    "expo-build-properties": "~57.0.10",
+    "expo-build-properties": "~57.0.11",
     "expo-font": "~57.0.1",
     "expo-haptics": "~57.0.1",
     "expo-image": "~57.0.3",
@@ -41,7 +42,7 @@
     "react-native-screens": "~4.26.0",
     "react-native-svg": "15.15.4",
     "react-native-vector-icons": "^10.2.0",
-    "react-native-worklets": "^0.10.3"
+    "react-native-worklets": "0.10.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

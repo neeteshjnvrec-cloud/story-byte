@@ -6,9 +6,10 @@
 // --- Fonts -----------------------------------------------------------------
 // Family strings match the keys loaded by expo-font in App.js (see FONT_MAP).
 export const FONTS = {
-  display: 'Sora_700Bold',
-  displaySemi: 'Sora_600SemiBold',
-  heading: 'Sora_600SemiBold',
+  // Warm serif display voice (storybook identity), sans for body/UI.
+  display: 'Fraunces_700Bold',
+  displaySemi: 'Fraunces_600SemiBold',
+  heading: 'Fraunces_600SemiBold',
   body: 'Inter_400Regular',
   bodyMedium: 'Inter_500Medium',
   bodySemi: 'Inter_600SemiBold',
@@ -22,6 +23,9 @@ export const FONTS = {
 
 // The map passed to useFonts() in App.js.
 export const FONT_MAP = {
+  Fraunces_400Regular: require('@expo-google-fonts/fraunces/400Regular/Fraunces_400Regular.ttf'),
+  Fraunces_600SemiBold: require('@expo-google-fonts/fraunces/600SemiBold/Fraunces_600SemiBold.ttf'),
+  Fraunces_700Bold: require('@expo-google-fonts/fraunces/700Bold/Fraunces_700Bold.ttf'),
   Sora_600SemiBold: require('@expo-google-fonts/sora/600SemiBold/Sora_600SemiBold.ttf'),
   Sora_700Bold: require('@expo-google-fonts/sora/700Bold/Sora_700Bold.ttf'),
   Inter_400Regular: require('@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf'),

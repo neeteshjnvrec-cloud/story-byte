@@ -1,43 +1,64 @@
-// Search Screen for Story Byte
+// Browse Screen for Story Byte
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
-  Text,
-  TextInput,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   ActivityIndicator,
   Keyboard
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer } from '../context/AudioContext';
 import { useTheme } from '../hooks/useTheme';
 import apiService from '../services/api';
+import { AppText } from '../components/ui/AppText';
+import { Input } from '../components/ui/Input';
+import { Icon } from '../components/ui/Icon';
+import { Cover } from '../components/story/Cover';
+import { CompactRow, fmtMin } from '../components/story/StoryCard';
 
-const GENRES = [
-  { id: 'adventure', icon: '🏔️', label: 'Adventure' },
-  { id: 'horror', icon: '👻', label: 'Horror' },
-  { id: 'comedy', icon: '😂', label: 'Comedy' },
-  { id: 'romance', icon: '💕', label: 'Romance' },
-  { id: 'fantasy', icon: '🐉', label: 'Fantasy' },
-  { id: 'sci-fi', icon: '🚀', label: 'Sci-Fi' },
-  { id: 'mystery', icon: '🔍', label: 'Mystery' },
-  { id: 'thriller', icon: '🔪', label: 'Thriller' },
-  { id: 'historical', icon: '📜', label: 'Historical' },
-  { id: 'fairy-tale', icon: '🧚', label: 'Fairy Tale' },
-  { id: 'bed-time', icon: '🌙', label: 'Bed Time' }
+// Single-select filter pills.
+const FILTERS = [
+  { id: 'all', label: 'All' },
+  { id: 'en', label: 'EN' },
+  { id: 'hi', label: 'हिंदी' },
+  { id: 'short', label: '‹5 min' },
+  { id: 'long', label: '15+ min' },
+];
+
+// 2x2 vertical tiles.
+const VERTICALS = [
+  { key: 'fiction', label: 'Fiction' },
+  { key: 'bedtime', label: 'Bedtime' },
+  { key: 'kids', label: 'Kids' },
+  { key: 'hindi', label: 'Hindi' },
+];
+
+// Genre chips → mapped to existing GENRES ids used by getStories({ genre }).
+const GENRE_CHIPS = [
+  { id: 'romance', label: 'Romance' },
+  { id: 'mystery', label: 'Mystery' },
+  { id: 'sci-fi', label: 'Sci-fi' },
+  { id: 'horror', label: 'Horror' },
+  { id: 'fairy-tale', label: 'Fairy tale' },
+  { id: 'adventure', label: 'Adventure' },
 ];
 
 export const SearchScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { playStory } = useAudioPlayer();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [filter, setFilter] = useState('all');
+  const [selectedGenre, setSelectedGenre] = useState(null);
 
   // Debounce search input (300ms)
   useEffect(() => {
@@ -51,9 +72,8 @@ export const SearchScreen = () => {
   useEffect(() => {
     if (debouncedQuery.trim().length > 0) {
       performSearch(debouncedQuery.trim());
-    } else {
+    } else if (!hasSearched) {
       setResults([]);
-      setHasSearched(false);
     }
   }, [debouncedQuery]);
 
@@ -61,6 +81,7 @@ export const SearchScreen = () => {
     try {
       setLoading(true);
       setHasSearched(true);
+      setSelectedGenre(null);
       Keyboard.dismiss();
 
       // Get all active stories and filter client-side (Firestore can't do full-text search)
@@ -86,17 +107,67 @@ export const SearchScreen = () => {
   }, []);
 
   const handleGenrePress = async (genre) => {
-    setQuery(genre.label);
+    setQuery('');
+    setSelectedGenre(genre.id);
     try {
       setLoading(true);
       setHasSearched(true);
-      const response = await apiService.getStories({ genre: genre.id });
+      const response = await apiService.getStories({ genre: genre.id, limit: 200 });
       setResults(response.stories || []);
     } catch (error) {
       console.error('Genre search error:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Filter chips. Language ones use the existing getStories({ language }) filter;
+  // duration ones filter the loaded set client-side via displayResults.
+  const handleFilterPress = async (id) => {
+    setFilter(id);
+    if (id === 'en' || id === 'hi') {
+      try {
+        setLoading(true);
+        setHasSearched(true);
+        const response = await apiService.getStories({ language: id, limit: 200 });
+        setResults(response.stories || []);
+      } catch (error) {
+        console.error('Language filter error:', error);
+      } finally {
+        setLoading(false);
+      }
+    } else if (id === 'all') {
+      if (debouncedQuery.trim()) {
+        performSearch(debouncedQuery.trim());
+      } else if (!selectedGenre) {
+        setResults([]);
+        setHasSearched(false);
+      }
+    } else if ((id === 'short' || id === 'long') && !hasSearched) {
+      // Nothing loaded yet — pull the catalog so the duration filter has data.
+      try {
+        setLoading(true);
+        setHasSearched(true);
+        const response = await apiService.getStories({ limit: 200 });
+        setResults(response.stories || []);
+      } catch (error) {
+        console.error('Duration filter error:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleVerticalPress = (v) => {
+    if (v.key === 'hindi') {
+      handleFilterPress('hi');
+    } else {
+      setQuery(v.label);
+    }
+  };
+
+  const handleStoryPress = (story) => {
+    navigation.navigate('StoryDetail', { storyId: story.id, story });
   };
 
   const handlePlayStory = async (story) => {
@@ -108,95 +179,160 @@ export const SearchScreen = () => {
     }, 100);
   };
 
+  // Apply the active chip on top of whatever result set is loaded.
+  const displayResults = results.filter((s) => {
+    const lang = (s.language || '').toLowerCase();
+    if (filter === 'en') return lang === 'en';
+    if (filter === 'hi') return lang === 'hi';
+    if (filter === 'short') return s.duration && s.duration < 300;
+    if (filter === 'long') return s.duration && s.duration >= 900;
+    return true;
+  });
+
+  const showResults = hasSearched || debouncedQuery.trim().length > 0;
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: theme.text }]}>Search</Text>
-          <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>
-            Find your perfect story
-          </Text>
+          <AppText variant="displayM">Browse</AppText>
         </View>
 
         {/* Search Input */}
-        <View style={styles.searchContainer}>
-          <View style={[styles.searchBar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <Text style={styles.searchIcon}>🔍</Text>
-            <TextInput
-              style={[styles.searchInput, { color: theme.text }]}
-              placeholder="Search stories..."
-              placeholderTextColor={theme.textSecondary}
-              value={query}
-              onChangeText={setQuery}
-              returnKeyType="search"
-              onSubmitEditing={() => performSearch(query.trim())}
-              autoCorrect={false}
-              clearButtonMode="while-editing"
-            />
-          </View>
+        <View style={styles.block}>
+          <Input
+            icon="search"
+            placeholder="Search stories, narrators…"
+            value={query}
+            onChangeText={setQuery}
+            returnKeyType="search"
+            onSubmitEditing={() => query.trim() && performSearch(query.trim())}
+            autoCorrect={false}
+            clearButtonMode="while-editing"
+            style={{ marginBottom: 0 }}
+          />
         </View>
 
-        {/* Genre Chips (shown only when not searching) */}
-        {!hasSearched && (
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Browse by Genre</Text>
-            <View style={styles.genreGrid}>
-              {GENRES.map((genre) => (
-                <TouchableOpacity
-                  key={genre.id}
-                  style={[styles.genreChip, { backgroundColor: theme.surface }]}
-                  onPress={() => handleGenrePress(genre)}
-                >
-                  <Text style={styles.genreIcon}>{genre.icon}</Text>
-                  <Text style={[styles.genreLabel, { color: theme.text }]}>{genre.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
+        {/* Filter chips */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.chipRow}
+        >
+          {FILTERS.map((f) => {
+            const on = filter === f.id;
+            return (
+              <Pressable
+                key={f.id}
+                onPress={() => handleFilterPress(f.id)}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: on ? theme.accent : theme.card,
+                    borderColor: on ? theme.accent : theme.border,
+                  },
+                ]}
+              >
+                <AppText variant="label" color={on ? 'onAccent' : 'textSecondary'} style={{ fontSize: 14 }}>
+                  {f.label}
+                </AppText>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
 
-        {/* Loading */}
         {loading && (
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={theme.accent} />
           </View>
         )}
 
-        {/* Search Results */}
-        {!loading && hasSearched && (
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>
-              {results.length > 0 ? `${results.length} results` : 'No stories found'}
-            </Text>
+        {!loading && !showResults && (
+          <>
+            {/* Verticals */}
+            <View style={styles.section}>
+              <AppText variant="h2" style={styles.sectionTitle}>Verticals</AppText>
+              <View style={styles.verticalGrid}>
+                {VERTICALS.map((v) => (
+                  <Pressable key={v.key} style={styles.vTile} onPress={() => handleVerticalPress(v)}>
+                    <Cover sceneKey={v.key} radius={18} style={styles.vCover}>
+                      <LinearGradient
+                        colors={['transparent', 'rgba(0,0,0,0.5)']}
+                        style={StyleSheet.absoluteFill}
+                      />
+                      <View style={styles.vLabel}>
+                        <AppText variant="h3" numberOfLines={1} style={{ color: '#fff' }}>{v.label}</AppText>
+                      </View>
+                    </Cover>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
 
-            {results.map((story) => (
-              <TouchableOpacity
+            {/* Genres */}
+            <View style={styles.section}>
+              <AppText variant="h2" style={styles.sectionTitle}>Genres</AppText>
+              <View style={styles.genreWrap}>
+                {GENRE_CHIPS.map((g) => {
+                  const on = selectedGenre === g.id;
+                  return (
+                    <Pressable
+                      key={g.id}
+                      onPress={() => handleGenrePress(g)}
+                      style={[
+                        styles.chip,
+                        {
+                          backgroundColor: on ? theme.accent : theme.card,
+                          borderColor: on ? theme.accent : theme.border,
+                        },
+                      ]}
+                    >
+                      <AppText variant="label" color={on ? 'onAccent' : 'textSecondary'} style={{ fontSize: 14 }}>
+                        {g.label}
+                      </AppText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          </>
+        )}
+
+        {/* Search Results */}
+        {!loading && showResults && (
+          <View style={styles.section}>
+            <AppText variant="h2" style={styles.sectionTitle}>
+              {displayResults.length > 0 ? `${displayResults.length} results` : 'No stories found'}
+            </AppText>
+
+            {displayResults.map((story) => (
+              <CompactRow
                 key={story.id}
-                style={[styles.resultCard, { backgroundColor: theme.card }]}
-                onPress={() => handlePlayStory(story)}
-              >
-                <View style={styles.resultContent}>
-                  <Text style={[styles.resultTitle, { color: theme.text }]} numberOfLines={1}>
-                    {story.title}
-                  </Text>
-                  <Text style={[styles.resultDescription, { color: theme.textSecondary }]} numberOfLines={1}>
-                    {story.genre} • {story.language?.toUpperCase()} • {formatDuration(story.duration)}
-                  </Text>
-                </View>
-                <View style={[styles.playBadge, { backgroundColor: theme.accent }]}>
-                  <Text style={styles.playBadgeText}>▶</Text>
-                </View>
-              </TouchableOpacity>
+                story={story}
+                onPress={() => handleStoryPress(story)}
+                subtitle={`${story.genre || 'Story'}${story.language ? ` · ${String(story.language).toUpperCase()}` : ''}${story.duration ? ` · ${fmtMin(story.duration)}` : ''}`}
+                trailing={
+                  <Pressable
+                    onPress={() => handlePlayStory(story)}
+                    hitSlop={8}
+                    style={[styles.playBtn, { backgroundColor: theme.accentSoft }]}
+                    accessibilityLabel="Play"
+                  >
+                    <Icon name="play" size={16} color={theme.accent} />
+                  </Pressable>
+                }
+              />
             ))}
 
-            {results.length === 0 && (
-              <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
-                Try different keywords or browse genres above
-              </Text>
+            {displayResults.length === 0 && (
+              <AppText variant="body" color="textSecondary" style={styles.emptyText}>
+                Try different keywords or browse verticals and genres.
+              </AppText>
             )}
           </View>
         )}
@@ -205,117 +341,75 @@ export const SearchScreen = () => {
   );
 };
 
-const formatDuration = (seconds) => {
-  if (!seconds) return '0:00';
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-};
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
   },
   content: {
-    paddingBottom: 20
+    paddingBottom: 32,
   },
   header: {
-    padding: 20,
-    paddingTop: 40
+    paddingHorizontal: 20,
+    paddingBottom: 12,
   },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold'
+  block: {
+    paddingHorizontal: 20,
   },
-  headerSubtitle: {
-    fontSize: 16,
-    marginTop: 4
+  chipRow: {
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    gap: 10,
   },
-  searchContainer: {
+  chip: {
     paddingHorizontal: 16,
-    marginBottom: 10
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
+    paddingVertical: 9,
+    borderRadius: 999,
     borderWidth: 1,
-    paddingHorizontal: 14,
-    height: 50
-  },
-  searchIcon: {
-    fontSize: 18,
-    marginRight: 10
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16
   },
   section: {
-    padding: 16
+    paddingHorizontal: 20,
+    paddingTop: 6,
+    paddingBottom: 8,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 14
+    marginBottom: 14,
   },
-  genreGrid: {
+  verticalGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10
+    justifyContent: 'space-between',
   },
-  genreChip: {
+  vTile: {
+    width: '48%',
+    marginBottom: 14,
+  },
+  vCover: {
+    height: 100,
+  },
+  vLabel: {
+    position: 'absolute',
+    left: 14,
+    bottom: 12,
+    right: 14,
+  },
+  genreWrap: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 20
+    flexWrap: 'wrap',
+    gap: 10,
   },
-  genreIcon: {
-    fontSize: 16,
-    marginRight: 6
-  },
-  genreLabel: {
-    fontSize: 14,
-    fontWeight: '600'
-  },
-  resultCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 10
-  },
-  resultContent: {
-    flex: 1
-  },
-  resultTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4
-  },
-  resultDescription: {
-    fontSize: 13
-  },
-  playBadge: {
+  playBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 12
-  },
-  playBadgeText: {
-    color: '#fff',
-    fontSize: 16
   },
   centered: {
     padding: 40,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   emptyText: {
-    fontSize: 14,
     textAlign: 'center',
-    marginTop: 20
-  }
+    marginTop: 16,
+  },
 });

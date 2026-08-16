@@ -9,6 +9,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -58,7 +59,7 @@ function MainStack({ isNewUser }) {
     <>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Main" component={AppNavigator} />
-        <Stack.Screen name="StoryDetail" component={StoryDetailScreen} options={{ headerShown: true, title: 'Story' }} />
+        <Stack.Screen name="StoryDetail" component={StoryDetailScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ presentation: 'modal' }} />
         {isNewUser ? (
           <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
@@ -105,16 +106,18 @@ export default function App() {
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <ThemeProvider>
-          <AppContextProvider>
-            <AudioProvider>
-              <NavigationContainer>
-                <StatusBar style="auto" />
-                <Root />
-              </NavigationContainer>
-            </AudioProvider>
-          </AppContextProvider>
-        </ThemeProvider>
+        <SafeAreaProvider>
+          <ThemeProvider>
+            <AppContextProvider>
+              <AudioProvider>
+                <NavigationContainer>
+                  <StatusBar style="auto" />
+                  <Root />
+                </NavigationContainer>
+              </AudioProvider>
+            </AppContextProvider>
+          </ThemeProvider>
+        </SafeAreaProvider>
       </GestureHandlerRootView>
     </ErrorBoundary>
   );

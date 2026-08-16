@@ -1,327 +1,140 @@
-// Story Detail Screen for Story Byte
+// Story Detail — warm design: cover, meta, play/resume, favorite, transcript.
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  Alert
-} from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { View, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer } from '../context/AudioContext';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../hooks/useTheme';
+import { AppText } from '../components/ui/AppText';
+import { Icon } from '../components/ui/Icon';
+import { Button } from '../components/ui/Button';
+import { Cover } from '../components/story/Cover';
+import { fmtMin } from '../components/story/StoryCard';
 import apiService from '../services/api';
 
 export const StoryDetailScreen = () => {
   const route = useRoute();
-  const { storyId } = route.params;
+  const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const { storyId, story: initialStory } = route.params || {};
   const { theme } = useTheme();
-  const { playStory, playPause, progress, isPlaying, currentStory } = useAudioPlayer();
+  const { playStory, playPause, isPlaying, currentStory } = useAudioPlayer();
   const { toggleFavorite, isInFavorites, user } = useAppContext();
-  const [story, setStory] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [rating, setRating] = useState(0);
-  const [review, setReview] = useState('');
+  const [story, setStory] = useState(initialStory || null);
+  const [loading, setLoading] = useState(!initialStory);
+  const [rating, setRating] = useState(initialStory?.rating || 0);
 
   useEffect(() => {
-    loadStory();
+    (async () => {
+      try {
+        const full = await apiService.getStory(storyId);
+        if (full) { setStory(full); if (full.rating) setRating(Math.round(full.rating)); }
+      } catch (e) { console.warn('detail load', e?.message); }
+      finally { setLoading(false); }
+    })();
   }, [storyId]);
 
-  const loadStory = async () => {
-    try {
-      setLoading(true);
-      const response = await apiService.getStory(storyId);
-      setStory(response);
-      if (response.rating) setRating(response.rating);
-    } catch (error) {
-      console.error('Error loading story:', error);
-      Alert.alert('Error', 'Failed to load story');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const isHere = story && currentStory?.id === story.id;
+  const isFavorite = story ? isInFavorites?.(story.id) : false;
 
   const handlePlay = async () => {
     if (!story) return;
-
-    if (!currentStory || currentStory.id !== story.id) {
-      // Different story (or nothing playing) — start fresh
-      await playStory(story);
-    } else {
-      // Same story — toggle play/pause
-      await playPause();
-    }
+    if (!isHere) await playStory(story); else await playPause();
   };
-
-  const handleRate = async () => {
-    if (!story) return;
-    try {
-      await apiService.rateStory(story.id, rating, review);
-      Alert.alert('Success', 'Rating submitted!');
-      setReview('');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to submit rating');
-    }
-  };
-
   const handleFavorite = async () => {
-    if (!user) {
-      Alert.alert('Login Required', 'Please sign in to add favorites');
-      return;
-    }
-    try {
-      await toggleFavorite(story);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update favorite');
-    }
+    if (!user) return Alert.alert('Sign in required', 'Please sign in to save favorites.');
+    try { await toggleFavorite(story); } catch (e) { Alert.alert('Error', 'Could not update favorite'); }
   };
-
-  const isFavorite = story ? isInFavorites(story.id) : false;
+  const handleRate = async (n) => {
+    setRating(n);
+    try { await apiService.rateStory(story.id, n); } catch (e) { /* best effort */ }
+  };
 
   if (loading) {
-    return (
-      <View style={[styles.centered, { backgroundColor: theme.background }]}>
-        <Text style={{ color: theme.text }}>Loading...</Text>
-      </View>
-    );
+    return <View style={[styles.center, { backgroundColor: theme.background }]}><ActivityIndicator color={theme.accent} /></View>;
   }
-
   if (!story) {
-    return (
-      <View style={[styles.centered, { backgroundColor: theme.background }]}>
-        <Text style={{ color: theme.text }}>Story not found</Text>
-      </View>
-    );
+    return <View style={[styles.center, { backgroundColor: theme.background }]}><AppText color="textSecondary">Story not found</AppText></View>;
   }
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Story Image */}
-      <Image
-        source={{ uri: story.coverImage || `https://placehold.co/400x300/667eea/ffffff?text=${encodeURIComponent(story.title.substring(0, 15))}` }}
-        style={styles.coverImage}
-      />
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
+      <View style={[styles.head, { paddingTop: insets.top + 4 }]}>
+        <Pressable onPress={() => navigation.goBack()} hitSlop={10}><Icon name="chev-left" /></Pressable>
+        <Pressable hitSlop={10} onPress={() => Alert.alert('Share', 'Sharing coming soon.')}><Icon name="share" /></Pressable>
+      </View>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 140 }} showsVerticalScrollIndicator={false}>
+        <Cover story={story} style={styles.cover} radius={22} />
+        <AppText variant="h1" style={{ marginTop: 4 }}>{story.title}</AppText>
 
-      {/* Story Info */}
-      <View style={styles.content}>
-        <Text style={[styles.title, { color: theme.text }]}>{story.title}</Text>
-        <Text style={[styles.description, { color: theme.textSecondary }]}>{story.description}</Text>
-
-        {/* Meta Info */}
-        <View style={styles.meta}>
-          <View style={styles.metaItem}>
-            <Text style={[styles.metaLabel, { color: theme.textSecondary }]}>Genre</Text>
-            <Text style={[styles.metaValue, { color: theme.text }]}>{story.genre}</Text>
+        <View style={styles.metaRow}>
+          {story.genre ? <Tag theme={theme} label={story.genre} /> : null}
+          {story.language ? <Tag theme={theme} label={String(story.language).toUpperCase()} /> : null}
+          <View style={styles.rate}>
+            <Icon name="star" size={14} color={theme.ratingActive} />
+            <AppText variant="caption" color="textSecondary">{(story.rating || 0).toFixed(1)}</AppText>
           </View>
-          <View style={styles.metaItem}>
-            <Text style={[styles.metaLabel, { color: theme.textSecondary }]}>Language</Text>
-            <Text style={[styles.metaValue, { color: theme.text }]}>{story.language.toUpperCase()}</Text>
-          </View>
-          <View style={styles.metaItem}>
-            <Text style={[styles.metaLabel, { color: theme.textSecondary }]}>Duration</Text>
-            <Text style={[styles.metaValue, { color: theme.text }]}>{formatDuration(story.duration)}</Text>
-          </View>
-          <View style={styles.metaItem}>
-            <Text style={[styles.metaLabel, { color: theme.textSecondary }]}>Plays</Text>
-            <Text style={[styles.metaValue, { color: theme.text }]}>{story.plays}</Text>
-          </View>
+          {story.duration ? <AppText variant="caption" color="textSecondary">· {fmtMin(story.duration)}</AppText> : null}
         </View>
 
-        {/* Action Buttons */}
+        <AppText variant="bodyL" color="textSecondary" style={{ marginTop: 12, lineHeight: 25 }}>{story.description}</AppText>
+
         <View style={styles.actions}>
-          <TouchableOpacity
-            style={[styles.playButton, { backgroundColor: theme.accent }]}
+          <Button
+            title={isHere && isPlaying ? 'Pause' : 'Play'}
+            leftIcon={isHere && isPlaying ? 'pause' : 'play'}
             onPress={handlePlay}
-          >
-            <Text style={styles.playButtonText}>
-              {currentStory?.id === story.id && isPlaying ? 'Pause' : 'Play'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.favoriteButton, { borderColor: theme.accent }]}
-            onPress={handleFavorite}
-          >
-            <Text style={[styles.favoriteButtonText, { color: theme.accent }]}>
-              {isFavorite ? '❤️' : '🤍'} Favorite
-            </Text>
-          </TouchableOpacity>
+            style={{ flex: 1 }}
+          />
+          <Pressable onPress={handleFavorite} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Icon name={isFavorite ? 'heart-fill' : 'heart'} color={theme.heart || theme.error} />
+          </Pressable>
+          <Pressable onPress={() => Alert.alert('Download', 'Offline downloads coming soon.')} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Icon name="download" />
+          </Pressable>
         </View>
 
-        {/* Progress Bar */}
-        {currentStory?.id === story.id && progress > 0 && (
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${progress * 100}%`, backgroundColor: theme.accent }]} />
-            </View>
-            <Text style={[styles.progressText, { color: theme.textSecondary }]}>
-              {formatProgress(progress, story.duration)}
-            </Text>
-          </View>
-        )}
-
-        {/* Rating Section */}
-        <View style={styles.ratingSection}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>Rate this Story</Text>
-          <View style={styles.starsContainer}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <TouchableOpacity key={star} onPress={() => setRating(star)}>
-                <Text style={[styles.star, { fontSize: 30, color: star <= rating ? '#f59e0b' : '#ddd' }]}>
-                  {star <= rating ? '⭐' : '☆'}
-                </Text>
-              </TouchableOpacity>
+        <View style={styles.section}>
+          <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2 }}>RATE THIS STORY</AppText>
+          <View style={styles.stars}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Pressable key={n} onPress={() => handleRate(n)} hitSlop={4}>
+                <Icon name={n <= rating ? 'star' : 'star-outline'} size={30} color={n <= rating ? theme.ratingActive : theme.ratingInactive} />
+              </Pressable>
             ))}
           </View>
-          <TouchableOpacity style={[styles.rateButton, { backgroundColor: theme.accent }]} onPress={handleRate}>
-            <Text style={styles.rateButtonText}>Submit Rating</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Story Text */}
-        {story.text && (
-          <View style={styles.textSection}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Story</Text>
-            <Text style={[styles.storyText, { color: theme.textSecondary }]}>{story.text}</Text>
+        {(story.text || story.description) ? (
+          <View style={styles.section}>
+            <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 8 }}>TRANSCRIPT</AppText>
+            <AppText variant="bodyL" color="textSecondary" style={{ lineHeight: 27 }}>{story.text || story.description}</AppText>
           </View>
-        )}
-      </View>
-    </ScrollView>
+        ) : null}
+      </ScrollView>
+    </View>
   );
 };
 
-const formatDuration = (seconds) => {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-};
-
-const formatProgress = (progress, duration) => {
-  const current = Math.floor(progress * duration);
-  return `${formatDuration(current)} / ${formatDuration(duration)}`;
-};
+function Tag({ theme, label }) {
+  return (
+    <View style={{ backgroundColor: theme.accentSoft, paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999 }}>
+      <AppText variant="caption" color="accent" style={{ fontWeight: '600' }}>{label}</AppText>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  coverImage: {
-    width: '100%',
-    height: 250
-  },
-  content: {
-    padding: 20
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10
-  },
-  description: {
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 20
-  },
-  meta: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 15,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-    marginBottom: 20
-  },
-  metaItem: {
-    alignItems: 'center'
-  },
-  metaLabel: {
-    fontSize: 12,
-    marginBottom: 4
-  },
-  metaValue: {
-    fontSize: 14,
-    fontWeight: '600'
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 15,
-    marginBottom: 20
-  },
-  playButton: {
-    flex: 1,
-    paddingVertical: 15,
-    borderRadius: 12,
-    alignItems: 'center'
-  },
-  playButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold'
-  },
-  favoriteButton: {
-    flex: 1,
-    borderWidth: 2,
-    paddingVertical: 15,
-    borderRadius: 12,
-    alignItems: 'center'
-  },
-  favoriteButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold'
-  },
-  progressContainer: {
-    marginBottom: 20
-  },
-  progressBar: {
-    height: 4,
-    backgroundColor: '#eee',
-    borderRadius: 2,
-    overflow: 'hidden'
-  },
-  progressFill: {
-    height: '100%'
-  },
-  progressText: {
-    fontSize: 12,
-    textAlign: 'right',
-    marginTop: 4
-  },
-  ratingSection: {
-    marginBottom: 20
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15
-  },
-  starsContainer: {
-    flexDirection: 'row',
-    marginBottom: 10
-  },
-  star: {
-    marginHorizontal: 5
-  },
-  rateButton: {
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center'
-  },
-  rateButtonText: {
-    color: '#fff',
-    fontWeight: 'bold'
-  },
-  textSection: {
-    marginTop: 20
-  },
-  storyText: {
-    fontSize: 16,
-    lineHeight: 24
-  }
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  head: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 8 },
+  cover: { width: '100%', height: 220, marginBottom: 16 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' },
+  rate: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 20 },
+  iconBtn: { width: 52, height: 52, borderRadius: 14, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  section: { marginTop: 26 },
+  stars: { flexDirection: 'row', gap: 6, marginTop: 10 },
 });
+
+export default StoryDetailScreen;

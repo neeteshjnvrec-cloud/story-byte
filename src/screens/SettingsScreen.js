@@ -1,124 +1,201 @@
 // Settings Screen for Story Byte
-// Theme toggle, language, notifications preferences
-import React from 'react';
+// Warm "storybook" design built entirely on the shared design system.
+import React, { useState } from 'react';
 import {
   View,
-  Text,
-  TouchableOpacity,
-  Switch,
   ScrollView,
+  Pressable,
   StyleSheet,
-  Platform
+  Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../hooks/useTheme';
+import { AppText } from '../components/ui/AppText';
+import { Icon } from '../components/ui/Icon';
+
+// Inline pill toggle — 44x26 track, 20x20 knob. ON = accent, OFF = border.
+const Toggle = ({ value, onValueChange, theme }) => (
+  <Pressable
+    onPress={() => onValueChange(!value)}
+    hitSlop={8}
+    style={[
+      styles.toggleTrack,
+      { backgroundColor: value ? theme.accent : theme.border },
+    ]}
+  >
+    <View
+      style={[
+        styles.toggleKnob,
+        { alignSelf: value ? 'flex-end' : 'flex-start' },
+      ]}
+    />
+  </Pressable>
+);
+
+// Small uppercase group heading.
+const GroupLabel = ({ children }) => (
+  <AppText
+    variant="micro"
+    color="textTertiary"
+    style={styles.groupLabel}
+  >
+    {children}
+  </AppText>
+);
+
+// A single row: accent icon + label on the left, value/chevron or toggle on the right.
+const Row = ({ theme, icon, label, value, right, onPress, isLast }) => {
+  const content = (
+    <View
+      style={[
+        styles.row,
+        { borderBottomColor: theme.divider, borderBottomWidth: isLast ? 0 : 1 },
+      ]}
+    >
+      <View style={styles.rowLeft}>
+        <Icon name={icon} size={20} color={theme.accent} />
+        <AppText variant="body" color="text">{label}</AppText>
+      </View>
+      <View style={styles.rowRight}>
+        {value != null && (
+          <AppText variant="caption" color="textSecondary">{value}</AppText>
+        )}
+        {right}
+      </View>
+    </View>
+  );
+
+  if (onPress) {
+    return (
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [pressed && { opacity: 0.6 }]}
+      >
+        {content}
+      </Pressable>
+    );
+  }
+  return content;
+};
+
+// Grouped card wrapper.
+const Group = ({ theme, label, children }) => (
+  <View style={styles.group}>
+    <GroupLabel>{label}</GroupLabel>
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: theme.card, borderColor: theme.border },
+      ]}
+    >
+      {children}
+    </View>
+  </View>
+);
+
+const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
+const THEME_CYCLE = { system: 'light', light: 'dark', dark: 'system' };
 
 export const SettingsScreen = () => {
-  const { theme, themeMode, changeTheme, isDark } = useTheme();
+  const { theme, themeMode, changeTheme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
 
-  const themeOptions = [
-    { key: 'light', label: 'Light', icon: '☀️' },
-    { key: 'dark', label: 'Dark', icon: '🌙' },
-    { key: 'system', label: 'System', icon: '📱' },
-  ];
+  const [autoplayNext, setAutoplayNext] = useState(true);
+  const [wifiOnly, setWifiOnly] = useState(true);
+
+  // Preserved logic: cycle System → Light → Dark and persist via changeTheme.
+  const cycleAppearance = () => changeTheme(THEME_CYCLE[themeMode] || 'light');
+  const appearanceValue = THEME_LABELS[themeMode] || 'System';
+
+  const chevron = <Icon name="chev-right" size={18} color={theme.textTertiary} />;
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
-        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-          Manage your StoryByte preferences</Text>
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          hitSlop={12}
+          style={styles.headerSide}
+        >
+          <Icon name="chev-left" size={26} color={theme.text} />
+        </Pressable>
+        <AppText variant="h3" color="text">Settings</AppText>
+        <View style={styles.headerSide} />
       </View>
 
-      {/* Theme Section */}
-      <View style={[styles.section, { borderBottomColor: theme.divider }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Appearance</Text>
-
-        {themeOptions.map((option) => (
-          <TouchableOpacity
-            key={option.key}
-            style={[
-              styles.settingItem,
-              themeMode === option.key && { backgroundColor: theme.surface }
-            ]}
-            onPress={() => changeTheme(option.key)}
-          >
-            <View style={styles.settingLeft}>
-              <Text style={styles.settingIcon}>{option.icon}</Text>
-              <Text style={[styles.settingText, { color: theme.text }]}>{option.label}</Text>
-            </View>
-            {themeMode === option.key && (
-              <Text style={[styles.checkmark, { color: theme.accent }]}>✓</Text>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Notifications Section */}
-      <View style={[styles.section, { borderBottomColor: theme.divider }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Notifications</Text>
-
-        <View style={[styles.settingItem, { justifyContent: 'space-between' }]}>
-          <View style={styles.settingLeft}>
-            <Text style={styles.settingIcon}>🔔</Text>
-            <Text style={[styles.settingText, { color: theme.text }]}>Daily reminders</Text>
-          </View>
-          <Switch
-            value={true}
-            onValueChange={() => {}}
-            trackColor={{ false: '#767577', true: theme.accent }}
-            thumbColor="#fff"
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* PLAYBACK */}
+        <Group theme={theme} label="PLAYBACK">
+          <Row
+            theme={theme}
+            icon="speed"
+            label="Default speed"
+            value="1.0×"
+            right={chevron}
+            onPress={() => {}}
           />
-        </View>
-
-        <View style={[styles.settingItem, { justifyContent: 'space-between' }]}>
-          <View style={styles.settingLeft}>
-            <Text style={styles.settingIcon}>🎧</Text>
-            <Text style={[styles.settingText, { color: theme.text }]}>New story alerts</Text>
-          </View>
-          <Switch
-            value={true}
-            onValueChange={() => {}}
-            trackColor={{ false: '#767577', true: theme.accent }}
-            thumbColor="#fff"
+          <Row
+            theme={theme}
+            icon="queue"
+            label="Autoplay next"
+            right={<Toggle theme={theme} value={autoplayNext} onValueChange={setAutoplayNext} />}
+            isLast
           />
-        </View>
-      </View>
+        </Group>
 
-      {/* Language Section */}
-      <View style={[styles.section, { borderBottomColor: theme.divider }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Language</Text>
+        {/* APP */}
+        <Group theme={theme} label="APP">
+          <Row
+            theme={theme}
+            icon="globe"
+            label="Language"
+            value="English"
+            right={chevron}
+            onPress={() => {}}
+          />
+          <Row
+            theme={theme}
+            icon="moon"
+            label="Appearance"
+            value={appearanceValue}
+            right={chevron}
+            onPress={cycleAppearance}
+          />
+          <Row
+            theme={theme}
+            icon="download"
+            label="Downloads over Wi-Fi only"
+            right={<Toggle theme={theme} value={wifiOnly} onValueChange={setWifiOnly} />}
+            isLast
+          />
+        </Group>
 
-        {['English', 'Hindi', 'Spanish'].map((lang) => (
-          <TouchableOpacity key={lang} style={styles.settingItem}>
-            <Text style={[styles.settingText, { color: theme.text }]}>{lang}</Text>
-            {lang === 'English' && (
-              <Text style={[styles.checkmark, { color: theme.accent }]}>✓</Text>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* About Section */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>About</Text>
-
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={[styles.settingText, { color: theme.text }]}>Privacy Policy</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>→</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={[styles.settingText, { color: theme.text }]}>Terms of Service</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>→</Text>
-        </TouchableOpacity>
-
-        <View style={styles.settingItem}>
-          <Text style={[styles.settingText, { color: theme.text }]}>Version</Text>
-          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>1.0.0</Text>
-        </View>
-      </View>
-    </ScrollView>
+        {/* MODES */}
+        <Group theme={theme} label="MODES">
+          <Row
+            theme={theme}
+            icon="star"
+            label="Sleep mode"
+            right={chevron}
+            onPress={() => Alert.alert('Sleep mode', 'Coming soon.')}
+          />
+          <Row
+            theme={theme}
+            icon="lock"
+            label="Kids mode"
+            right={chevron}
+            onPress={() => Alert.alert('Kids mode', 'Coming soon.')}
+            isLast
+          />
+        </Group>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -127,53 +204,60 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    padding: 20,
-    paddingTop: 60,
-    paddingBottom: 10,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#8b9dc3',
-  },
-  section: {
-    padding: 20,
-    borderBottomWidth: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  settingItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
-  settingLeft: {
+  headerSide: {
+    width: 40,
+    alignItems: 'flex-start',
+  },
+  group: {
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  groupLabel: {
+    letterSpacing: 1.2,
+    paddingHorizontal: 4,
+    paddingBottom: 8,
+  },
+  card: {
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 15,
+    paddingHorizontal: 16,
+  },
+  rowLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    flexShrink: 1,
   },
-  settingIcon: {
-    fontSize: 22,
+  rowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  settingText: {
-    fontSize: 16,
+  toggleTrack: {
+    width: 44,
+    height: 26,
+    borderRadius: 13,
+    padding: 3,
+    justifyContent: 'center',
   },
-  settingValue: {
-    fontSize: 16,
-  },
-  checkmark: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  toggleKnob: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
   },
 });
 

@@ -1,28 +1,42 @@
-// Favorites Screen for Story Byte
+// Library Screen for Story Byte — Favorites / Downloads / History.
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
+  ActivityIndicator,
   StyleSheet
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../hooks/useTheme';
 import apiService from '../services/api';
 import { useAudioPlayer } from '../context/AudioContext';
+import { AppText } from '../components/ui/AppText';
+import { Icon } from '../components/ui/Icon';
+import { CompactRow } from '../components/story/StoryCard';
+
+const SEGMENTS = [
+  { key: 'favorites', label: 'Favorites' },
+  { key: 'downloads', label: 'Downloads' },
+  { key: 'history', label: 'History' },
+];
 
 export const FavoritesScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { favorites, loading: contextLoading } = useAppContext();
   const { playStory } = useAudioPlayer();
   const [stories, setStories] = useState([]);
+  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState('favorites');
 
   useEffect(() => {
     loadFavorites();
+    loadHistory();
   }, [favorites]);
 
   const loadFavorites = async () => {
@@ -40,163 +54,173 @@ export const FavoritesScreen = () => {
     }
   };
 
-  const handlePlayStory = async (story) => {
-    await playStory(story);
-    navigation.navigate('StoryDetail', { storyId: story.id });
+  const loadHistory = async () => {
+    try {
+      const progress = await apiService.getUserProgress();
+      setHistory(progress || []);
+    } catch (error) {
+      console.error('Error loading history:', error);
+    }
   };
 
-  if (contextLoading || loading) {
-    return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <Text style={{ color: theme.text }}>Loading...</Text>
+  const openStory = (story) => {
+    navigation.navigate('StoryDetail', { storyId: story.id, story });
+  };
+
+  const EmptyState = ({ icon, title, caption }) => (
+    <View style={styles.emptyState}>
+      <View style={[styles.emptyIcon, { backgroundColor: theme.accentSoft }]}>
+        <Icon name={icon} size={30} color={theme.accent} />
       </View>
-    );
-  }
+      <AppText variant="h3" style={{ marginTop: 16 }}>{title}</AppText>
+      {caption ? (
+        <AppText variant="caption" color="textSecondary" style={{ marginTop: 6, textAlign: 'center' }}>
+          {caption}
+        </AppText>
+      ) : null}
+    </View>
+  );
+
+  const renderFavorites = () => {
+    if (stories.length === 0) {
+      return (
+        <EmptyState
+          icon="heart"
+          title="No favorites yet"
+          caption="Tap the heart on any story to save it here."
+        />
+      );
+    }
+    return stories.map((story) => (
+      <CompactRow
+        key={story.id}
+        story={story}
+        onPress={() => openStory(story)}
+        trailing={<Icon name="heart-fill" size={20} color={theme.error} />}
+      />
+    ));
+  };
+
+  const renderDownloads = () => (
+    <EmptyState
+      icon="download"
+      title="No downloads yet"
+      caption="Downloaded stories play offline."
+    />
+  );
+
+  const renderHistory = () => {
+    if (history.length === 0) {
+      return (
+        <EmptyState
+          icon="timer"
+          title="Nothing played yet"
+          caption="Stories you listen to will appear here."
+        />
+      );
+    }
+    return history.map((item) => {
+      const pct = item.progress || 0;
+      const subtitle = pct >= 0.98 ? 'Finished' : `${Math.round(pct * 100)}% complete`;
+      return (
+        <CompactRow
+          key={item.storyId}
+          story={item}
+          subtitle={subtitle}
+          onPress={() => openStory({ id: item.storyId, ...item })}
+          trailing={
+            <AppText variant="caption" color="textTertiary">
+              {pct >= 0.98 ? 'Done' : `${Math.round(pct * 100)}%`}
+            </AppText>
+          }
+        />
+      );
+    });
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.text }]}>Favorites</Text>
-          <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-            {stories.length} saved stories
-          </Text>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+          <AppText variant="displayM">Library</AppText>
         </View>
 
-        {stories.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={{ fontSize: 48 }}>🤍</Text>
-            <Text style={[styles.emptyTitle, { color: theme.text }]}>No favorites yet</Text>
-            <Text style={[styles.emptySubtitle, { color: theme.textSecondary }]}>
-              Tap the heart icon on stories to save them here
-            </Text>
-          </View>
-        ) : (
-          stories.map((story) => (
-            <TouchableOpacity
-              key={story.id}
-              style={[styles.storyCard, { backgroundColor: theme.card }]}
-              onPress={() => handlePlayStory(story)}
-            >
-              <View style={styles.storyHeader}>
-                <Text style={[styles.storyTitle, { color: theme.text }]} numberOfLines={1}>
-                  {story.title}
-                </Text>
-                <Text style={[styles.storyGenre, { color: theme.accent }]}>
-                  {story.genre}
-                </Text>
-              </View>
-              <Text style={[styles.storyDescription, { color: theme.textSecondary }]} numberOfLines={2}>
-                {story.description}
-              </Text>
-              <View style={styles.storyFooter}>
-                <Text style={[styles.storyDuration, { color: theme.textSecondary }]}>
-                  {formatDuration(story.duration)}
-                </Text>
-                <TouchableOpacity
-                  style={[styles.playButton, { backgroundColor: theme.accent }]}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    handlePlayStory(story);
-                  }}
+        {/* Segmented control */}
+        <View style={[styles.segments, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          {SEGMENTS.map((seg) => {
+            const isActive = active === seg.key;
+            return (
+              <Pressable
+                key={seg.key}
+                onPress={() => setActive(seg.key)}
+                style={[
+                  styles.segment,
+                  isActive && { backgroundColor: theme.accent },
+                ]}
+              >
+                <AppText
+                  variant="label"
+                  color={isActive ? 'onAccent' : 'textSecondary'}
+                  style={{ fontSize: 14 }}
                 >
-                  <Text style={styles.playButtonText}>Play</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
-          ))
-        )}
+                  {seg.label}
+                </AppText>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <View style={styles.pane}>
+          {(contextLoading || loading) && active === 'favorites' ? (
+            <ActivityIndicator color={theme.accent} style={{ marginTop: 40 }} />
+          ) : active === 'favorites' ? (
+            renderFavorites()
+          ) : active === 'downloads' ? (
+            renderDownloads()
+          ) : (
+            renderHistory()
+          )}
+        </View>
       </ScrollView>
     </View>
   );
 };
 
-const formatDuration = (seconds) => {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-};
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
-  scrollView: {
-    flex: 1
-  },
-  header: {
-    padding: 20,
-    paddingTop: 40
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold'
-  },
-  subtitle: {
-    fontSize: 16,
-    marginTop: 4
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 20
-  },
-  emptySubtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 10
-  },
-  storyCard: {
+  container: { flex: 1 },
+  scrollView: { flex: 1 },
+  header: { paddingHorizontal: 20, paddingBottom: 16 },
+  segments: {
+    flexDirection: 'row',
     marginHorizontal: 20,
-    marginBottom: 15,
-    padding: 15,
     borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4
+    borderWidth: 1,
+    padding: 3,
+    marginBottom: 8,
   },
-  storyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  segment: {
+    flex: 1,
     alignItems: 'center',
-    marginBottom: 8
+    justifyContent: 'center',
+    paddingVertical: 9,
+    borderRadius: 10,
   },
-  storyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    flex: 1
+  pane: { paddingTop: 8, minHeight: 300 },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 40,
+    paddingTop: 70,
   },
-  storyGenre: {
-    fontSize: 14,
-    marginLeft: 10
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  storyDescription: {
-    fontSize: 14,
-    marginBottom: 12
-  },
-  storyFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  storyDuration: {
-    fontSize: 14
-  },
-  playButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20
-  },
-  playButtonText: {
-    color: '#fff',
-    fontWeight: 'bold'
-  }
 });

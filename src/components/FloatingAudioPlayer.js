@@ -1,406 +1,138 @@
-// Floating Audio Player for Story Byte
+// FloatingAudioPlayer — a docked mini bar + a full-screen player modal,
+// styled to the warm storybook design.
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView
-} from 'react-native';
+import { View, Pressable, Modal, StyleSheet, ScrollView } from 'react-native';
 import Slider from '@react-native-community/slider';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer } from '../context/AudioContext';
 import { useTheme } from '../hooks/useTheme';
+import { AppText } from './ui/AppText';
+import { Icon } from './ui/Icon';
+import { Cover } from './story/Cover';
+
+const fmtTime = (s) => {
+  if (!s || s < 0) return '0:00';
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+};
 
 export const FloatingAudioPlayer = () => {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const {
-    currentStory,
-    progress,
-    isPlaying,
-    duration,
-    currentPage,
-    totalPages,
-    speed,
-    playPause,
-    seek,
-    seekForward,
-    seekBackward,
-    nextPage,
-    prevPage,
-    cycleSpeed,
-    stop
+    currentStory, progress, isPlaying, duration, currentPage, totalPages, speed,
+    playPause, seek, seekForward, seekBackward, cycleSpeed, stop,
   } = useAudioPlayer();
-
   const [expanded, setExpanded] = useState(false);
 
   if (!currentStory) return null;
 
-  const currentPageData = currentStory.pages?.[currentPage] || null;
-  const displayText = currentPageData?.text || currentStory.description || '';
-  const pageLabel = totalPages > 1 ? `Page ${currentPage + 1} / ${totalPages}` : '';
-
-  const handleCollapsedPress = () => {
-    setExpanded(true);
-  };
+  const pos = (progress || 0) * (duration || 0);
+  const pageText = currentStory.pages?.[currentPage]?.text || currentStory.text || currentStory.description || '';
+  const miniBottom = (insets.bottom || 10) + 60;
 
   return (
     <>
-      {/* Collapsed bar — always visible at bottom when a story is loaded */}
-      <TouchableOpacity
-        style={[styles.collapsedBar, { backgroundColor: theme.card, borderTopColor: theme.border }]}
+      {/* Mini bar */}
+      <Pressable
         onPress={() => setExpanded(true)}
-        activeOpacity={0.9}
+        style={[styles.mini, { backgroundColor: theme.text, bottom: miniBottom }]}
+        accessibilityRole="button"
+        accessibilityLabel={`Now playing ${currentStory.title}. Open player.`}
       >
-        <View style={styles.collapsedInfo}>
-          <Text style={[styles.collapsedTitle, { color: theme.text }]} numberOfLines={1}>
-            {currentStory.title}
-          </Text>
-          <Text style={[styles.collapsedSubtitle, { color: theme.textSecondary }]}>
-            {formatProgress(progress, duration)}{pageLabel ? ` • ${pageLabel}` : ''}
-          </Text>
+        <Cover story={currentStory} style={styles.miniCover} radius={11} />
+        <View style={{ flex: 1 }}>
+          <AppText variant="label" style={{ color: theme.background }} numberOfLines={1}>{currentStory.title}</AppText>
+          <AppText variant="caption" style={{ color: theme.background, opacity: 0.7 }} numberOfLines={1}>
+            {currentStory.genre || 'Story'}
+          </AppText>
         </View>
-
-        <View style={styles.collapsedControls}>
-          <TouchableOpacity onPress={seekBackward} style={styles.iconBtn}>
-            <Text style={styles.iconText}>⏪</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.playBtn, { backgroundColor: theme.accent }]}
-            onPress={playPause}
-          >
-            <Text style={styles.playBtnText}>{isPlaying ? '⏸' : '▶'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={seekForward} style={styles.iconBtn}>
-            <Text style={styles.iconText}>⏩</Text>
-          </TouchableOpacity>
+        <Pressable onPress={playPause} hitSlop={10} accessibilityLabel={isPlaying ? 'Pause' : 'Play'}>
+          <Icon name={isPlaying ? 'pause' : 'play'} size={24} color={theme.background} />
+        </Pressable>
+        <View style={[styles.miniBar, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+          <View style={{ width: `${Math.max(2, (progress || 0) * 100)}%`, height: '100%', backgroundColor: theme.secondary, borderRadius: 2 }} />
         </View>
-      </TouchableOpacity>
+      </Pressable>
 
-      {/* Expanded modal full player */}
-      <Modal
-        visible={expanded}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setExpanded(false)}
-      >
-        <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.background }]}>
-          {/* Header */}
-          <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setExpanded(false)} style={styles.closeBtn}>
-              <Text style={[styles.closeText, { color: theme.text }]}>▼</Text>
-            </TouchableOpacity>
-            <Text style={[styles.modalHeaderTitle, { color: theme.text }]} numberOfLines={1}>
-              {currentStory.title}
-            </Text>
+      {/* Full player */}
+      <Modal visible={expanded} animationType="slide" onRequestClose={() => setExpanded(false)}>
+        <View style={[styles.full, { backgroundColor: theme.background, paddingTop: insets.top + 6, paddingBottom: insets.bottom + 20 }]}>
+          <View style={styles.fpHead}>
+            <Pressable onPress={() => setExpanded(false)} hitSlop={10}><Icon name="chev-down" /></Pressable>
+            <AppText variant="micro" color="textSecondary" style={{ letterSpacing: 1.2 }}>PLAYING FROM · STORYBYTE</AppText>
+            <Pressable onPress={() => { stop(); setExpanded(false); }} hitSlop={10}><Icon name="close" /></Pressable>
           </View>
 
-          <ScrollView style={styles.modalBody} contentContainerStyle={styles.modalBodyContent}>
-            {/* Story Text */}
-            <View style={[styles.textCard, { backgroundColor: theme.card }]}>
-              {pageLabel ? (
-                <Text style={[styles.pageLabel, { color: theme.accent }]}>{pageLabel}</Text>
-              ) : null}
-              <Text style={[styles.storyText, { color: theme.text }]}>
-                {displayText}
-              </Text>
-            </View>
-          </ScrollView>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 26 }} showsVerticalScrollIndicator={false}>
+            <Cover story={currentStory} style={styles.art} radius={24} />
+            <AppText variant="h1" style={{ textAlign: 'center' }}>{currentStory.title}</AppText>
+            {totalPages > 1 ? (
+              <AppText variant="caption" color="accent" style={{ textAlign: 'center', marginTop: 4 }}>Page {currentPage + 1} of {totalPages}</AppText>
+            ) : null}
+            <AppText variant="body" color="textSecondary" style={{ textAlign: 'center', marginTop: 6 }} numberOfLines={2}>
+              {currentStory.description || ''}
+            </AppText>
 
-          {/* Progress Bar */}
-          <View style={styles.progressSection}>
             <Slider
-              style={styles.slider}
-              minimumValue={0}
-              maximumValue={1}
-              value={progress}
-              onValueChange={(value) => {
-                if (duration > 0) seek(value * duration);
-              }}
-              minimumTrackTintColor={theme.accent}
-              maximumTrackTintColor={theme.border}
-              thumbTintColor={theme.accent}
+              style={{ width: '100%', height: 40, marginTop: 18 }}
+              minimumValue={0} maximumValue={1} value={progress || 0}
+              onSlidingComplete={(v) => { if (duration > 0) seek(v * duration); }}
+              minimumTrackTintColor={theme.accent} maximumTrackTintColor={theme.border} thumbTintColor={theme.accent}
             />
-            <View style={styles.timeRow}>
-              <Text style={[styles.timeText, { color: theme.textSecondary }]}>
-                {formatProgress(progress, duration)}
-              </Text>
-              <Text style={[styles.timeText, { color: theme.textSecondary }]}>
-                {formatTime(duration)}
-              </Text>
-            </View>
-          </View>
-
-          {/* Main Controls */}
-          <View style={styles.mainControls}>
-            <TouchableOpacity
-              style={styles.mainControlBtn}
-              onPress={prevPage}
-              disabled={currentPage === 0}
-              opacity={currentPage === 0 ? 0.3 : 1}
-            >
-              <Text style={styles.mainControlText}>⏮</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={seekBackward} style={styles.iconBtn}>
-              <Text style={styles.iconText}>⏪</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.bigPlayBtn, { backgroundColor: theme.accent }]}
-              onPress={playPause}
-            >
-              <Text style={styles.bigPlayText}>{isPlaying ? '⏸' : '▶'}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={seekForward} style={styles.iconBtn}>
-              <Text style={styles.iconText}>⏩</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.mainControlBtn}
-              onPress={nextPage}
-              disabled={currentPage >= totalPages - 1}
-              opacity={currentPage >= totalPages - 1 ? 0.3 : 1}
-            >
-              <Text style={styles.mainControlText}>⏭</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Secondary Controls: Speed + Volume + Close */}
-          <View style={styles.secondaryControls}>
-            <TouchableOpacity
-              style={[styles.speedBtn, { backgroundColor: theme.surface }]}
-              onPress={cycleSpeed}
-            >
-              <Text style={[styles.speedText, { color: theme.accent }]}>{speed}x</Text>
-            </TouchableOpacity>
-
-            <View style={styles.volumeContainer}>
-              <Text style={[styles.volumeIcon, { color: theme.textSecondary }]}>🔊</Text>
-              <Slider
-                style={styles.volumeSlider}
-                minimumValue={0}
-                maximumValue={1}
-                value={1}
-                onValueChange={() => {
-                  // Volume is controlled at the OS level for expo-audio
-                  // This slider is for UI feedback only
-                }}
-                minimumTrackTintColor={theme.accent}
-                maximumTrackTintColor={theme.border}
-                thumbTintColor={theme.accent}
-              />
+            <View style={styles.times}>
+              <AppText variant="caption" color="textSecondary">{fmtTime(pos)}</AppText>
+              <AppText variant="caption" color="textSecondary">-{fmtTime((duration || 0) - pos)}</AppText>
             </View>
 
-            <TouchableOpacity
-              style={[styles.closePlayerBtn, { backgroundColor: theme.surface }]}
-              onPress={() => {
-                stop();
-                setExpanded(false);
-              }}
-            >
-              <Text style={[styles.closePlayerText, { color: theme.error || '#ef4444' }]}>✕</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
+            <View style={styles.controls}>
+              <Pressable hitSlop={8}><Icon name="shuffle" size={24} color={theme.textSecondary} /></Pressable>
+              <Pressable onPress={seekBackward} hitSlop={8} accessibilityLabel="Back 10 seconds"><Icon name="prev" size={30} /></Pressable>
+              <Pressable onPress={playPause} style={[styles.bigPlay, { backgroundColor: theme.text }]} accessibilityLabel={isPlaying ? 'Pause' : 'Play'}>
+                <Icon name={isPlaying ? 'pause' : 'play'} size={32} color={theme.background} />
+              </Pressable>
+              <Pressable onPress={seekForward} hitSlop={8} accessibilityLabel="Forward 10 seconds"><Icon name="next" size={30} /></Pressable>
+              <Pressable hitSlop={8}><Icon name="repeat" size={24} color={theme.textSecondary} /></Pressable>
+            </View>
+
+            <View style={styles.foot}>
+              <Pressable style={styles.pill} hitSlop={6}><Icon name="queue" size={18} color={theme.textSecondary} /><AppText variant="label" color="textSecondary" style={{ fontSize: 12 }}>Up next</AppText></Pressable>
+              <Pressable style={styles.pill} hitSlop={6}><Icon name="timer" size={18} color={theme.textSecondary} /><AppText variant="label" color="textSecondary" style={{ fontSize: 12 }}>Sleep timer</AppText></Pressable>
+              <Pressable onPress={cycleSpeed} style={styles.pill} hitSlop={6}><Icon name="speed" size={18} color={theme.textSecondary} /><AppText variant="label" color="textSecondary" style={{ fontSize: 12 }}>{speed}×</AppText></Pressable>
+            </View>
+
+            {pageText ? (
+              <View style={[styles.textCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                <AppText variant="bodyL" style={{ lineHeight: 26 }}>{pageText}</AppText>
+              </View>
+            ) : null}
+          </ScrollView>
+        </View>
       </Modal>
     </>
   );
 };
 
-const formatTime = (seconds) => {
-  if (!seconds || seconds < 0) return '0:00';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-};
-
-const formatProgress = (progress, duration) => {
-  if (!duration) return '0:00';
-  const current = progress * duration;
-  return formatTime(current);
-};
-
 const styles = StyleSheet.create({
-  collapsedBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    zIndex: 1000
+  mini: {
+    position: 'absolute', left: 12, right: 12, flexDirection: 'row', alignItems: 'center', gap: 11,
+    paddingHorizontal: 13, paddingVertical: 10, borderRadius: 16, zIndex: 1000,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.35, shadowRadius: 20, elevation: 8,
   },
-  collapsedInfo: {
-    flex: 1,
-    marginRight: 12
+  miniCover: { width: 42, height: 42 },
+  miniBar: { position: 'absolute', left: 13, right: 13, bottom: 5, height: 2, borderRadius: 2 },
+  full: { flex: 1 },
+  fpHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 6 },
+  art: { width: '100%', aspectRatio: 1, marginVertical: 16, maxHeight: 300, alignSelf: 'center' },
+  times: { flexDirection: 'row', justifyContent: 'space-between', marginTop: -4 },
+  controls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 22, marginBottom: 14 },
+  bigPlay: {
+    width: 78, height: 78, borderRadius: 39, alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 14, elevation: 6,
   },
-  collapsedTitle: {
-    fontSize: 15,
-    fontWeight: '600'
-  },
-  collapsedSubtitle: {
-    fontSize: 12,
-    marginTop: 2
-  },
-  collapsedControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8
-  },
-  iconBtn: {
-    padding: 8
-  },
-  iconText: {
-    fontSize: 20
-  },
-  playBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  playBtnText: {
-    color: '#fff',
-    fontSize: 18
-  },
-  modalContainer: {
-    flex: 1,
-    paddingTop: 20
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)'
-  },
-  closeBtn: {
-    padding: 8,
-    marginRight: 8
-  },
-  closeText: {
-    fontSize: 20
-  },
-  modalHeaderTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: 'bold'
-  },
-  modalBody: {
-    flex: 1
-  },
-  modalBodyContent: {
-    padding: 16,
-    paddingBottom: 24
-  },
-  textCard: {
-    padding: 20,
-    borderRadius: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3
-  },
-  pageLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 10
-  },
-  storyText: {
-    fontSize: 17,
-    lineHeight: 26
-  },
-  progressSection: {
-    paddingHorizontal: 16,
-    paddingTop: 10
-  },
-  slider: {
-    width: '100%',
-    height: 40
-  },
-  timeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
-  timeText: {
-    fontSize: 12
-  },
-  mainControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    gap: 12
-  },
-  mainControlBtn: {
-    padding: 12
-  },
-  mainControlText: {
-    fontSize: 26
-  },
-  bigPlayBtn: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  bigPlayText: {
-    color: '#fff',
-    fontSize: 28
-  },
-  secondaryControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 30,
-    gap: 10
-  },
-  speedBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20
-  },
-  speedText: {
-    fontSize: 15,
-    fontWeight: 'bold'
-  },
-  volumeContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8
-  },
-  volumeIcon: {
-    fontSize: 18
-  },
-  volumeSlider: {
-    flex: 1,
-    height: 40
-  },
-  closePlayerBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  closePlayerText: {
-    fontSize: 18,
-    fontWeight: 'bold'
-  }
+  foot: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 4 },
+  pill: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  textCard: { marginTop: 22, padding: 18, borderRadius: 18, borderWidth: 1, marginBottom: 10 },
 });
+
+export default FloatingAudioPlayer;

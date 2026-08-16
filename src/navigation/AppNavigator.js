@@ -1,9 +1,10 @@
-// Navigation configuration for StoryByte
-// Bottom tab navigation with Home, Search, Favorites, Profile
+// Bottom tab navigation: Home · Browse · Library · Profile
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
+import { FONTS } from '../theme/tokens';
 import { HomeScreen } from '../screens/HomeScreen';
 import { SearchScreen } from '../screens/SearchScreen';
 import { FavoritesScreen } from '../screens/FavoritesScreen';
@@ -11,45 +12,41 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
-// Fallback theme in case context is not available
-const FALLBACK_THEME = {
-  accent: '#667eea',
-  card: '#1e1e1e',
-  border: '#2a2a2a',
+const ICONS = {
+  Home: 'home',
+  Browse: 'search',
+  Library: 'library',
+  Profile: 'person',
 };
 
-// Emoji-based tab icons (no icon library dependency)
-const TabIcon = ({ icon, color }) => (
-  <Text style={{ fontSize: 22, color }}>{icon}</Text>
-);
-
 export function AppNavigator() {
-  const { theme, isDark } = useTheme() || { theme: FALLBACK_THEME, isDark: true };
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: theme.accent || FALLBACK_THEME.accent,
-        tabBarInactiveTintColor: isDark ? '#666' : '#999',
+        tabBarActiveTintColor: theme.tabBarActive,
+        tabBarInactiveTintColor: theme.tabBarInactive,
+        tabBarLabelStyle: { fontFamily: FONTS.bodySemi, fontSize: 10, marginTop: 2 },
         tabBarStyle: {
-          backgroundColor: theme.card || FALLBACK_THEME.card,
-          borderTopColor: theme.border || FALLBACK_THEME.border,
+          backgroundColor: theme.surface,
+          borderTopColor: theme.border,
+          height: 58 + insets.bottom,
+          paddingTop: 8,
+          paddingBottom: insets.bottom || 10,
         },
-        tabBarIcon: ({ color }) => {
-          const icons = {
-            Home: '🏠',
-            Search: '🔍',
-            Favorites: '❤️',
-            Profile: '👤'
-          };
-          return <TabIcon icon={icons[route.name]} color={color} />;
-        }
+        tabBarIcon: ({ color, focused }) => {
+          const base = ICONS[route.name] || 'ellipse';
+          const name = focused ? base : `${base}-outline`;
+          return <Ionicons name={name} size={23} color={color} />;
+        },
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Search" component={SearchScreen} />
-      <Tab.Screen name="Favorites" component={FavoritesScreen} />
+      <Tab.Screen name="Browse" component={SearchScreen} />
+      <Tab.Screen name="Library" component={FavoritesScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

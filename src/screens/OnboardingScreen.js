@@ -1,65 +1,41 @@
 // Onboarding Screen for Story Byte
 // First-time user walkthrough
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Platform
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../hooks/useTheme';
-import { authStyles } from './auth/authStyles';
-
-const { width } = Dimensions.get('window');
+import { AppText } from '../components/ui/AppText';
+import { Button } from '../components/ui/Button';
+import { Cover } from '../components/story/Cover';
 
 const slides = [
   {
     id: '1',
-    title: 'Welcome to StoryByte',
-    subtitle: 'Your personal audio storytelling companion',
-    emoji: '📚',
-    description: 'Discover thousands of AI-generated stories crafted just for you.',
+    title: 'Bedtime tales, on tap',
+    subtitle: 'Thousands of short audio stories — for winding down, the commute, and the kids.',
+    sceneKey: 'bedtime',
   },
   {
     id: '2',
-    title: 'Personalized Stories',
-    subtitle: 'Stories tailored to your interests',
-    emoji: '🎧',
-    description: 'Choose your favorite genres and languages for daily story recommendations.',
+    title: 'Made for your moments',
+    subtitle: 'Pick a genre or a language and let a calm narrator do the rest.',
+    sceneKey: 'calm',
   },
   {
     id: '3',
-    title: 'Listen Anywhere',
-    subtitle: 'Offline playback & resume sync',
-    emoji: '📱',
-    description: 'Pick up where you left off, even without an internet connection.',
+    title: 'Right where you left off',
+    subtitle: 'Resume any story across your devices, even when you are offline.',
+    sceneKey: 'kids',
   },
 ];
 
 export const OnboardingScreen = ({ onComplete }) => {
   const { theme } = useTheme();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handleNext = () => {
-    if (currentIndex < slides.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
-  const handleSkip = async () => {
-    try {
-      await AsyncStorage.setItem('storybyte-onboarding-complete', 'true');
-    } catch (e) {
-      // Silent fail on onboarding save
-    }
-    navigation.replace('Login');
-  };
 
   const handleGetStarted = async () => {
     try {
@@ -74,110 +50,85 @@ export const OnboardingScreen = ({ onComplete }) => {
     }
   };
 
-  const handleSkipOnboarding = () => {
-    navigation.replace('Login');
+  const handleNext = () => {
+    if (currentIndex < slides.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      handleGetStarted();
+    }
   };
 
   const slide = slides[currentIndex];
   const isLast = currentIndex === slides.length - 1;
-  const gradientColors = [theme.gradientStart, theme.gradientEnd];
 
   return (
-    <LinearGradient
-      colors={gradientColors}
-      style={styles.container}
-    >
-      <View style={styles.content}>
-        {/* Slide indicator */}
-        <View style={styles.indicatorContainer}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
+      <View style={styles.center}>
+        <Cover sceneKey={slide.sceneKey} radius={30} style={styles.illustration} />
+        <AppText variant="displayM" style={styles.title}>{slide.title}</AppText>
+        <AppText variant="body" color="textSecondary" style={styles.subtitle}>
+          {slide.subtitle}
+        </AppText>
+      </View>
+
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
+        <View style={styles.dots}>
           {slides.map((_, i) => (
             <View
               key={i}
               style={[
-                styles.indicator,
-                i === currentIndex && styles.activeIndicator,
-                i === currentIndex && { backgroundColor: '#fff' }
+                styles.dot,
+                {
+                  width: i === currentIndex ? 26 : 8,
+                  backgroundColor: i === currentIndex ? theme.accent : theme.border,
+                },
               ]}
             />
           ))}
         </View>
 
-        {/* Slide content */}
-        <View style={styles.slideContent}>
-          <Text style={styles.emoji}>{slide.emoji}</Text>
-          <Text style={authStyles.title}>{slide.title}</Text>
-          <Text style={[authStyles.subtitle, { color: theme.textSecondary }]}>
-            {slide.subtitle}
-          </Text>
-          <Text style={authStyles.subtitle}>
-            {slide.description}
-          </Text>
-        </View>
-
-        {/* Navigation buttons */}
-        <View style={styles.buttonContainer}>
-          {isLast ? (
-            <TouchableOpacity
-              style={[authStyles.primaryButton, { backgroundColor: theme.accent }]}
-              onPress={handleGetStarted}
-            >
-              <Text style={authStyles.primaryButtonText}>Get Started</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={[authStyles.primaryButton, { backgroundColor: theme.accent }]}
-              onPress={handleNext}
-            >
-              <Text style={authStyles.primaryButtonText}>Next</Text>
-            </TouchableOpacity>
-          )}
-
-          <TouchableOpacity style={authStyles.secondaryButton} onPress={handleSkipOnboarding}>
-            <Text style={[authStyles.secondaryButtonText]}>Skip</Text>
-          </TouchableOpacity>
-        </View>
+        <Button title={isLast ? 'Get started' : 'Continue'} onPress={handleNext} />
       </View>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: 28,
   },
-  content: {
+  center: {
     flex: 1,
-    justifyContent: 'space-between',
-    padding: 24,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  indicatorContainer: {
+  illustration: {
+    width: 190,
+    height: 190,
+  },
+  title: {
+    textAlign: 'center',
+    marginTop: 40,
+  },
+  subtitle: {
+    textAlign: 'center',
+    marginTop: 14,
+    lineHeight: 24,
+    maxWidth: 320,
+  },
+  footer: {
+    gap: 22,
+  },
+  dots: {
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
     gap: 8,
-    marginBottom: 32,
   },
-  indicator: {
-    width: 8,
+  dot: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  activeIndicator: {
-    width: 24,
-  },
-  slideContent: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  emoji: {
-    fontSize: 80,
-    marginBottom: 24,
-  },
-  buttonContainer: {
-    gap: 16,
-    marginBottom: 20,
   },
 });
 

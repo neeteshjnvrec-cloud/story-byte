@@ -24,35 +24,35 @@ const hexToRgba = (hex, a) => {
 // --- Palettes --------------------------------------------------------------
 const THEMES = {
   light: {
-    background: '#FFFFFF', surface: '#F5F6FA', surfaceElevated: '#FFFFFF', card: '#FFFFFF',
-    text: '#0F1222', textSecondary: '#565B72', textTertiary: '#8A8FA3',
-    border: '#E6E8F0', divider: '#EDEFF5',
-    accent: '#4F46E5', accentSoft: 'rgba(79,70,229,0.12)', accentMuted: '#6D5AE6', onAccent: '#FFFFFF',
-    primary: '#4F46E5', secondary: '#F59E0B',
-    success: '#0E9F6E', warning: '#B45309', error: '#DC2626',
-    successSoft: '#E6F6F0', warningSoft: '#FEF3E2', errorSoft: '#FCE9E9',
-    scrim: 'rgba(15,18,34,0.55)', focusRing: '#4F46E5',
-    skeletonBase: '#ECEEF4', skeletonHighlight: '#F7F8FC',
-    ratingActive: '#F59E0B', ratingInactive: '#D3D7E3',
-    tabBarActive: '#4F46E5', tabBarInactive: '#8A8FA3',
-    gradientStart: '#4F46E5', gradientMid: '#6D5AE6', gradientEnd: '#7C3AED',
+    background: '#F6EFE4', surface: '#FCF7EF', surfaceElevated: '#FFFFFF', card: '#FCF7EF', cardAlt: '#FBEEE9',
+    text: '#2A2118', textSecondary: '#7A6E5F', textTertiary: '#A99C89',
+    border: '#EADFCC', divider: '#F1E1D3',
+    accent: '#B5613A', accentSoft: 'rgba(181,97,58,0.12)', accentMuted: '#93472A', onAccent: '#FFFFFF',
+    primary: '#B5613A', secondary: '#E0913A',
+    success: '#4B8B6F', warning: '#B4863A', error: '#C6553F',
+    successSoft: '#E6F1EA', warningSoft: '#F6ECD8', errorSoft: '#F7E6E1',
+    scrim: 'rgba(42,33,24,0.55)', focusRing: '#B5613A',
+    skeletonBase: '#EFE6D6', skeletonHighlight: '#FAF4EA',
+    ratingActive: '#E0913A', ratingInactive: '#DBCDB6',
+    tabBarActive: '#B5613A', tabBarInactive: '#A99C89',
+    gradientStart: '#B5613A', gradientMid: '#D07C43', gradientEnd: '#E0913A',
   },
   dark: {
-    background: '#0B0B10', surface: '#14141C', surfaceElevated: '#1C1C28', card: '#1A1A24',
-    text: '#F5F6FA', textSecondary: '#A6ABBD', textTertiary: '#6C7080',
-    border: '#2A2C38', divider: '#23252F',
-    accent: '#818CF8', accentSoft: 'rgba(129,140,248,0.16)', accentMuted: '#6366F1', onAccent: '#0B0B10',
-    primary: '#818CF8', secondary: '#FBBF24',
-    success: '#34D399', warning: '#FBBF24', error: '#F87171',
-    successSoft: '#123227', warningSoft: '#322717', errorSoft: '#321B1B',
-    scrim: 'rgba(0,0,0,0.6)', focusRing: '#A5B4FC',
-    skeletonBase: '#1E1E2A', skeletonHighlight: '#2A2A3A',
-    ratingActive: '#FBBF24', ratingInactive: '#3A3D4C',
-    tabBarActive: '#818CF8', tabBarInactive: '#6C7080',
-    gradientStart: '#4F46E5', gradientMid: '#6D28D9', gradientEnd: '#7C3AED',
+    background: '#17110C', surface: '#211913', surfaceElevated: '#2B211A', card: '#211913', cardAlt: '#2B211A',
+    text: '#F3E9DB', textSecondary: '#B8A991', textTertiary: '#7F7261',
+    border: '#3A2E24', divider: '#2B211A',
+    accent: '#D98A5E', accentSoft: 'rgba(217,138,94,0.16)', accentMuted: '#B5613A', onAccent: '#17110C',
+    primary: '#D98A5E', secondary: '#E8B04B',
+    success: '#5FA98A', warning: '#E0A44B', error: '#E07A63',
+    successSoft: '#15241D', warningSoft: '#26200F', errorSoft: '#2A1712',
+    scrim: 'rgba(0,0,0,0.6)', focusRing: '#D98A5E',
+    skeletonBase: '#241B14', skeletonHighlight: '#30251C',
+    ratingActive: '#E8B04B', ratingInactive: '#4A3B2E',
+    tabBarActive: '#D98A5E', tabBarInactive: '#7F7261',
+    gradientStart: '#B5613A', gradientMid: '#C77A45', gradientEnd: '#E0913A',
   },
   sleep: {
-    background: '#070A12', surface: '#0E121C', surfaceElevated: '#151A26', card: '#131826',
+    background: '#070A12', surface: '#0E121C', surfaceElevated: '#151A26', card: '#131826', cardAlt: '#171C2B',
     text: '#CDD3E0', textSecondary: '#8590A6', textTertiary: '#5E687E',
     border: '#1E2433', divider: '#182031',
     accent: '#9AA0D8', accentSoft: 'rgba(154,160,216,0.14)', accentMuted: '#6B72A6', onAccent: '#070A12',
@@ -66,7 +66,7 @@ const THEMES = {
     gradientStart: '#141A2E', gradientMid: '#1B2036', gradientEnd: '#0B0F1C',
   },
   kids: {
-    background: '#FFFDF7', surface: '#FFF4DE', surfaceElevated: '#FFFFFF', card: '#FFFFFF',
+    background: '#FFFDF7', surface: '#FFF4DE', surfaceElevated: '#FFFFFF', card: '#FFFFFF', cardAlt: '#FFF1EC',
     text: '#2B2440', textSecondary: '#5B5470', textTertiary: '#8A82A0',
     border: '#F0E4C8', divider: '#F4EAD2',
     accent: '#FF6B6B', accentSoft: 'rgba(255,107,107,0.16)', accentMuted: '#FF8A8A', onAccent: '#FFFFFF',
@@ -87,12 +87,12 @@ export const KIDS_CARD_COLORS = ['#FF6B6B', '#17B3A6', '#7C5CFF', '#FFC93C', '#4
 // --- Per-vertical accent (overlaid in normal mode only) --------------------
 const VERTICAL_ACCENTS = {
   general: {
-    light: { accent: '#4F46E5', gradientStart: '#4F46E5', gradientMid: '#6D5AE6', gradientEnd: '#7C3AED', onAccent: '#FFFFFF' },
-    dark: { accent: '#818CF8', gradientStart: '#4F46E5', gradientMid: '#6D28D9', gradientEnd: '#7C3AED', onAccent: '#0B0B10' },
+    light: { accent: '#B5613A', gradientStart: '#B5613A', gradientMid: '#D07C43', gradientEnd: '#E0913A', onAccent: '#FFFFFF' },
+    dark: { accent: '#D98A5E', gradientStart: '#B5613A', gradientMid: '#C77A45', gradientEnd: '#E0913A', onAccent: '#17110C' },
   },
   fiction: {
-    light: { accent: '#4F46E5', gradientStart: '#4F46E5', gradientMid: '#6D5AE6', gradientEnd: '#7C3AED', onAccent: '#FFFFFF' },
-    dark: { accent: '#818CF8', gradientStart: '#4F46E5', gradientMid: '#6D28D9', gradientEnd: '#7C3AED', onAccent: '#0B0B10' },
+    light: { accent: '#B5613A', gradientStart: '#B5613A', gradientMid: '#D07C43', gradientEnd: '#E0913A', onAccent: '#FFFFFF' },
+    dark: { accent: '#D98A5E', gradientStart: '#B5613A', gradientMid: '#C77A45', gradientEnd: '#E0913A', onAccent: '#17110C' },
   },
   bedtime: {
     light: { accent: '#7C6FD6', gradientStart: '#7C6FD6', gradientMid: '#6D5AE6', gradientEnd: '#4F46E5', onAccent: '#FFFFFF' },
@@ -103,7 +103,7 @@ const VERTICAL_ACCENTS = {
     dark: { accent: '#FF8A8A', gradientStart: '#FF6B6B', gradientMid: '#FF9E7C', gradientEnd: '#FFC93C', onAccent: '#2B2440' },
   },
   hindi: {
-    light: { accent: '#EA6D2A', gradientStart: '#EA6D2A', gradientMid: '#F59E0B', gradientEnd: '#FBBF24', onAccent: '#FFFFFF' },
+    light: { accent: '#E0913A', gradientStart: '#E0913A', gradientMid: '#EAA24B', gradientEnd: '#E8B04B', onAccent: '#FFFFFF' },
     dark: { accent: '#FB923C', gradientStart: '#C2410C', gradientMid: '#EA6D2A', gradientEnd: '#F59E0B', onAccent: '#1A1206' },
   },
 };
@@ -115,7 +115,9 @@ const STORAGE_UIMODE = 'storybyte-ui-mode';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [themeMode, setThemeMode] = useState(SYSTEM_THEME); // system | light | dark
+  // Default to the warm light identity (the approved design); users can switch
+  // to system/dark in Settings.
+  const [themeMode, setThemeMode] = useState('light'); // system | light | dark
   const [mode, setModeState] = useState('normal'); // normal | sleep | kids
   const [vertical, setVertical] = useState('general');
   const systemScheme = useColorScheme() || 'light';
@@ -127,7 +129,9 @@ export const ThemeProvider = ({ children }) => {
           AsyncStorage.getItem(STORAGE_MODE),
           AsyncStorage.getItem(STORAGE_UIMODE),
         ]);
-        if (savedTheme) setThemeMode(savedTheme);
+        // Only honor an explicit light/dark choice; ignore stale 'system'
+        // so the app opens in the approved light identity by default.
+        if (savedTheme === 'light' || savedTheme === 'dark') setThemeMode(savedTheme);
         if (savedUiMode) setModeState(savedUiMode);
       } catch (e) {}
     })();

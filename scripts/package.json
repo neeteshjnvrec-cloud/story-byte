@@ -1,0 +1,14 @@
+{
+  "name": "storybyte-pipeline",
+  "version": "1.0.0",
+  "private": true,
+  "description": "StoryByte content-generation pipeline (Groq + edge-tts -> GitHub Releases + Firestore).",
+  "type": "commonjs",
+  "scripts": {
+    "generate": "node build-stories.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "groq-sdk": "^0.9.0"
+  }
+}
