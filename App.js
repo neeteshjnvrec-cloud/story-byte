@@ -30,6 +30,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { FONT_MAP } from './src/theme/tokens';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
+import apiService from './src/services/api';
 
 const Stack = createNativeStackNavigator();
 
@@ -91,7 +92,7 @@ function Root() {
   useEffect(() => {
     if (user) {
       const checkProfile = async () => {
-        const profile = await (require('./src/services/api').default).getUserProfile();
+        const profile = await apiService.getUserProfile();
         if (!profile?.profileComplete) {
           setShowProfileSetup(true);
         }
