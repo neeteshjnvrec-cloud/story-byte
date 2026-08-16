@@ -1,7 +1,7 @@
 // Audio Context for Story Byte — full-featured player
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
 import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { db } from '../services/firebase';
 
 const AudioContext = createContext();
@@ -25,6 +25,7 @@ export const AudioProvider = ({ children }) => {
   const subscriptionRef = useRef(null);
   const progressTimerRef = useRef(null);
   const uidRef = useRef(null);
+  const currentStoryRef = useRef(null);
 
   useEffect(() => {
     setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
@@ -43,6 +44,32 @@ export const AudioProvider = ({ children }) => {
       clearInterval(progressTimerRef.current);
       progressTimerRef.current = null;
     }
+  };
+
+  // Save the current listening position to Firestore. Ref-based so it's safe to
+  // call from anywhere (start / pause / finish / stop / unmount) without stale
+  // closures. Denormalizes title/cover so History renders without extra reads.
+  const persistProgress = async () => {
+    const player = playerRef.current;
+    const uid = uidRef.current;
+    const story = currentStoryRef.current;
+    if (!uid || !story) return;
+    const dur = (player && player.durationIsReady && player.duration) || story.duration || 0;
+    const cur = (player && player.currentTime) || 0;
+    const prog = dur ? Math.min(cur / dur, 1) : 0;
+    try {
+      await setDoc(doc(db, 'users', uid, 'progress', story.id), {
+        storyId: story.id,
+        title: story.title || '',
+        coverImage: story.coverImage || null,
+        genre: story.genre || null,
+        language: story.language || null,
+        duration: dur,
+        currentTime: cur,
+        progress: prog,
+        lastUpdated: serverTimestamp(),
+      }, { merge: true });
+    } catch (e) { /* best effort */ }
   };
 
   // Save progress to Firestore every PROGRESS_SAVE_INTERVAL ms
@@ -80,6 +107,7 @@ export const AudioProvider = ({ children }) => {
     setIsPlaying(status.playing);
 
     if (status.didJustFinish) {
+      persistProgress();
       // Auto-advance to next page if available
       if (currentPage < totalPages - 1) {
         setCurrentPage((p) => p + 1);
@@ -94,6 +122,7 @@ export const AudioProvider = ({ children }) => {
   const playStory = useCallback(async (story, startPage = 0) => {
     try {
       cleanupPlayer();
+      currentStoryRef.current = story;
       setCurrentStory(story);
       setProgress(0);
       setDuration(0);
@@ -128,7 +157,13 @@ export const AudioProvider = ({ children }) => {
       player.play();
       setIsPlaying(true);
 
-      // Start auto-save timer
+      // Count a play on the story (allowed by rules for signed-in users).
+      if (story?.id) {
+        updateDoc(doc(db, 'stories', story.id), { plays: increment(1), lastPlayedAt: serverTimestamp() }).catch(() => {});
+      }
+
+      // Record immediately (marks as played + shows in history), then auto-save.
+      persistProgress();
       startProgressSaveTimer(story.id);
     } catch (error) {
       console.error('Error playing story:', error);
@@ -184,6 +219,7 @@ export const AudioProvider = ({ children }) => {
     if (player.playing) {
       player.pause();
       setIsPlaying(false);
+      persistProgress();
     } else {
       player.play();
       setIsPlaying(true);
@@ -225,7 +261,9 @@ export const AudioProvider = ({ children }) => {
   }, []);
 
   const stop = useCallback(async () => {
+    persistProgress();
     cleanupPlayer();
+    currentStoryRef.current = null;
     setCurrentStory(null);
     setIsPlaying(false);
     setProgress(0);
@@ -258,7 +296,7 @@ export const AudioProvider = ({ children }) => {
 
   useEffect(() => {
     return () => {
-      saveFinalProgress();
+      persistProgress();
       cleanupPlayer();
     };
   }, []);

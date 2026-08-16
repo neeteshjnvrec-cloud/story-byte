@@ -9,6 +9,7 @@ import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 
 export const LoginScreen = ({ navigation }) => {
   const { loginWithEmail } = useAppContext();
@@ -18,6 +19,7 @@ export const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const google = useGoogleAuth(setError);
 
   const handleLogin = async () => {
     if (!email.trim() || !password) { setError('Please enter your email and password'); return; }
@@ -60,7 +62,7 @@ export const LoginScreen = ({ navigation }) => {
           </View>
 
           <Button title="Continue with Google" variant="ghost" leftIcon="globe"
-            onPress={() => Alert.alert('Google sign-in', 'Google sign-in will be enabled once the OAuth client is configured.')} />
+            loading={google.inProgress} onPress={google.signIn} />
 
           <View style={styles.footer}>
             <AppText variant="caption" color="textSecondary">New here? </AppText>

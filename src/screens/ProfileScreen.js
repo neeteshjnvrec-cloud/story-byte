@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   StyleSheet
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppContext } from '../context/AppContext';
@@ -27,11 +27,12 @@ export const ProfileScreen = () => {
   const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
 
-  useEffect(() => {
-    if (user) {
-      loadUserData();
-    }
-  }, [user]);
+  // Refresh stats every time the tab gains focus (so numbers update live).
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user) loadUserData();
+    }, [user])
+  );
 
   const loadUserData = async () => {
     if (!user) return;
@@ -68,7 +69,8 @@ export const ProfileScreen = () => {
     );
   }
 
-  const initial = user.displayName?.charAt(0) || user.email?.charAt(0) || 'U';
+  const name = user.displayName || (user.email ? user.email.split('@')[0] : 'You');
+  const initial = (name[0] || 'U').toUpperCase();
   const minutes = stats?.minutesListened || 0;
   const listenTime = `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
   const streak = stats?.streak ?? userStats?.streak ?? 0;
@@ -108,7 +110,7 @@ export const ProfileScreen = () => {
         >
           <AppText variant="displayM" style={{ color: '#fff' }}>{initial}</AppText>
         </LinearGradient>
-        <AppText variant="h2" style={{ marginTop: 14 }}>{user.displayName || 'User'}</AppText>
+        <AppText variant="h2" style={{ marginTop: 14 }}>{name}</AppText>
         <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>{user.email}</AppText>
       </View>
 
@@ -138,6 +140,7 @@ export const ProfileScreen = () => {
           <StatCard value={listenTime} label="Listen time" />
           <StatCard value={stats?.plays || 0} label="Stories played" />
           <StatCard value={stats?.favorites || 0} label="Favorites" />
+          <StatCard value={stats?.finished || 0} label="Finished" />
         </View>
       )}
 
@@ -224,8 +227,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flexGrow: 1,
-    flexBasis: '30%',
-    minWidth: 100,
+    flexBasis: '47%',
     borderRadius: 16,
     borderWidth: 1,
     padding: 15,

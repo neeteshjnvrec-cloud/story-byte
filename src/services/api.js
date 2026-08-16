@@ -24,6 +24,18 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
 
+// Consecutive-day listening streak from a set of 'YYYY-MM-DD' strings.
+// Counts back from today (with a one-day grace if today has no listen yet).
+function streakFromDays(days) {
+  if (!days || days.size === 0) return 0;
+  const key = (d) => d.toISOString().slice(0, 10);
+  const d = new Date();
+  if (!days.has(key(d))) d.setDate(d.getDate() - 1); // allow streak if last listen was yesterday
+  let s = 0;
+  while (days.has(key(d))) { s += 1; d.setDate(d.getDate() - 1); }
+  return s;
+}
+
 class ApiService {
   get uid() {
     return auth.currentUser?.uid || null;
@@ -118,10 +130,21 @@ class ApiService {
   // --- Favorites (users/{uid}/favorites/{storyId}) -------------------------
 
   // Returns an array of { storyId, id, ...meta }.
+  // Returns favorited stories with full data. Self-healing: any favorite whose
+  // story no longer exists is dropped and its orphan doc deleted, so the count
+  // and Library list stay accurate even after stories are removed.
   async getFavorites() {
     if (!this.uid) return [];
     const snap = await getDocs(collection(db, 'users', this.uid, 'favorites'));
-    return snap.docs.map((d) => ({ storyId: d.id, id: d.id, ...d.data() }));
+    const results = await Promise.all(snap.docs.map(async (d) => {
+      const story = await this.getStory(d.id);
+      if (!story) {
+        try { await deleteDoc(doc(db, 'users', this.uid, 'favorites', d.id)); } catch (e) {}
+        return null;
+      }
+      return { ...story, id: d.id, storyId: d.id, favoritedAt: d.data().addedAt };
+    }));
+    return results.filter(Boolean);
   }
 
   async addFavorite(storyId) {
@@ -221,11 +244,31 @@ class ApiService {
     };
   }
 
+  // Computed live from the user's favorites + progress subcollections (the
+  // static users/{uid}.stats field was never maintained).
   async getUserStats() {
-    if (!this.uid) return { plays: 0, favorites: 0, minutesListened: 0 };
-    const d = await getDoc(doc(db, 'users', this.uid));
-    const stats = d.exists() ? d.data().stats : null;
-    return stats || { plays: 0, favorites: 0, minutesListened: 0 };
+    const empty = { plays: 0, favorites: 0, minutesListened: 0, finished: 0, streak: 0 };
+    if (!this.uid) return empty;
+    const [favorites, progSnap] = await Promise.all([
+      this.getFavorites(),
+      getDocs(collection(db, 'users', this.uid, 'progress')),
+    ]);
+    let minutes = 0, finished = 0;
+    const days = new Set();
+    progSnap.forEach((d) => {
+      const p = d.data();
+      minutes += (p.currentTime || 0) / 60;
+      if ((p.progress || 0) >= 0.98) finished += 1;
+      const t = p.lastUpdated && p.lastUpdated.toDate ? p.lastUpdated.toDate() : null;
+      if (t) days.add(t.toISOString().slice(0, 10));
+    });
+    return {
+      plays: progSnap.size,
+      favorites: favorites.length,
+      minutesListened: Math.round(minutes),
+      finished,
+      streak: streakFromDays(days),
+    };
   }
 
   // user_activity is admin-only per the security rules, so history is not

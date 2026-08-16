@@ -10,7 +10,7 @@ import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
 import { Cover } from '../components/story/Cover';
-import { fmtMin } from '../components/story/StoryCard';
+import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import apiService from '../services/api';
 
 export const StoryDetailScreen = () => {
@@ -76,6 +76,7 @@ export const StoryDetailScreen = () => {
             <AppText variant="caption" color="textSecondary">{(story.rating || 0).toFixed(1)}</AppText>
           </View>
           {story.duration ? <AppText variant="caption" color="textSecondary">· {fmtMin(story.duration)}</AppText> : null}
+          <AppText variant="caption" color="textSecondary">· ▶ {fmtPlays(story.plays)} plays</AppText>
         </View>
 
         <AppText variant="bodyL" color="textSecondary" style={{ marginTop: 12, lineHeight: 25 }}>{story.description}</AppText>

@@ -13,6 +13,12 @@ export function fmtMin(sec) {
   return `${m} min`;
 }
 
+export function fmtPlays(n) {
+  n = n || 0;
+  if (n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k';
+  return String(n);
+}
+
 export function PlayFab({ size = 46, solid, onPress, style }) {
   const { theme } = useTheme();
   return (
@@ -42,7 +48,7 @@ export function RailCard({ story, width = 138, onPress, onPlay }) {
       </Cover>
       <AppText variant="h3" numberOfLines={2} style={{ marginTop: 8 }}>{story.title}</AppText>
       <AppText variant="caption" color="textSecondary" numberOfLines={1} style={{ marginTop: 2 }}>
-        {(story.genre || story.vertical || 'Story')}{story.duration ? ` · ${fmtMin(story.duration)}` : ''}
+        {story.duration ? fmtMin(story.duration) : (story.genre || 'Story')}{story.plays ? `  ·  ▶ ${fmtPlays(story.plays)}` : ''}
       </AppText>
     </Pressable>
   );
@@ -57,7 +63,7 @@ export function CompactRow({ story, onPress, subtitle, trailing }) {
       <View style={{ flex: 1 }}>
         <AppText variant="h3" numberOfLines={1}>{story.title}</AppText>
         <AppText variant="caption" color="textSecondary" numberOfLines={1} style={{ marginTop: 2 }}>
-          {subtitle != null ? subtitle : `${story.genre || 'Story'}${story.duration ? ` · ${fmtMin(story.duration)}` : ''}`}
+          {subtitle != null ? subtitle : `${story.genre || 'Story'}${story.duration ? ` · ${fmtMin(story.duration)}` : ''}${story.plays ? ` · ▶ ${fmtPlays(story.plays)}` : ''}`}
         </AppText>
       </View>
       {trailing}
@@ -83,7 +89,7 @@ export function Hero({ story, badge = "Today's pick", onPress, onPlay }) {
         <View style={styles.heroSub}>
           <Icon name="note" size={13} color="rgba(255,255,255,0.9)" />
           <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.92)' }}>
-            {fmtMin(story.duration) || '—'}{story.genre ? `  ·  ${story.genre}` : ''}{story.language ? `  ·  ${String(story.language).toUpperCase()}` : ''}
+            {fmtMin(story.duration) || '—'}{story.genre ? `  ·  ${story.genre}` : ''}{story.plays ? `  ·  ▶ ${fmtPlays(story.plays)}` : ''}
           </AppText>
         </View>
       </View>

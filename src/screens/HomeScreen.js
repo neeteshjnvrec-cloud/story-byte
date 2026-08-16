@@ -53,6 +53,10 @@ export const HomeScreen = () => {
 
   const hero = stories[0];
   const genres = [...new Set(stories.map((s) => s.genre).filter(Boolean))];
+  const popular = [...stories]
+    .filter((s) => (s.plays || 0) > 0)
+    .sort((a, b) => (b.plays || 0) - (a.plays || 0))
+    .slice(0, 10);
   const rails = genres.length
     ? genres.map((g) => ({ title: cap(g), items: stories.filter((s) => s.genre === g) }))
     : (stories.length ? [{ title: 'Latest stories', items: stories }] : []);
@@ -105,6 +109,13 @@ export const HomeScreen = () => {
             <>
               <SectionHeader theme={theme} title="Continue listening" />
               <Rail items={progress} onOpen={openStory} onPlay={play} />
+            </>
+          ) : null}
+
+          {popular.length ? (
+            <>
+              <SectionHeader theme={theme} title="🔥 Popular" />
+              <Rail items={popular} onOpen={openStory} onPlay={play} />
             </>
           ) : null}
 
