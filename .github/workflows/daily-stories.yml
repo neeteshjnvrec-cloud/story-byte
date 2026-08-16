@@ -3,14 +3,14 @@ name: Daily Stories
 on:
   schedule:
     - cron: '30 0 * * *'   # 00:30 UTC (~06:00 IST) daily
-  workflow_dispatch:        # manual "Run workflow" button / backfills
+  workflow_dispatch:
 
 concurrency:
   group: daily-stories
   cancel-in-progress: false
 
 permissions:
-  contents: write           # needed to create/upload the audio Release
+  contents: write           # to commit the generated public/ audio + covers
 
 jobs:
   generate:
@@ -34,15 +34,21 @@ jobs:
 
       - name: Install pipeline deps
         working-directory: scripts
-        run: npm ci || npm install
+        run: npm install
 
-      - name: Generate stories
+      - name: Generate + host stories
         working-directory: scripts
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          AUDIO_HOST: github
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FIREBASE_PROJECT_ID: storybyte-76716
         run: node build-stories.js
+
+      - name: Persist generated audio + covers
+        run: |
+          git config user.name "storybyte-bot"
+          git config user.email "bot@storybyte.app"
+          git add public/audio public/covers public/index.html 2>/dev/null || true
+          git commit -m "chore: daily story audio + covers ($(date -u +%F))" || echo "nothing to commit"
+          git push || echo "nothing to push"
