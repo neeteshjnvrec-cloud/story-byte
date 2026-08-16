@@ -45,15 +45,13 @@ async function checkOnboardingStatus() {
 }
 
 // Auth stack shown when the user is signed out.
-function AuthStack({ showProfileSetup }) {
+function AuthStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-      {showProfileSetup ? (
-        <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
-      ) : null}
+      <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
     </Stack.Navigator>
   );
 }
@@ -78,29 +76,13 @@ function MainStack({ isNewUser }) {
 }
 
 function Root() {
-  const { user, loading, userStats } = useAppContext();
+  const { user, loading } = useAppContext();
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
-  const [checkProfileComplete, setCheckProfileComplete] = useState(false);
-  const [showProfileSetup, setShowProfileSetup] = useState(false);
 
   useEffect(() => {
     checkOnboardingStatus().then(setHasCompletedOnboarding);
   }, []);
-
-  // Check if user profile is complete
-  useEffect(() => {
-    if (user) {
-      const checkProfile = async () => {
-        const profile = await apiService.getUserProfile();
-        if (!profile?.profileComplete) {
-          setShowProfileSetup(true);
-        }
-        setCheckProfileComplete(profile?.profileComplete || false);
-      };
-      checkProfile();
-    }
-  }, [user]);
 
   // Show a minimal splash while auth state is being restored.
   if (loading) {
@@ -116,17 +98,7 @@ function Root() {
     );
   }
 
-  // Show profile setup if user hasn't completed profile
-  if (showProfileSetup) {
-    return (
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <AuthStack showProfileSetup={true} />
-      </GestureHandlerRootView>
-    );
-  }
-
   return user ? <MainStack isNewUser={false} /> : <AuthStack />;
-}
 
 export default function App() {
   const [fontsLoaded] = useFonts(FONT_MAP);
