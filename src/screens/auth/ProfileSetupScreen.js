@@ -42,7 +42,8 @@ export const ProfileSetupScreen = ({ navigation }) => {
         favoriteGenre,
         profileComplete: true,
       });
-      navigation.replace('Main');
+      // Navigate to Profile tab in main app
+      navigation.navigate('Main', { screen: 'Profile' });
     } catch (e) {
       setError('Failed to save profile. Please try again.');
       console.error(e);
