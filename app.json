@@ -2,7 +2,7 @@
   "expo": {
     "name": "StoryByte",
     "slug": "storybyte-app",
-    "owner": "neeteshjnv",
+    "owner": "neeteshbyte",
     "scheme": "storybyte",
     "version": "2.0.0",
     "orientation": "portrait",
@@ -53,7 +53,10 @@
         "expo-build-properties",
         {
           "android": {
-            "usesCleartextTraffic": true
+            "usesCleartextTraffic": true,
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36,
+            "minSdkVersion": 24
           }
         }
       ],
@@ -79,7 +82,7 @@
         "appId": "${FIREBASE_APP_ID}"
       },
       "eas": {
-        "projectId": "f2d73672-10ed-4c48-a462-da23ce798bcc"
+        "projectId": "d60ac706-e177-401b-8307-eb0cd8e8dfff"
       }
     },
     "updates": {

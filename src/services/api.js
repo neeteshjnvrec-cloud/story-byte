@@ -302,13 +302,13 @@ class ApiService {
 
   async updateProfile(updates) {
     if (!this.uid) throw new Error('Authentication required');
-    // MUST include userId — the security rules reject updates where
-    // request.resource.data.userId != userId.
-    await updateDoc(doc(db, 'users', this.uid), {
+    // Use setDoc with merge: true so it creates the document if it doesn't exist
+    // (new users won't have a Firestore doc yet).
+    await setDoc(doc(db, 'users', this.uid), {
       ...updates,
       userId: this.uid,
       updatedAt: serverTimestamp(),
-    });
+    }, { merge: true });
     // Clear profile cache after update
     this.clearCache(`userProfile_${this.uid}`);
     return { success: true };

@@ -183,10 +183,13 @@ export const EditProfileScreen = () => {
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        // Modern array API + limited access triggers Android Photo Picker on
+        // API 33+ — no READ_MEDIA_IMAGES permission needed.
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 0.5,
+        quality: 0.4,
+        accessPrivileges: 'limited',
       });
       if (!result.canceled && result.assets?.[0]) {
         setUploadingPic(true);
