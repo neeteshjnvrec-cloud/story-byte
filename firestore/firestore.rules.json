@@ -58,5 +58,18 @@ service cloud.firestore {
     // Admin-only collections (written by the pipeline via the Admin SDK).
     match /user_activity/{docId}   { allow read, write: if false; }
     match /generation_logs/{docId} { allow read, write: if false; }
+
+    // Notifications: authenticated users can read, update, delete
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn();
+      allow create: if false; // Only admin SDK can create
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn();
+    }
+
+    // Failed slots: admin-only (internal tracking)
+    match /failed_slots/{dateId} {
+      allow read, write: if false;
+    }
   }
 }

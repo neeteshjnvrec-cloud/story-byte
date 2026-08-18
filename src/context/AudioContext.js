@@ -137,6 +137,9 @@ export const AudioProvider = ({ children }) => {
       } else {
         setIsPlaying(false);
         cleanupPlayer();
+        // Clear currentStory so clicking play again restarts from beginning
+        currentStoryRef.current = null;
+        setCurrentStory(null);
       }
     }
   }, [currentPage, totalPages]);
@@ -203,7 +206,13 @@ export const AudioProvider = ({ children }) => {
       // Load saved progress for this story
       let resumeProgress = 0;
       let resumeCurrentTime = 0;
-      if (story.id && uidRef.current) {
+      // If clicking play on the same story that just finished, restart from beginning
+      const isSameStory = currentStoryRef.current && currentStoryRef.current.id === story.id;
+      if (isSameStory) {
+        console.log('[AudioContext] playStory: restarting finished story from beginning');
+        resumeProgress = 0;
+        resumeCurrentTime = 0;
+      } else if (story.id && uidRef.current) {
         try {
           const progressDoc = await getDoc(doc(db, 'users', uidRef.current, 'progress', story.id));
           console.log('[AudioContext] playStory: checking progress for', story.id, '- exists:', progressDoc.exists());

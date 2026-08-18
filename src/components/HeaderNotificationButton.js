@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { TouchableOpacity, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, StyleSheet, View, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { notificationDb } from '../services/notificationDb';
+import { notificationService } from '../services/notificationService';
 import { Icon } from './ui/Icon';
 
 export const HeaderNotificationButton = ({ size = 24, color = '#B5613A' }) => {
@@ -9,27 +9,23 @@ export const HeaderNotificationButton = ({ size = 24, color = '#B5613A' }) => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    loadUnreadCount();
-    const interval = setInterval(loadUnreadCount, 30000);
-    return () => clearInterval(interval);
+    // Subscribe to notifications for real-time count updates
+    const unsubscribe = notificationService.subscribe((items) => {
+      const count = items.filter(n => !n.read).length;
+      setUnreadCount(count);
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
-  const loadUnreadCount = async () => {
-    try {
-      const count = await notificationDb.getUnreadCount();
-      setUnreadCount(count);
-    } catch (e) {
-      console.error('Failed to load unread count:', e);
-    }
-  };
-
   const handlePress = () => {
-    console.log('Notification bell tapped');
     navigation.navigate('Notifications');
   };
 
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       onPress={handlePress}
       style={styles.container}
       activeOpacity={0.7}
@@ -39,7 +35,7 @@ export const HeaderNotificationButton = ({ size = 24, color = '#B5613A' }) => {
       <Icon name="bell" size={size} color={color} />
       {unreadCount > 0 && (
         <View style={[styles.badge, { top: -4, right: -4 }]}>
-          <Icon name="x" size={10} color="#fff" />
+          <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -53,12 +49,18 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    width: 18,
+    minWidth: 18,
     height: 18,
     borderRadius: 9,
     backgroundColor: '#E53E3E',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
   }
 });
 

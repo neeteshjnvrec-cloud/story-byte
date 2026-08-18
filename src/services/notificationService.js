@@ -1,89 +1,82 @@
-// Notification Service — handles FCM tokens
-import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
-import Constants from 'expo-constants';
+// Notification Service — reads from Firestore for real-time notifications
 import { db, auth } from './firebase';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const TOKEN_KEY = 'expo_push_token';
-const NOTIFICATION_ENABLED_KEY = 'notifications_enabled';
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+import { collection, query, orderBy, limit, onSnapshot, updateDoc, doc, deleteDoc, where } from 'firebase/firestore';
 
 export const notificationService = {
-  async requestPermission() {
+  // Subscribe to real-time notifications from Firestore
+  subscribe(callback) {
+    if (!auth.currentUser) return null;
+    
+    const q = query(
+      collection(db, 'notifications'),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      callback(items);
+    }, (error) => {
+      console.error('Notification subscription error:', error);
+    });
+    
+    return unsubscribe;
+  },
+
+  // Mark notification as read
+  async markAsRead(notificationId) {
     try {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      
-      if (finalStatus !== 'granted') return false;
-
-      const tokenData = await Notifications.getExpoPushTokenAsync({
-        projectId: Constants.expoConfig?.extra?.eas?.projectId,
+      await updateDoc(doc(db, 'notifications', notificationId), {
+        read: true,
+        readAt: new Date().toISOString(),
       });
-      
-      const token = tokenData.data;
-      await AsyncStorage.setItem(TOKEN_KEY, token);
-      
-      if (auth.currentUser) {
-        await this.saveToken(auth.currentUser.uid, token);
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Permission error:', error);
-      return false;
+    } catch (e) {
+      console.error('Failed to mark read:', e);
     }
   },
 
-  async saveToken(userId, token) {
+  // Mark all notifications as read
+  async markAllAsRead() {
+    const q = query(collection(db, 'notifications'));
+    const snapshot = await q.get();
+    const batch = [];
+    snapshot.forEach(documentSnapshot => {
+      batch.push(updateDoc(documentSnapshot.ref, { read: true, readAt: new Date().toISOString() }));
+    });
+    await Promise.all(batch);
+  },
+
+  // Delete single notification
+  async delete(notificationId) {
     try {
-      await setDoc(doc(db, 'push_tokens', `${userId}_${token}`), {
-        userId,
-        token,
-        platform: Platform.OS,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    } catch (error) {
-      console.error('Save token error:', error);
+      await deleteDoc(doc(db, 'notifications', notificationId));
+    } catch (e) {
+      console.error('Failed to delete:', e);
     }
   },
 
-  async deleteToken(userId) {
-    const token = await AsyncStorage.getItem(TOKEN_KEY);
-    if (token) {
-      try {
-        await deleteDoc(doc(db, 'push_tokens', `${userId}_${token}`));
-      } catch (error) {
-        console.error('Delete token error:', error);
-      }
-      await AsyncStorage.removeItem(TOKEN_KEY);
+  // Clear all notifications
+  async clearAll() {
+    const q = query(collection(db, 'notifications'));
+    const snapshot = await q.get();
+    const batch = [];
+    snapshot.forEach(documentSnapshot => {
+      batch.push(deleteDoc(documentSnapshot.ref));
+    });
+    await Promise.all(batch);
+  },
+
+  // Get unread count
+  async getUnreadCount() {
+    try {
+      const q = query(
+        collection(db, 'notifications'),
+        where('read', '==', false)
+      );
+      const snapshot = await q.get();
+      return snapshot.size;
+    } catch (e) {
+      return 0;
     }
-  },
-
-  async isEnabled() {
-    const enabled = await AsyncStorage.getItem(NOTIFICATION_ENABLED_KEY);
-    return enabled === 'true';
-  },
-
-  async setEnabled(enabled) {
-    await AsyncStorage.setItem(NOTIFICATION_ENABLED_KEY, String(enabled));
-  },
-
-  async getToken() {
-    return AsyncStorage.getItem(TOKEN_KEY);
   },
 };

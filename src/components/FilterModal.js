@@ -11,15 +11,7 @@ import {
 import { useTheme } from '../hooks/useTheme';
 import { AppText } from './ui/AppText';
 import { Icon } from './ui/Icon';
-
-const GENRES = [
-  { id: 'all', label: 'All Genres' },
-  { id: 'romance', label: 'Romance' },
-  { id: 'mystery', label: 'Mystery' },
-  { id: 'drama', label: 'Drama' },
-  { id: 'adventure', label: 'Adventure' },
-  { id: 'sleep', label: 'Sleep' },
-];
+import { GENRES } from '../constants/genres';
 
 const LANGUAGES = [
   { id: 'all', label: 'All Languages' },
