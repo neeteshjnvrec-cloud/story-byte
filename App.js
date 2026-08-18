@@ -26,6 +26,9 @@ import { ProfileSetupScreen } from './src/screens/auth/ProfileSetupScreen';
 import { EditProfileScreen } from './src/screens/EditProfileScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { NotificationButton } from './src/components/NotificationButton';
+import { NotificationsScreen } from './src/screens/NotificationsScreen';
+import { NotificationProvider } from './src/context/NotificationContext';
 import { FloatingAudioPlayer } from './src/components/FloatingAudioPlayer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
@@ -85,6 +88,7 @@ function MainStack({ isNewUser }) {
         <Stack.Screen name="Main" component={AppNavigator} />
         <Stack.Screen name="StoryDetail" component={StoryDetailScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ presentation: 'modal', headerShown: false }} />
         <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ presentation: 'modal' }} />
         {isNewUser ? (
@@ -135,10 +139,12 @@ export default function App() {
           <ThemeProvider>
             <AppContextProvider>
               <AudioProvider>
-                <NavigationContainer>
+                <NotificationProvider>
+                  <NavigationContainer>
                   <StatusBar style="auto" />
                   <Root />
                 </NavigationContainer>
+                </NotificationProvider>
               </AudioProvider>
             </AppContextProvider>
           </ThemeProvider>

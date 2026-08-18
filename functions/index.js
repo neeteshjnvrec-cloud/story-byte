@@ -89,6 +89,9 @@ exports.manualGenerateStories = functions
 
         const stories = await generateDailyStories(today, { count, language });
 
+        // Send notifications for new stories
+        await sendNotifications(stories);
+
         res.json({
           success: true,
           count: stories.length,
@@ -100,6 +103,70 @@ exports.manualGenerateStories = functions
       }
     });
   });
+
+/**
+ * Send push notifications to all users with new stories
+ * Triggered after story generation
+ */
+async function sendNotifications(stories) {
+  try {
+    const fcmTokens = [];
+    
+    // Get all active FCM tokens from users
+    const tokensSnapshot = await db.collection('fcm_tokens').get();
+    tokensSnapshot.forEach(doc => {
+      const tokenData = doc.data();
+      if (tokenData.token && tokenData.deletedAt === undefined) {
+        fcmTokens.push(tokenData.token);
+      }
+    });
+
+    if (fcmTokens.length === 0) {
+      console.log('No FCM tokens found for notifications');
+      return;
+    }
+
+    console.log(`Sending notifications to ${fcmTokens.length} users`);
+
+    // Send batch notifications (FCM allows up to 500 tokens per request)
+    const batchSize = 500;
+    for (let i = 0; i < fcmTokens.length; i += batchSize) {
+      const batch = fcmTokens.slice(i, i + batchSize);
+      
+      const newStories = stories.slice(0, 3); // Top 3 stories
+      
+      const promises = newStories.map(async (story) => {
+        const payload = {
+          tokens: batch,
+          notification: {
+            title: `New ${story.genre} Story`,
+            body: story.title,
+            image: story.coverImage,
+          },
+          data: {
+            storyId: story.id,
+            type: 'new_story',
+            genre: story.genre,
+            language: story.language,
+            url: `/stories/${story.id}`
+          }
+        };
+
+        try {
+          await admin.messaging().sendEachForMulticast(payload);
+        } catch (error) {
+          console.error(`Error sending batch notification:`, error);
+        }
+      });
+
+      await Promise.all(promises);
+    }
+
+    console.log(`Notifications sent for ${stories.length} stories`);
+  } catch (error) {
+    console.error('Notification error:', error);
+  }
+}
 
 /**
  * API endpoint - list stories
@@ -416,3 +483,51 @@ exports.verifyResetCode = functions.https.onRequest(async (req, res) => {
     }
   });
 });
+/**
+ * Webhook to trigger story generation and send notifications
+ * GET /api/trigger-story-generation
+ */
+exports.triggerStoryGeneration = functions
+  .runWith({ timeoutSeconds: 540, memory: '1GB' })
+  .https
+  .onRequest(async (req, res) => {
+    cors(req, res, async () => {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const { count = 6 } = req.query;
+        
+        console.log(`Triggering daily stories for ${today}`);
+        
+        const stories = await generateDailyStories(today, { count });
+        
+        // Send notifications
+        await sendNotifications(stories);
+        
+        // Update generation log
+        await db.collection('generation_logs').doc(today).set({
+          date: today,
+          count: stories.length,
+          status: 'success',
+          triggeredBy: 'webhook',
+          createdAt: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        res.json({
+          success: true,
+          count: stories.length,
+          stories: stories.map(s => ({ id: s.id, title: s.title, genre: s.genre }))
+        });
+      } catch (error) {
+        console.error('Webhook trigger error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+  });
+
+// Import notification functions
+const { sendStoryNotification, saveToken, deleteToken } = require('./notification-functions');
+
+// Export for Firebase
+exports.sendStoryNotification = exports.sendStoryNotification;
+exports.saveToken = exports.saveToken;
+exports.deleteToken = exports.deleteToken;

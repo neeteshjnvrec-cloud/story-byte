@@ -160,11 +160,18 @@ export const SearchScreen = () => {
     }
   };
 
-  const handleVerticalPress = (v) => {
-    if (v.key === 'hindi') {
-      handleFilterPress('hi');
-    } else {
-      setQuery(v.label);
+  const handleVerticalPress = async (v) => {
+    setLoading(true);
+    setHasSearched(true);
+    setSelectedGenre(null);
+    try {
+      const response = await apiService.getStories({ vertical: v.key, limit: 200 });
+      setResults(response.stories || []);
+    } catch (error) {
+      console.error('Vertical filter error:', error);
+      setResults([]);
+    } finally {
+      setLoading(false);
     }
   };
 
