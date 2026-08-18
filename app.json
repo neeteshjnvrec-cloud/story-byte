@@ -69,7 +69,8 @@
           "photosPermission": "StoryByte uses your photo library so you can choose a profile picture.",
           "cameraPermission": "StoryByte uses the camera so you can take a profile picture."
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "extra": {
       "firebase": {
@@ -89,3 +90,7 @@
     }
   }
 }
+"plugins": [
+  "expo-notifications",
+  "expo-firebase-core"
+]
