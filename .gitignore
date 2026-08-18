@@ -64,4 +64,4 @@ local.properties
 android/app/build/
 android/.gradle/
 ios/Pods/
-ios/build/
+ios/build/google-services.json
