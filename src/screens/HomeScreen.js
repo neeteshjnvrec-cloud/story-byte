@@ -10,6 +10,7 @@ import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Hero, RailCard } from '../components/story/StoryCard';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
+import { FilterModal } from '../components/FilterModal';
 import apiService from '../services/api';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
@@ -28,10 +29,17 @@ export const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [language, setLanguage] = useState('All');
+  const [showFilter, setShowFilter] = useState(false);
+  const [activeFilters, setActiveFilters] = useState(null);
 
-  const load = useCallback(async (lang = 'All') => {
+  const load = useCallback(async (lang = 'All', filters = null) => {
     try {
-      const params = lang !== 'All' ? { language: lang } : {};
+      const params = {};
+      if (lang !== 'All') params.language = lang;
+      if (filters) {
+        if (filters.genre) params.genre = filters.genre;
+        if (filters.language) params.language = filters.language;
+      }
       const [res, prog] = await Promise.all([
         apiSafe(() => apiService.getStories(params), { stories: [] }),
         apiSafe(() => apiService.getUserProgress(), []),
@@ -48,10 +56,15 @@ export const HomeScreen = () => {
     }
   }, []);
 
-  useEffect(() => { load(language); }, []);
+  useEffect(() => { load(language, activeFilters); }, [language, activeFilters]);
 
-  const onRefresh = () => { setRefreshing(true); load(language); };
-  const pickLang = (l) => { setLanguage(l); setLoading(true); load(l); };
+  const onRefresh = () => { setRefreshing(true); load(language, activeFilters); };
+  const pickLang = (l) => { setLanguage(l); setLoading(true); load(l, activeFilters); };
+  const handleFilterApply = (filters) => {
+    setActiveFilters(filters);
+    setLoading(true);
+    load(language, filters);
+  };
 
   const openStory = (s) => navigation.navigate('StoryDetail', { storyId: s.id, story: s });
   const play = async (s) => { await playStory(s); };
@@ -76,6 +89,10 @@ export const HomeScreen = () => {
         <View style={s.headerIcons}>
           <Pressable onPress={() => navigation.navigate('Browse')} hitSlop={8}><Icon name="search" /></Pressable>
           <HeaderNotificationButton size={22} color={theme.text} />
+          <Pressable onPress={() => setShowFilter(true)} hitSlop={8} style={s.filterBtn}>
+            <Icon name="filter" size={22} color={theme.text} />
+            {activeFilters && <View style={s.filterDot} />}
+          </Pressable>
           <Pressable onPress={() => navigation.navigate('Settings')} hitSlop={8}><Icon name="gear" /></Pressable>
         </View>
       </View>
@@ -162,7 +179,20 @@ const styles = (theme, tokens) =>
     headerIcons: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
+      gap: 4,
+    },
+    filterBtn: {
+      padding: 8,
+      position: 'relative',
+    },
+    filterDot: {
+      position: 'absolute',
+      top: 6,
+      right: 6,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: theme.accent,
     },
     chips: {
       flexDirection: 'row',
