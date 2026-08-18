@@ -5,6 +5,8 @@ export const GENRES = [
   { id: 'drama', label: 'Drama' },
   { id: 'adventure', label: 'Adventure' },
   { id: 'sleep', label: 'Sleep' },
+  { id: 'motivation', label: 'Motivation' },
+  { id: 'devotional', label: 'Devotional' },
 ];
 
 // For profile selection (capitalized)

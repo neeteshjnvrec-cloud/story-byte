@@ -50,9 +50,13 @@ export const FilterModal = ({ visible, onClose, onApply, initialFilters }) => {
   };
 
   const handleReset = () => {
+    // Reset local state
     setSelectedGenre('all');
     setSelectedLanguage('all');
     setSelectedDuration('all');
+    // Apply reset to parent (clears filters) and close modal
+    onApply(null);
+    onClose();
   };
 
   const FilterSection = ({ title, items, selected, onSelect }) => (

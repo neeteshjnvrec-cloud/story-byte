@@ -135,11 +135,17 @@ export const SearchScreen = () => {
         setLoading(false);
       }
     } else if (id === 'all') {
-      if (debouncedQuery.trim()) {
-        performSearch(debouncedQuery.trim());
-      } else if (!selectedGenre) {
-        setResults([]);
-        setHasSearched(false);
+      // Reset genre filter and load all stories
+      setSelectedGenre(null);
+      setHasSearched(false);
+      try {
+        setLoading(true);
+        const response = await apiService.getStories({ limit: 200 });
+        setResults(response.stories || []);
+      } catch (error) {
+        console.error('All filter error:', error);
+      } finally {
+        setLoading(false);
       }
     } else if ((id === 'short' || id === 'long') && !hasSearched) {
       // Nothing loaded yet — pull the catalog so the duration filter has data.

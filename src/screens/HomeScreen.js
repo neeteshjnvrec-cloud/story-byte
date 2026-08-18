@@ -89,25 +89,27 @@ export const HomeScreen = () => {
         <View style={s.headerIcons}>
           <Pressable onPress={() => navigation.navigate('Browse')} hitSlop={8}><Icon name="search" /></Pressable>
           <HeaderNotificationButton size={22} color={theme.text} />
-          <Pressable onPress={() => setShowFilter(true)} hitSlop={8} style={s.filterBtn}>
-            <Icon name="filter" size={22} color={theme.text} />
-            {activeFilters && <View style={s.filterDot} />}
-          </Pressable>
           <Pressable onPress={() => navigation.navigate('Settings')} hitSlop={8}><Icon name="gear" /></Pressable>
         </View>
       </View>
 
-      {/* Language chips */}
-      <View style={s.chips}>
-        {['All', 'EN', 'HI'].map((l) => {
-          const on = language === l;
-          return (
-            <Pressable key={l} onPress={() => pickLang(l)}
-              style={[s.chip, on && { backgroundColor: theme.accent, borderColor: theme.accent }]}>
-              <AppText variant="label" color={on ? 'onAccent' : 'textSecondary'}>{l}</AppText>
-            </Pressable>
-          );
-        })}
+      {/* Filter & Language Chips */}
+      <View style={s.chipsRow}>
+        <View style={s.chips}>
+          {['All', 'EN', 'HI'].map((l) => {
+            const on = language === l;
+            return (
+              <Pressable key={l} onPress={() => pickLang(l)}
+                style={[s.chip, on && { backgroundColor: theme.accent, borderColor: theme.accent }]}>
+                <AppText variant="label" color={on ? 'onAccent' : 'textSecondary'}>{l}</AppText>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Pressable onPress={() => setShowFilter(true)} hitSlop={8} style={s.filterBtn}>
+          <Icon name="filter" size={22} color={theme.text} />
+          {activeFilters && <View style={s.filterDot} />}
+        </Pressable>
       </View>
 
       {loading ? (
@@ -160,13 +162,13 @@ export const HomeScreen = () => {
           ))}
         </ScrollView>
       )}
+      <FilterModal
+        visible={showFilter}
+        onClose={() => setShowFilter(false)}
+        onApply={handleFilterApply}
+        initialFilters={activeFilters}
+      />
     </View>
-    <FilterModal
-      visible={showFilter}
-      onClose={() => setShowFilter(false)}
-      onApply={handleFilterApply}
-      initialFilters={activeFilters}
-    />
   );
 };
 
@@ -193,20 +195,25 @@ const styles = (theme, tokens) =>
     },
     filterDot: {
       position: 'absolute',
-      top: 6,
-      right: 6,
+      top: 4,
+      right: 4,
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: theme.accent,
+      backgroundColor: '#E53E3E',
+    },
+    chipsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.divider,
     },
     chips: {
       flexDirection: 'row',
-      paddingHorizontal: 16,
-      paddingVertical: 10,
       gap: 8,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.divider,
     },
     chip: {
       paddingHorizontal: 14,
