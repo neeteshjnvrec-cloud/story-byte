@@ -25,6 +25,13 @@ const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
 const MODEL = process.env.GROQ_MODEL || 'groq/compound';
 const DATE = process.env.STORY_DATE || new Date().toISOString().slice(0, 10);
 
+// Valid tags for AI to choose from
+const VALID_TAGS = [
+  'friendship', 'family', 'love', 'adventure', 'mystery',
+  'magic', 'nature', 'teamwork', 'sleepy', 'moral',
+  'humor', 'courage', 'kindness', 'growth', 'imagination'
+];
+
 // --- .env loader (local) ---
 (function () {
   try {
@@ -100,7 +107,7 @@ async function generateText(groq, slot) {
     ? 'Write the entire story in natural Hindi (Devanagari script).'
     : 'Write the entire story in English.';
   const sys = `You are a professional storyteller writing narration for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama} ${langInstruction} ` +
-    `Respond with ONLY JSON: {"title": string (max 60 chars), "description": string (one enticing sentence), "text": string (full narration, 450-800 words, natural spoken style, no markdown), "tags": string[]}.`;
+    `Respond with ONLY JSON: {"title": string (max 60 chars), "description": string (one enticing sentence), "text": string (full narration, 450-800 words, natural spoken style, no markdown), "tags": string[] (choose 3-5 tags ONLY from: ${VALID_TAGS.join(', ')})}.`;
   const c = await withRetry(() => groq.chat.completions.create({
     model: MODEL, temperature: 0.85, max_tokens: 4096, top_p: 0.95,
     response_format: { type: 'json_object' },
@@ -127,7 +134,9 @@ async function generateText(groq, slot) {
     title: String(d.title).replace(/^["']|["']$/g, '').slice(0, 70),
     description: String(d.description || `A ${slot.genre} story`).slice(0, 160),
     text: String(d.text).trim(),
-    tags: Array.isArray(d.tags) ? d.tags.slice(0, 6) : [slot.genre],
+    tags: Array.isArray(d.tags)
+      ? d.tags.filter(t => VALID_TAGS.includes(t)).slice(0, 5)
+      : [slot.genre],
   };
 }
 
