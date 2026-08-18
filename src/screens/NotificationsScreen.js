@@ -59,7 +59,6 @@ export const NotificationsScreen = () => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     // Force reload by re-subscribing
-    const q = require('../services/notificationService');
     // We'll just wait a moment and refresh state
     setTimeout(() => setRefreshing(false), 500);
   }, []);

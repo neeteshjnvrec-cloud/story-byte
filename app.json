@@ -90,7 +90,3 @@
     }
   }
 }
-"plugins": [
-  "expo-notifications",
-  "expo-firebase-core"
-]
