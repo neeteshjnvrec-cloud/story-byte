@@ -65,7 +65,11 @@ export const NotificationsScreen = () => {
 
   const handleNotificationPress = async (item) => {
     // Mark as read in Firestore
-    await notificationService.markAsRead(item.id);
+    try {
+      await notificationService.markAsRead(item.id);
+    } catch (e) {
+      console.error('Failed to mark read:', e);
+    }
     
     // Update local state
     setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, read: true } : n));
@@ -83,21 +87,33 @@ export const NotificationsScreen = () => {
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Clear All', style: 'destructive', onPress: async () => {
-          await notificationService.clearAll();
-          setNotifications([]);
+          try {
+            await notificationService.clearAll();
+            setNotifications([]);
+          } catch (e) {
+            console.error('Failed to clear notifications:', e);
+          }
         }}
       ]
     );
   };
 
   const handleMarkAllRead = async () => {
-    await notificationService.markAllAsRead();
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (e) {
+      console.error('Failed to mark all as read:', e);
+    }
   };
 
   const handleDelete = async (id) => {
-    await notificationService.delete(id);
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    try {
+      await notificationService.delete(id);
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    } catch (e) {
+      console.error('Failed to delete notification:', e);
+    }
   };
 
   const renderItem = ({ item }) => {

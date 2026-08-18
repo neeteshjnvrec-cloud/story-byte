@@ -77,10 +77,10 @@ class ApiService {
 
   // --- Stories -------------------------------------------------------------
 
-  // Returns { stories: [...] }. Filters genre/language/vertical in-memory to avoid
+  // Returns { stories: [...] }. Filters genre/language/vertical/duration in-memory to avoid
   // needing extra composite indexes.
   async getStories(params = {}) {
-    const { genre, language, vertical, limit = 50 } = params;
+    const { genre, language, vertical, duration, limit = 50 } = params;
 
     const q = query(
       collection(db, 'stories'),
@@ -101,6 +101,15 @@ class ApiService {
     }
     if (vertical && vertical !== 'All') {
       stories = stories.filter((s) => (s.verticalId || '').toLowerCase() === vertical.toLowerCase());
+    }
+    if (duration && duration !== 'all') {
+      stories = stories.filter((s) => {
+        const dur = s.duration || 0;
+        if (duration === 'short') return dur > 0 && dur < 300;
+        if (duration === 'medium') return dur >= 300 && dur < 900;
+        if (duration === 'long') return dur >= 900;
+        return true;
+      });
     }
 
     return { stories };

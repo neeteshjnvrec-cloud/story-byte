@@ -21,10 +21,7 @@ export const NotificationButton = () => {
   const handleToggle = async () => {
     if (!user) return;
     
-    const isEnabled = await notificationService.isEnabled();
-    const newStatus = !isEnabled;
     
-    await notificationService.setEnabled(newStatus);
     
     if (newStatus) {
       const token = await notificationService.getToken();

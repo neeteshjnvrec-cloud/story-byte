@@ -39,6 +39,7 @@ export const HomeScreen = () => {
       if (filters) {
         if (filters.genre) params.genre = filters.genre;
         if (filters.language) params.language = filters.language;
+        if (filters.duration) params.duration = filters.duration;
       }
       const [res, prog] = await Promise.all([
         apiSafe(() => apiService.getStories(params), { stories: [] }),

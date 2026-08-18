@@ -1,6 +1,17 @@
 // Notification Service — reads from Firestore for real-time notifications
 import { db, auth } from './firebase';
-import { collection, query, orderBy, limit, onSnapshot, updateDoc, doc, deleteDoc, where } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  onSnapshot,
+  updateDoc,
+  deleteDoc,
+  doc,
+  where,
+  getDocs
+} from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 
@@ -98,13 +109,22 @@ export const notificationService = {
 
   // Mark all notifications as read
   async markAllAsRead() {
-    const q = query(collection(db, 'notifications'));
-    const snapshot = await q.get();
-    const batch = [];
-    snapshot.forEach(documentSnapshot => {
-      batch.push(updateDoc(documentSnapshot.ref, { read: true, readAt: new Date().toISOString() }));
-    });
-    await Promise.all(batch);
+    try {
+      const q = query(collection(db, 'notifications'));
+      const snapshot = await getDocs(q);
+      console.log('[notificationService] markAllAsRead: found', snapshot.size, 'notifications');
+      
+      for (const docSnap of snapshot.docs) {
+        console.log('[notificationService] Updating doc:', docSnap.id);
+        await updateDoc(docSnap.ref, {
+          read: true,
+          readAt: new Date().toISOString(),
+        });
+      }
+      console.log('[notificationService] markAllAsRead: completed');
+    } catch (e) {
+      console.error('[notificationService] Failed to mark all as read:', e);
+    }
   },
 
   // Delete single notification
@@ -118,13 +138,19 @@ export const notificationService = {
 
   // Clear all notifications
   async clearAll() {
-    const q = query(collection(db, 'notifications'));
-    const snapshot = await q.get();
-    const batch = [];
-    snapshot.forEach(documentSnapshot => {
-      batch.push(deleteDoc(documentSnapshot.ref));
-    });
-    await Promise.all(batch);
+    try {
+      const q = query(collection(db, 'notifications'));
+      const snapshot = await getDocs(q);
+      console.log('[notificationService] clearAll: found', snapshot.size, 'notifications');
+      
+      for (const docSnap of snapshot.docs) {
+        console.log('[notificationService] Deleting doc:', docSnap.id);
+        await deleteDoc(docSnap.ref);
+      }
+      console.log('[notificationService] clearAll: completed');
+    } catch (e) {
+      console.error('[notificationService] Failed to clear all:', e);
+    }
   },
 
   // Get unread count
