@@ -372,7 +372,7 @@ export const EditProfileScreen = () => {
           <AppText variant="micro" color="textTertiary" style={styles.groupLabel}>FAVORITE GENRE</AppText>
           <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <View style={styles.pillRow}>
-              {GENRES.map((g) => <GenrePill key={g} label={g} selected={favoriteGenre === g} />)}
+              {GENRES.map((g) => <GenrePill key={g.id} label={g.label} selected={favoriteGenre === g.label} />)}
             </View>
           </View>
         </View>
