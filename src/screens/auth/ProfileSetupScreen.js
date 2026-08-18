@@ -147,8 +147,8 @@ export const ProfileSetupScreen = ({ navigation }) => {
           <View style={styles.pillRow}>
             {GENDERS.map((g) => (
               <GenderPill
-                key={g}
-                label={g}
+                key={g.id}
+                label={g.label}
                 selected={gender === g}
                 onPress={() => setGender(g)}
               />
@@ -169,10 +169,10 @@ export const ProfileSetupScreen = ({ navigation }) => {
           <View style={styles.pillRow}>
             {GENRES.map((g) => (
               <GenrePill
-                key={g}
-                label={g}
-                selected={favoriteGenre === g}
-                onPress={() => setFavoriteGenre(g)}
+                key={g.id}
+                label={g.label}
+                selected={favoriteGenre === g.label}
+                onPress={() => setFavoriteGenre(g.label)}
               />
             ))}
           </View>
