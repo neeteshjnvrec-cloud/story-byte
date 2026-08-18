@@ -161,6 +161,12 @@ export const HomeScreen = () => {
         </ScrollView>
       )}
     </View>
+    <FilterModal
+      visible={showFilter}
+      onClose={() => setShowFilter(false)}
+      onApply={handleFilterApply}
+      initialFilters={activeFilters}
+    />
   );
 };
 
