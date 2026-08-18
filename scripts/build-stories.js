@@ -230,7 +230,34 @@ async function run() {
     console.log('✓ doc', p.id);
   }
   try { await db.collection('generation_logs').doc(DATE).set({ date: DATE, count: pending.length, at: admin.firestore.FieldValue.serverTimestamp() }, { merge: true }); } catch (e) {}
+  
+  // Send notifications after successful deploy
+  await sendNotificationWebhook(pending);
+  
   console.log(`\nDone. Published ${pending.length} stories for ${DATE}.`);
+  
+  // Send notifications after successful deploy
+  await sendNotificationWebhook(pending);
+  
   process.exit(0);
 }
 run().catch((e) => { console.error('FATAL', e); process.exit(1); });
+
+// --- Send notification webhook after stories are published ---
+async function sendNotificationWebhook(stories) {
+  if (stories.length === 0) return;
+  const funcUrl = process.env.FIREBASE_FUNCTIONS_URL || 'https://us-central1-storybyte-76716.cloudfunctions.net/triggerStoryGeneration';
+  try {
+    console.log('📩 Sending notification webhook...');
+    const res = await fetch(`${funcUrl}?count=${stories.length}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    console.log('✅ Notifications sent:', data.count, 'stories');
+  } catch (e) {
+    console.warn('⚠️ Notification webhook failed:', e.message);
+    // Don't fail the pipeline if notifications fail
+  }
+}

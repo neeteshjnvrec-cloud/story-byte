@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "74586701348",
+    "project_id": "storybyte-76716",
+    "storage_bucket": "storybyte-76716.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74586701348:android:ae46bc4bfd04b3ab62e2b1",
+        "android_client_info": {
+          "package_name": "com.storybyte.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "74586701348-co6slfg5827d2fqr4nqhv753uha61q5i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.storybyte.app",
+            "certificate_hash": "108dbd26d58e64ad6f6de0d0e429b8c0ccf92a03"
+          }
+        },
+        {
+          "client_id": "74586701348-lk5akva1brs30arf1ai68smif1cok520.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.storybyte.app",
+            "certificate_hash": "257d4d2a51033455a13fb596bdea23c84b79c50a"
+          }
+        },
+        {
+          "client_id": "74586701348-v7dn6umvmpugmhl2j8b72kih0mi8gs30.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.storybyte.app",
+            "certificate_hash": "efb49eb906cea01d1cb8830d2cef323daa8b79bc"
+          }
+        },
+        {
+          "client_id": "74586701348-jb2e7lnrodgu8747jl4gpcro0og00ll0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUSSiZRPlDufXPYVxMR8XOwSDKNqMO5v8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "74586701348-jb2e7lnrodgu8747jl4gpcro0og00ll0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
