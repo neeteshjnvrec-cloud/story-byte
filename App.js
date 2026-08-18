@@ -26,7 +26,7 @@ import { ProfileSetupScreen } from './src/screens/auth/ProfileSetupScreen';
 import { EditProfileScreen } from './src/screens/EditProfileScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
-import { NotificationButton } from './src/components/NotificationButton';
+import { HeaderNotificationButton } from './src/components/HeaderNotificationButton';
 import { NotificationsScreen } from './src/screens/NotificationsScreen';
 import { NotificationProvider } from './src/context/NotificationContext';
 import { FloatingAudioPlayer } from './src/components/FloatingAudioPlayer';

@@ -40,14 +40,10 @@ const VERTICALS = [
 ];
 
 // Genre chips → mapped to existing GENRES ids used by getStories({ genre }).
-const GENRE_CHIPS = [
-  { id: 'romance', label: 'Romance' },
-  { id: 'mystery', label: 'Mystery' },
-  { id: 'sci-fi', label: 'Sci-fi' },
-  { id: 'horror', label: 'Horror' },
-  { id: 'fairy-tale', label: 'Fairy tale' },
-  { id: 'adventure', label: 'Adventure' },
-];
+import { GENRES } from '../constants/genres';
+
+// Genre chips
+const GENRE_CHIPS = GENRES;
 
 export const SearchScreen = () => {
   const navigation = useNavigation();

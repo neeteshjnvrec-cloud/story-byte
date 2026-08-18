@@ -22,7 +22,7 @@ const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
 const PROJECT = process.env.FIREBASE_PROJECT_ID || 'storybyte-76716';
 const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
-const MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+const MODEL = process.env.GROQ_MODEL || 'groq/compound';
 const DATE = process.env.STORY_DATE || new Date().toISOString().slice(0, 10);
 
 // --- .env loader (local) ---
@@ -72,18 +72,56 @@ const SLOTS = [
 const slug = (s) => (s || 'story').toLowerCase().replace(/[^a-z0-9ऀ-ॿ]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40);
 const hashSeed = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100000; return h; };
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Groq free tier rate-limits bursty requests (returns 429, sometimes 413).
+// Retry transient errors with exponential backoff + jitter.
+async function withRetry(fn, { attempts = 6, baseMs = 2000, label = 'call' } = {}) {
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastErr = e;
+      const msg = String(e && e.message || e);
+      const transient = e && (e.status === 429 || e.status === 413 || e.status === 500 || e.status === 502 || e.status === 503)
+        || /rate.?limit|too many|413|429|entity too large|overloaded|server error/i.test(msg);
+      if (!transient || i === attempts - 1) throw e;
+      const delay = baseMs * Math.pow(2, i) + Math.floor(Math.random() * 1000);
+      console.log(`  … ${label}: transient error (${msg.slice(0, 60)}), retry ${i + 1}/${attempts - 1} in ${Math.round(delay / 1000)}s`);
+      await sleep(delay);
+    }
+  }
+  throw lastErr;
+}
+
 async function generateText(groq, slot) {
   const langInstruction = slot.language === 'hi'
     ? 'Write the entire story in natural Hindi (Devanagari script).'
     : 'Write the entire story in English.';
   const sys = `You are a professional storyteller writing narration for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama} ${langInstruction} ` +
     `Respond with ONLY JSON: {"title": string (max 60 chars), "description": string (one enticing sentence), "text": string (full narration, 450-800 words, natural spoken style, no markdown), "tags": string[]}.`;
-  const c = await groq.chat.completions.create({
-    model: MODEL, temperature: 0.85, max_tokens: 2048, top_p: 0.95,
+  const c = await withRetry(() => groq.chat.completions.create({
+    model: MODEL, temperature: 0.85, max_tokens: 4096, top_p: 0.95,
     response_format: { type: 'json_object' },
     messages: [{ role: 'system', content: sys }, { role: 'user', content: `Write a ${slot.genre} story as JSON.` }],
-  });
-  const d = JSON.parse(c.choices[0].message.content.trim());
+  }), { label: `groq:${slot.language}/${slot.genre}` });
+  const raw = c.choices[0].message.content.trim();
+  // Reasoning models (groq/compound) may emit a thinking preamble before the
+  // JSON. Parse directly if clean; otherwise scan brace positions from the end
+  // until a slice parses as a complete JSON object (the real payload is the
+  // last {...} in the text, so the first parseable candidate wins).
+  let d;
+  try {
+    d = JSON.parse(raw);
+  } catch (_) {
+    const end = raw.lastIndexOf('}');
+    let ok = false;
+    for (let i = raw.lastIndexOf('{'); i >= 0 && !ok; i = raw.lastIndexOf('{', i - 1)) {
+      try { d = JSON.parse(raw.slice(i, end + 1)); ok = true; } catch (e) {}
+    }
+    if (!ok) throw new Error('no JSON in response');
+  }
   if (!d.title || !d.text) throw new Error('incomplete JSON');
   return {
     title: String(d.title).replace(/^["']|["']$/g, '').slice(0, 70),
@@ -108,6 +146,9 @@ function fetchImage(url, out) {
       res.pipe(f); f.on('finish', () => f.close(() => resolve()));
     }).on('error', reject).on('timeout', function () { this.destroy(new Error('img timeout')); });
   });
+}
+async function fetchImageWithRetry(url, out, { attempts = 3, baseMs = 3000, label = 'image' } = {}) {
+  return withRetry(() => fetchImage(url, out), { attempts, baseMs, label });
 }
 
 const EDGE = [['edge-tts', []], ['python3', ['-m', 'edge_tts']], ['uvx', ['edge-tts']]];
@@ -138,8 +179,18 @@ async function run() {
   fs.mkdirSync(path.join(PUB, 'covers'), { recursive: true });
   if (!fs.existsSync(path.join(PUB, 'index.html'))) fs.writeFileSync(path.join(PUB, 'index.html'), '<!doctype html><title>StoryByte CDN</title><h1>StoryByte content</h1>');
 
+  // Guard: skip if any story for this date already published (prevent duplicates on re-runs)
+  const todayCountSnap = await db.collection('stories').where('generatedDate', '==', DATE).count().get();
+  const todayCount = todayCountSnap.data().count;
+  if (todayCount > 0) {
+    console.log(`Already ${todayCount} stories for ${DATE} — skipping.`);
+    process.exit(0);
+  }
+
   const pending = [];
-  for (const slot of SLOTS) {
+  for (let s = 0; s < SLOTS.length; s++) {
+    const slot = SLOTS[s];
+    if (s > 0) await sleep(3000); // stay under Groq free-tier burst limits
     try {
       const content = await generateText(groq, slot);
       const id = `${DATE}_${slot.language}_${slot.genre}_${slug(content.title)}`;
@@ -147,7 +198,7 @@ async function run() {
       if (existing.exists && existing.data().audioUrl) { console.log('skip (exists):', id); continue; }
 
       const cover = path.join(PUB, 'covers', `${id}.jpg`);
-      await fetchImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(coverPrompt(slot, content))}?width=768&height=768&nologo=true&seed=${hashSeed(id)}&model=flux`, cover);
+      await fetchImageWithRetry(`https://image.pollinations.ai/prompt/${encodeURIComponent(coverPrompt(slot, content))}?width=768&height=768&nologo=true&seed=${hashSeed(id)}&model=flux`, cover, { label: `cover:${slot.language}/${slot.genre}` });
       const audio = path.join(PUB, 'audio', `${id}.mp3`);
       synth(content.text, slot, audio);
       const duration = durationSec(audio) || Math.max(60, Math.round(content.text.split(/\s+/).length / 2.5));
@@ -179,7 +230,35 @@ async function run() {
     console.log('✓ doc', p.id);
   }
   try { await db.collection('generation_logs').doc(DATE).set({ date: DATE, count: pending.length, at: admin.firestore.FieldValue.serverTimestamp() }, { merge: true }); } catch (e) {}
+  
+  // Send notifications after successful deploy
+  await sendNotificationWebhook(pending);
+  
   console.log(`\nDone. Published ${pending.length} stories for ${DATE}.`);
+  
+  // Send notifications after successful deploy
+  const { sendNotifications } = require('./send-notifications');
+  await sendNotifications(pending.map(p => ({ id: p.id, title: p.content.title, genre: p.slot.genre, language: p.slot.language, coverImage: `${SITE}/covers/${p.id}.jpg` })));
+  
   process.exit(0);
 }
 run().catch((e) => { console.error('FATAL', e); process.exit(1); });
+
+// --- Send notification webhook after stories are published ---
+async function sendNotificationWebhook(stories) {
+  if (stories.length === 0) return;
+  const funcUrl = process.env.FIREBASE_FUNCTIONS_URL || 'https://us-central1-storybyte-76716.cloudfunctions.net/triggerStoryGeneration';
+  try {
+    console.log('📩 Sending notification webhook...');
+    const res = await fetch(`${funcUrl}?count=${stories.length}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    console.log('✅ Notifications sent:', data.count, 'stories');
+  } catch (e) {
+    console.warn('⚠️ Notification webhook failed:', e.message);
+    // Don't fail the pipeline if notifications fail
+  }
+}

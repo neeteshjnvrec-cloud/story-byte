@@ -1,6 +1,7 @@
 // Notifications Provider - Handles permission and message listening
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Alert, Platform } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import { notificationService } from '../services/notificationService';
 import { useAppContext } from '../context/AppContext';
 
@@ -47,13 +48,16 @@ export const NotificationProvider = ({ children }) => {
   };
 
   const listenForMessages = () => {
-    // Handle foreground messages
-    const unsubscribe = notificationService.onMessage((payload) => {
+    // Handle foreground messages using Expo's listener
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      const payload = response.notification.request.content.data;
       showNotification(payload);
     });
 
-    // Handle background/terminated state messages
-    // These are handled by the native side and shown by the system
+    // Cleanup on unmount
+    return () => {
+      subscription.remove();
+    };
   };
 
   const showNotification = (payload) => {

@@ -9,6 +9,7 @@ import { useTheme } from '../hooks/useTheme';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Hero, RailCard } from '../components/story/StoryCard';
+import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
 import apiService from '../services/api';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
@@ -74,7 +75,7 @@ export const HomeScreen = () => {
         <AppText variant="displayM"><AppText variant="displayM" color="accent">Story</AppText>Byte</AppText>
         <View style={s.headerIcons}>
           <Pressable onPress={() => navigation.navigate('Browse')} hitSlop={8}><Icon name="search" /></Pressable>
-          <Pressable hitSlop={8}><Icon name="bell" /></Pressable>
+          <HeaderNotificationButton size={22} color={theme.text} />
           <Pressable onPress={() => navigation.navigate('Settings')} hitSlop={8}><Icon name="gear" /></Pressable>
         </View>
       </View>
@@ -109,24 +110,35 @@ export const HomeScreen = () => {
             <Hero story={hero} onPress={() => openStory(hero)} onPlay={() => play(hero)} />
           ) : null}
 
-          {progress.length ? (
-            <>
-              <SectionHeader theme={theme} title="Continue listening" />
-              <Rail items={progress} onOpen={openStory} onPlay={play} />
-            </>
+          {popular.length > 1 ? (
+            <View style={s.section}>
+              <AppText variant="h3" style={s.sectionTitle}>Popular</AppText>
+              <View style={s.rail}>
+                {popular.map((story) => (
+                  <RailCard
+                    key={story.id}
+                    story={story}
+                    onPress={() => openStory(story)}
+                    onPlay={() => play(story)}
+                  />
+                ))}
+              </View>
+            </View>
           ) : null}
 
-          {popular.length ? (
-            <>
-              <SectionHeader theme={theme} title="🔥 Popular" />
-              <Rail items={popular} onOpen={openStory} onPlay={play} />
-            </>
-          ) : null}
-
-          {rails.map((r) => (
-            <View key={r.title}>
-              <SectionHeader theme={theme} title={r.title} />
-              <Rail items={r.items} onOpen={openStory} onPlay={play} />
+          {rails.map((rail) => (
+            <View key={rail.title} style={s.section}>
+              <AppText variant="h3" style={s.sectionTitle}>{rail.title}</AppText>
+              <View style={s.rail}>
+                {rail.items.slice(0, 5).map((story) => (
+                  <RailCard
+                    key={story.id}
+                    story={story}
+                    onPress={() => openStory(story)}
+                    onPlay={() => play(story)}
+                  />
+                ))}
+              </View>
             </View>
           ))}
         </ScrollView>
@@ -135,33 +147,47 @@ export const HomeScreen = () => {
   );
 };
 
-function SectionHeader({ theme, title, action }) {
-  return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingHorizontal: 20, paddingTop: 18, paddingBottom: 10 }}>
-      <AppText variant="h2">{title}</AppText>
-      {action ? <AppText variant="micro" color="accent">SEE ALL</AppText> : null}
-    </View>
-  );
-}
-
-function Rail({ items, onOpen, onPlay }) {
-  return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 20, gap: 14 }}>
-      {items.map((it, i) => (
-        <RailCard key={it.id || it.storyId || i} story={it} onPress={() => onOpen(it)} onPlay={() => onPlay(it)} />
-      ))}
-    </ScrollView>
-  );
-}
-
-const styles = (theme, tokens) => StyleSheet.create({
-  screen: { flex: 1, backgroundColor: theme.background },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
-  headerIcons: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  chips: { flexDirection: 'row', gap: 8, paddingHorizontal: 20, paddingVertical: 8 },
-  chip: { paddingHorizontal: 15, paddingVertical: 8, borderRadius: 999, backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-});
+const styles = (theme, tokens) =>
+  StyleSheet.create({
+    screen: { flex: 1, backgroundColor: theme.background },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border,
+    },
+    headerIcons: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    chips: {
+      flexDirection: 'row',
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      gap: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.divider,
+    },
+    chip: {
+      paddingHorizontal: 14,
+      paddingVertical: 6,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.border,
+      backgroundColor: theme.card,
+    },
+    section: { marginTop: 20, paddingHorizontal: 16 },
+    sectionTitle: { marginBottom: 12, color: theme.text },
+    rail: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 12,
+    },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  });
 
 export default HomeScreen;

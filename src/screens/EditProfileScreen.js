@@ -22,6 +22,7 @@ import { useTheme } from '../hooks/useTheme';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Input } from '../components/ui/Input';
+import { GENRES } from '../constants/genres';
 
 const GENRES = ['Romance', 'Mystery', 'Drama', 'Fantasy', 'Thriller', 'Comedy', 'Horror', 'Slice of Life'];
 const GENDERS = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
