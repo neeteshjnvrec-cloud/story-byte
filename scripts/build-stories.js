@@ -19,10 +19,11 @@ const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
 const PROJECT = process.env.FIREBASE_PROJECT_ID || 'storybyte-76716';
 const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
-const MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b'; // cheaper, higher rate limits than 120b
+// Model fallback chain — try each in order on failure (rate limits, 413, etc.)
+const MODELS = (process.env.GROQ_MODEL || 'openai/gpt-oss-20b').split(',').map(s => s.trim());
 const DATE = process.env.STORY_DATE || new Date().toISOString().slice(0, 10);
 const DAILY_COUNT = 2; // Exactly 2 stories per day
-const MAX_RETRIES = 3; // Retry failed slots up to 3 times
+const MAX_RETRIES = 6; // Retry each slot up to 6 times (trying different models)
 
 // --- .env loader (local) ---
 (function () {
@@ -116,19 +117,38 @@ async function generateText(groq, slot) {
   // Compact system prompt to avoid "Request Entity Too Large" (413) errors
   const sys = `You are a storyteller for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama} Write in ${langInstruction} ` +
     `JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 words, spoken style, no markdown","tags":["genre"]}.`;
-  const c = await groq.chat.completions.create({
-    model: MODEL, temperature: 0.85, max_tokens: 2048, top_p: 0.95,
-    response_format: { type: 'json_object' },
-    messages: [{ role: 'system', content: sys }, { role: 'user', content: `Write a ${slot.genre} story.` }],
-  });
-  const d = JSON.parse(c.choices[0].message.content.trim());
-  if (!d.title || !d.text) throw new Error('incomplete JSON');
-  return {
-    title: String(d.title).replace(/^["']|["']$/g, '').slice(0, 70),
-    description: String(d.description || `A ${slot.genre} story`).slice(0, 160),
-    text: String(d.text).trim(),
-    tags: Array.isArray(d.tags) ? d.tags.slice(0, 6) : [slot.genre],
-  };
+
+  // Try each model in the fallback chain until one succeeds
+  const errors = [];
+  for (const model of MODELS) {
+    try {
+      const c = await groq.chat.completions.create({
+        model, temperature: 0.85, max_tokens: 2048, top_p: 0.95,
+        response_format: { type: 'json_object' },
+        messages: [{ role: 'system', content: sys }, { role: 'user', content: `Write a ${slot.genre} story.` }],
+      });
+      const d = JSON.parse(c.choices[0].message.content.trim());
+      if (!d.title || !d.text) throw new Error('incomplete JSON');
+      // Log which model succeeded (useful for debugging)
+      console.log(`  ✅ Model: ${model}`);
+      return {
+        title: String(d.title).replace(/^["']|["']$/g, '').slice(0, 70),
+        description: String(d.description || `A ${slot.genre} story`).slice(0, 160),
+        text: String(d.text).trim(),
+        tags: Array.isArray(d.tags) ? d.tags.slice(0, 6) : [slot.genre],
+      };
+    } catch (e) {
+      errors.push({ model, error: e.message });
+      console.log(`  ✗ ${model}: ${e.message}`);
+      // If it's a model not found / auth error, don't bother trying next
+      if (e.message.includes('not found') || e.message.includes('authentication') || e.message.includes('Invalid API Key')) {
+        throw new Error(`Model ${model} failed permanently: ${e.message}`);
+      }
+    }
+  }
+  // All models exhausted
+  const modelSummaries = errors.map(e => `${e.model}(${e.error.slice(0, 30)})`).join(' | ');
+  throw new Error(`All models failed: ${modelSummaries}`);
 }
 
 function coverPrompt(slot, content) {
