@@ -328,17 +328,11 @@ async function run() {
     console.log(`\n⚠️  ${failedToday.length} slots failed — will retry tomorrow`);
   }
 
-  // CRITICAL: Only deploy if we have exactly DAILY_COUNT proper stories
+  // Deploy if we have at least 1 story (don't require exactly DAILY_COUNT)
   console.log(`\n📊 Generated: ${pending.length}/${DAILY_COUNT} stories`);
 
   if (pending.length === 0) {
     console.log('❌ No stories generated — nothing to deploy.');
-    process.exit(0);
-  }
-
-  if (pending.length < DAILY_COUNT) {
-    console.log(`⚠️  Only ${pending.length} stories generated (expected ${DAILY_COUNT}). NOT deploying.`);
-    console.log('Run the script again tomorrow to retry failed slots.');
     process.exit(0);
   }
 
