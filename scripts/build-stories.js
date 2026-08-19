@@ -24,10 +24,26 @@ const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
 // 2. openai/gpt-oss-20b — good speed, cheap, occasionally empty (caught below)
 // 3. groq/compound — slower (3s) but very reliable
 // 4. openai/gpt-oss-120b — best quality but rate-limited on free tier
-const MODELS = (process.env.GROQ_MODEL || 'qwen/qwen3.6-27b,openai/gpt-oss-20b,groq/compound,openai/gpt-oss-120b')
-              .split(',')
-              .map(s => s.trim())
-              .filter(Boolean);
+//
+// GROQ_MODEL can be:
+//   - comma-separated: "model1,model2,model3"
+//   - JSON array string: '["model1","model2"]' or ["model1","model2"]
+function parseModels(envValue) {
+  if (!envValue) return ['qwen/qwen3.6-27b', 'openai/gpt-oss-20b', 'groq/compound', 'openai/gpt-oss-120b'];
+  const raw = envValue.trim();
+  // Try JSON array first (handles ['model1', 'model2'] format)
+  if (raw.startsWith('[') || raw.startsWith('(')) {
+    try {
+      const cleaned = raw.replace(/^\[|^\(|\]$|\)$/g, ''); // Remove brackets
+      return cleaned.split(',').map(s => s.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean);
+    } catch (e) {
+      // Fall through to simple split
+    }
+  }
+  // Simple comma-separated
+  return raw.split(',').map(s => s.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean);
+}
+const MODELS = parseModels(process.env.GROQ_MODEL);
 const DATE = process.env.STORY_DATE || new Date().toISOString().slice(0, 10);
 const DAILY_COUNT = 2; // Exactly 2 stories per day
 const MAX_RETRIES = 6; // Retry each slot up to 6 times (trying different models)
