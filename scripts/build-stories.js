@@ -19,8 +19,15 @@ const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
 const PROJECT = process.env.FIREBASE_PROJECT_ID || 'storybyte-76716';
 const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
-// Model fallback chain — try each in order on failure (rate limits, 413, etc.)
-const MODELS = (process.env.GROQ_MODEL || 'openai/gpt-oss-20b').split(',').map(s => s.trim());
+// Model fallback chain (ordered by speed/reliability based on tests):
+// 1. qwen/qwen3.6-27b — fastest (259ms), reliable
+// 2. openai/gpt-oss-20b — good speed, cheap, occasionally empty (caught below)
+// 3. groq/compound — slower (3s) but very reliable
+// 4. openai/gpt-oss-120b — best quality but rate-limited on free tier
+const MODELS = (process.env.GROQ_MODEL || 'qwen/qwen3.6-27b,openai/gpt-oss-20b,groq/compound,openai/gpt-oss-120b')
+              .split(',')
+              .map(s => s.trim())
+              .filter(Boolean);
 const DATE = process.env.STORY_DATE || new Date().toISOString().slice(0, 10);
 const DAILY_COUNT = 2; // Exactly 2 stories per day
 const MAX_RETRIES = 6; // Retry each slot up to 6 times (trying different models)
@@ -128,7 +135,7 @@ async function generateText(groq, slot) {
         messages: [{ role: 'system', content: sys }, { role: 'user', content: `Write a ${slot.genre} story.` }],
       });
       const d = JSON.parse(c.choices[0].message.content.trim());
-      if (!d.title || !d.text) throw new Error('incomplete JSON');
+      if (!d.title || !d.text || d.text.trim().length < 50) throw new Error('incomplete/empty text');
       // Log which model succeeded (useful for debugging)
       console.log(`  ✅ Model: ${model}`);
       return {
@@ -139,7 +146,7 @@ async function generateText(groq, slot) {
       };
     } catch (e) {
       errors.push({ model, error: e.message });
-      console.log(`  ✗ ${model}: ${e.message}`);
+      console.log(`  ✗ ${model}: ${e.message.slice(0, 60)}`);
       // If it's a model not found / auth error, don't bother trying next
       if (e.message.includes('not found') || e.message.includes('authentication') || e.message.includes('Invalid API Key')) {
         throw new Error(`Model ${model} failed permanently: ${e.message}`);
