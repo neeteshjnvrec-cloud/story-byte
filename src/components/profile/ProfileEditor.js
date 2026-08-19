@@ -19,7 +19,7 @@ import { Icon } from '../ui/Icon';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 
-const GENRES = ['Romance', 'Mystery', 'Drama', 'Fantasy', 'Thriller', 'Comedy', 'Horror', 'Slice of Life'];
+import { GENRES } from '../../constants/genres';
 const GENDERS = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
 
 export const ProfileEditor = ({

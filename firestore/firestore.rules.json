@@ -6,15 +6,22 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
     function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
 
-    // Stories: public read. Clients may NOT create/delete or edit content — the
-    // content pipeline writes via the Admin SDK (which bypasses these rules).
-    // The only client mutation allowed is bumping counters (plays/ratings).
+    // Config: public read (API keys are rate-limited, not secret)
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if false; // Admin-only
+    }
+
+    // Stories: public read, authenticated users can create community stories
     match /stories/{storyId} {
       allow read: if true;
-      allow create, delete: if false;
+      allow create: if isSignedIn() 
+        && request.resource.data.isCommunityStory == true
+        && request.resource.data.authorId == request.auth.uid;
+      allow delete: if false; // Admin-only
       allow update: if isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['plays', 'rating', 'ratingCount', 'lastPlayedAt', 'lastRatedAt', 'lastReview']);
+              .hasOnly(['plays', 'rating', 'ratingCount', 'lastPlayedAt', 'lastRatedAt', 'lastReview']);
     }
 
     // Pre-built home feed + taxonomy: public read, admin-only write.
@@ -62,7 +69,7 @@ service cloud.firestore {
     // Notifications: authenticated users can read, update, delete
     match /notifications/{notificationId} {
       allow read: if isSignedIn();
-      allow create: if false; // Only admin SDK can create
+      allow create: if isSignedIn(); // Allow users to create notifications (for community stories)
       allow update: if isSignedIn();
       allow delete: if isSignedIn();
     }

@@ -1,4 +1,4 @@
-// Bottom tab navigation: Home · Browse · Library · Profile
+// Bottom tab navigation: Home · Browse · Community · Create · Library · Profile
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,8 @@ import { useTheme } from '../hooks/useTheme';
 import { FONTS } from '../theme/tokens';
 import { HomeScreen } from '../screens/HomeScreen';
 import { SearchScreen } from '../screens/SearchScreen';
+import { CommunityScreen } from '../screens/CommunityScreen';
+import { CreateStoryScreen } from '../screens/CreateStoryScreen';
 import { FavoritesScreen } from '../screens/FavoritesScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 
@@ -15,6 +17,8 @@ const Tab = createBottomTabNavigator();
 const ICONS = {
   Home: 'home',
   Browse: 'search',
+  Community: 'people',
+  Create: 'create',
   Library: 'library',
   Profile: 'person',
 };
@@ -46,6 +50,8 @@ export function AppNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Browse" component={SearchScreen} />
+      <Tab.Screen name="Community" component={CommunityScreen} />
+      <Tab.Screen name="Create" component={CreateStoryScreen} />
       <Tab.Screen name="Library" component={FavoritesScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
