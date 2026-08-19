@@ -19,7 +19,7 @@ const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
 const PROJECT = process.env.FIREBASE_PROJECT_ID || 'storybyte-76716';
 const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
-const MODEL = process.env.GROQ_MODEL || 'groq/compound';
+const MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b'; // cheaper, higher rate limits than 120b
 const DATE = process.env.STORY_DATE || new Date().toISOString().slice(0, 10);
 const DAILY_COUNT = 2; // Exactly 2 stories per day
 const MAX_RETRIES = 3; // Retry failed slots up to 3 times
@@ -112,15 +112,14 @@ async function markSlotSuccess(slot) {
 }
 
 async function generateText(groq, slot) {
-  const langInstruction = slot.language === 'hi'
-    ? 'Write the entire story in natural Hindi (Devanagari script).'
-    : 'Write the entire story in English.';
-  const sys = `You are a professional storyteller writing narration for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama} ${langInstruction} ` +
-    `Respond with ONLY JSON: {"title": string (max 60 chars), "description": string (one enticing sentence), "text": string (full narration, 450-800 words, natural spoken style, no markdown), "tags": string[]}.`;
+  const langInstruction = slot.language === 'hi' ? 'Hindi (Devanagari).' : 'English.';
+  // Compact system prompt to avoid "Request Entity Too Large" (413) errors
+  const sys = `You are a storyteller for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama} Write in ${langInstruction} ` +
+    `JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 words, spoken style, no markdown","tags":["genre"]}.`;
   const c = await groq.chat.completions.create({
     model: MODEL, temperature: 0.85, max_tokens: 2048, top_p: 0.95,
     response_format: { type: 'json_object' },
-    messages: [{ role: 'system', content: sys }, { role: 'user', content: `Write a ${slot.genre} story as JSON.` }],
+    messages: [{ role: 'system', content: sys }, { role: 'user', content: `Write a ${slot.genre} story.` }],
   });
   const d = JSON.parse(c.choices[0].message.content.trim());
   if (!d.title || !d.text) throw new Error('incomplete JSON');
@@ -185,6 +184,9 @@ async function createNotification(story) {
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 }
+
+// --- utils ---
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function run() {
   if (!process.env.GROQ_API_KEY) throw new Error('GROQ_API_KEY is not set');
@@ -295,6 +297,12 @@ async function run() {
         usedSlots.add(slotKey);
       } catch (e) {
         console.error(`✗ attempt ${attempts}:`, e.message);
+        // Exponential backoff: 2s, 4s, 8s — avoids rate limits (429)
+        if (attempts < maxAttempts) {
+          const waitMs = Math.min(2000 * Math.pow(2, attempts - 1), 10000);
+          console.log(`  ⏳ Waiting ${waitMs/1000}s before retry...`);
+          await sleep(waitMs);
+        }
         if (attempts >= maxAttempts) {
           failedToday.push({ language: slot.language, genre: slot.genre });
         }
