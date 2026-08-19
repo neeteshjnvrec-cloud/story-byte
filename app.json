@@ -83,7 +83,8 @@
       },
       "eas": {
         "projectId": "d60ac706-e177-401b-8307-eb0cd8e8dfff"
-      }
+      },
+      "GITHUB_TOKEN": "${EXPO_PUBLIC_GITHUB_TOKEN}"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

@@ -23,6 +23,7 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
+import Groq from 'groq-sdk';
 
 // Consecutive-day listening streak from a set of 'YYYY-MM-DD' strings.
 // Counts back from today (with a one-day grace if today has no listen yet).
@@ -406,6 +407,218 @@ class ApiService {
     await deleteDoc(doc(db, 'users', userId));
 
     return { success: true };
+  }
+  // --- Community Stories -----------------------------------------------------
+
+  /**
+   * Fetch Groq API keys and models from Firestore config collection.
+   * Returns { keys: string[], models: string[] }
+   */
+  async fetchGroqConfig() {
+    try {
+      const configDoc = await getDoc(doc(db, 'config', 'groq_settings'));
+      if (!configDoc.exists()) {
+        // Default fallback if no config exists
+        console.warn('Groq config not found in Firestore, using defaults');
+        return {
+          keys: [process.env.GROQ_API_KEY || ''],
+          models: ['groq/compound', 'groq/deepseek-r1-distill-llama-70b']
+        };
+      }
+      const data = configDoc.data();
+      return {
+        keys: Array.isArray(data.apiKeys) ? data.apiKeys.filter(Boolean) : [],
+        models: Array.isArray(data.models) ? data.models.filter(Boolean) : []
+      };
+    } catch (error) {
+      console.error('Error fetching Groq config:', error);
+      return { keys: [], models: [] };
+    }
+  }
+
+  /**
+   * Generate story using Groq API with automatic key/model rotation on failure
+   */
+  async generateCommunityStory({ title, prompt, genre }) {
+    const { keys, models } = await this.fetchGroqConfig();
+    
+    if (!keys.length || !models.length) {
+      throw new Error('No Groq API keys or models configured in Firestore');
+    }
+
+    const langInstruction = 'English';
+    const sysPrompt = `You are a storyteller for an audio app. Write a ${genre} story. Write in ${langInstruction}. 
+JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 words, spoken style, no markdown","tags":["${genre}"]}.`;
+
+    const errors = [];
+
+    // Try each key-model combination with retry
+    for (let keyIndex = 0; keyIndex < keys.length; keyIndex++) {
+      const apiKey = keys[keyIndex];
+      if (!apiKey) continue;
+
+      const groq = new Groq({ apiKey });
+
+      for (let modelIndex = 0; modelIndex < models.length; modelIndex++) {
+        const model = models[modelIndex];
+        
+        try {
+          const completion = await groq.chat.completions.create({
+            model,
+            temperature: 0.85,
+            max_tokens: 2048,
+            top_p: 0.95,
+            response_format: { type: 'json_object' },
+            messages: [
+              { role: 'system', content: sysPrompt },
+              { role: 'user', content: `Write a ${genre} story based on this prompt: ${prompt}` }
+            ],
+          });
+
+          const content = completion.choices[0]?.message?.content;
+          if (!content) throw new Error('Empty response from Groq');
+
+          const parsed = JSON.parse(content.trim());
+          
+          if (!parsed.title || !parsed.text || parsed.text.trim().length < 50) {
+            throw new Error('Incomplete story generated');
+          }
+
+          console.log(`✅ Generated story using model: ${model} (key ${keyIndex + 1}/${keys.length})`);
+          
+          return {
+            title: parsed.title.replace(/^["']|["']$/g, '').slice(0, 70),
+            description: parsed.description || `A ${genre} story`,
+            prompt,
+            genre,
+            text: parsed.text.trim(),
+            tags: Array.isArray(parsed.tags) ? parsed.tags.slice(0, 6) : [genre],
+            status: 'draft',
+            authorId: this.uid,
+            authorName: this.user?.displayName || 'Anonymous',
+            modelUsed: model,
+            keyUsed: keyIndex,
+          };
+
+        } catch (error) {
+          const errorMsg = error.message || 'Unknown error';
+          errors.push({ model, keyIndex, error: errorMsg });
+          console.log(`✗ Failed (${model}, key ${keyIndex + 1}): ${errorMsg.slice(0, 50)}`);
+
+          // Don't retry on authentication/key errors - skip to next key
+          if (errorMsg.includes('authentication') || errorMsg.includes('Invalid API Key') || errorMsg.includes('401')) {
+            break;
+          }
+        }
+      }
+    }
+
+    // All combinations failed
+    const errorSummary = errors.map(e => `${e.model}(key${e.keyIndex + 1}):${e.error.slice(0, 30)}`).join(' | ');
+    throw new Error(`All Groq combinations failed: ${errorSummary}`);
+  }
+
+  async publishCommunityStory(storyData) {
+    try {
+      const storyId = `community_${Date.now()}_${this.uid}`;
+      const storyRef = doc(db, 'stories', storyId);
+
+      // Generate a cover image URL locally (Pollinations AI — free, no key needed)
+      let coverImage = '';
+      try {
+        const prompt = encodeURIComponent(
+          `${storyData.genre} story illustration, children's book style, warm colors, ${storyData.title || ''}`
+        );
+        const seed = Math.floor(Math.random() * 99999);
+        coverImage = `https://image.pollinations.ai/prompt/${prompt}?width=768&height=768&nologo=true&seed=${seed}&model=flux`;
+      } catch (_) {}
+
+      const storyDoc = {
+        storyId,
+        title: storyData.title,
+        description: storyData.description || storyData.prompt,
+        genre: storyData.genre,
+        language: storyData.language || 'en',
+        text: storyData.text,
+        audioUrl: '',          // filled by host-on-firebase.js after deploy
+        coverImage,            // real AI-generated URL saved immediately
+        duration: 0,
+        authorName: storyData.authorName || 'Anonymous',
+        authorId: this.uid,
+        isCommunityStory: true,
+        status: 'published',
+        likesCount: 0,
+        playsCount: 0,
+        tags: storyData.tags || [storyData.genre],
+        modelUsed: storyData.modelUsed || '',
+        ttsEngine: 'edge-tts', // host-on-firebase.js picks this up to generate audio
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      await setDoc(storyRef, storyDoc);
+
+      // Broadcast notification
+      await this.createNotification({
+        type: 'new_community_story',
+        title: 'New Story Published!',
+        body: `${storyDoc.authorName} published: ${storyDoc.title}`,
+        storyId,
+        authorName: storyDoc.authorName,
+        coverImage: storyDoc.coverImage,
+      });
+
+      return { ...storyDoc, id: storyId };
+    } catch (error) {
+      console.error('Error publishing community story:', error);
+      throw error;
+    }
+  }
+
+  async getCommunityStories() {
+    try {
+      // Wait for index to be ready (index building can take 1-2 minutes)
+      const MAX_RETRIES = 3;
+      const DELAY_MS = 2000;
+      
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        try {
+          const q = query(
+            collection(db, 'stories'),
+            where('isCommunityStory', '==', true),
+            orderBy('createdAt', 'desc'),
+            fbLimit(50)
+          );
+          
+          const snapshot = await getDocs(q);
+          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+          if (error.code === 'failed-precondition' && attempt < MAX_RETRIES - 1) {
+            // Index is building, wait and retry
+            console.log(`⏳ Index building, retrying in ${DELAY_MS/1000}s... (attempt ${attempt + 1}/${MAX_RETRIES})`);
+            await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+            continue;
+          }
+          throw error;
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching community stories:', error);
+      return [];
+    }
+  }
+
+  async createNotification(notificationData) {
+    try {
+      const notifRef = doc(collection(db, 'notifications'));
+      await setDoc(notifRef, {
+        ...notificationData,
+        read: false,
+        createdAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error('Error creating notification:', error);
+    }
   }
 }
 

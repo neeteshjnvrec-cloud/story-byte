@@ -174,12 +174,14 @@ async function generateText(groq, slot) {
   throw new Error(`All models failed: ${modelSummaries}`);
 }
 
-function coverPrompt(slot, content) {
-  const mood = slot.isSleep ? 'calm dreamy nighttime, soft moonlight' :
-    slot.isKids ? 'bright cheerful playful cartoon' :
-    slot.genre === 'mystery' ? 'moody atmospheric, muted tones' :
-    slot.genre === 'romance' ? 'warm golden tender' : 'warm cinematic';
-  return `${content.description || content.title}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
+function coverPrompt(slotOrStory, content) {
+  // Support both slot objects (daily) and story objects (community)
+  const mood = (slotOrStory.isSleep || (content && content.isSleep)) ? 'calm dreamy nighttime, soft moonlight' :
+    (slotOrStory.isKids || (content && content.isKids)) ? 'bright cheerful playful cartoon' :
+    (slotOrStory.genre === 'mystery' || content?.genre === 'mystery') ? 'moody atmospheric, muted tones' :
+    (slotOrStory.genre === 'romance' || content?.genre === 'romance') ? 'warm golden tender' : 'warm cinematic';
+  const desc = content?.description || content?.title || slotOrStory.description || slotOrStory.title || '';
+  return `${desc}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
 }
 
 function fetchImage(url, out) {
@@ -371,20 +373,60 @@ async function run() {
     console.log(`\n⚠️  ${failedToday.length} slots failed — will retry tomorrow`);
   }
 
-  // Deploy if we have at least 1 story (don't require exactly DAILY_COUNT)
-  console.log(`\n📊 Generated: ${pending.length}/${DAILY_COUNT} stories`);
+  // ── Process pending community stories (same audio/cover pipeline) ────────────
+  const communityPending = [];
+  try {
+    const q = db.collection('stories')
+      .where('ttsEngine', '==', 'edge-tts')
+      .where('isCommunityStory', '==', true);
+    const snap = await q.get();
+    console.log(`\n🔍 Found ${snap.size} pending community story(ies)`);
+    for (const doc of snap.docs) {
+      const data = doc.data();
+      // Skip if already has a real hosting URL
+      if (data.audioUrl && data.audioUrl.startsWith(SITE)) continue;
+      console.log(`  → ${data.title || 'untitled'} (${doc.id})`);
 
-  if (pending.length === 0) {
-    console.log('❌ No stories generated — nothing to deploy.');
+      const id = doc.id;
+      const cover = path.join(PUB, 'covers', `${id}.jpg`);
+      const audio = path.join(PUB, 'audio', `${id}.mp3`);
+
+      // Cover
+      await fetchImage(
+        `https://image.pollinations.ai/prompt/${encodeURIComponent(coverPrompt(data, data))}?width=768&height=768&nologo=true&seed=${hashSeed(id)}&model=flux`,
+        cover
+      );
+      console.log(`    cover ✓ (${Math.round(fs.statSync(cover).size / 1024)}KB)`);
+
+      // Audio via edge-tts
+      const slotLike = { voice: 'en-US-AriaNeural', rate: null };
+      synth(data.text, slotLike, audio);
+      const dur = durationSec(audio) || Math.max(30, Math.round((data.text || '').split(/\s+/).length / 2.5));
+      console.log(`    audio ✓ (${Math.round(fs.statSync(audio).size / 1024)}KB, ${dur}s)`);
+
+      communityPending.push({ id, title: data.title, genre: data.genre, duration: dur });
+    }
+  } catch (e) { console.warn('⚠️  Community story processing skipped:', e.message); }
+
+  // Deploy if we have at least 1 story (daily OR community)
+  const totalStories = pending.length + communityPending.length;
+  console.log(`\n📊 Daily: ${pending.length}, Community: ${communityPending.length} → deploying ${totalStories}`);
+
+  if (totalStories === 0) {
+    console.log('❌ No stories to deploy.');
     process.exit(0);
   }
 
-  // Deploy all staged files to Firebase Hosting once.
-  console.log(`\n🚀 Deploying ${pending.length} stories to Firebase Hosting...`);
+  // Deploy all staged files to Firebase Hosting once (daily + community together)
+  const hostLabel = [
+    pending.length ? `${pending.length} daily` : '',
+    communityPending.length ? `${communityPending.length} community` : '',
+  ].filter(Boolean).join(' + ') || 'none';
+  console.log(`\n🚀 Deploying ${hostLabel} stories to Firebase Hosting...`);
   execFileSync('npx', ['--yes', 'firebase-tools', 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
     { cwd: ROOT, stdio: 'inherit', env: { ...process.env, GOOGLE_APPLICATION_CREDENTIALS: SA_PATH } });
 
-  // Write docs to Firestore and create notifications
+  // Write daily story docs to Firestore
   for (const p of pending) {
     const storyData = {
       storyId: p.id, title: p.content.title, description: p.content.description,
@@ -397,20 +439,32 @@ async function run() {
       createdAt: admin.firestore.FieldValue.serverTimestamp(), updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
     await db.collection('stories').doc(p.id).set(storyData, { merge: true });
-    console.log('✓ doc', p.id);
-
-    // Create notification for this story
+    console.log('✓ daily doc', p.id);
     await createNotification({
-      storyId: p.id,
-      title: p.content.title,
-      genre: p.slot.genre,
+      storyId: p.id, title: p.content.title, genre: p.slot.genre,
       coverImage: `${SITE}/covers/${p.id}.jpg`,
+    });
+  }
+
+  // Update community story docs with hosting URLs
+  for (const c of communityPending) {
+    await db.collection('stories').doc(c.id).update({
+      audioUrl: `${SITE}/audio/${c.id}.mp3`,
+      coverImage: `${SITE}/covers/${c.id}.jpg`,
+      duration: c.duration,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    console.log('✓ community doc', c.id, `→ ${SITE}/audio/${c.id}.mp3`);
+    await createNotification({
+      storyId: c.id, title: c.title, genre: c.genre,
+      coverImage: `${SITE}/covers/${c.id}.jpg`,
     });
   }
 
   // Log generation
   await db.collection('generation_logs').doc(DATE).set({
-    date: DATE, count: pending.length, expected: DAILY_COUNT, failed: failedToday.length, at: admin.firestore.FieldValue.serverTimestamp()
+    date: DATE, count: pending.length, expected: DAILY_COUNT, failed: failedToday.length,
+    communityCount: communityPending.length, at: admin.firestore.FieldValue.serverTimestamp()
   }, { merge: true });
 
   console.log(`\n✅ Done. Published ${pending.length}/${DAILY_COUNT} stories for ${DATE}.`);
