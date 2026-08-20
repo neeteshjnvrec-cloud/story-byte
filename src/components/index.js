@@ -4,15 +4,17 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { useTheme } from '../hooks/useTheme';
 
 // Story Card Component
 export function StoryCard({ story, onPress }) {
+  const { theme } = useTheme() || { theme: {} };
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle} numberOfLines={2}>{story.title}</Text>
-        <Text style={styles.cardGenre}>{story.genre}</Text>
-        <Text style={styles.cardMeta}>{story.duration} min • {story.plays || 0} plays</Text>
+    <TouchableOpacity style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]} onPress={onPress}>
+      <View style={[styles.cardContent, { borderBottomColor: theme.divider }]}>
+        <Text style={[styles.cardTitle, { color: theme.text }]} numberOfLines={2}>{story.title}</Text>
+        <Text style={[styles.cardGenre, { color: theme.accent }]}>{story.genre}</Text>
+        <Text style={[styles.cardMeta, { color: theme.textSecondary }]}>{story.duration ? `${story.duration} min` : ''} • {story.plays || 0} plays</Text>
       </View>
     </TouchableOpacity>
   );
@@ -71,33 +73,28 @@ export function EmptyState({ message, icon }) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    borderWidth: 1,
+    position: 'relative',
   },
   cardContent: {
     flex: 1,
+    borderBottomWidth: 1,
+    paddingBottom: 12,
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 4,
   },
   cardGenre: {
     fontSize: 12,
-    color: '#667eea',
     marginBottom: 4,
   },
   cardMeta: {
     fontSize: 12,
-    color: '#999',
   },
   loadingContainer: {
     flex: 1,
@@ -108,7 +105,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#666',
   },
   errorContainer: {
     flex: 1,
@@ -118,18 +114,15 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#e74c3c',
     textAlign: 'center',
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#667eea',
     paddingVertical: 10,
     paddingHorizontal: 24,
     borderRadius: 25,
   },
   retryText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -158,7 +151,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#999',
     textAlign: 'center',
   },
 });

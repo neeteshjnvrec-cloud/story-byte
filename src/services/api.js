@@ -546,7 +546,7 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
         authorName: storyData.authorName || 'Anonymous',
         authorId: this.uid,
         isCommunityStory: true,
-        status: 'published',
+        status: 'under_review',
         likesCount: 0,
         playsCount: 0,
         tags: storyData.tags || [storyData.genre],
@@ -557,16 +557,6 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
       };
 
       await setDoc(storyRef, storyDoc);
-
-      // Broadcast notification
-      await this.createNotification({
-        type: 'new_community_story',
-        title: 'New Story Published!',
-        body: `${storyDoc.authorName} published: ${storyDoc.title}`,
-        storyId,
-        authorName: storyDoc.authorName,
-        coverImage: storyDoc.coverImage,
-      });
 
       return { ...storyDoc, id: storyId };
     } catch (error) {

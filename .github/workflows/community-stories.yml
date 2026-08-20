@@ -1,0 +1,67 @@
+name: Community Story Audio Generator
+
+on:
+  workflow_dispatch:
+    inputs:
+      story_id:
+        description: 'Story ID to generate audio for (optional — if empty, processes all pending)'
+        required: false
+        default: ''
+  # Also trigger via API call from the app when a new community story is published
+  repository_dispatch:
+    types: [community-story-published]
+
+concurrency:
+  group: community-stories
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  generate-audio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install edge-tts + ffmpeg
+        run: |
+          python -m pip install --upgrade pip
+          pip install edge-tts
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install pipeline deps
+        working-directory: scripts
+        run: npm install
+
+      - name: Generate audio + covers for community stories
+        working-directory: scripts
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_PROJECT_ID: storybyte-76716
+          STORIES_FILTER: ${{ github.event.inputs.story_id || '' }}
+        run: node generate-community-audio.js
+
+      - name: Deploy to Firebase Hosting
+        run: |
+          npx --yes firebase-tools deploy --only hosting --project storybyte-76716 --non-interactive
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sb-sa.json
+
+      - name: Persist generated files
+        run: |
+          git config user.name "storybyte-bot"
+          git config user.email "bot@storybyte.app"
+          git add public/audio public/covers 2>/dev/null || true
+          git commit -m "chore: community story audio + covers" || echo "nothing to commit"
+          git push || echo "nothing to push"

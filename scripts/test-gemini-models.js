@@ -1,5 +1,5 @@
 /**
- * Gemini Model Test — checks which Google AI Studio models are working
+ * Gemini Model Test — Dynamically fetches models from API and tests each one
  *
  * Usage:
  *   GEMINI_API_KEY=your_key node test-gemini-models.js
@@ -15,44 +15,28 @@ if (!API_KEY) {
 
 const BASE_URL = 'generativelanguage.googleapis.com';
 const API_VERSION = 'v1beta';
-
-// Models to test (from the list you shared)
-const MODELS_TO_TEST = [
-  'gemini-2.5-flash',
-  'gemini-2.5-pro',
-  'gemini-flash-latest',
-  'gemini-flash-lite-latest',
-  'gemini-pro-latest',
-  'gemini-2.5-flash-lite',
-  'gemini-3-flash-preview',
-  'gemini-3.1-pro-preview',
-  'gemini-3.1-flash-lite-preview',
-  'gemini-3.1-flash-lite',
-  'gemini-3.5-flash',
-  'gemini-3.5-flash-lite',
-  'gemini-3.6-flash',
-  'gemini-3.7-flash',
-  'gemma-4-26b-a4b-it',
-  'gemma-4-31b-it',
-];
-
-const TEST_PROMPT = 'Write a one-sentence story about a cat.';
+const TEST_PROMPT = 'Write a one-sentence story about a curious cat.';
 
 // --- API helpers ---
 
-function makeRequest(path, body) {
+function makeRequest(path, body, method = 'POST') {
   return new Promise((resolve, reject) => {
     const url = `https://${BASE_URL}${path}`;
-    const data = JSON.stringify(body);
-
-    const req = https.request(url, {
-      method: 'POST',
+    const options = {
+      method,
       headers: {
         'Content-Type': 'application/json',
         'x-goog-api-key': API_KEY,
-        'Content-Length': Buffer.byteLength(data),
       },
-    }, (res) => {
+    };
+
+    let data = null;
+    if (body) {
+      data = JSON.stringify(body);
+      options.headers['Content-Length'] = Buffer.byteLength(data);
+    }
+
+    const req = https.request(url, options, (res) => {
       let rawData = '';
       res.setEncoding('utf8');
       res.on('data', chunk => rawData += chunk);
@@ -70,36 +54,54 @@ function makeRequest(path, body) {
       req.destroy();
       reject(new Error('Request timeout'));
     });
-    req.write(data);
+    if (data) req.write(data);
     req.end();
   });
 }
 
-async function listModels() {
-  console.log('📋 Fetching available models...\n');
+// --- Fetch all available models from API ---
+
+async function fetchModels() {
+  console.log('📋 Fetching models from Google AI Studio API...\n');
   const path = `/${API_VERSION}/models?key=${API_KEY}`;
-  const res = await makeRequest(path, null);
+  const res = await makeRequest(path, null, 'GET');
 
   if (res.status !== 200) {
-    console.error('❌ Failed to list models:', res.body);
+    console.error('❌ Failed to fetch models:', JSON.stringify(res.body, null, 2));
     process.exit(1);
   }
 
   const models = res.body.models || [];
   console.log(`✅ Found ${models.length} models\n`);
 
-  // Filter for text generation models
-  const textModels = models.filter(m =>
-    m.name.includes('gemini') || m.name.includes('gemma')
-  ).map(m => ({
-    name: m.name.replace('models/', ''),
-    displayName: m.displayName,
-    inputTokenLimit: m.inputTokenLimit,
-    outputTokenLimit: m.outputTokenLimit,
-  }));
+  // Parse and filter for text-generation models dynamically
+  const modelList = models
+    .filter(m => {
+      const name = m.name || '';
+      // Skip non-text models
+      if (name.includes('embedding') || name.includes('aqa')) return false;
+      if (name.includes('tts') || name.includes('audio') || name.includes('video') || name.includes('veo')) return false;
+      if (name.includes('robotics') || name.includes('computer-use')) return false;
+      // Only include models that support generateContent
+      if (!m.supportedGenerationMethods?.includes('generateContent')) return false;
+      return true;
+    })
+    .map(m => ({
+      name: m.name.replace('models/', ''),
+      version: m.version || '',
+      displayName: m.displayName || m.name,
+      inputTokenLimit: m.inputTokenLimit || 0,
+      outputTokenLimit: m.outputTokenLimit || 0,
+      temperature: m.temperature || 1,
+      topP: m.topP || 0.95,
+      topK: m.topK || 64,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-  return textModels;
+  return modelList;
 }
+
+// --- Test a single model ---
 
 async function testModel(modelName) {
   const start = Date.now();
@@ -119,87 +121,136 @@ async function testModel(modelName) {
     const ms = Date.now() - start;
 
     if (res.status !== 200) {
-      const errorMsg = res.body?.error?.message || JSON.stringify(res.body).slice(0, 100);
-      console.log(`❌ ${modelName.padEnd(35)} ${ms}ms | ${errorMsg}`);
-      return { model: modelName, ok: false, ms, error: errorMsg };
+      const error = res.body?.error?.message || JSON.stringify(res.body)?.slice(0, 100) || 'Unknown error';
+      return { name: modelName, version: '', ok: false, ms, error };
     }
 
-    const text = res.body?.candidates?.[0]?.content?.parts?.[0]?.text || '(no text)';
-    console.log(`✅ ${modelName.padEnd(35)} ${ms}ms | ${text.slice(0, 80)}`);
-    return { model: modelName, ok: true, ms, text: text.trim() };
+    const text = res.body?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '(no text)';
+    const stopReason = res.body?.candidates?.[0]?.finishReason || '';
+
+    return {
+      name: modelName,
+      version: '',
+      ok: true,
+      ms,
+      text,
+      stopReason,
+    };
   } catch (e) {
     const ms = Date.now() - start;
-    console.log(`❌ ${modelName.padEnd(35)} ${ms}ms | ${e.message.slice(0, 80)}`);
-    return { model: modelName, ok: false, ms, error: e.message };
+    return { name: modelName, version: '', ok: false, ms, error: e.message };
   }
 }
 
-async function main() {
-  console.log(`\n🧪 Testing Gemini models...\n`);
-  console.log(`API Key: ${API_KEY.slice(0, 10)}...${API_KEY.slice(-4)}\n`);
+// --- Main ---
 
-  // Step 1: Fetch available models from API
-  let availableModels = [];
+async function main() {
+  console.log(`🧪 Gemini Model Test - Dynamic API Fetch\n`);
+  console.log(`API Key: ${API_KEY.slice(0, 12)}...${API_KEY.slice(-4)}\n`);
+  console.log('='.repeat(70) + '\n');
+
+  // Step 1: Fetch models dynamically from API
+  let models = [];
   try {
-    availableModels = await listModels();
+    models = await fetchModels();
   } catch (e) {
     console.error('Failed to fetch models:', e.message);
-    console.log('Using hardcoded model list instead...\n');
+    process.exit(1);
   }
 
-  // Step 2: Test models (use API list if available, otherwise hardcoded)
-  const models = availableModels.length > 0
-    ? availableModels.map(m => m.name)
-    : MODELS_TO_TEST;
+  if (models.length === 0) {
+    console.log('No text-generation models found.');
+    process.exit(0);
+  }
 
-  console.log(`Testing ${models.length} models...\n`);
+  // Step 2: Test each model
+  console.log(`Testing ${models.length} models dynamically fetched from API...\n`);
+  console.log('-'.repeat(70));
+
   const results = [];
+  for (let i = 0; i < models.length; i++) {
+    const model = models[i];
+    process.stdout.write(`[${i + 1}/${models.length}] ${model.name} ... `);
 
-  for (const model of models) {
-    // Skip image/audio only models
-    if (model.includes('image') || model.includes('tts') || model.includes('audio') ||
-        model.includes('video') || model.includes('veo') || model.includes('embedding') ||
-        model.includes('aqa') || model.includes('robotics') || model.includes('computer-use')) {
-      continue;
+    const r = await testModel(model.name);
+    results.push({ ...model, ...r });
+
+    if (r.ok) {
+      console.log(`✅ ${r.ms}ms`);
+    } else {
+      console.log(`❌ ${r.ms}ms | ${r.error.slice(0, 50)}`);
     }
 
-    const r = await testModel(model);
-    results.push(r);
-    // Small delay to avoid rate limits
-    await new Promise(r => setTimeout(r, 300));
+    // Small delay between requests to avoid rate limits
+    if (i < models.length - 1) {
+      await new Promise(r => setTimeout(r, 200));
+    }
   }
 
   // Step 3: Summary
+  console.log('\n' + '='.repeat(70));
+  console.log('\n📊 RESULTS\n');
+
   const ok = results.filter(r => r.ok);
   const fail = results.filter(r => !r.ok);
 
-  console.log(`\n📊 Results: ${ok.length}/${results.length} working\n`);
+  // Sort working models by speed
+  ok.sort((a, b) => a.ms - b.ms);
+
+  console.log(`✅ Working: ${ok.length}/${results.length}\n`);
 
   if (ok.length > 0) {
-    console.log('✅ Working models:');
-    ok.sort((a, b) => a.ms - b.ms);
+    console.log('🏆 Models ranked by speed:');
+    console.log('-'.repeat(70));
     for (const r of ok) {
-      console.log(`   ${r.ms.toString().padStart(4)}ms | ${r.model}`);
+      const speed = r.ms < 500 ? '⚡' : r.ms < 1500 ? '🚀' : '📈';
+      console.log(`${speed} ${r.ms.toString().padStart(4)}ms | ${r.name}`);
     }
   }
 
   if (fail.length > 0) {
-    console.log(`\n❌ Failed models (${fail.length}):`);
-    for (const r of fail.slice(0, 5)) {
-      console.log(`   ${r.model}: ${r.error.slice(0, 60)}`);
+    console.log(`\n❌ Failed: ${fail.length}\n`);
+    const errors = {};
+    for (const r of fail) {
+      const err = r.error?.split(':')[0] || 'Unknown';
+      if (!errors[err]) errors[err] = [];
+      errors[err].push(r.name);
     }
-    if (fail.length > 5) {
-      console.log(`   ... and ${fail.length - 5} more`);
+    for (const [err, models] of Object.entries(errors)) {
+      console.log(`  ${err}:`);
+      for (const m of models.slice(0, 3)) {
+        console.log(`    - ${m}`);
+      }
+      if (models.length > 3) {
+        console.log(`    ... and ${models.length - 3} more`);
+      }
     }
   }
 
-  // Suggest best model
+  // Step 4: Recommendations
+  console.log('\n' + '='.repeat(70));
+  console.log('\n💡 RECOMMENDATIONS\n');
+
   if (ok.length > 0) {
-    const best = ok.reduce((a, b) => a.ms < b.ms ? a : b);
     const fastest = ok[0];
-    console.log(`\n🏆 Fastest: ${fastest.model} (${fastest.ms}ms)`);
-    console.log(`💡 Recommended: ${best.model} (balanced speed/quality)`);
+    const bestMedium = ok[Math.floor(ok.length / 2)] || ok[0];
+    const bestQuality = ok[ok.length - 1];
+
+    console.log(`⚡ Fastest:          ${fastest.name} (${fastest.ms}ms)`);
+    console.log(`🎯 Balanced:         ${bestMedium.name} (${bestMedium.ms}ms)`);
+    console.log(`✨ Best Quality:     ${bestQuality.name} (${bestQuality.ms}ms)`);
+
+    console.log('\n📚 For StoryByte (story generation):');
+    if (fastest.ms < 1000) {
+      console.log(`   → Use ${fastest.name} (fast + good quality)`);
+    } else {
+      console.log(`   → Use ${bestMedium.name} (balance of speed/quality)`);
+    }
+  } else {
+    console.log('No working models found. Check your API key or quota.');
   }
+
+  console.log('\n' + '='.repeat(70) + '\n');
 }
 
 main().catch(console.error);

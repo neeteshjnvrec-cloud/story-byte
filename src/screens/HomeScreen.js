@@ -31,8 +31,10 @@ export const HomeScreen = () => {
   const [language, setLanguage] = useState('All');
   const [showFilter, setShowFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState(null);
+  const [error, setError] = useState(null);
 
   const load = useCallback(async (lang = 'All', filters = null) => {
+    setError(null);
     try {
       const params = {};
       if (lang !== 'All') params.language = lang;
@@ -42,8 +44,8 @@ export const HomeScreen = () => {
         if (filters.duration) params.duration = filters.duration;
       }
       const [res, prog] = await Promise.all([
-        apiSafe(() => apiService.getStories(params), { stories: [] }),
-        apiSafe(() => apiService.getUserProgress(), []),
+        apiService.getStories(params),
+        apiService.getUserProgress(),
       ]);
       setStories(res.stories || []);
       setProgress((prog || []).filter((p) => {
@@ -51,6 +53,9 @@ export const HomeScreen = () => {
         const pct = (typeof rawPct === 'number' && isFinite(rawPct)) ? rawPct : 0;
         return pct < 0.98;
       }).slice(0, 10));
+    } catch (e) {
+      console.error('Home load error:', e);
+      setError(e?.message || 'Failed to load stories');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -69,6 +74,7 @@ export const HomeScreen = () => {
 
   const openStory = (s) => navigation.navigate('StoryDetail', { storyId: s.id, story: s });
   const play = async (s) => { await playStory(s); };
+  const handleRetry = () => load(language, activeFilters);
 
   const hero = stories[0];
   const genres = [...new Set(stories.map((s) => s.genre).filter(Boolean))];
@@ -113,7 +119,15 @@ export const HomeScreen = () => {
         </Pressable>
       </View>
 
-      {loading ? (
+      {error ? (
+        <View style={s.errorContainer}>
+          <Icon name="alert-circle" size={48} color={theme.error} />
+          <AppText variant="body" color="error" style={s.errorText}>{error}</AppText>
+          <Pressable onPress={handleRetry} style={[s.retryBtn, { backgroundColor: theme.accent }]}>
+            <AppText variant="label" color="onAccent">Retry</AppText>
+          </Pressable>
+        </View>
+      ) : loading ? (
         <View style={s.center}><ActivityIndicator color={theme.accent} /></View>
       ) : stories.length === 0 ? (
         <View style={s.center}>
@@ -232,6 +246,9 @@ const styles = (theme, tokens) =>
       gap: 12,
     },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
+    errorText: { marginTop: 16, textAlign: 'center' },
+    retryBtn: { marginTop: 20, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 25 },
   });
 
 export default HomeScreen;

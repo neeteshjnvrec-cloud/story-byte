@@ -1,10 +1,10 @@
 // App Context for Story Byte
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { auth, firebaseSignOut, onAuthStateChanged } from '../services/firebase';
 import { setDoc, getDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../services/firebase';
 import apiService from '../services/api';
 import { loginWithEmail as authServiceLogin, signupWithEmail as authServiceSignup, signOutUser, sendResetEmail } from '../services/auth';
+import { dispatchAudioWorkflow } from '../utils/communityAudioGen';
 
 const AppContext = createContext();
 
@@ -15,41 +15,48 @@ export const AppContextProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [userStats, setUserStats] = useState(null);
   const [favorites, setFavorites] = useState([]);
-  const [profileCache, setProfileCache] = useState(null);
-  const [lastProfileFetch, setLastProfileFetch] = useState(0);
 
-  // Cache profile data to avoid redundant fetches
+  // Refs (must live inside the component — hooks can't run at module scope).
+  // cacheRef avoids stale closures in loadUserData: state-based cache tracking
+  // read stale values because loadUserData's dependency array captured them at
+  // creation time rather than call time. publishInProgressRef is a mutex that
+  // prevents concurrent publish calls from racing with fetchCommunityStories.
+  const cacheRef = useRef({ profile: null, timestamp: 0 });
+  const publishInProgressRef = useRef(false);
+
+  // Cache profile data to avoid redundant fetches.
+  // Uses cacheRef (not state) so loadUserData always reads current values.
   const loadUserData = useCallback(async (firebaseUser) => {
     if (!firebaseUser) return;
-    
+
+    const now = Date.now();
+    const cached = cacheRef.current;
+    const isStale = !cached.profile || now - cached.timestamp > 5 * 60 * 1000;
+
     try {
-      const now = Date.now();
-      // Only fetch if cache is stale (older than 5 minutes) or doesn't exist
-      if (!profileCache || now - lastProfileFetch > 300000) {
+      if (isStale) {
         const [profile, stats, favoritesData] = await Promise.all([
           apiService.getUserProfile(),
           apiService.getUserStats(),
           apiService.getFavorites()
         ]);
-        
         setUserStats(profile);
         setFavorites(favoritesData);
-        setProfileCache(profile);
-        setLastProfileFetch(now);
+        cacheRef.current = { profile, timestamp: now };
       } else {
-        // Use cached data
+        // Cache is fresh — still fetch favorites (it's not included in profile cache)
         const favoritesData = await apiService.getFavorites();
-        setUserStats(profileCache);
+        setUserStats(cached.profile);
         setFavorites(favoritesData);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
       // Fallback to cached data on error
-      if (profileCache) {
-        setUserStats(profileCache);
+      if (cached.profile) {
+        setUserStats(cached.profile);
       }
     }
-  }, [profileCache, lastProfileFetch]);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -145,13 +152,12 @@ export const AppContextProvider = ({ children }) => {
   const updateUserProfile = useCallback(async (updates) => {
     try {
       await apiService.updateProfile(updates);
-      // Refresh the profile doc (fullName, phone, gender, ...) so screens that
-      // read `userStats` show the saved values immediately.
+      // Refresh the profile doc so screens that read `userStats` show saved values immediately.
       if (user) {
         const profile = await apiService.getUserProfile();
         setUserStats(profile);
-        // Invalidate cache to force fresh data on next load
-        setProfileCache(null);
+        // Invalidate cache ref to force fresh data on next load
+        cacheRef.current = { profile: null, timestamp: 0 };
       }
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -177,108 +183,53 @@ export const AppContextProvider = ({ children }) => {
     }
   };
 
-  // ── GitHub Actions dispatch & polling helpers ────────────────────────────────
-  const GITHUB_OWNER = 'neeteshjnvrec-cloud';
-  const GITHUB_REPO = 'story-byte';
-  const GITHUB_WORKFLOW = 'daily-stories.yml';
-  const MAX_POLL = 60;       // seconds to wait for audio generation
-  const POLL_INTERVAL = 1000; // ms between polls
-
-  /** Dispatch the daily-stories GitHub Actions workflow */
-  async function dispatchWorkflow(storyId) {
-    const token = process.env.EXPO_PUBLIC_GITHUB_TOKEN;
-    if (!token) {
-      console.warn('[AppContext] EXPO_PUBLIC_GITHUB_TOKEN not set — skipping workflow dispatch');
-      return false;
-    }
-    try {
-      await fetch(
-        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${encodeURIComponent(GITHUB_WORKFLOW)}/dispatches`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ref: 'main' }),
-        }
-      );
-      console.log(`[AppContext] Workflow dispatched for community story ${storyId}`);
-      return true;
-    } catch (e) {
-      console.error('[AppContext] Workflow dispatch failed:', e.message);
-      return false;
-    }
-  }
-
-  /** Poll Firestore until the story has a real hosting audioUrl */
-  function waitForAudioGeneration(storyId) {
-    return new Promise((resolve) => {
-      let elapsed = 0;
-      const interval = setInterval(async () => {
-        elapsed += 1;
-        try {
-          const doc = await getDoc(doc(db, 'stories', storyId));
-          if (doc.exists()) {
-            const data = doc.data();
-            if (data.audioUrl && data.audioUrl.startsWith('https://storybyte-76716.web.app')) {
-              clearInterval(interval);
-              resolve(data);
-              return;
-            }
-          }
-        } catch (_) {}
-        if (elapsed >= MAX_POLL) {
-          clearInterval(interval);
-          resolve(null);
-        }
-      }, POLL_INTERVAL);
-    });
-  }
-
   const publishCommunityStory = async (storyData) => {
+    // Mutex: prevent concurrent publish calls from racing with each other
+    // and with fetchCommunityStories, which would corrupt communityStories state.
+    if (publishInProgressRef.current) {
+      console.warn('[AppContext] publishCommunityStory: previous publish still in progress, skipping');
+      return null;
+    }
+    publishInProgressRef.current = true;
+
     try {
       const published = await apiService.publishCommunityStory(storyData);
       if (!published) return null;
 
       const storyId = published.storyId || published.id;
 
-      // Remove any stale copy from previous list
+      // Add to community stories list with pending flag — will be updated
+      // by the GitHub Actions workflow once audio + cover image are ready.
+      const storyWithPending = { ...published, _pendingPublish: true };
       setCommunityStories(prev => {
         const filtered = prev.filter(s => (s.storyId || s.id) !== storyId);
-        return [published, ...filtered];
+        return [storyWithPending, ...filtered];
       });
 
-      // Trigger GitHub Actions to generate audio + deploy hosting
-      const dispatched = await dispatchWorkflow(storyId);
-
-      if (dispatched) {
-        // Poll for up to ~1 min until audio URL appears
-        const updated = await waitForAudioGeneration(storyId);
-        if (updated) {
-          setCommunityStories(prev => {
-            const id = updated.storyId || updated.id || storyId;
-            const filtered = prev.filter(s => (s.storyId || s.id) !== id);
-            return [updated, ...filtered];
-          });
-        }
-      }
+      // Fire-and-forget: dispatch the community-stories workflow.
+      // The workflow picks up under_review stories, generates audio+image,
+      // then flips status to 'published' and sends notifications.
+      dispatchAudioWorkflow(storyId).catch(err => {
+        console.error('[AppContext] workflow dispatch failed:', err.message);
+        // Clear the pending flag so UI doesn't show stale state
+        setCommunityStories(prev => prev.map(s =>
+          (s.storyId || s.id) === storyId ? { ...s, _pendingPublish: false } : s
+        ));
+      });
 
       return published;
     } catch (error) {
       console.error('Error publishing story:', error);
       throw error;
+    } finally {
+      publishInProgressRef.current = false;
     }
   };
 
   const fetchCommunityStories = async () => {
-    try {
-      const stories = await apiService.getCommunityStories();
-      setCommunityStories(stories);
-    } catch (error) {
-      console.error('Error fetching community stories:', error);
-    }
+    const stories = await apiService.getCommunityStories();
+    setCommunityStories(stories);
+    return stories;
   };
 
   return (

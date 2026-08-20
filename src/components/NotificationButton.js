@@ -20,10 +20,9 @@ export const NotificationButton = () => {
 
   const handleToggle = async () => {
     if (!user) return;
-    
-    
-    
-    if (newStatus) {
+    // Request notification permission and save token
+    const granted = await notificationService.requestPermission();
+    if (granted) {
       const token = await notificationService.getToken();
       if (token) {
         await notificationService.saveToken(user.uid, token);

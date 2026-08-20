@@ -33,6 +33,7 @@ export const FavoritesScreen = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState('favorites');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadFavorites();
@@ -42,6 +43,7 @@ export const FavoritesScreen = () => {
   const loadFavorites = async () => {
     try {
       setLoading(true);
+      setError(null);
       const favoriteStoryIds = favorites.map(f => f.storyId || f.id);
       const favoriteStories = await Promise.all(
         favoriteStoryIds.map(id => apiService.getStory(id))
@@ -49,6 +51,7 @@ export const FavoritesScreen = () => {
       setStories(favoriteStories.filter(Boolean));
     } catch (error) {
       console.error('Error loading favorites:', error);
+      setError('Failed to load favorites. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -56,11 +59,17 @@ export const FavoritesScreen = () => {
 
   const loadHistory = async () => {
     try {
+      setError(null);
       const progress = await apiService.getUserProgress();
       setHistory(progress || []);
     } catch (error) {
       console.error('Error loading history:', error);
     }
+  };
+
+  const handleRetry = () => {
+    setError(null);
+    loadFavorites();
   };
 
   const openStory = (story) => {
@@ -179,7 +188,17 @@ export const FavoritesScreen = () => {
         </View>
 
         <View style={styles.pane}>
-          {(contextLoading || loading) && active === 'favorites' ? (
+          {error ? (
+            <View style={styles.errorContainer}>
+              <View style={[styles.errorIcon, { backgroundColor: theme.errorSoft }]}>
+                <Icon name="alert-circle" size={32} color={theme.error} />
+              </View>
+              <AppText variant="body" color="error" style={styles.errorText}>{error}</AppText>
+              <Pressable onPress={handleRetry} style={[styles.retryBtn, { backgroundColor: theme.accent }]}>
+                <AppText variant="label" color="onAccent">Retry</AppText>
+              </Pressable>
+            </View>
+          ) : (contextLoading || loading) && active === 'favorites' ? (
             <ActivityIndicator color={theme.accent} style={{ marginTop: 40 }} />
           ) : active === 'favorites' ? (
             renderFavorites()
@@ -226,5 +245,28 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 40,
+    paddingVertical: 40,
+  },
+  errorIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  retryBtn: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 25,
   },
 });

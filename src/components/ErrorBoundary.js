@@ -36,10 +36,10 @@ export class ErrorBoundary extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#0B0B10' },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
   emoji: { fontSize: 48, marginBottom: 16 },
-  title: { fontSize: 20, fontWeight: '700', color: '#F5F6FA', marginBottom: 8 },
-  message: { fontSize: 14, color: '#A6ABBD', textAlign: 'center', marginBottom: 24 },
+  title: { fontSize: 20, fontWeight: '700', marginBottom: 8 },
+  message: { fontSize: 14, textAlign: 'center', marginBottom: 24 },
   button: { backgroundColor: '#818CF8', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 },
   buttonText: { color: '#0B0B10', fontSize: 15, fontWeight: '700' },
 });

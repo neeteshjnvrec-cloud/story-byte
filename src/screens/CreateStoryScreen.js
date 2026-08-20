@@ -33,7 +33,7 @@ export function CreateStoryScreen() {
   const [selectedGenre, setSelectedGenre] = useState('romance');
   const [generatedStory, setGeneratedStory] = useState(null);
   const [isPreview, setIsPreview] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showUnderReview, setShowUnderReview] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
 
   const handleGenerate = async () => {
@@ -60,7 +60,7 @@ export function CreateStoryScreen() {
     try {
       const published = await publishCommunityStory(generatedStory);
       if (published) {
-        setShowSuccessModal(true);
+        setShowUnderReview(true);
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to publish story. Please try again.');
@@ -75,11 +75,11 @@ export function CreateStoryScreen() {
     setSelectedGenre('romance');
     setGeneratedStory(null);
     setIsPreview(false);
-    setShowSuccessModal(false);
+    setShowUnderReview(false);
   };
 
   const handleViewStory = () => {
-    setShowSuccessModal(false);
+    setShowUnderReview(false);
     navigation.navigate('StoryDetail', {
       storyId: generatedStory.storyId || `community_${Date.now()}`,
       story: generatedStory,
@@ -87,12 +87,12 @@ export function CreateStoryScreen() {
   };
 
   const handleCreateAnother = () => {
-    setShowSuccessModal(false);
+    setShowUnderReview(false);
     resetForm();
   };
 
   const handleDone = () => {
-    setShowSuccessModal(false);
+    setShowUnderReview(false);
     setIsPreview(false);
   };
 
@@ -153,12 +153,12 @@ export function CreateStoryScreen() {
                     ]}
                     onPress={() => setSelectedGenre(genre.id)}
                   >
-                    <Ionicons 
-                      name={genre.icon} 
-                      size={18} 
-                      color={selectedGenre === genre.id ? '#fff' : theme.textPrimary} 
+                    <Ionicons
+                      name={genre.icon}
+                      size={18}
+                      color={selectedGenre === genre.id ? theme.onAccent : theme.textPrimary}
                     />
-                    <Text style={[styles.genreLabel, { color: selectedGenre === genre.id ? '#fff' : theme.textPrimary }]}>
+                    <Text style={[styles.genreLabel, { color: selectedGenre === genre.id ? theme.onAccent : theme.textPrimary }]}>
                       {genre.label}
                     </Text>
                   </TouchableOpacity>
@@ -196,11 +196,11 @@ export function CreateStoryScreen() {
               disabled={isGenerating}
             >
               {isGenerating ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={theme.onAccent} />
               ) : (
                 <>
-                  <Ionicons name="sparkles" size={22} color="#fff" />
-                  <Text style={styles.generateButtonText}>Generate with AI</Text>
+                  <Ionicons name="sparkles" size={22} color={theme.onAccent} />
+                  <Text style={[styles.generateButtonText, { color: theme.onAccent }]}>Generate with AI</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -260,11 +260,11 @@ export function CreateStoryScreen() {
                 disabled={isPublishing}
               >
                 {isPublishing ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={theme.onAccent} />
                 ) : (
                   <>
-                    <Icon name="share-social" size={20} color="#fff" />
-                    <Text style={styles.buttonText}>Publish</Text>
+                    <Icon name="share-social" size={20} color={theme.onAccent} />
+                    <Text style={[styles.buttonText, { color: theme.onAccent }]}>Publish</Text>
                   </>
                 )}
               </TouchableOpacity>
@@ -273,39 +273,40 @@ export function CreateStoryScreen() {
         )}
       </ScrollView>
 
-      {/* Success Modal */}
-      <Modal
-        visible={showSuccessModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowSuccessModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
-            <View style={styles.modalIcon}>
-              <Ionicons name="checkmark-circle" size={64} color={theme.primary} />
+      {/* Under Review Screen */}
+      {showUnderReview && (
+        <View style={styles.underReviewContainer}>
+          <View style={styles.underReviewContent}>
+            <View style={[styles.underReviewIcon, { backgroundColor: theme.accentSoft }]}>
+              <Ionicons name="hourglass" size={48} color={theme.accent} />
             </View>
-            <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>
-              Story Published! 🎉
+            <Text style={[styles.underReviewTitle, { color: theme.textPrimary }]}>
+              Story Under Review ✨
             </Text>
-            <Text style={[styles.modalDescription, { color: theme.textSecondary }]}>
-              Your story is now available to the community
+            <Text style={[styles.underReviewDesc, { color: theme.textSecondary }]}>
+              Your story "{generatedStory?.title}" is being processed. We're generating a professional audio narration and cover art for you.
             </Text>
-            
-            <TouchableOpacity style={[styles.modalButton, { backgroundColor: theme.primary }]} onPress={handleViewStory}>
-              <Text style={styles.modalButtonText}>View Story</Text>
+            <View style={[styles.underReviewCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <Text style={[styles.underReviewStoryTitle, { color: theme.textPrimary }]}>{generatedStory?.title}</Text>
+              <View style={[styles.underReviewGenre, { backgroundColor: theme.accent + '20' }]}>
+                <Text style={[styles.underReviewGenreText, { color: theme.accent }]}>{generatedStory?.genre}</Text>
+              </View>
+              <Text style={[styles.underReviewHint, { color: theme.textTertiary }]}>
+                You'll be notified once it's live!
+              </Text>
+            </View>
+            <TouchableOpacity style={[styles.viewBtn, { backgroundColor: theme.primary }]} onPress={handleViewStory}>
+              <Text style={[styles.viewBtnText, { color: theme.onAccent }]}>View Story</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity style={[styles.modalButton, { backgroundColor: theme.surface, marginTop: 12 }]} onPress={handleCreateAnother}>
-              <Text style={[styles.modalButtonText, { color: theme.textPrimary }]}>Create Another</Text>
+            <TouchableOpacity style={[styles.createBtn, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={handleCreateAnother}>
+              <Text style={[styles.createBtnText, { color: theme.textPrimary }]}>Create Another Story</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.modalTextButton} onPress={handleDone}>
-              <Text style={[styles.modalText, { color: theme.textSecondary }]}>Done</Text>
+            <TouchableOpacity style={styles.doneBtn} onPress={handleDone}>
+              <Text style={[styles.doneBtnText, { color: theme.textSecondary }]}>Done</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      )}
     </View>
   );
 }
@@ -471,51 +472,100 @@ const styles = StyleSheet.create({
   },
   
   // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  // Under Review Screen
+  underReviewContainer: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
+    zIndex: 100,
   },
-  modalContent: {
+  underReviewContent: {
     width: '100%',
-    maxWidth: 340,
-    borderRadius: 24,
-    padding: 28,
+    maxWidth: 360,
     alignItems: 'center',
   },
-  modalIcon: {
-    marginBottom: 16,
+  underReviewIcon: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
   },
-  modalTitle: {
+  underReviewTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
-  modalDescription: {
+  underReviewDesc: {
     fontSize: 14,
     textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 20,
+    lineHeight: 22,
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
-  modalButton: {
+  underReviewCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 18,
+    width: '100%',
+    marginBottom: 20,
+  },
+  underReviewStoryTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  underReviewGenre: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  underReviewGenreText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  underReviewHint: {
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
+  viewBtn: {
     width: '100%',
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
+    marginBottom: 10,
   },
-  modalButtonText: {
+  viewBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
     color: '#fff',
+  },
+  createBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    marginBottom: 10,
+  },
+  createBtnText: {
     fontSize: 15,
     fontWeight: '600',
   },
-  modalTextButton: {
-    marginTop: 20,
+  doneBtn: {
     paddingVertical: 8,
+    marginTop: 4,
   },
-  modalText: {
+  doneBtnText: {
     fontSize: 14,
   },
 });
