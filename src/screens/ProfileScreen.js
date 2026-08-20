@@ -136,7 +136,7 @@ export const ProfileScreen = () => {
                 end={{ x: 1, y: 1 }}
                 style={styles.avatar}
               >
-                <AppText variant="displayM" style={{ color: '#fff' }}>{initial}</AppText>
+                <AppText variant="displayM" style={{ color: theme.onAccent }}>{initial}</AppText>
               </LinearGradient>
               <AppText variant="h2" style={{ marginTop: 14 }}>{name}</AppText>
               <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>{user.email}</AppText>
@@ -162,7 +162,7 @@ export const ProfileScreen = () => {
             <Icon name="flame" size={30} color="#fff" />
           </View>
           <View style={{ flex: 1 }}>
-            <AppText variant="displayM" style={{ color: '#fff' }}>{streak}</AppText>
+            <AppText variant="displayM" style={{ color: theme.onAccent }}>{streak}</AppText>
             <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.9)', marginTop: 2 }}>
               day listening streak · keep it up!
             </AppText>

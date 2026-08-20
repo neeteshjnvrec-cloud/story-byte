@@ -114,7 +114,7 @@ export const FloatingAudioPlayer = () => {
       <Modal visible={expanded} animationType="slide" onRequestClose={() => setExpanded(false)}>
         <View style={[styles.full, { backgroundColor: theme.background, paddingTop: insets.top + 6, paddingBottom: insets.bottom + 20 }]}>
           <View style={styles.fpHead}>
-            <Pressable onPress={() => setExpanded(false)} hitSlop={10}><Icon name="chev-down" /></Pressable>
+            <Pressable onPress={() => setExpanded(false)} hitSlop={10}><Icon name="chev-down" color={theme.text} /></Pressable>
             <AppText variant="micro" color="textSecondary" style={{ letterSpacing: 1.2 }}>PLAYING FROM · STORYBYTE</AppText>
             <Pressable onPress={() => { stop(); setExpanded(false); }} hitSlop={10}><Icon name="close" /></Pressable>
           </View>

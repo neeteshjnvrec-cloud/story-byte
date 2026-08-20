@@ -2,10 +2,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { auth, firebaseSignOut, onAuthStateChanged } from '../services/firebase';
 import { setDoc, getDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../services/firebase';
 import apiService from '../services/api';
 import { loginWithEmail as authServiceLogin, signupWithEmail as authServiceSignup, signOutUser, sendResetEmail } from '../services/auth';
-import { dispatchAudioWorkflow, waitForAudioGeneration } from '../utils/communityAudioGen';
+import { dispatchAudioWorkflow } from '../utils/communityAudioGen';
 
 const AppContext = createContext();
 
@@ -199,41 +198,24 @@ export const AppContextProvider = ({ children }) => {
 
       const storyId = published.storyId || published.id;
 
-      // Mark as generating audio so UI shows loading state
-      const storyWithGenerating = { ...published, _generatingAudio: true };
-
-      // Remove any stale copy from previous list and add with generating flag
+      // Add to community stories list with pending flag — will be updated
+      // by the GitHub Actions workflow once audio + cover image are ready.
+      const storyWithPending = { ...published, _pendingPublish: true };
       setCommunityStories(prev => {
         const filtered = prev.filter(s => (s.storyId || s.id) !== storyId);
-        return [storyWithGenerating, ...filtered];
+        return [storyWithPending, ...filtered];
       });
 
-      // Trigger GitHub Actions to generate audio + deploy hosting
-      const dispatched = await dispatchAudioWorkflow(storyId);
-
-      const updateStoryState = (story) =>
-        setCommunityStories(prev => {
-          const id = story.storyId || story.id || storyId;
-          const filtered = prev.filter(s => (s.storyId || s.id) !== id);
-          return [{ ...story, _generatingAudio: false }, ...filtered];
-        });
-
-      const clearGeneratingFlag = () =>
+      // Fire-and-forget: dispatch the community-stories workflow.
+      // The workflow picks up under_review stories, generates audio+image,
+      // then flips status to 'published' and sends notifications.
+      dispatchAudioWorkflow(storyId).catch(err => {
+        console.error('[AppContext] workflow dispatch failed:', err.message);
+        // Clear the pending flag so UI doesn't show stale state
         setCommunityStories(prev => prev.map(s =>
-          (s.storyId || s.id) === storyId ? { ...s, _generatingAudio: false } : s
+          (s.storyId || s.id) === storyId ? { ...s, _pendingPublish: false } : s
         ));
-
-      if (dispatched) {
-        // Poll for up to ~1 min until audio URL appears
-        const updated = await waitForAudioGeneration(storyId, db);
-        if (updated) {
-          updateStoryState(updated);
-        } else {
-          clearGeneratingFlag();
-        }
-      } else {
-        clearGeneratingFlag();
-      }
+      });
 
       return published;
     } catch (error) {
