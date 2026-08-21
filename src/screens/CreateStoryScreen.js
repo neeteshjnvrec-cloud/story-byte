@@ -1,5 +1,5 @@
 // Create Story Screen - AI Co-Creator Studio
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -38,12 +38,13 @@ export function CreateStoryScreen() {
   // tappable underneath, and whose "View Story" button navigated to a story id
   // that doesn't exist yet.
   const [submitted, setSubmitted] = useState(false);
+  const scrollRef = useRef(null);
 
   // Auto-hide the banner. Cleared on unmount so a fast back-navigation can't
   // set state on an unmounted screen.
   useEffect(() => {
     if (!submitted) return;
-    const timer = setTimeout(() => setSubmitted(false), 6000);
+    const timer = setTimeout(() => setSubmitted(false), 10000);
     return () => clearTimeout(timer);
   }, [submitted]);
 
@@ -78,6 +79,10 @@ export function CreateStoryScreen() {
         // inline — the author hears back via a notification when it goes live.
         resetForm();
         setSubmitted(true);
+        // Publish is tapped at the bottom of the preview. Without this the
+        // ScrollView keeps that offset while the content shrinks back to the
+        // form, leaving the reset form scrolled somewhere in its middle.
+        scrollRef.current?.scrollTo({ y: 0, animated: true });
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to publish story. Please try again.');
@@ -107,37 +112,42 @@ export function CreateStoryScreen() {
         <HeaderNotificationButton size={22} color={theme.text} />
       </View>
 
+      {/* Pinned between the header and the scroll view, NOT inside it. Inside the
+          ScrollView this sat at the top of the content while Publish is tapped at
+          the bottom of the preview, so it mounted off-screen and auto-hid before
+          it could ever be seen. */}
+      {submitted && (
+        <View style={[styles.banner, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <Ionicons name="checkmark-circle" size={22} color={theme.accent} style={styles.bannerIcon} />
+          <View style={styles.bannerBody}>
+            <Text style={[styles.bannerTitle, { color: theme.text }]}>
+              Your story is under review ✨
+            </Text>
+            <Text style={[styles.bannerText, { color: theme.textSecondary }]}>
+              We're generating the narration and cover art. We'll notify you once it's approved and live.
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => setSubmitted(false)}
+            hitSlop={10}
+            style={styles.bannerClose}
+            accessibilityLabel="Dismiss"
+          >
+            <Icon name="close" size={18} color={theme.textSecondary} />
+          </Pressable>
+        </View>
+      )}
+
       <ScrollView
+        ref={scrollRef}
         style={styles.scrollView}
         contentContainerStyle={styles.content}
       >
-        {submitted && (
-          <View style={[styles.banner, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <Ionicons name="checkmark-circle" size={22} color={theme.accent} style={styles.bannerIcon} />
-            <View style={styles.bannerBody}>
-              <Text style={[styles.bannerTitle, { color: theme.textPrimary }]}>
-                Submitted for review ✨
-              </Text>
-              <Text style={[styles.bannerText, { color: theme.textSecondary }]}>
-                We're generating narration and cover art. You'll get a notification when it's live.
-              </Text>
-            </View>
-            <Pressable
-              onPress={() => setSubmitted(false)}
-              hitSlop={10}
-              style={styles.bannerClose}
-              accessibilityLabel="Dismiss"
-            >
-              <Icon name="close" size={18} color={theme.textSecondary} />
-            </Pressable>
-          </View>
-        )}
-
         {!isPreview ? (
           <>
             {/* Hero Section */}
             <View style={styles.heroSection}>
-              <Text style={[styles.title, { color: theme.textPrimary }]}>
+              <Text style={[styles.title, { color: theme.text }]}>
                 ✨ Create Your Story
               </Text>
               <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
@@ -147,9 +157,9 @@ export function CreateStoryScreen() {
 
             {/* Title Input */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.textPrimary }]}>Title <Text style={[styles.optional, { color: theme.textTertiary }]}>(optional)</Text></Text>
+              <Text style={[styles.label, { color: theme.text }]}>Title <Text style={[styles.optional, { color: theme.textTertiary }]}>(optional)</Text></Text>
               <TextInput
-                style={[styles.input, { backgroundColor: theme.surface, color: theme.textPrimary, borderColor: theme.border }]}
+                style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
                 placeholder="Give your story a name..."
                 placeholderTextColor={theme.textSecondary}
                 value={title}
@@ -159,7 +169,7 @@ export function CreateStoryScreen() {
 
             {/* Genre Selection */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.textPrimary }]}>Genre</Text>
+              <Text style={[styles.label, { color: theme.text }]}>Genre</Text>
               <View style={styles.genreGrid}>
                 {GENRES.map((genre) => (
                   <TouchableOpacity
@@ -176,9 +186,9 @@ export function CreateStoryScreen() {
                     <Ionicons
                       name={genre.icon}
                       size={18}
-                      color={selectedGenre === genre.id ? theme.onAccent : theme.textPrimary}
+                      color={selectedGenre === genre.id ? theme.onAccent : theme.text}
                     />
-                    <Text style={[styles.genreLabel, { color: selectedGenre === genre.id ? theme.onAccent : theme.textPrimary }]}>
+                    <Text style={[styles.genreLabel, { color: selectedGenre === genre.id ? theme.onAccent : theme.text }]}>
                       {genre.label}
                     </Text>
                   </TouchableOpacity>
@@ -188,9 +198,9 @@ export function CreateStoryScreen() {
 
             {/* Prompt Input */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.textPrimary }]}>Your Story Idea</Text>
+              <Text style={[styles.label, { color: theme.text }]}>Your Story Idea</Text>
               <TextInput
-                style={[styles.textArea, { backgroundColor: theme.surface, color: theme.textPrimary, borderColor: theme.border }]}
+                style={[styles.textArea, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
                 placeholder="Describe your story idea... (e.g., A detective finds a watch that stops time for 10 seconds)"
                 placeholderTextColor={theme.textSecondary}
                 value={prompt}
@@ -229,7 +239,7 @@ export function CreateStoryScreen() {
           <>
             {/* Preview Header */}
             <View style={styles.previewHeader}>
-              <Text style={[styles.previewTitle, { color: theme.textPrimary }]}>
+              <Text style={[styles.previewTitle, { color: theme.text }]}>
                 📖 Your Story
               </Text>
               <Pressable onPress={() => setIsPreview(false)} style={styles.closeButton}>
@@ -239,7 +249,7 @@ export function CreateStoryScreen() {
 
             {/* Story Card */}
             <View style={[styles.storyCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <Text style={[styles.storyTitle, { color: theme.textPrimary }]}>
+              <Text style={[styles.storyTitle, { color: theme.text }]}>
                 {generatedStory?.title || 'Untitled Story'}
               </Text>
               <View style={[styles.genreTag, { backgroundColor: theme.primary + '20' }]}>
@@ -247,7 +257,7 @@ export function CreateStoryScreen() {
                   {generatedStory?.genre || 'Story'}
                 </Text>
               </View>
-              <Text style={[styles.storyText, { color: theme.textPrimary }]}>
+              <Text style={[styles.storyText, { color: theme.text }]}>
                 {generatedStory?.text}
               </Text>
             </View>
@@ -456,14 +466,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Submit confirmation banner
+  // Submit confirmation banner. Lives outside the ScrollView, so it carries its
+  // own horizontal inset instead of inheriting `content`'s padding.
   banner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     borderRadius: 14,
     borderWidth: 1,
     padding: 14,
-    marginBottom: 20,
+    marginHorizontal: 20,
+    marginTop: 4,
+    marginBottom: 4,
     gap: 10,
   },
   bannerIcon: {

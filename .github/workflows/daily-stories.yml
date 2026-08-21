@@ -45,10 +45,18 @@ jobs:
           FIREBASE_PROJECT_ID: storybyte-76716
         run: node build-stories.js
 
+      # always(): assets already written to public/ must reach the repo even if
+      # the generate step failed partway. A Hosting deploy serves only what a
+      # fresh checkout contains, so an uncommitted mp3 becomes a 404 later.
       - name: Persist generated audio + covers
+        if: always()
         run: |
           git config user.name "storybyte-bot"
           git config user.email "bot@storybyte.app"
           git add public/audio public/covers public/index.html 2>/dev/null || true
           git commit -m "chore: daily story audio + covers ($(date -u +%F))" || echo "nothing to commit"
-          git push || echo "nothing to push"
+          # The community workflow pushes to main too; rebase so a stale branch
+          # doesn't reject the push. A real push failure must stay loud — it
+          # means generated audio never landed.
+          git pull --rebase --autostash || true
+          git push

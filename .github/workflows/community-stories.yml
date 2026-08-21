@@ -55,18 +55,24 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           FIREBASE_PROJECT_ID: storybyte-76716
           STORIES_FILTER: ${{ github.event.inputs.story_id || '' }}
+        # The script deploys hosting itself (and refuses to publish when that
+        # deploy fails), so the workflow must NOT deploy again — the old second
+        # step had no auth and red-exited every successful run.
         run: node generate-community-audio.js
 
-      - name: Deploy to Firebase Hosting
-        run: |
-          npx --yes firebase-tools deploy --only hosting --project storybyte-76716 --non-interactive
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sb-sa.json
-
+      # always(): a Hosting deploy replaces the whole site with whatever is in
+      # public/, and only committed files survive a fresh checkout. If the
+      # generate step fails after writing assets, those files must still land in
+      # the repo — otherwise the next deploy silently 404s a published story.
       - name: Persist generated files
+        if: always()
         run: |
           git config user.name "storybyte-bot"
           git config user.email "bot@storybyte.app"
           git add public/audio public/covers 2>/dev/null || true
           git commit -m "chore: community story audio + covers" || echo "nothing to commit"
-          git push || echo "nothing to push"
+          # The daily workflow pushes to main too; rebase so a stale branch
+          # doesn't reject the push. A real push failure must stay loud — it
+          # means generated audio never landed.
+          git pull --rebase --autostash || true
+          git push
