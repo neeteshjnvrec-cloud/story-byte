@@ -1,5 +1,5 @@
 // Create Story Screen - AI Co-Creator Studio
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -33,20 +33,7 @@ export function CreateStoryScreen() {
   const [generatedStory, setGeneratedStory] = useState(null);
   const [isPreview, setIsPreview] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  // Inline confirmation after submit. Replaces the old full-screen "Story Under
-  // Review" overlay, which painted over the story text and left the tab bar
-  // tappable underneath, and whose "View Story" button navigated to a story id
-  // that doesn't exist yet.
-  const [submitted, setSubmitted] = useState(false);
   const scrollRef = useRef(null);
-
-  // Auto-hide the banner. Cleared on unmount so a fast back-navigation can't
-  // set state on an unmounted screen.
-  useEffect(() => {
-    if (!submitted) return;
-    const timer = setTimeout(() => setSubmitted(false), 10000);
-    return () => clearTimeout(timer);
-  }, [submitted]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -54,7 +41,6 @@ export function CreateStoryScreen() {
       return;
     }
 
-    setSubmitted(false);
     const result = await generateStory({
       title: title || undefined,
       prompt: prompt.trim(),
@@ -75,14 +61,17 @@ export function CreateStoryScreen() {
       if (published) {
         // Submitting hands the story to the generation pipeline; it stays
         // invisible (status 'under_review') until narration and cover art are
-        // ready, so there is nothing to navigate to. Clear the form and confirm
-        // inline — the author hears back via a notification when it goes live.
+        // ready, so there is nothing to navigate to and no story id worth
+        // offering. Reset the form and confirm with a native Alert — a modal
+        // can't be scrolled past or hidden by a layout change, which is how both
+        // the old overlay and the inline banner ended up unseen.
         resetForm();
-        setSubmitted(true);
-        // Publish is tapped at the bottom of the preview. Without this the
-        // ScrollView keeps that offset while the content shrinks back to the
-        // form, leaving the reset form scrolled somewhere in its middle.
-        scrollRef.current?.scrollTo({ y: 0, animated: true });
+        scrollRef.current?.scrollTo({ y: 0, animated: false });
+        Alert.alert(
+          'Your story is under review ✨',
+          "We're generating the narration and cover art. We'll notify you once it's approved and live.",
+          [{ text: 'Got it' }]
+        );
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to publish story. Please try again.');
@@ -111,32 +100,6 @@ export function CreateStoryScreen() {
         </AppText>
         <HeaderNotificationButton size={22} color={theme.text} />
       </View>
-
-      {/* Pinned between the header and the scroll view, NOT inside it. Inside the
-          ScrollView this sat at the top of the content while Publish is tapped at
-          the bottom of the preview, so it mounted off-screen and auto-hid before
-          it could ever be seen. */}
-      {submitted && (
-        <View style={[styles.banner, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          <Ionicons name="checkmark-circle" size={22} color={theme.accent} style={styles.bannerIcon} />
-          <View style={styles.bannerBody}>
-            <Text style={[styles.bannerTitle, { color: theme.text }]}>
-              Your story is under review ✨
-            </Text>
-            <Text style={[styles.bannerText, { color: theme.textSecondary }]}>
-              We're generating the narration and cover art. We'll notify you once it's approved and live.
-            </Text>
-          </View>
-          <Pressable
-            onPress={() => setSubmitted(false)}
-            hitSlop={10}
-            style={styles.bannerClose}
-            accessibilityLabel="Dismiss"
-          >
-            <Icon name="close" size={18} color={theme.textSecondary} />
-          </Pressable>
-        </View>
-      )}
 
       <ScrollView
         ref={scrollRef}
@@ -464,37 +427,5 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 15,
     fontWeight: '600',
-  },
-
-  // Submit confirmation banner. Lives outside the ScrollView, so it carries its
-  // own horizontal inset instead of inheriting `content`'s padding.
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 14,
-    marginHorizontal: 20,
-    marginTop: 4,
-    marginBottom: 4,
-    gap: 10,
-  },
-  bannerIcon: {
-    marginTop: 1,
-  },
-  bannerBody: {
-    flex: 1,
-  },
-  bannerTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 3,
-  },
-  bannerText: {
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  bannerClose: {
-    marginTop: 1,
   },
 });
