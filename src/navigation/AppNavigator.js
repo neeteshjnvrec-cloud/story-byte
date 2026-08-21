@@ -33,7 +33,10 @@ export function AppNavigator() {
         headerShown: false,
         tabBarActiveTintColor: theme.tabBarActive,
         tabBarInactiveTintColor: theme.tabBarInactive,
-        tabBarLabelStyle: { fontFamily: FONTS.bodySemi, fontSize: 10, marginTop: 2 },
+        tabBarLabelStyle: { fontFamily: FONTS.bodySemi, fontSize: 9, marginTop: 2 },
+        // Six tabs at the default item padding truncated the longest label
+        // ("Community" → "Commun…"); reclaim the horizontal padding instead.
+        tabBarItemStyle: { paddingHorizontal: 0 },
         tabBarStyle: {
           backgroundColor: theme.surface,
           borderTopColor: theme.border,

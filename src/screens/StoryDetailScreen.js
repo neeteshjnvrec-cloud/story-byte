@@ -92,10 +92,12 @@ export const StoryDetailScreen = () => {
   const { storyId, story: initialStory } = route.params || {};
   const { theme } = useTheme() || { theme: {} };
   const { playStory, playPause, isPlaying, currentStory } = useAudioPlayer();
-  const { toggleFavorite, isInFavorites, user } = useAppContext();
+  const {
+    toggleFavorite, user, getStoryMetrics, toggleLike,
+    rateStory: rateStoryInContext, receiveStoryDocs,
+  } = useAppContext();
   const [story, setStory] = useState(initialStory || null);
   const [loading, setLoading] = useState(!initialStory);
-  const [rating, setRating] = useState(initialStory?.rating || 0);
 
   // Chapter state
   const [chapters, setChapters] = useState(null);
@@ -108,12 +110,14 @@ export const StoryDetailScreen = () => {
         const full = await apiService.getStory(storyId);
         if (full) {
           setStory(full);
-          if (full.rating) setRating(Math.round(full.rating));
+          // Publish the fresh aggregates to the shared store so the feed picks
+          // up anything that changed while it wasn't listening.
+          receiveStoryDocs(full);
         }
       } catch (e) { console.warn('detail load', e?.message); }
       finally { setLoading(false); }
     })();
-  }, [storyId]);
+  }, [storyId, receiveStoryDocs]);
 
   // Parse chapters when story text is available
   useEffect(() => {
@@ -130,19 +134,25 @@ export const StoryDetailScreen = () => {
   }, [story]);
 
   const isHere = story && currentStory?.id === story.id;
-  const isFavorite = story ? isInFavorites?.(story.id) : false;
+  // Same numbers as the community feed — one shared store behind both.
+  // `rating` is the community average; `myRating` is this user's own score.
+  const { liked, likesCount, saved, plays, rating, myRating } = getStoryMetrics(story);
 
   const handlePlay = async () => {
     if (!story) return;
     if (!isHere) await playStory(story); else await playPause();
+  };
+  const handleLike = async () => {
+    if (!user) return Alert.alert('Sign in required', 'Please sign in to like stories.');
+    try { await toggleLike(story); } catch (e) { Alert.alert('Error', 'Could not update like'); }
   };
   const handleFavorite = async () => {
     if (!user) return Alert.alert('Sign in required', 'Please sign in to save favorites.');
     try { await toggleFavorite(story); } catch (e) { Alert.alert('Error', 'Could not update favorite'); }
   };
   const handleRate = async (n) => {
-    setRating(n);
-    try { await apiService.rateStory(story.id, n); } catch (e) { /* best effort */ }
+    if (!user) return Alert.alert('Sign in required', 'Please sign in to rate stories.');
+    try { await rateStoryInContext(story, n); } catch (e) { Alert.alert('Error', 'Could not save rating'); }
   };
 
   if (loading) {
@@ -162,21 +172,25 @@ export const StoryDetailScreen = () => {
     <View style={{ flex: 1, backgroundColor: theme.background }}>
       <View style={[styles.head, { paddingTop: insets.top + 4 }]}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={10}><Icon name="chev-left" /></Pressable>
-        <Pressable hitSlop={10} onPress={() => Alert.alert('Share', 'Sharing coming soon.')}><Icon name="share" /></Pressable>
+        <Pressable hitSlop={10} onPress={() => Alert.alert('Share', 'Sharing coming soon.')}><Icon name="send" /></Pressable>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 140 }} showsVerticalScrollIndicator={false}>
         <Cover story={story} style={styles.cover} radius={22} />
         <AppText variant="h1" style={{ marginTop: 4 }}>{story.title}</AppText>
 
+        {/* Zero-valued metrics are omitted rather than shown as "0" — same rule
+            as the feed and the story cards. */}
         <View style={styles.metaRow}>
           {story.genre ? <Tag theme={theme} label={story.genre} /> : null}
           {story.language ? <Tag theme={theme} label={String(story.language).toUpperCase()} /> : null}
-          <View style={styles.rate}>
-            <Icon name="star" size={14} color={theme.ratingActive} />
-            <AppText variant="caption" color="textSecondary">{(story.rating || 0).toFixed(1)}</AppText>
-          </View>
+          {rating > 0 ? (
+            <View style={styles.rate}>
+              <Icon name="star" size={14} color={theme.ratingActive} />
+              <AppText variant="caption" color="textSecondary">{rating.toFixed(1)}</AppText>
+            </View>
+          ) : null}
           {story.duration ? <AppText variant="caption" color="textSecondary">· {fmtMin(story.duration)}</AppText> : null}
-          <AppText variant="caption" color="textSecondary">· ▶ {fmtPlays(story.plays)} plays</AppText>
+          {plays > 0 ? <AppText variant="caption" color="textSecondary">· ▶ {fmtPlays(plays)} plays</AppText> : null}
         </View>
 
         <AppText variant="bodyL" color="textSecondary" style={{ marginTop: 12, lineHeight: 25 }}>{story.description}</AppText>
@@ -188,8 +202,17 @@ export const StoryDetailScreen = () => {
             onPress={handlePlay}
             style={{ flex: 1 }}
           />
+          {/* Heart = like, bookmark = save — matching the community feed. The
+              heart used to toggle favorites here, so a like made on the feed
+              looked like it had been lost when you opened the story. */}
+          <Pressable onPress={handleLike} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Icon name={liked ? 'heart-fill' : 'heart'} color={liked ? (theme.heart || theme.error) : theme.text} />
+            {likesCount > 0 ? (
+              <AppText variant="micro" color="textSecondary" style={styles.iconBtnCount}>{fmtPlays(likesCount)}</AppText>
+            ) : null}
+          </Pressable>
           <Pressable onPress={handleFavorite} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Icon name={isFavorite ? 'heart-fill' : 'heart'} color={theme.heart || theme.error} />
+            <Icon name={saved ? 'bookmark-fill' : 'bookmark'} color={saved ? theme.accent : theme.text} />
           </Pressable>
           <Pressable onPress={() => Alert.alert('Download', 'Offline downloads coming soon.')} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <Icon name="download" />
@@ -197,11 +220,16 @@ export const StoryDetailScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2 }}>RATE THIS STORY</AppText>
+          <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2 }}>
+            {myRating > 0 ? 'YOUR RATING' : 'RATE THIS STORY'}
+          </AppText>
           <View style={styles.stars}>
             {[1, 2, 3, 4, 5].map((n) => (
               <Pressable key={n} onPress={() => handleRate(n)} hitSlop={4}>
-                <Icon name={n <= rating ? 'star' : 'star-outline'} size={30} color={n <= rating ? theme.ratingActive : theme.ratingInactive} />
+                {/* Your own score. This used to be seeded from the community
+                    average, so a story averaging 4.2 showed four filled stars
+                    as though you had rated it. */}
+                <Icon name={n <= myRating ? 'star' : 'star-outline'} size={30} color={n <= myRating ? theme.ratingActive : theme.ratingInactive} />
               </Pressable>
             ))}
           </View>
@@ -279,6 +307,9 @@ const styles = StyleSheet.create({
   rate: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 20 },
   iconBtn: { width: 52, height: 52, borderRadius: 14, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  // Stacked under the icon inside the same 52pt square. Only rendered at ≥1
+  // like, so the icon sits dead-centre until there's a number to show.
+  iconBtnCount: { marginTop: 1 },
   section: { marginTop: 26 },
   stars: { flexDirection: 'row', gap: 6, marginTop: 10 },
 

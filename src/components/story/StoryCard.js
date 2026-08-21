@@ -6,18 +6,11 @@ import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../ui/AppText';
 import { Icon } from '../ui/Icon';
 import { Cover } from './Cover';
+import { fmtMin, fmtPlays, storyPlays } from '../../utils/storyMetrics';
 
-export function fmtMin(sec) {
-  if (!sec && sec !== 0) return '';
-  const m = Math.round(sec / 60);
-  return `${m} min`;
-}
-
-export function fmtPlays(n) {
-  n = n || 0;
-  if (n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k';
-  return String(n);
-}
+// Re-exported: screens have imported these from here since before the helpers
+// moved out to utils/storyMetrics, and both are used right here.
+export { fmtMin, fmtPlays, storyPlays };
 
 export function PlayFab({ size = 46, solid, onPress, style }) {
   const { theme } = useTheme() || { theme: {} };
@@ -41,6 +34,7 @@ export function PlayFab({ size = 46, solid, onPress, style }) {
 // Vertical rail card (~138 wide).
 export function RailCard({ story, width = 138, onPress, onPlay }) {
   const { theme } = useTheme() || { theme: {} };
+  const plays = storyPlays(story);
   return (
     <Pressable onPress={onPress} style={{ width }} accessibilityRole="button" accessibilityLabel={story.title}>
       <Cover story={story} style={{ height: width }} radius={16}>
@@ -48,7 +42,7 @@ export function RailCard({ story, width = 138, onPress, onPlay }) {
       </Cover>
       <AppText variant="h3" numberOfLines={2} style={{ marginTop: 8 }}>{story.title}</AppText>
       <AppText variant="caption" color="textSecondary" numberOfLines={1} style={{ marginTop: 2 }}>
-        {story.duration ? fmtMin(story.duration) : (story.genre || 'Story')}{story.plays ? `  ·  ▶ ${fmtPlays(story.plays)}` : ''}
+        {story.duration ? fmtMin(story.duration) : (story.genre || 'Story')}{plays ? `  ·  ▶ ${fmtPlays(plays)}` : ''}
       </AppText>
     </Pressable>
   );
@@ -57,13 +51,14 @@ export function RailCard({ story, width = 138, onPress, onPlay }) {
 // Horizontal compact row for lists/search/history.
 export function CompactRow({ story, onPress, subtitle, trailing }) {
   const { theme } = useTheme() || { theme: {} };
+  const plays = storyPlays(story);
   return (
     <Pressable onPress={onPress} style={styles.row} accessibilityRole="button" accessibilityLabel={story.title}>
       <Cover story={story} style={styles.rowCover} radius={12} />
       <View style={{ flex: 1 }}>
         <AppText variant="h3" numberOfLines={1}>{story.title}</AppText>
         <AppText variant="caption" color="textSecondary" numberOfLines={1} style={{ marginTop: 2 }}>
-          {subtitle != null ? subtitle : `${story.genre || 'Story'}${story.duration ? ` · ${fmtMin(story.duration)}` : ''}${story.plays ? ` · ▶ ${fmtPlays(story.plays)}` : ''}`}
+          {subtitle != null ? subtitle : `${story.genre || 'Story'}${story.duration ? ` · ${fmtMin(story.duration)}` : ''}${plays ? ` · ▶ ${fmtPlays(plays)}` : ''}`}
         </AppText>
       </View>
       {trailing}
@@ -74,6 +69,7 @@ export function CompactRow({ story, onPress, subtitle, trailing }) {
 // Full-bleed hero.
 export function Hero({ story, badge = "Today's pick", onPress, onPlay }) {
   const { theme } = useTheme() || { theme: {} };
+  const plays = storyPlays(story);
   return (
     <Pressable onPress={onPress} style={styles.hero} accessibilityRole="button" accessibilityLabel={story.title}>
       <Cover story={story} style={StyleSheet.absoluteFill} radius={24} />
@@ -89,7 +85,7 @@ export function Hero({ story, badge = "Today's pick", onPress, onPlay }) {
         <View style={styles.heroSub}>
           <Icon name="note" size={13} color="rgba(255,255,255,0.9)" />
           <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.92)' }}>
-            {fmtMin(story.duration) || '—'}{story.genre ? `  ·  ${story.genre}` : ''}{story.plays ? `  ·  ▶ ${fmtPlays(story.plays)}` : ''}
+            {fmtMin(story.duration) || '—'}{story.genre ? `  ·  ${story.genre}` : ''}{plays ? `  ·  ▶ ${fmtPlays(plays)}` : ''}
           </AppText>
         </View>
       </View>

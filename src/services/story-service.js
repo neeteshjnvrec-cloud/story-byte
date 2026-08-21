@@ -239,17 +239,6 @@ const getStoryById = async (storyId) => {
 };
 
 /**
- * Increment play count
- */
-const incrementPlayCount = async (storyId) => {
-  const storyRef = storiesCollection.doc(storyId);
-  await storyRef.update({
-    plays: firebase.firestore.FieldValue.increment(1),
-    lastPlayed: firebase.firestore.FieldValue.serverTimestamp()
-  });
-};
-
-/**
  * Add rating to story
  */
 const addRating = async (storyId, userId, rating, review = null) => {
@@ -344,7 +333,6 @@ module.exports = {
   generateAudio,
   getStories,
   getStoryById,
-  incrementPlayCount,
   addRating,
   getCategories,
   scheduleDailyGeneration

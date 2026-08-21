@@ -29,7 +29,8 @@ const initialStories = [
     rating: 4.5,
     plays: 0,
     isPremium: false,
-    status: 'active',
+    status: 'published',
+    isCommunityStory: false,
     author: 'StoryByte Team',
     tags: ['romance', 'library', 'en'],
     text: 'Maya was browsing the shelves when she spotted Arjun. They both reached for the same book... (Full story text would be here)'
@@ -45,7 +46,8 @@ const initialStories = [
     rating: 4.2,
     plays: 0,
     isPremium: false,
-    status: 'active',
+    status: 'published',
+    isCommunityStory: false,
     author: 'StoryByte Team',
     tags: ['mystery', 'detective', 'en'],
     text: 'The old mansion had been locked for decades. But today, someone found the key... (Full story text would be here)'
@@ -61,7 +63,8 @@ const initialStories = [
     rating: 4.8,
     plays: 0,
     isPremium: false,
-    status: 'active',
+    status: 'published',
+    isCommunityStory: false,
     author: 'StoryByte Team',
     tags: ['romance', 'hindi', 'hi'],
     text: 'शहर की गलियों में एक अनजान दिल की तलाश... (Full story text would be here)'

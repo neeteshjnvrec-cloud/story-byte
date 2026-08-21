@@ -1,8 +1,9 @@
 // Audio Context for Story Byte — full-featured player
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
 import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
-import { doc, setDoc, getDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../services/firebase';
+import { useAppContext } from './AppContext';
 
 const AudioContext = createContext();
 
@@ -12,6 +13,9 @@ const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 const PROGRESS_SAVE_INTERVAL = 30000; // 30 seconds
 
 export const AudioProvider = ({ children }) => {
+  // Play counts live in AppContext's shared metric store so every screen
+  // showing this story updates together.
+  const { recordPlay } = useAppContext() || {};
   const [currentStory, setCurrentStory] = useState(null);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -269,8 +273,11 @@ export const AudioProvider = ({ children }) => {
       setIsPlaying(true);
 
       // Count a play on the story (allowed by rules for signed-in users).
+      // Routed through AppContext so the number moves on every screen showing
+      // this story, not just in the doc. Safe to consume here: AudioProvider is
+      // nested inside AppContextProvider (App.js).
       if (story?.id) {
-        updateDoc(doc(db, 'stories', story.id), { plays: increment(1), lastPlayedAt: serverTimestamp() }).catch(() => {});
+        recordPlay?.(story);
       }
 
       // Record immediately (marks as played + shows in history), then auto-save.
@@ -279,7 +286,7 @@ export const AudioProvider = ({ children }) => {
     } catch (error) {
       console.error('Error playing story:', error);
     }
-  }, [speed, startProgressSaveTimer, onPlaybackStatusUpdate, totalPages]);
+  }, [speed, startProgressSaveTimer, onPlaybackStatusUpdate, totalPages, recordPlay]);
 
   // Navigate to a specific page
   const goToPage = useCallback(async (pageIndex) => {

@@ -28,6 +28,7 @@ import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { NotificationsScreen } from './src/screens/NotificationsScreen';
 import { FloatingAudioPlayer } from './src/components/FloatingAudioPlayer';
+import { notificationService } from './src/services/notificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { FONT_MAP } from './src/theme/tokens';
@@ -75,6 +76,18 @@ function MainStack({ isNewUser }) {
       navigationRef.current.navigate('EditProfile');
     }
   }, [needsProfile, ready]);
+
+  // Tapping a push notification opens the story it's about. Without this a push
+  // just brought the app to whatever screen it was last on, which made the
+  // publish/broadcast notifications feel broken even when they arrived.
+  React.useEffect(() => {
+    if (!ready) return;
+    return notificationService.addResponseListener((data) => {
+      if (data?.storyId && navigationRef.current) {
+        navigationRef.current.navigate('StoryDetail', { storyId: data.storyId });
+      }
+    });
+  }, [ready]);
 
   return (
     <>
