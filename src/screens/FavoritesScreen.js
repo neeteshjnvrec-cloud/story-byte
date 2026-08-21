@@ -105,7 +105,7 @@ export const FavoritesScreen = () => {
         key={story.id}
         story={story}
         onPress={() => openStory(story)}
-        trailing={<Icon name="heart-fill" size={20} color={theme.error} />}
+        trailing={<Icon name="bookmark-fill" size={20} color={theme.accent} />}
       />
     ));
   };

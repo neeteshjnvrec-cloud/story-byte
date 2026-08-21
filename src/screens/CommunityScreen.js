@@ -1,13 +1,18 @@
-// Community Screen — Instagram-profile-style single-column feed
+// Community Screen — Instagram-style single-column feed
 // Layout per card:
-//   [ COVER IMAGE ]
-//   👤 avatar (top-left corner of image)
+//   👤 avatar   author name          ⋯     ← header, on the app background
+//               17h ago
 //   ───────────────────
-//   @username   ★ · 5 min ago
-//   story title + short description
+//   [ COVER IMAGE — title/duration + play FAB over a bottom-only scrim ]
 //   ───────────────────
 //   ❤️   💬   ⭐   🔖   📤    ← action bar
 //   likes  comments  rating  saved  share
+//   ───────────────────
+//   **author** description         ← caption
+//
+// The header is intentionally NOT overlaid on the cover. A chip or top scrim
+// sitting on artwork reads as a dark patch with a hard edge no matter how it's
+// sized or tinted; moving it onto the background removes the problem outright.
 
 import React, { useEffect, useState } from 'react';
 import {
@@ -31,7 +36,8 @@ import { Cover } from '../components/story/Cover';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAudioPlayer } from '../context/AudioContext';
-import apiService from '../services/api';
+import { collection, query, where, onSnapshot, orderBy, limit as fbLimit } from 'firebase/firestore';
+import { db } from '../services/firebase';
 
 // Relative time formatter
 function timeAgo(dateValue) {
@@ -50,70 +56,92 @@ export function CommunityScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
-  const { user, communityStories, fetchCommunityStories, toggleFavorite, isInFavorites } = useAppContext();
+  const {
+    user, communityStories, fetchCommunityStories, receiveCommunityStories,
+    toggleFavorite, getStoryMetrics, toggleLike, rateStory,
+  } = useAppContext();
   const { playStory } = useAudioPlayer();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [likedStories, setLikedStories] = useState({});
-  const [savedStories, setSavedStories] = useState({});
-  const [storyRatings, setStoryRatings] = useState({});
+  const [ratingOpenFor, setRatingOpenFor] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
+
+    // Initial fetch
     fetchCommunityStories().then(() => {
       if (!cancelled) setLoading(false);
     }).catch((e) => {
       if (!cancelled) { setError(e.message || 'Failed to load stories'); setLoading(false); }
     });
-    return () => { cancelled = true; };
-  }, [fetchCommunityStories]);
 
-  // Seed initial like/save state
-  useEffect(() => {
-    const likes = {};
-    const saves = {};
-    communityStories.forEach(s => {
-      const id = s.id || s.storyId;
-      likes[id] = false;
-      saves[id] = isInFavorites?.(id) || false;
+    // Real-time listener. The status filter is what makes an under_review story
+    // invisible to everyone including its author — without it, every client's
+    // snapshot carried other people's unpublished submissions.
+    const q = query(
+      collection(db, 'stories'),
+      where('isCommunityStory', '==', true),
+      where('status', '==', 'published'),
+      orderBy('createdAt', 'desc'),
+      fbLimit(50)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (cancelled) return;
+      const stories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Hand the docs to the context, which updates both the story list and the
+      // shared metric store — so a like made here is visible on Story Detail
+      // and anywhere else showing the same story.
+      receiveCommunityStories(stories);
+      setError(null);
+      setLoading(false);
+    }, (error) => {
+      console.error('[CommunityScreen] Realtime listener error:', error);
+      if (!cancelled) { setError(error.message || 'Failed to load stories'); setLoading(false); }
     });
-    setLikedStories(likes);
-    setSavedStories(saves);
-  }, [communityStories, isInFavorites]);
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, [fetchCommunityStories, receiveCommunityStories]);
 
   const handleStoryPress = (story) => {
     navigation.navigate('StoryDetail', { storyId: story.storyId || story.id, story });
   };
 
-  const handleLike = (story) => {
-    const id = story.id || story.storyId;
-    setLikedStories(prev => ({ ...prev, [id]: !prev[id] }));
+  // The optimistic-update-and-revert logic for all three of these lives in
+  // AppContext now, so the same tap behaves identically on Story Detail.
+  const handleLike = async (story) => {
+    try {
+      const result = await toggleLike(story);
+      if (result?.needsAuth) Alert.alert('Sign in required', 'Please sign in to like stories.');
+    } catch (e) {
+      Alert.alert('Error', 'Could not update like');
+    }
   };
 
   const handleComment = (story) => {
     Alert.alert('Comments', `Comments coming soon for "${story.title}"`);
   };
 
+  // Tapping the star swaps the left action cluster for an inline 1–5 row.
+  // (Alert.alert can't do this: Android caps it at 3 buttons, so the old
+  // six-button rating alert silently dropped most of its options there.)
   const handleRate = (story) => {
-    Alert.alert(
-      'Rate this story',
-      `How would you rate "${story.title}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: '😞 1', onPress: () => submitRating(story, 1) },
-        { text: '😐 2', onPress: () => submitRating(story, 2) },
-        { text: '🙂 3', onPress: () => submitRating(story, 3) },
-        { text: '😊 4', onPress: () => submitRating(story, 4) },
-        { text: '🤩 5', onPress: () => submitRating(story, 5) },
-      ]
-    );
+    if (!user) {
+      Alert.alert('Sign in required', 'Please sign in to rate stories.');
+      return;
+    }
+    const id = story.id || story.storyId;
+    setRatingOpenFor(prev => (prev === id ? null : id));
   };
 
   const submitRating = async (story, rating) => {
+    setRatingOpenFor(null);
     try {
-      await apiService.rateStory(story.id || story.storyId, rating);
-      const id = story.id || story.storyId;
-      setStoryRatings(prev => ({ ...prev, [id]: rating }));
+      const result = await rateStory(story, rating);
+      if (result?.needsAuth) Alert.alert('Sign in required', 'Please sign in to rate stories.');
     } catch (e) {
       Alert.alert('Error', 'Could not save rating');
     }
@@ -128,11 +156,8 @@ export function CommunityScreen() {
       Alert.alert('Sign in required', 'Please sign in to save favorites.');
       return;
     }
-    const id = story.id || story.storyId;
-    const isFav = savedStories[id];
     try {
       await toggleFavorite(story);
-      setSavedStories(prev => ({ ...prev, [id]: !isFav }));
     } catch (e) {
       Alert.alert('Error', 'Could not update saved stories');
     }
@@ -153,56 +178,62 @@ export function CommunityScreen() {
 
   const keyExtractor = (item, index) => item.storyId || item.id || `story-key-${index}`;
 
-  // Show only published stories; pending ones get a special placeholder row
-  const published = communityStories.filter(s => s.status === 'published');
-  const pending = communityStories.filter(s => s.status === 'under_review' || s._pendingPublish);
+  // The query already filters to published, so nothing here needs a status
+  // branch — an under_review story never reaches this screen at all.
+  const published = communityStories;
 
   const renderItem = ({ item }) => {
     const id = item.id || item.storyId;
-    const isLiked = likedStories[id] || false;
-    const isSaved = savedStories[id] || false;
-    const rating = storyRatings[id] || 0;
-    const plays = item.plays || item.playsCount || 0;
+    // Every metric from one place, so these numbers match Story Detail exactly.
+    const { liked, likesCount, saved, plays, rating, myRating } = getStoryMetrics(item);
+    const isRatingOpen = ratingOpenFor === id;
     const postedAt = timeAgo(item.createdAt);
-    const authorInitial = (item.authorName || '?')[0].toUpperCase();
+    // Trim first: an empty-string authorName passes `||` but ''[0] is undefined.
+    const authorName = item.authorName?.trim() || 'Anonymous';
+    const authorInitial = authorName[0].toUpperCase();
 
     return (
       <View style={styles.post}>
-        {/* ═══════════ COVER IMAGE — Hero-style layout ═══════════ */}
-        <View style={styles.coverWrap}>
-          <TouchableOpacity onPress={() => handleStoryPress(item)} activeOpacity={0.92}>
-            {/* Cover image */}
-            <Cover story={item} style={styles.cover} radius={16} />
+        {/* ═══════════ AUTHOR HEADER — above the media, on the app background.
+            Deliberately NOT overlaid on the cover: a scrim or chip sitting on
+            artwork always reads as a patch. ═══════════ */}
+        <View style={styles.postHeader}>
+          <View style={[styles.headerAvatar, { backgroundColor: theme.accent }]}>
+            <Text style={styles.headerAvatarLetter}>{authorInitial}</Text>
+          </View>
+          <View style={styles.headerTextWrap}>
+            <AppText variant="bodySemi" color="text" numberOfLines={1}>
+              {authorName}
+            </AppText>
+            {postedAt ? (
+              <AppText variant="caption" color="textSecondary" numberOfLines={1}>
+                {postedAt}
+              </AppText>
+            ) : null}
+          </View>
+          <TouchableOpacity
+            hitSlop={10}
+            style={styles.headerMoreBtn}
+            onPress={() => handleStoryPress(item)}
+            accessibilityLabel="Story options"
+          >
+            <Icon name="more" size={20} color={theme.text} />
+          </TouchableOpacity>
+        </View>
 
-            {/* Gradient fade at bottom for text readability */}
+        {/* ═══════════ COVER IMAGE ═══════════ */}
+        <TouchableOpacity onPress={() => handleStoryPress(item)} activeOpacity={0.92} style={styles.coverWrap}>
+          {/* Cover image */}
+          <Cover story={item} style={StyleSheet.absoluteFill} radius={24} />
+
+            {/* Bottom-only scrim for the title + meta. `colors` takes colors
+                only — stop positions go in `locations`. */}
             <LinearGradient
-              colors={['transparent 40%', 'rgba(0,0,0,0.75)']}
+              colors={['transparent', 'rgba(0,0,0,0.75)']}
+              locations={[0.45, 1]}
+              pointerEvents="none"
               style={styles.gradient}
             />
-
-            {/* Profile avatar + username — top-left */}
-            <View style={styles.overlayProfile}>
-              <View style={[styles.overlayAvatar, { backgroundColor: theme.accent }]}>
-                <Text style={styles.overlayAvatarLetter}>{authorInitial}</Text>
-              </View>
-              <View style={styles.overlayTextWrap}>
-                <AppText variant="bodySemi" color="onAccent" numberOfLines={1} style={styles.overlayUsername}>
-                  {item.authorName || 'Anonymous'}
-                </AppText>
-                <AppText variant="caption" color="rgba(255,255,255,0.7)" style={styles.overlayTime}>
-                  Published {postedAt}
-                </AppText>
-              </View>
-            </View>
-
-            {/* 3-dot menu — top-right, opens story detail */}
-            <TouchableOpacity
-              hitSlop={10}
-              style={styles.moreBtnTopRight}
-              onPress={() => handleStoryPress(item)}
-            >
-              <Icon name="more" size={22} color="#fff" />
-            </TouchableOpacity>
 
             {/* Title + meta — bottom-left (like Hero card) */}
             <View style={styles.heroMeta}>
@@ -214,7 +245,7 @@ export function CommunityScreen() {
                 <AppText variant="caption" style={styles.heroMetaText}>
                   {fmtMin(item.duration || 0)}
                   {item.genre ? `  ·  ${item.genre}` : ''}
-                  {item.plays ? `  ·  ▶ ${fmtPlays(item.plays || 0)}` : ''}
+                  {plays ? `  ·  ▶ ${fmtPlays(plays)}` : ''}
                 </AppText>
               </View>
             </View>
@@ -231,79 +262,108 @@ export function CommunityScreen() {
               </View>
             </TouchableOpacity>
           </TouchableOpacity>
-        </View>
 
         {/* ═══════════ ACTION BAR ═══════════ */}
+        {/* Like / comment / rate / send cluster on the left; save is pushed to
+            the far right on its own, as in Instagram. Tapping rate swaps the
+            left cluster for an inline 1–5 star row. */}
         <View style={styles.actionBar}>
-          {/* ❤️ Like */}
-          <TouchableOpacity onPress={() => handleLike(item)} hitSlop={8} style={styles.actionBtn}>
-            <Icon name={isLiked ? 'heart-fill' : 'heart'} size={22} color={isLiked ? '#E53E3E' : theme.text} />
-          </TouchableOpacity>
+          {isRatingOpen ? (
+            <>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <TouchableOpacity
+                  key={n}
+                  onPress={() => submitRating(item, n)}
+                  hitSlop={6}
+                  style={[styles.starBtn, n === 1 && styles.starBtnFirst]}
+                  accessibilityLabel={`Rate ${n} out of 5`}
+                >
+                  {/* Pre-filled with your own score, not the community average. */}
+                  <Icon
+                    name={n <= myRating ? 'star' : 'star-outline'}
+                    size={24}
+                    color={n <= myRating ? theme.ratingActive : theme.ratingInactive}
+                  />
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                onPress={() => setRatingOpenFor(null)}
+                hitSlop={8}
+                style={styles.actionBtn}
+                accessibilityLabel="Cancel rating"
+              >
+                <Icon name="close" size={18} color={theme.textSecondary} />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              {/* ❤️ Like — the heart means "like" here and on Story Detail;
+                  saving is the bookmark at the far right. */}
+              <TouchableOpacity onPress={() => handleLike(item)} hitSlop={8} style={styles.actionBtn}>
+                <Icon name={liked ? 'heart-fill' : 'heart'} size={22} color={liked ? '#E53E3E' : theme.text} />
+                {likesCount > 0 ? (
+                  <Text style={[styles.actionNum, { color: liked ? '#E53E3E' : theme.textSecondary }]}>
+                    {likesCount}
+                  </Text>
+                ) : null}
+              </TouchableOpacity>
 
-          {/* 💬 Comment */}
-          <TouchableOpacity onPress={() => handleComment(item)} hitSlop={8} style={styles.actionBtn}>
-            <Icon name="more" size={22} color={theme.text} />
-            <Text style={[styles.actionNum, { color: theme.textSecondary }]}>{item.commentsCount || 0}</Text>
-          </TouchableOpacity>
+              {/* 💬 Comment */}
+              <TouchableOpacity onPress={() => handleComment(item)} hitSlop={8} style={styles.actionBtn}>
+                <Icon name="chat" size={22} color={theme.text} />
+                {item.commentsCount > 0 ? (
+                  <Text style={[styles.actionNum, { color: theme.textSecondary }]}>{item.commentsCount}</Text>
+                ) : null}
+              </TouchableOpacity>
 
-          {/* ⭐ Rate */}
-          <TouchableOpacity onPress={() => handleRate(item)} hitSlop={8} style={styles.actionBtn}>
-            <Icon name={rating > 0 ? 'star' : 'star-outline'} size={22} color={rating > 0 ? theme.ratingActive : theme.text} />
-            {rating > 0 && <Text style={[styles.actionNum, { color: theme.ratingActive }]}>{rating}</Text>}
-          </TouchableOpacity>
+              {/* ⭐ Rate — StoryByte-specific, sits where Instagram puts repost.
+                  The number is the community average; the fill says whether YOU
+                  rated it. Both meanings, one control. */}
+              <TouchableOpacity onPress={() => handleRate(item)} hitSlop={8} style={styles.actionBtn}>
+                <Icon
+                  name={myRating > 0 ? 'star' : 'star-outline'}
+                  size={22}
+                  color={myRating > 0 ? theme.ratingActive : theme.text}
+                />
+                {rating > 0 ? (
+                  <Text style={[styles.actionNum, { color: myRating > 0 ? theme.ratingActive : theme.textSecondary }]}>
+                    {rating.toFixed(1)}
+                  </Text>
+                ) : null}
+              </TouchableOpacity>
 
-          {/* 🔖 Save */}
-          <TouchableOpacity onPress={() => handleSave(item)} hitSlop={8} style={styles.actionBtn}>
-            <Icon name={isSaved ? 'check-circle' : 'download-outline'} size={22} color={isSaved ? theme.accent : theme.text} />
-          </TouchableOpacity>
+              {/* ✈ Share */}
+              <TouchableOpacity onPress={() => handleShare(item)} hitSlop={8} style={styles.actionBtn}>
+                <Icon name="send" size={22} color={theme.text} />
+              </TouchableOpacity>
+            </>
+          )}
 
-          {/* 📤 Share */}
-          <TouchableOpacity onPress={() => handleShare(item)} hitSlop={8} style={styles.actionBtn}>
-            <Icon name="share" size={22} color={theme.text} />
+          {/* 🔖 Save — right-aligned */}
+          <TouchableOpacity onPress={() => handleSave(item)} hitSlop={8} style={[styles.actionBtn, styles.actionBtnEnd]}>
+            <Icon name={saved ? 'bookmark-fill' : 'bookmark'} size={22} color={saved ? theme.accent : theme.text} />
           </TouchableOpacity>
         </View>
 
-        {/* ═══════════ TITLE + DESCRIPTION ═══════════ */}
-        <View style={styles.captionRow}>
-          {item.title ? (
+        {/* ═══════════ CAPTION — bold author + description ═══════════ */}
+        {/* The title already sits on the cover, so the caption carries the
+            description; it falls back to the title only when there's none. */}
+        {(item.description || item.title) ? (
+          <View style={styles.captionRow}>
             <AppText variant="body" color="text" style={styles.caption} numberOfLines={3}>
               {item.authorName ? (
-                <Text><Text style={{ fontWeight: '700' }}>{item.authorName}: </Text>{item.title}</Text>
-              ) : (
-                item.title
-              )}
-              {item.description ? <Text style={{ marginTop: 2 }}>{item.description}</Text> : null}
+                <Text style={styles.captionAuthor}>{authorName}{'  '}</Text>
+              ) : null}
+              {item.description || item.title}
             </AppText>
-          ) : item.description ? (
-            <AppText variant="body" color="text" style={styles.caption} numberOfLines={3}>
-              {item.description}
-            </AppText>
-          ) : null}
-        </View>
+          </View>
+        ) : null}
 
         {/* divider */}
         <View style={[styles.divider, { borderBottomColor: theme.divider }]} />
       </View>
     );
   };
-
-  const renderPendingItem = ({ item }) => (
-    <View style={[styles.pendingCard, { borderColor: theme.border }]}>
-      <View style={[styles.pendingImg, { backgroundColor: theme.surface }]}>
-        <ActivityIndicator size="large" color={theme.accent} />
-        <View style={styles.pendingAvatar}>
-          <Text style={styles.pendingAvatarLetter}>?</Text>
-        </View>
-      </View>
-      <View style={styles.pendingMeta}>
-        <AppText variant="bodySemi" color="text" numberOfLines={1} style={styles.pendingUser}>@your-story</AppText>
-        <AppText variant="caption" color="accent">{item.genre || 'Story'}</AppText>
-        <AppText variant="caption" color="textTertiary" style={styles.pendingHint}>
-          Generating audio & cover…
-        </AppText>
-      </View>
-    </View>
-  );
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
@@ -335,15 +395,15 @@ export function CommunityScreen() {
         </View>
       ) : (
         <FlatList
-          data={[...pending, ...published]}
+          data={published}
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item }) =>
-            item._pendingPublish || item.status === 'under_review'
-              ? renderPendingItem({ item })
-              : renderItem({ item })
-          }
+          // Metrics live outside `data` now, so FlatList needs telling when they
+          // move. getStoryMetrics' identity changes exactly when the shared
+          // like/rating/play state does, which is precisely when rows must repaint.
+          extraData={getStoryMetrics}
+          renderItem={renderItem}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Icon name="people" size={48} color={theme.textTertiary} />
@@ -376,19 +436,21 @@ const styles = StyleSheet.create({
   retryBtn: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 25, marginTop: 16 },
 
   // ── Post Card ──
+  // Community card — identical to Home Hero card
   post: {},
 
   coverWrap: {
-    width: '100%',
-    aspectRatio: 4 / 3,
-    position: 'relative',
-    borderRadius: 16,
+    height: 200,
+    marginHorizontal: 20,
+    borderRadius: 24,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 4,
+    position: 'relative',
+    shadowColor: '#3C2814',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.4,
+    shadowRadius: 24,
+    elevation: 8,
+    marginBottom: 12,
   },
   cover: {
     width: '100%',
@@ -398,63 +460,44 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
 
-  // Profile avatar + username — top-left
-  overlayProfile: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
+  // ── Author header (above the media, on the app background) ──
+  postHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: 10,
   },
-  overlayAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  headerAvatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.5)',
   },
-  overlayAvatarLetter: {
+  headerAvatarLetter: {
     color: '#fff',
     fontSize: 14,
     fontWeight: '800',
   },
-  overlayUsername: {
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  overlayTextWrap: { flex: 1, minWidth: 0 },
-  overlayTime: {
-    fontSize: 11,
-    marginTop: 1,
-  },
-  // 3-dot menu — top-right
-  moreBtnTopRight: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  // flex: 1 is correct here (unlike on an absolute node): it pushes the ⋯
+  // button to the right edge and lets the name ellipsize.
+  headerTextWrap: { flex: 1, minWidth: 0 },
+  headerMoreBtn: { padding: 4 },
 
-  // Hero-style meta — bottom-left of card (like Home hero)
+  // Compact hero meta - bottom-left of card
   heroMeta: {
     position: 'absolute',
-    bottom: 60,
-    left: 14,
-    right: 70,
+    bottom: 48,
+    left: 10,
+    right: 60,
   },
   heroTitle: {
     color: '#fff',
     fontWeight: '700',
-    fontSize: 16,
-    lineHeight: 22,
+    fontSize: 13,
+    lineHeight: 18,
     textShadowColor: 'rgba(0,0,0,0.5)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
@@ -462,63 +505,84 @@ const styles = StyleSheet.create({
   heroSub: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
+    gap: 3,
+    marginTop: 2,
   },
   heroMetaText: {
-    color: 'rgba(255,255,255,0.92)',
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 10,
   },
   heroFab: {
     position: 'absolute',
-    right: 14,
-    bottom: 14,
+    right: 10,
+    bottom: 10,
   },
   playBtnCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
 
   // Caption
   captionRow: {
-    paddingHorizontal: 14,
+    // 20 = the card gutter (coverWrap marginHorizontal / postHeader padding).
+    paddingHorizontal: 20,
     paddingBottom: 6,
   },
   caption: {
     lineHeight: 20,
   },
+  captionAuthor: {
+    fontWeight: '700',
+  },
 
-  // Action bar
+  // Action bar — 12 here + 8 on actionBtn lands the first icon on the same
+  // 20pt gutter as the cover and caption.
   actionBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 2,
   },
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 20,
+    gap: 3,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 16,
   },
   actionNum: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
+  },
+  // Pushes save to the far right, leaving the other actions clustered left.
+  actionBtnEnd: {
+    marginLeft: 'auto',
+  },
+  // Inline 1–5 stars. Tighter than actionBtn so all five plus the cancel
+  // button fit on the same row without crowding the right-aligned save.
+  starBtn: {
+    paddingVertical: 4,
+    paddingHorizontal: 5,
+  },
+  // 12 (actionBar) + 8 = the same 20pt gutter the heart icon sits on, so the
+  // row doesn't shift sideways when it expands.
+  starBtnFirst: {
+    paddingLeft: 8,
   },
 
   divider: {
     borderBottomWidth: 1,
-    marginHorizontal: 14,
+    marginHorizontal: 20,
   },
 
   emptyContainer: {
@@ -527,39 +591,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 80,
   },
-
-  // Pending card
-  pendingCard: {
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    overflow: 'hidden',
-  },
-  pendingImg: {
-    width: '100%',
-    aspectRatio: 4 / 3,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  pendingAvatar: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pendingAvatarLetter: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  pendingMeta: {
-    padding: 12,
-  },
-  pendingUser: { fontWeight: '700' },
-  pendingHint: { marginTop: 4, fontStyle: 'italic' },
 });

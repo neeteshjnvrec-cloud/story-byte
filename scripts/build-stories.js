@@ -4,8 +4,14 @@
  * Generates exactly 2 random stories per day. Failed stories are retried
  * the next day (same slot) — never skips ahead.
  *
+ * Daily stories only. Community stories are owned end-to-end by
+ * generate-community-audio.js; this script used to generate their assets too but
+ * never flipped their status to 'published', which left them fully generated and
+ * permanently invisible.
+ *
  * Env: GROQ_API_KEY (req), GROQ_MODEL, FIREBASE_SERVICE_ACCOUNT (JSON, CI) or a
- *      local functions/firebase-service-account.json, STORY_DATE (opt).
+ *      local functions/firebase-service-account.json, STORY_DATE (opt),
+ *      MAX_FANOUT_USERS (opt, ceiling on notification recipients).
  */
 const admin = require('firebase-admin');
 const Groq = require('groq-sdk');
@@ -14,6 +20,7 @@ const https = require('https');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { notifyAndPushAll } = require('./lib/notify');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -217,17 +224,25 @@ function durationSec(file) {
 }
 
 async function createNotification(story) {
-  // Store notification in Firestore for the app to read
-  await db.collection('notifications').add({
-    type: 'new_story',
-    title: `New ${story.genre} story`,
-    body: story.title,
-    storyId: story.storyId,
-    genre: story.genre,
-    coverImage: story.coverImage,
-    read: false,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
+  // One doc per user under users/{uid}/notifications — the only path the app
+  // reads. This previously wrote a single doc to a top-level `notifications`
+  // collection that nothing subscribed to.
+  await notifyAndPushAll(
+    db,
+    {
+      type: 'new_story',
+      title: `New ${story.genre} story`,
+      body: story.title,
+      storyId: story.storyId,
+      genre: story.genre,
+      coverImage: story.coverImage,
+    },
+    {
+      title: `New ${story.genre} story`,
+      body: story.title,
+      data: { storyId: story.storyId, type: 'new_story', navigateTo: 'StoryDetail' },
+    }
+  );
 }
 
 // --- utils ---
@@ -373,56 +388,18 @@ async function run() {
     console.log(`\n⚠️  ${failedToday.length} slots failed — will retry tomorrow`);
   }
 
-  // ── Process pending community stories (same audio/cover pipeline) ────────────
-  const communityPending = [];
-  try {
-    const q = db.collection('stories')
-      .where('ttsEngine', '==', 'edge-tts')
-      .where('isCommunityStory', '==', true);
-    const snap = await q.get();
-    console.log(`\n🔍 Found ${snap.size} pending community story(ies)`);
-    for (const doc of snap.docs) {
-      const data = doc.data();
-      // Skip if already has a real hosting URL
-      if (data.audioUrl && data.audioUrl.startsWith(SITE)) continue;
-      console.log(`  → ${data.title || 'untitled'} (${doc.id})`);
+  // Community stories are NOT handled here — generate-community-audio.js owns
+  // their whole lifecycle, including the status flip to 'published' and the
+  // author/broadcast notifications. This script used to generate their assets in
+  // parallel without flipping status, which stranded them as invisible.
 
-      const id = doc.id;
-      const cover = path.join(PUB, 'covers', `${id}.jpg`);
-      const audio = path.join(PUB, 'audio', `${id}.mp3`);
-
-      // Cover
-      await fetchImage(
-        `https://image.pollinations.ai/prompt/${encodeURIComponent(coverPrompt(data, data))}?width=768&height=768&nologo=true&seed=${hashSeed(id)}&model=flux`,
-        cover
-      );
-      console.log(`    cover ✓ (${Math.round(fs.statSync(cover).size / 1024)}KB)`);
-
-      // Audio via edge-tts
-      const slotLike = { voice: 'en-US-AriaNeural', rate: null };
-      synth(data.text, slotLike, audio);
-      const dur = durationSec(audio) || Math.max(30, Math.round((data.text || '').split(/\s+/).length / 2.5));
-      console.log(`    audio ✓ (${Math.round(fs.statSync(audio).size / 1024)}KB, ${dur}s)`);
-
-      communityPending.push({ id, title: data.title, genre: data.genre, duration: dur });
-    }
-  } catch (e) { console.warn('⚠️  Community story processing skipped:', e.message); }
-
-  // Deploy if we have at least 1 story (daily OR community)
-  const totalStories = pending.length + communityPending.length;
-  console.log(`\n📊 Daily: ${pending.length}, Community: ${communityPending.length} → deploying ${totalStories}`);
-
-  if (totalStories === 0) {
+  if (pending.length === 0) {
     console.log('❌ No stories to deploy.');
     process.exit(0);
   }
 
-  // Deploy all staged files to Firebase Hosting once (daily + community together)
-  const hostLabel = [
-    pending.length ? `${pending.length} daily` : '',
-    communityPending.length ? `${communityPending.length} community` : '',
-  ].filter(Boolean).join(' + ') || 'none';
-  console.log(`\n🚀 Deploying ${hostLabel} stories to Firebase Hosting...`);
+  // Deploy all staged files to Firebase Hosting once
+  console.log(`\n🚀 Deploying ${pending.length} daily story(ies) to Firebase Hosting...`);
   execFileSync('npx', ['--yes', 'firebase-tools', 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
     { cwd: ROOT, stdio: 'inherit', env: { ...process.env, GOOGLE_APPLICATION_CREDENTIALS: SA_PATH } });
 
@@ -434,7 +411,13 @@ async function run() {
       isKids: !!p.slot.isKids, isSleep: !!p.slot.isSleep, episode: 1,
       text: p.content.text,
       audioUrl: `${SITE}/audio/${p.id}.mp3`, coverImage: `${SITE}/covers/${p.id}.jpg`,
-      duration: p.duration, rating: 0, plays: 0, isPremium: false, status: 'active', isDaily: true,
+      duration: p.duration, isPremium: false, isDaily: true,
+      // One lifecycle shared with community stories: 'published' means visible,
+      // and isCommunityStory is the only thing that decides which feed.
+      status: 'published', isCommunityStory: false,
+      // Every aggregate present from birth so the metrics store never has to
+      // fall back for a fresh story.
+      plays: 0, likesCount: 0, rating: 0, ratingSum: 0, ratingCount: 0,
       generatedDate: DATE, voice: p.slot.voice, ttsEngine: 'edge-tts', author: 'StoryByte AI', tags: p.content.tags,
       createdAt: admin.firestore.FieldValue.serverTimestamp(), updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
@@ -446,25 +429,10 @@ async function run() {
     });
   }
 
-  // Update community story docs with hosting URLs
-  for (const c of communityPending) {
-    await db.collection('stories').doc(c.id).update({
-      audioUrl: `${SITE}/audio/${c.id}.mp3`,
-      coverImage: `${SITE}/covers/${c.id}.jpg`,
-      duration: c.duration,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-    console.log('✓ community doc', c.id, `→ ${SITE}/audio/${c.id}.mp3`);
-    await createNotification({
-      storyId: c.id, title: c.title, genre: c.genre,
-      coverImage: `${SITE}/covers/${c.id}.jpg`,
-    });
-  }
-
   // Log generation
   await db.collection('generation_logs').doc(DATE).set({
     date: DATE, count: pending.length, expected: DAILY_COUNT, failed: failedToday.length,
-    communityCount: communityPending.length, at: admin.firestore.FieldValue.serverTimestamp()
+    at: admin.firestore.FieldValue.serverTimestamp()
   }, { merge: true });
 
   console.log(`\n✅ Done. Published ${pending.length}/${DAILY_COUNT} stories for ${DATE}.`);

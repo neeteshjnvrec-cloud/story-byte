@@ -10,6 +10,11 @@ on:
   # Also trigger via API call from the app when a new community story is published
   repository_dispatch:
     types: [community-story-published]
+  # Safety net: the app's repository_dispatch can fail silently (bad or missing
+  # EXPO_PUBLIC_GITHUB_TOKEN), which would leave a story stuck in under_review
+  # and invisible forever. This sweeps up anything the dispatch missed.
+  schedule:
+    - cron: '17 * * * *'
 
 concurrency:
   group: community-stories

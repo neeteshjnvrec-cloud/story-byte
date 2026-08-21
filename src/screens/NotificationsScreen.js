@@ -16,14 +16,21 @@ import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { notificationService } from '../services/notificationService';
 
+// Keys must match the `type` written by the generation pipeline
+// (scripts/lib/notify.js). An unmapped type falls through to a generic bell,
+// which is what story_published and new_community_story used to do.
 const TYPE_ICONS = {
   new_story: 'book',
+  story_published: 'check-circle',
+  new_community_story: 'people',
   reminder: 'bell',
   update: 'info',
 };
 
 const TYPE_COLORS = {
   new_story: '#B5613A',
+  story_published: '#3E9C6D',
+  new_community_story: '#8B5CF6',
   reminder: '#E0913A',
   update: '#667eea',
 };
@@ -119,7 +126,7 @@ export const NotificationsScreen = () => {
   const renderItem = ({ item }) => {
     const icon = TYPE_ICONS[item.type] || 'bell';
     const color = TYPE_COLORS[item.type] || '#B5613A';
-    const timeAgo = getTimeAgo(item.createdAt?.toDate?.() || new Date(item.createdAt));
+    const timeAgo = getTimeAgo(item.createdAt);
 
     return (
       <Pressable
@@ -206,10 +213,16 @@ export const NotificationsScreen = () => {
   );
 };
 
-function getTimeAgo(date) {
+// Accepts a Firestore Timestamp, an ISO string, or null. Null happens on the
+// local snapshot of a serverTimestamp write before the server acknowledges it —
+// `new Date(null)` is 1970, which rendered as an absurd date.
+function getTimeAgo(value) {
+  const date = value?.toDate?.() ?? (value ? new Date(value) : null);
+  if (!date || Number.isNaN(date.getTime())) return 'Just now';
+
   const now = new Date();
   const diff = Math.floor((now - date) / 1000);
-  
+
   if (diff < 60) return 'Just now';
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;

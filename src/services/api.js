@@ -20,6 +20,7 @@ import {
   orderBy,
   limit as fbLimit,
   increment,
+  runTransaction,
   serverTimestamp
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
@@ -80,12 +81,22 @@ class ApiService {
 
   // Returns { stories: [...] }. Filters genre/language/vertical/duration in-memory to avoid
   // needing extra composite indexes.
+  //
+  // `community` picks the library: false (default) = the curated daily feed that
+  // Home shows, true = community submissions, 'all' = both (Search). Daily and
+  // community stories are the same doc shape on one lifecycle — isCommunityStory
+  // is the only thing that separates them.
   async getStories(params = {}) {
-    const { genre, language, vertical, duration, limit = 50 } = params;
+    const { genre, language, vertical, duration, limit = 50, community = false } = params;
+
+    const constraints = [where('status', '==', 'published')];
+    if (community !== 'all') {
+      constraints.push(where('isCommunityStory', '==', community === true));
+    }
 
     const q = query(
       collection(db, 'stories'),
-      where('status', '==', 'active'),
+      ...constraints,
       orderBy('createdAt', 'desc'),
       fbLimit(Number(limit))
     );
@@ -117,17 +128,28 @@ class ApiService {
   }
 
   // Returns the story object directly (StoryDetailScreen sets it as-is).
+  //
+  // Non-published stories read as missing. `under_review` means the narration and
+  // cover art don't exist yet, so the detail screen would render a story with no
+  // audio; treating it as absent is what "invisible until published" means for a
+  // direct lookup, including for its own author.
   async getStory(storyId) {
     const ref = doc(db, 'stories', storyId);
     const d = await getDoc(ref);
     if (!d.exists()) return null;
-    return { id: d.id, ...d.data() };
+    const data = d.data();
+    if (data.status && data.status !== 'published') return null;
+    return { id: d.id, ...data };
   }
 
-  // Returns { categories: [{ name, count, totalPlays }] } aggregated from
-  // active stories.
+  // Returns { categories: [{ name, count, totalPlays }] } aggregated from the
+  // published daily library. Equality-only, so no composite index is needed.
   async getCategories() {
-    const q = query(collection(db, 'stories'), where('status', '==', 'active'));
+    const q = query(
+      collection(db, 'stories'),
+      where('status', '==', 'published'),
+      where('isCommunityStory', '==', false)
+    );
     const snap = await getDocs(q);
 
     const map = {};
@@ -148,30 +170,162 @@ class ApiService {
     return { categories };
   }
 
-  // Best-effort play count increment. Requires an authenticated user per the
-  // security rules; silently ignored otherwise so playback is never blocked.
-  async playStory(storyId) {
-    if (!this.uid) return { success: false, reason: 'unauthenticated' };
+  // --- Ratings (stories/{id}.ratingSum+ratingCount + users/{uid}/ratings/{id})
+  //
+  // The per-user doc is the source of truth, mirroring the likes pattern. The
+  // story doc carries ratingSum + ratingCount so `rating` can be a genuine
+  // average, and re-rating adjusts by the delta instead of double-counting.
+  //
+  // Legacy data: before this, `rating` was last-writer-wins and ratingCount was
+  // incremented on every submit, so old aggregates are unrecoverable — there's
+  // no record of who rated what. A story with no `ratingSum` is therefore
+  // treated as having zero prior ratings and its count is reset.
+  async rateStory(storyId, rating, review = null) {
+    if (!this.uid) throw new Error('Authentication required to rate');
+
+    const value = Number(rating);
+    if (!Number.isInteger(value) || value < 1 || value > 5) {
+      throw new Error('Rating must be a whole number from 1 to 5');
+    }
+
+    const storyRef = doc(db, 'stories', storyId);
+    const mineRef = doc(db, 'users', this.uid, 'ratings', storyId);
+
     try {
-      await updateDoc(doc(db, 'stories', storyId), {
-        plays: increment(1),
-        lastPlayedAt: serverTimestamp()
+      const average = await runTransaction(db, async (tx) => {
+        // All reads must precede all writes inside a transaction.
+        const [storySnap, mineSnap] = await Promise.all([tx.get(storyRef), tx.get(mineRef)]);
+        if (!storySnap.exists()) throw new Error('Story not found');
+
+        const data = storySnap.data();
+        const migrated = typeof data.ratingSum === 'number';
+        let sum = migrated ? data.ratingSum : 0;
+        let count = migrated ? (data.ratingCount || 0) : 0;
+
+        const previous = mineSnap.exists() ? Number(mineSnap.data().rating) : null;
+        if (previous != null && migrated) {
+          sum += value - previous; // re-rate: swap the old score for the new one
+        } else {
+          sum += value;
+          count += 1;
+        }
+
+        const avg = count > 0 ? Math.round((sum / count) * 10) / 10 : 0;
+
+        tx.set(mineRef, {
+          rating: value,
+          ratedAt: serverTimestamp(),
+          ...(review ? { review } : {}),
+        }, { merge: true });
+
+        tx.update(storyRef, {
+          ratingSum: sum,
+          ratingCount: count,
+          rating: avg, // still populated for existing readers — now a real average
+          lastRatedAt: serverTimestamp(),
+          ...(review ? { lastReview: review } : {}),
+        });
+
+        return avg;
       });
-      return { success: true };
+
+      return { success: true, average };
     } catch (error) {
-      console.warn('playStory: could not record play', error?.message);
-      return { success: false };
+      console.error('rateStory error:', error);
+      throw error;
     }
   }
 
-  async rateStory(storyId, rating, review = null) {
-    if (!this.uid) throw new Error('Authentication required to rate');
-    await updateDoc(doc(db, 'stories', storyId), {
-      rating: Number(rating),
-      lastRatedAt: serverTimestamp(),
-      ...(review ? { lastReview: review } : {})
-    });
-    return { success: true };
+  // This user's score for one story, or 0 if they haven't rated it.
+  async getUserRating(storyId) {
+    if (!this.uid) return 0;
+    try {
+      const snap = await getDoc(doc(db, 'users', this.uid, 'ratings', storyId));
+      return snap.exists() ? Number(snap.data().rating) || 0 : 0;
+    } catch (error) {
+      console.error('getUserRating error:', error);
+      return 0;
+    }
+  }
+
+  // All of this user's scores as { [storyId]: rating } — one read for a feed.
+  async getUserRatings() {
+    if (!this.uid) return {};
+    try {
+      const snap = await getDocs(collection(db, 'users', this.uid, 'ratings'));
+      return Object.fromEntries(snap.docs.map(d => [d.id, Number(d.data().rating) || 0]));
+    } catch (error) {
+      console.error('getUserRatings error:', error);
+      return {};
+    }
+  }
+
+  // --- Likes (stories/{storyId}.likesCount + users/{uid}/likes/{storyId}) --
+  // --- Likes (stories/{id}.likesCount + users/{uid}/likes/{id}) -------------
+  //
+  // Transactional, and idempotent on the per-user doc: the count and the like
+  // record move together. Previously these were two sequential awaits, so a
+  // failure on the second left likesCount permanently overcounted with no
+  // record of who it belonged to.
+
+  async likeStory(storyId) {
+    if (!this.uid) throw new Error('Authentication required');
+    const storyRef = doc(db, 'stories', storyId);
+    const mineRef = doc(db, 'users', this.uid, 'likes', storyId);
+    try {
+      await runTransaction(db, async (tx) => {
+        const mineSnap = await tx.get(mineRef);
+        // Already liked — don't bump the count a second time.
+        if (mineSnap.exists()) return;
+        tx.set(mineRef, { likedAt: serverTimestamp() }, { merge: true });
+        tx.update(storyRef, { likesCount: increment(1), lastLikedAt: serverTimestamp() });
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('likeStory error:', error);
+      throw error;
+    }
+  }
+
+  async unlikeStory(storyId) {
+    if (!this.uid) throw new Error('Authentication required');
+    const storyRef = doc(db, 'stories', storyId);
+    const mineRef = doc(db, 'users', this.uid, 'likes', storyId);
+    try {
+      await runTransaction(db, async (tx) => {
+        const mineSnap = await tx.get(mineRef);
+        // Not liked — nothing to decrement, and doing so would go negative.
+        if (!mineSnap.exists()) return;
+        tx.delete(mineRef);
+        tx.update(storyRef, { likesCount: increment(-1) });
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('unlikeStory error:', error);
+      throw error;
+    }
+  }
+
+  async isStoryLiked(storyId) {
+    if (!this.uid) return false;
+    try {
+      const docSnap = await getDoc(doc(db, 'users', this.uid, 'likes', storyId));
+      return docSnap.exists();
+    } catch (error) {
+      console.error('isStoryLiked error:', error);
+      return false;
+    }
+  }
+
+  async getUserLikes() {
+    if (!this.uid) return [];
+    try {
+      const snap = await getDocs(collection(db, 'users', this.uid, 'likes'));
+      return snap.docs.map(d => d.id);
+    } catch (error) {
+      console.error('getUserLikes error:', error);
+      return [];
+    }
   }
 
   // --- Favorites (users/{uid}/favorites/{storyId}) -------------------------
@@ -184,11 +338,18 @@ class ApiService {
     if (!this.uid) return [];
     const snap = await getDocs(collection(db, 'users', this.uid, 'favorites'));
     const results = await Promise.all(snap.docs.map(async (d) => {
-      const story = await this.getStory(d.id);
-      if (!story) {
+      // Read the doc directly rather than through getStory, which also returns
+      // null for a story that exists but isn't published. Only a genuinely
+      // missing story should have its favorite deleted — otherwise a story
+      // temporarily flipped back to under_review/failed would silently destroy
+      // every user's bookmark of it.
+      const storySnap = await getDoc(doc(db, 'stories', d.id));
+      if (!storySnap.exists()) {
         try { await deleteDoc(doc(db, 'users', this.uid, 'favorites', d.id)); } catch (e) {}
         return null;
       }
+      const story = storySnap.data();
+      if (story.status && story.status !== 'published') return null; // hidden, but keep the bookmark
       return { ...story, id: d.id, storyId: d.id, favoritedAt: d.data().addedAt };
     }));
     return results.filter(Boolean);
@@ -495,7 +656,7 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
             tags: Array.isArray(parsed.tags) ? parsed.tags.slice(0, 6) : [genre],
             status: 'draft',
             authorId: this.uid,
-            authorName: this.user?.displayName || 'Anonymous',
+            authorName: auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || 'Anonymous',
             modelUsed: model,
             keyUsed: keyIndex,
           };
@@ -547,8 +708,15 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
         authorId: this.uid,
         isCommunityStory: true,
         status: 'under_review',
+        // Every aggregate present from birth, under the names the increments
+        // and the readers actually use. This previously wrote `playsCount`,
+        // which nothing ever incremented, so community stories were invisible
+        // to Home's trending filter and showed a permanent zero.
         likesCount: 0,
-        playsCount: 0,
+        plays: 0,
+        rating: 0,
+        ratingSum: 0,
+        ratingCount: 0,
         tags: storyData.tags || [storyData.genre],
         modelUsed: storyData.modelUsed || '',
         ttsEngine: 'edge-tts', // host-on-firebase.js picks this up to generate audio
@@ -576,6 +744,10 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
           const q = query(
             collection(db, 'stories'),
             where('isCommunityStory', '==', true),
+            // under_review stories are invisible to everyone, including their
+            // own author — the pipeline flips them to 'published' once audio,
+            // cover and doc are all wired.
+            where('status', '==', 'published'),
             orderBy('createdAt', 'desc'),
             fbLimit(50)
           );
@@ -600,14 +772,24 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
 
   async createNotification(notificationData) {
     try {
-      const notifRef = doc(collection(db, 'notifications'));
+      // Create notification for a specific user
+      const userId = notificationData.userId || this.uid;
+      if (!userId) {
+        console.warn('createNotification: no userId provided');
+        return null;
+      }
+
+      const notifRef = doc(collection(db, 'users', userId, 'notifications'));
       await setDoc(notifRef, {
         ...notificationData,
+        userId,
         read: false,
         createdAt: serverTimestamp(),
       });
+      return { id: notifRef.id, success: true };
     } catch (error) {
       console.error('Error creating notification:', error);
+      throw error;
     }
   }
 }

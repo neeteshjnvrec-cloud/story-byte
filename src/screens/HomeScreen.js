@@ -9,6 +9,7 @@ import { useTheme } from '../hooks/useTheme';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Hero, RailCard } from '../components/story/StoryCard';
+import { storyPlays } from '../utils/storyMetrics';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
 import { FilterModal } from '../components/FilterModal';
 import apiService from '../services/api';
@@ -78,9 +79,11 @@ export const HomeScreen = () => {
 
   const hero = stories[0];
   const genres = [...new Set(stories.map((s) => s.genre).filter(Boolean))];
+  // storyPlays, not s.plays: community stories carry the count under
+  // `playsCount`, so reading the raw field excluded every one of them here.
   const popular = [...stories]
-    .filter((s) => (s.plays || 0) > 0)
-    .sort((a, b) => (b.plays || 0) - (a.plays || 0))
+    .filter((s) => storyPlays(s) > 0)
+    .sort((a, b) => storyPlays(b) - storyPlays(a))
     .slice(0, 10);
   const rails = genres.length
     ? genres.map((g) => ({ title: cap(g), items: stories.filter((s) => s.genre === g) }))

@@ -1,16 +1,19 @@
-// Community audio generation utilities — GitHub Actions dispatch + audio polling.
+// Community audio generation utilities — GitHub Actions dispatch.
 // Extracted from AppContext to keep context focused on user state management.
 
 const GITHUB_OWNER = 'neeteshjnvrec-cloud';
 const GITHUB_REPO = 'story-byte';
-const GITHUB_WORKFLOW = 'community-stories.yml';
-const MAX_POLL = 60;       // seconds to wait for audio generation
-const POLL_INTERVAL = 1000; // ms between polls
 
 /**
- * Dispatch the daily-stories GitHub Actions workflow to trigger audio generation.
+ * Dispatch the community-stories GitHub Actions workflow, which generates the
+ * narration and cover art and then flips the story to `published`.
+ *
+ * A false return is not fatal — the workflow also runs on an hourly cron that
+ * sweeps up any `under_review` story — but it does mean publication is delayed,
+ * so the caller should log it.
+ *
  * @param {string} storyId - The story ID to trigger generation for
- * @returns {Promise<boolean>} true if dispatch succeeded
+ * @returns {Promise<boolean>} true if GitHub accepted the dispatch
  */
 export async function dispatchAudioWorkflow(storyId) {
   const token = process.env.EXPO_PUBLIC_GITHUB_TOKEN;
@@ -19,7 +22,7 @@ export async function dispatchAudioWorkflow(storyId) {
     return false;
   }
   try {
-    await fetch(
+    const res = await fetch(
       `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/dispatches`,
       {
         method: 'POST',
@@ -34,42 +37,22 @@ export async function dispatchAudioWorkflow(storyId) {
         }),
       }
     );
+
+    // fetch only rejects on network failure — a 401 (bad token) or 404 (repo or
+    // permission wrong) resolves normally. Without this check every dispatch
+    // reported success and the story silently never got processed.
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      console.error(
+        `[communityAudioGen] Workflow dispatch rejected: ${res.status} ${res.statusText} ${body.slice(0, 200)}`
+      );
+      return false;
+    }
+
     console.log(`[communityAudioGen] Workflow dispatched for story ${storyId}`);
     return true;
   } catch (e) {
     console.error('[communityAudioGen] Workflow dispatch failed:', e.message);
     return false;
   }
-}
-
-/**
- * Poll Firestore until the story has a real hosting audioUrl.
- * @param {string} storyId - The story ID to poll for
- * @param {Object} db - Firebase Firestore db instance
- * @returns {Promise<Object|null>} The updated story data, or null on timeout
- */
-export function waitForAudioGeneration(storyId, db) {
-  return new Promise((resolve) => {
-    let elapsed = 0;
-    const interval = setInterval(async () => {
-      elapsed += 1;
-      try {
-        const { getDoc } = require('firebase/firestore');
-        const { doc } = require('firebase/firestore');
-        const snapshot = await getDoc(doc(db, 'stories', storyId));
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          if (data.audioUrl && data.audioUrl.startsWith('https://storybyte-76716.web.app')) {
-            clearInterval(interval);
-            resolve(data);
-            return;
-          }
-        }
-      } catch (_) {}
-      if (elapsed >= MAX_POLL) {
-        clearInterval(interval);
-        resolve(null);
-      }
-    }, POLL_INTERVAL);
-  });
 }

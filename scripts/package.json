@@ -5,7 +5,10 @@
   "description": "StoryByte content-generation pipeline (Groq + edge-tts -> GitHub Releases + Firestore).",
   "type": "commonjs",
   "scripts": {
-    "generate": "node build-stories.js"
+    "generate": "node build-stories.js",
+    "test:groq": "node test-groq-models.js",
+    "test:gemini": "node test-gemini-models.js",
+    "test:agentrouter": "node test-agentrouter-models.js"
   },
   "dependencies": {
     "firebase-admin": "^12.7.0",

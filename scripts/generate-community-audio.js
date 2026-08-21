@@ -1,17 +1,24 @@
 /**
  * Community Story Audio Generator — standalone script for GitHub Actions.
  *
- * Processes all community stories with status='under_review' and ttsEngine='edge-tts',
+ * The single owner of the community story lifecycle. Processes community stories
+ * with status 'under_review' (or 'failed', so transient failures are retried),
  * generates a cover image + audio narration, deploys to Firebase Hosting, then
- * flips status to 'published' and sends two notifications:
+ * flips status to 'published' — the point at which the story becomes visible to
+ * anyone at all — and sends two notifications:
  *   1. To the publisher (authorId) — "Your story is live!"
- *   2. Broadcast to all users — "New story by [author]: [title]"
+ *   2. Broadcast to every other user — "New story by [author]"
+ *
+ * Notifications go to users/{uid}/notifications, one doc per recipient, which is
+ * the only path the app reads. Push goes through the Expo Push API; see
+ * lib/notify.js for why admin.messaging() can't be used here.
  *
  * Env vars:
  *   GROQ_API_KEY        — optional, used only if story needs text regeneration
  *   FIREBASE_SERVICE_ACCOUNT — JSON string or path to service account
  *   FIREBASE_PROJECT_ID — default: storybyte-76716
  *   STORIES_FILTER      — if set, process only this single story ID
+ *   MAX_FANOUT_USERS    — ceiling on broadcast recipients (default 5000)
  */
 const admin = require('firebase-admin');
 const { execFileSync } = require('child_process');
@@ -19,6 +26,7 @@ const https = require('https');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { notifyAndPushUser, notifyAndPushAll } = require('./lib/notify');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -40,7 +48,6 @@ function serviceAccountPath() {
 const SA_PATH = serviceAccountPath();
 admin.initializeApp({ credential: admin.credential.cert(require(SA_PATH)) });
 const db = admin.firestore();
-const messaging = admin.messaging();
 
 // --- helpers -----------------------------------------------------------------
 const slug = (s) =>
@@ -106,94 +113,57 @@ function durationSec(file) {
 }
 
 // --- notifications -----------------------------------------------------------
+// Both of these previously wrote to a top-level `notifications` collection that
+// the app never reads — it subscribes to users/{uid}/notifications. lib/notify
+// writes there instead, one doc per recipient.
 
 async function sendPublisherNotification(story) {
-  // Find the publisher's FCM tokens from their push_tokens subcollection
   const authorId = story.authorId;
-  if (!authorId) return;
+  if (!authorId) {
+    console.warn('  ⚠️  No authorId on story — publisher notification skipped');
+    return;
+  }
 
-  try {
-    const tokensSnap = await db.collection('users').doc(authorId).collection('push_tokens').get();
-    const tokens = tokensSnap.docs
-      .map(d => d.data().token)
-      .filter(Boolean);
-
-    if (tokens.length === 0) {
-      console.log(`  🔔 No push tokens for publisher ${authorId} — writing Firestore notification instead`);
-    }
-
-    // Always write a Firestore notification for the publisher
-    await db.collection('notifications').add({
+  await notifyAndPushUser(
+    db,
+    authorId,
+    {
       type: 'story_published',
       title: 'Your story is live! 🎉',
-      body: `"${story.title}" has been published and is now available to all listeners.`,
+      body: `"${story.title}" has been reviewed and published — it's now available to all listeners.`,
       storyId: story.storyId,
-      authorId,
-      read: false,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-
-    // Also try FCM push if tokens exist
-    if (tokens.length > 0) {
-      try {
-        await messaging.sendEachForMulticast({
-          tokens,
-          notification: {
-            title: 'Your story is live! 🎉',
-            body: `"${story.title}" is now available.`,
-            image: story.coverImage || undefined,
-          },
-          data: { storyId: story.storyId, type: 'story_published', navigateTo: 'StoryDetail' },
-        });
-        console.log(`  🔔 FCM push sent to ${tokens.length} device(s) for publisher`);
-      } catch (e) {
-        console.warn('  ⚠️  FCM push to publisher failed:', e.message);
-      }
+      genre: story.genre,
+      coverImage: story.coverImage,
+    },
+    {
+      title: 'Your story is live! 🎉',
+      body: `"${story.title}" is now available.`,
+      data: { storyId: story.storyId, type: 'story_published', navigateTo: 'StoryDetail' },
     }
-  } catch (e) {
-    console.warn('  ⚠️  Publisher notification failed:', e.message);
-  }
+  );
 }
 
 async function sendBroadcastNotification(story) {
-  try {
-    // Write a broadcast notification to Firestore — all users can see it
-    await db.collection('notifications').add({
+  // Everyone except the author, who already got the "your story is live" one.
+  await notifyAndPushAll(
+    db,
+    {
       type: 'new_community_story',
-      title: `New: "${story.title}"`,
-      body: `by ${story.authorName} · ${story.genre} · ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
+      title: `New story by ${story.authorName || 'a StoryByte listener'}`,
+      body: `"${story.title}" · ${story.genre}`,
       storyId: story.storyId,
       authorName: story.authorName,
       authorId: story.authorId,
       genre: story.genre,
       coverImage: story.coverImage,
-      read: false,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-    console.log(`  📢 Broadcast notification written to Firestore`);
-
-    // Also try FCM push to all registered devices
-    try {
-      const tokensSnap = await db.collection('push_tokens').where('deletedAt', '==', admin.firestore.FieldValue.delete()).get();
-      const tokens = tokensSnap.docs.map(d => d.data().token).filter(Boolean);
-      if (tokens.length > 0) {
-        await messaging.sendEachForMulticast({
-          tokens,
-          notification: {
-            title: `New: "${story.title}"`,
-            body: `by ${story.authorName} · ${story.genre}`,
-            image: story.coverImage || undefined,
-          },
-          data: { storyId: story.storyId, type: 'new_community_story' },
-        });
-        console.log(`  📢 FCM broadcast sent to ${tokens.length} device(s)`);
-      }
-    } catch (e) {
-      console.warn('  ⚠️  FCM broadcast failed:', e.message);
-    }
-  } catch (e) {
-    console.warn('  ⚠️  Broadcast notification failed:', e.message);
-  }
+    },
+    {
+      title: `New story by ${story.authorName || 'a StoryByte listener'}`,
+      body: `"${story.title}" · ${story.genre}`,
+      data: { storyId: story.storyId, type: 'new_community_story', navigateTo: 'StoryDetail' },
+    },
+    { excludeUid: story.authorId }
+  );
 }
 
 // --- main --------------------------------------------------------------------
@@ -201,10 +171,12 @@ async function main() {
   fs.mkdirSync(path.join(PUB, 'audio'), { recursive: true });
   fs.mkdirSync(path.join(PUB, 'covers'), { recursive: true });
 
-  // Determine which stories to process
+  // Determine which stories to process.
+  // 'failed' is included so a transient cover/TTS failure is retried on the next
+  // run instead of stranding the story as permanently invisible.
   let query = db.collection('stories')
     .where('isCommunityStory', '==', true)
-    .where('status', '==', 'under_review')
+    .where('status', 'in', ['under_review', 'failed'])
     .where('ttsEngine', '==', 'edge-tts');
 
   const filterId = (process.env.STORIES_FILTER || '').trim();
@@ -263,14 +235,28 @@ async function main() {
     process.exit(1);
   }
 
-  // Deploy all generated files
+  // Deploy all generated files.
+  //
+  // A failed deploy must NOT publish: the audioUrl and coverImage below point at
+  // files that only exist once hosting has them, so publishing anyway would put
+  // a story with a dead audio URL into the feed and broadcast it to every user.
+  // Leaving them 'failed' means the next run (hourly cron) retries the whole
+  // thing, since the query matches 'failed' as well as 'under_review'.
   console.log(`\n🚀 Deploying ${processed.length} story asset(s) to Firebase Hosting...`);
   try {
     execFileSync('npx', ['--yes', 'firebase-tools', 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
       { cwd: ROOT, stdio: 'inherit', env: { ...process.env, GOOGLE_APPLICATION_CREDENTIALS: SA_PATH } });
     console.log('✅ Hosting deployed.');
   } catch (e) {
-    console.warn('⚠️  Hosting deploy failed:', e.message);
+    console.error('❌ Hosting deploy failed:', e.message);
+    console.error('   Not publishing — assets are not reachable. Marking for retry.');
+    for (const item of processed) {
+      await db.collection('stories').doc(item.id).update({
+        status: 'failed',
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }).catch((err) => console.warn(`  ⚠️  could not mark ${item.id} failed: ${err.message}`));
+    }
+    process.exit(1);
   }
 
   // Update Firestore: flip status → published, add audioUrl + coverImage
@@ -288,9 +274,15 @@ async function main() {
     });
     console.log(`  ✓ ${item.title} → published`);
 
-    // Send two notifications
-    await sendPublisherNotification({ ...item, coverImage: coverUrl, storyId: item.id });
-    await sendBroadcastNotification({ ...item, coverImage: coverUrl, storyId: item.id });
+    // Two notifications: the author, then everyone else. Guarded so a delivery
+    // failure on one story can't abort the loop and strand the rest unpublished —
+    // the story itself is already live by this point.
+    try {
+      await sendPublisherNotification({ ...item, coverImage: coverUrl, storyId: item.id });
+      await sendBroadcastNotification({ ...item, coverImage: coverUrl, storyId: item.id });
+    } catch (e) {
+      console.warn(`  ⚠️  notifications for ${item.id} failed: ${e.message}`);
+    }
   }
 
   console.log(`\n✅ Done. Published ${processed.length} community story(ies).`);

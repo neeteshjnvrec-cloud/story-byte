@@ -21,7 +21,7 @@ service cloud.firestore {
       allow delete: if false; // Admin-only
       allow update: if isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['plays', 'rating', 'ratingCount', 'lastPlayedAt', 'lastRatedAt', 'lastReview']);
+              .hasOnly(['plays', 'rating', 'ratingSum', 'ratingCount', 'lastPlayedAt', 'lastRatedAt', 'lastReview', 'likesCount', 'lastLikedAt']);
     }
 
     // Pre-built home feed + taxonomy: public read, admin-only write.
@@ -41,14 +41,12 @@ service cloud.firestore {
     match /users/{userId}/favorites/{storyId} { allow read, write: if isOwner(userId); }
     match /users/{userId}/progress/{storyId}  { allow read, write: if isOwner(userId); }
     match /users/{userId}/downloads/{storyId} { allow read, write: if isOwner(userId); }
+    match /users/{userId}/likes/{storyId}    { allow read, write: if isOwner(userId); }
+    match /users/{userId}/ratings/{storyId}  { allow read, write: if isOwner(userId); }
     match /users/{userId}/push_tokens/{tokenId} { allow read, write: if isOwner(userId); }
-
-    // Push tokens — authenticated users can read/write their own
-    match /push_tokens/{tokenId} {
-      allow read: if isSignedIn();
-      allow create, update, delete: if isSignedIn() && request.auth.uid == path.to('/push_tokens/{tokenId}').split('_')[0];
-    }
-    match /users/{userId}/push_tokens/{tokenId} { allow read, write: if isOwner(userId); }
+    // Notifications are written by the pipeline via the Admin SDK (which bypasses
+    // rules); the owner reads them and marks them read/deleted.
+    match /users/{userId}/notifications/{notifId} { allow read, write: if isOwner(userId); }
 
     // Deleted users archive — owner can create (archive), admin-only read/delete.
     match /deleted_users/{userId} {
@@ -56,23 +54,9 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
-    // Push tokens collection — authenticated users can manage their own tokens
-    match /push_tokens/{tokenId} {
-      allow read: if isSignedIn();
-      allow create, update, delete: if isSignedIn() && request.auth.uid == request.resource.data.userId;
-    }
-
     // Admin-only collections (written by the pipeline via the Admin SDK).
     match /user_activity/{docId}   { allow read, write: if false; }
     match /generation_logs/{docId} { allow read, write: if false; }
-
-    // Notifications: authenticated users can read, update, delete
-    match /notifications/{notificationId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn(); // Allow users to create notifications (for community stories)
-      allow update: if isSignedIn();
-      allow delete: if isSignedIn();
-    }
 
     // Failed slots: admin-only (internal tracking)
     match /failed_slots/{dateId} {

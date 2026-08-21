@@ -1,5 +1,5 @@
 // Create Story Screen - AI Co-Creator Studio
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
-  Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
-import { GENRES, GENRE_ICONS } from '../constants/genres';
+import { GENRES } from '../constants/genres';
 
 export function CreateStoryScreen() {
   const navigation = useNavigation();
@@ -33,8 +32,20 @@ export function CreateStoryScreen() {
   const [selectedGenre, setSelectedGenre] = useState('romance');
   const [generatedStory, setGeneratedStory] = useState(null);
   const [isPreview, setIsPreview] = useState(false);
-  const [showUnderReview, setShowUnderReview] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  // Inline confirmation after submit. Replaces the old full-screen "Story Under
+  // Review" overlay, which painted over the story text and left the tab bar
+  // tappable underneath, and whose "View Story" button navigated to a story id
+  // that doesn't exist yet.
+  const [submitted, setSubmitted] = useState(false);
+
+  // Auto-hide the banner. Cleared on unmount so a fast back-navigation can't
+  // set state on an unmounted screen.
+  useEffect(() => {
+    if (!submitted) return;
+    const timer = setTimeout(() => setSubmitted(false), 6000);
+    return () => clearTimeout(timer);
+  }, [submitted]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -42,6 +53,7 @@ export function CreateStoryScreen() {
       return;
     }
 
+    setSubmitted(false);
     const result = await generateStory({
       title: title || undefined,
       prompt: prompt.trim(),
@@ -60,7 +72,12 @@ export function CreateStoryScreen() {
     try {
       const published = await publishCommunityStory(generatedStory);
       if (published) {
-        setShowUnderReview(true);
+        // Submitting hands the story to the generation pipeline; it stays
+        // invisible (status 'under_review') until narration and cover art are
+        // ready, so there is nothing to navigate to. Clear the form and confirm
+        // inline — the author hears back via a notification when it goes live.
+        resetForm();
+        setSubmitted(true);
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to publish story. Please try again.');
@@ -74,25 +91,6 @@ export function CreateStoryScreen() {
     setPrompt('');
     setSelectedGenre('romance');
     setGeneratedStory(null);
-    setIsPreview(false);
-    setShowUnderReview(false);
-  };
-
-  const handleViewStory = () => {
-    setShowUnderReview(false);
-    navigation.navigate('StoryDetail', {
-      storyId: generatedStory.storyId || `community_${Date.now()}`,
-      story: generatedStory,
-    });
-  };
-
-  const handleCreateAnother = () => {
-    setShowUnderReview(false);
-    resetForm();
-  };
-
-  const handleDone = () => {
-    setShowUnderReview(false);
     setIsPreview(false);
   };
 
@@ -109,10 +107,32 @@ export function CreateStoryScreen() {
         <HeaderNotificationButton size={22} color={theme.text} />
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
       >
+        {submitted && (
+          <View style={[styles.banner, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Ionicons name="checkmark-circle" size={22} color={theme.accent} style={styles.bannerIcon} />
+            <View style={styles.bannerBody}>
+              <Text style={[styles.bannerTitle, { color: theme.textPrimary }]}>
+                Submitted for review ✨
+              </Text>
+              <Text style={[styles.bannerText, { color: theme.textSecondary }]}>
+                We're generating narration and cover art. You'll get a notification when it's live.
+              </Text>
+            </View>
+            <Pressable
+              onPress={() => setSubmitted(false)}
+              hitSlop={10}
+              style={styles.bannerClose}
+              accessibilityLabel="Dismiss"
+            >
+              <Icon name="close" size={18} color={theme.textSecondary} />
+            </Pressable>
+          </View>
+        )}
+
         {!isPreview ? (
           <>
             {/* Hero Section */}
@@ -272,41 +292,6 @@ export function CreateStoryScreen() {
           </>
         )}
       </ScrollView>
-
-      {/* Under Review Screen */}
-      {showUnderReview && (
-        <View style={styles.underReviewContainer}>
-          <View style={styles.underReviewContent}>
-            <View style={[styles.underReviewIcon, { backgroundColor: theme.accentSoft }]}>
-              <Ionicons name="hourglass" size={48} color={theme.accent} />
-            </View>
-            <Text style={[styles.underReviewTitle, { color: theme.textPrimary }]}>
-              Story Under Review ✨
-            </Text>
-            <Text style={[styles.underReviewDesc, { color: theme.textSecondary }]}>
-              Your story "{generatedStory?.title}" is being processed. We're generating a professional audio narration and cover art for you.
-            </Text>
-            <View style={[styles.underReviewCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <Text style={[styles.underReviewStoryTitle, { color: theme.textPrimary }]}>{generatedStory?.title}</Text>
-              <View style={[styles.underReviewGenre, { backgroundColor: theme.accent + '20' }]}>
-                <Text style={[styles.underReviewGenreText, { color: theme.accent }]}>{generatedStory?.genre}</Text>
-              </View>
-              <Text style={[styles.underReviewHint, { color: theme.textTertiary }]}>
-                You'll be notified once it's live!
-              </Text>
-            </View>
-            <TouchableOpacity style={[styles.viewBtn, { backgroundColor: theme.primary }]} onPress={handleViewStory}>
-              <Text style={[styles.viewBtnText, { color: theme.onAccent }]}>View Story</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.createBtn, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={handleCreateAnother}>
-              <Text style={[styles.createBtnText, { color: theme.textPrimary }]}>Create Another Story</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.doneBtn} onPress={handleDone}>
-              <Text style={[styles.doneBtnText, { color: theme.textSecondary }]}>Done</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
     </View>
   );
 }
@@ -470,102 +455,33 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
-  
-  // Modal Styles
-  // Under Review Screen
-  underReviewContainer: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    zIndex: 100,
-  },
-  underReviewContent: {
-    width: '100%',
-    maxWidth: 360,
-    alignItems: 'center',
-  },
-  underReviewIcon: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  underReviewTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  underReviewDesc: {
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  underReviewCard: {
-    borderRadius: 16,
+
+  // Submit confirmation banner
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 14,
     borderWidth: 1,
-    padding: 18,
-    width: '100%',
+    padding: 14,
     marginBottom: 20,
+    gap: 10,
   },
-  underReviewStoryTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    marginBottom: 8,
+  bannerIcon: {
+    marginTop: 1,
   },
-  underReviewGenre: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 10,
+  bannerBody: {
+    flex: 1,
   },
-  underReviewGenreText: {
-    fontSize: 12,
+  bannerTitle: {
+    fontSize: 15,
     fontWeight: '600',
+    marginBottom: 3,
   },
-  underReviewHint: {
+  bannerText: {
     fontSize: 13,
-    textAlign: 'center',
-    marginTop: 8,
-    fontStyle: 'italic',
+    lineHeight: 19,
   },
-  viewBtn: {
-    width: '100%',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  viewBtnText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  createBtn: {
-    width: '100%',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1.5,
-    marginBottom: 10,
-  },
-  createBtnText: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  doneBtn: {
-    paddingVertical: 8,
-    marginTop: 4,
-  },
-  doneBtnText: {
-    fontSize: 14,
+  bannerClose: {
+    marginTop: 1,
   },
 });

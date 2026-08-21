@@ -82,8 +82,9 @@ export const SearchScreen = () => {
       setSelectedGenre(null);
       Keyboard.dismiss();
 
-      // Get all active stories and filter client-side (Firestore can't do full-text search)
-      const response = await apiService.getStories({ limit: 200 });
+      // Get every published story — daily and community — and filter client-side
+      // (Firestore can't do full-text search).
+      const response = await apiService.getStories({ limit: 200, community: 'all' });
       const allStories = response.stories || [];
 
       const lowerQuery = searchQuery.toLowerCase();
@@ -110,7 +111,7 @@ export const SearchScreen = () => {
     try {
       setLoading(true);
       setHasSearched(true);
-      const response = await apiService.getStories({ genre: genre.id, limit: 200 });
+      const response = await apiService.getStories({ genre: genre.id, limit: 200, community: 'all' });
       setResults(response.stories || []);
     } catch (error) {
       console.error('Genre search error:', error);
@@ -127,7 +128,7 @@ export const SearchScreen = () => {
       try {
         setLoading(true);
         setHasSearched(true);
-        const response = await apiService.getStories({ language: id, limit: 200 });
+        const response = await apiService.getStories({ language: id, limit: 200, community: 'all' });
         setResults(response.stories || []);
       } catch (error) {
         console.error('Language filter error:', error);
@@ -140,7 +141,7 @@ export const SearchScreen = () => {
       setHasSearched(false);
       try {
         setLoading(true);
-        const response = await apiService.getStories({ limit: 200 });
+        const response = await apiService.getStories({ limit: 200, community: 'all' });
         setResults(response.stories || []);
       } catch (error) {
         console.error('All filter error:', error);
@@ -152,7 +153,7 @@ export const SearchScreen = () => {
       try {
         setLoading(true);
         setHasSearched(true);
-        const response = await apiService.getStories({ limit: 200 });
+        const response = await apiService.getStories({ limit: 200, community: 'all' });
         setResults(response.stories || []);
       } catch (error) {
         console.error('Duration filter error:', error);
@@ -167,7 +168,7 @@ export const SearchScreen = () => {
     setHasSearched(true);
     setSelectedGenre(null);
     try {
-      const response = await apiService.getStories({ vertical: v.key, limit: 200 });
+      const response = await apiService.getStories({ vertical: v.key, limit: 200, community: 'all' });
       setResults(response.stories || []);
     } catch (error) {
       console.error('Vertical filter error:', error);
