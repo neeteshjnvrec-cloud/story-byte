@@ -47,6 +47,11 @@ export const type = {
   h3: { fontSize: 17, lineHeight: 24, fontFamily: FONTS.bodySemi },
   bodyL: { fontSize: 16, lineHeight: 26, fontFamily: FONTS.body },
   body: { fontSize: 15, lineHeight: 22, fontFamily: FONTS.body },
+  // Body size at semibold weight — for names and titles that sit next to body
+  // copy and must read as distinct from it. Screens already asked for
+  // variant="bodySemi"; without an entry here AppText fell back to `body`, so
+  // publisher names rendered identically to the story text beside them.
+  bodySemi: { fontSize: 15, lineHeight: 22, fontFamily: FONTS.bodySemi },
   label: { fontSize: 14, lineHeight: 20, fontFamily: FONTS.bodySemi },
   caption: { fontSize: 13, lineHeight: 18, fontFamily: FONTS.body },
   micro: { fontSize: 11, lineHeight: 14, fontFamily: FONTS.bodySemi, letterSpacing: 0.3 },

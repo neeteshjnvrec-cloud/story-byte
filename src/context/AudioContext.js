@@ -15,7 +15,7 @@ const PROGRESS_SAVE_INTERVAL = 30000; // 30 seconds
 export const AudioProvider = ({ children }) => {
   // Play counts live in AppContext's shared metric store so every screen
   // showing this story updates together.
-  const { recordPlay } = useAppContext() || {};
+  const { recordPlay, autoplayNext, setLastPlayTab, downloads } = useAppContext() || {};
   const [currentStory, setCurrentStory] = useState(null);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -31,6 +31,12 @@ export const AudioProvider = ({ children }) => {
   const uidRef = useRef(null);
   const currentStoryRef = useRef(null);
   const resumeTimeRef = useRef(0);
+  // Callback the consumer provides to get the next story when autoplay fires.
+  const nextStoryRef = useRef(null);
+  // Mirrors the autoplayNext setting so onPlaybackStatusUpdate — which is not
+  // rebuilt when the setting changes — always reads the current value.
+  const autoplayNextRef = useRef(autoplayNext);
+  useEffect(() => { autoplayNextRef.current = autoplayNext; }, [autoplayNext]);
 
   useEffect(() => {
     setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
@@ -144,6 +150,17 @@ export const AudioProvider = ({ children }) => {
         // Clear currentStory so clicking play again restarts from beginning
         currentStoryRef.current = null;
         setCurrentStory(null);
+        // Cross-story autoplay: if enabled and a next-story callback is set,
+        // play it. The callback is provided by the feed screen (Community or
+        // Home) and closes over that feed's current story list.
+        //
+        // Read through the ref, not the captured value: this callback isn't
+        // rebuilt when autoplayNext changes, so the closure would keep whatever
+        // the setting was when the handler was created and never see the toggle.
+        if (autoplayNextRef.current && nextStoryRef.current) {
+          const next = nextStoryRef.current();
+          if (next) playStory(next);
+        }
       }
     }
   }, [currentPage, totalPages]);
@@ -197,10 +214,13 @@ export const AudioProvider = ({ children }) => {
       const pages = story.pages || [];
       setTotalPages(pages.length > 0 ? pages.length : 1);
 
-      // Choose audio URL — if pages exist, use the page's audio
-      const audioUrl = pages.length > 0
-        ? (pages[startPage]?.audioUrl || story.audioUrl)
-        : story.audioUrl;
+      // Choose audio URL — downloaded file wins when offline; web URL is fallback.
+      const downloaded = downloads?.[story.id]?.path;
+      const audioUrl = downloaded
+        ? downloaded
+        : (pages.length > 0
+            ? (pages[startPage]?.audioUrl || story.audioUrl)
+            : story.audioUrl);
 
       if (!audioUrl) {
         console.warn('No audio URL available for this story');
@@ -480,7 +500,11 @@ export const AudioProvider = ({ children }) => {
         goToPage,
         cycleSpeed,
         setVolumeLevel,
-        stop
+        stop,
+        // Set a callback that returns the next story to play when autoplay fires.
+        // The consumer (CommunityScreen / HomeScreen) provides a function that
+        // looks up the next story from its local feed list.
+        setNextStory: (fn) => { nextStoryRef.current = fn; },
       }}
     >
       {children}

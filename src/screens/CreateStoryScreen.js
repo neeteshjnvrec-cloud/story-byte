@@ -1,5 +1,5 @@
 // Create Story Screen - AI Co-Creator Studio
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,33 +22,35 @@ import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
 import { GENRES } from '../constants/genres';
+import { LANGUAGES } from '../types/story';
+
+// The language's own name first — that's how a speaker recognises "its" at a
+// glance — then the English name in parens for everybody else. Orthography is
+// the gloss for English itself, which is why it stays bare.
+const LANGUAGE_LABELS = {
+  en: 'English', hi: 'हिन्दी (Hindi)', es: 'Español (Spanish)', fr: 'Français (French)',
+  de: 'Deutsch (German)', it: 'Italiano (Italian)', pt: 'Português (Portuguese)',
+  bn: 'বাংলা (Bengali)', mr: 'मराठी (Marathi)', te: 'తెలుగు (Telugu)', ta: 'தமிழ் (Tamil)',
+  gu: 'ગુજરાતી (Gujarati)', ur: 'اردو (Urdu)', kn: 'ಕನ್ನಡ (Kannada)', or: 'ଓଡ଼ିଆ (Odia)', ml: 'മലയാളം (Malayalam)',
+};
 
 export function CreateStoryScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
-  const { generateStory, publishCommunityStory, isGenerating } = useAppContext();
-  
+  const { generateStory, publishCommunityStory, isGenerating, userStats } = useAppContext();
+
   const [title, setTitle] = useState('');
   const [prompt, setPrompt] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('romance');
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [languagePickerVisible, setLanguagePickerVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [genrePickerVisible, setGenrePickerVisible] = useState(false);
   const [generatedStory, setGeneratedStory] = useState(null);
   const [isPreview, setIsPreview] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  // Inline confirmation after submit. Replaces the old full-screen "Story Under
-  // Review" overlay, which painted over the story text and left the tab bar
-  // tappable underneath, and whose "View Story" button navigated to a story id
-  // that doesn't exist yet.
-  const [submitted, setSubmitted] = useState(false);
   const scrollRef = useRef(null);
-
-  // Auto-hide the banner. Cleared on unmount so a fast back-navigation can't
-  // set state on an unmounted screen.
-  useEffect(() => {
-    if (!submitted) return;
-    const timer = setTimeout(() => setSubmitted(false), 10000);
-    return () => clearTimeout(timer);
-  }, [submitted]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -54,11 +58,11 @@ export function CreateStoryScreen() {
       return;
     }
 
-    setSubmitted(false);
     const result = await generateStory({
       title: title || undefined,
       prompt: prompt.trim(),
       genre: selectedGenre,
+      language: selectedLanguage,
     });
 
     if (result) {
@@ -71,18 +75,30 @@ export function CreateStoryScreen() {
     if (!generatedStory) return;
     setIsPublishing(true);
     try {
-      const published = await publishCommunityStory(generatedStory);
+      const published = await publishCommunityStory({
+        ...generatedStory,
+        authorName: userStats?.fullName || 'Anonymous',
+        authorProfilePic: userStats?.profilePic || userStats?.photoURL || '',
+      });
+      if (published?.limited) {
+        Alert.alert('Daily limit', published.message || 'You can publish up to 2 stories per day.');
+        setIsPublishing(false);
+        return;
+      }
       if (published) {
         // Submitting hands the story to the generation pipeline; it stays
         // invisible (status 'under_review') until narration and cover art are
-        // ready, so there is nothing to navigate to. Clear the form and confirm
-        // inline — the author hears back via a notification when it goes live.
+        // ready, so there is nothing to navigate to and no story id worth
+        // offering. Reset the form and confirm with a native Alert — a modal
+        // can't be scrolled past or hidden by a layout change, which is how both
+        // the old overlay and the inline banner ended up unseen.
         resetForm();
-        setSubmitted(true);
-        // Publish is tapped at the bottom of the preview. Without this the
-        // ScrollView keeps that offset while the content shrinks back to the
-        // form, leaving the reset form scrolled somewhere in its middle.
-        scrollRef.current?.scrollTo({ y: 0, animated: true });
+        scrollRef.current?.scrollTo({ y: 0, animated: false });
+        Alert.alert(
+          'Your story is under review ✨',
+          "We're generating the narration and cover art. We'll notify you once it's approved and live.",
+          [{ text: 'Got it' }]
+        );
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to publish story. Please try again.');
@@ -95,6 +111,7 @@ export function CreateStoryScreen() {
     setTitle('');
     setPrompt('');
     setSelectedGenre('romance');
+    setSelectedLanguage('en');
     setGeneratedStory(null);
     setIsPreview(false);
   };
@@ -111,32 +128,6 @@ export function CreateStoryScreen() {
         </AppText>
         <HeaderNotificationButton size={22} color={theme.text} />
       </View>
-
-      {/* Pinned between the header and the scroll view, NOT inside it. Inside the
-          ScrollView this sat at the top of the content while Publish is tapped at
-          the bottom of the preview, so it mounted off-screen and auto-hid before
-          it could ever be seen. */}
-      {submitted && (
-        <View style={[styles.banner, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          <Ionicons name="checkmark-circle" size={22} color={theme.accent} style={styles.bannerIcon} />
-          <View style={styles.bannerBody}>
-            <Text style={[styles.bannerTitle, { color: theme.text }]}>
-              Your story is under review ✨
-            </Text>
-            <Text style={[styles.bannerText, { color: theme.textSecondary }]}>
-              We're generating the narration and cover art. We'll notify you once it's approved and live.
-            </Text>
-          </View>
-          <Pressable
-            onPress={() => setSubmitted(false)}
-            hitSlop={10}
-            style={styles.bannerClose}
-            accessibilityLabel="Dismiss"
-          >
-            <Icon name="close" size={18} color={theme.textSecondary} />
-          </Pressable>
-        </View>
-      )}
 
       <ScrollView
         ref={scrollRef}
@@ -167,33 +158,56 @@ export function CreateStoryScreen() {
               />
             </View>
 
-            {/* Genre Selection */}
+            {/* Genre — inline list opens below button */}
             <View style={styles.section}>
               <Text style={[styles.label, { color: theme.text }]}>Genre</Text>
-              <View style={styles.genreGrid}>
-                {GENRES.map((genre) => (
-                  <TouchableOpacity
-                    key={genre.id}
-                    style={[
-                      styles.genreButton,
-                      { 
-                        backgroundColor: selectedGenre === genre.id ? theme.primary : theme.surface,
-                        borderColor: selectedGenre === genre.id ? theme.primary : theme.border,
-                      },
-                    ]}
-                    onPress={() => setSelectedGenre(genre.id)}
-                  >
-                    <Ionicons
-                      name={genre.icon}
-                      size={18}
-                      color={selectedGenre === genre.id ? theme.onAccent : theme.text}
-                    />
-                    <Text style={[styles.genreLabel, { color: selectedGenre === genre.id ? theme.onAccent : theme.text }]}>
-                      {genre.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              <TouchableOpacity
+                style={[styles.input, { backgroundColor: theme.surface, borderColor: theme.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
+                onPress={() => setGenrePickerVisible(!genrePickerVisible)}
+              >
+                <Text style={{ color: theme.text }}>{GENRES.find((g) => g.id === selectedGenre)?.label || selectedGenre}</Text>
+                <Ionicons name={genrePickerVisible ? 'chevron-up' : 'chevron-down'} size={20} color={theme.textSecondary} />
+              </TouchableOpacity>
+              {genrePickerVisible && (
+                <View style={{ backgroundColor: theme.surface, borderColor: theme.border, borderRadius: 12, marginTop: 6, maxHeight: 260, padding: 10, borderWidth: 1.5, width: '100%' }}>
+                  {GENRES.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={{ paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.divider || theme.border }}
+                      onPress={() => { setSelectedGenre(item.id); setGenrePickerVisible(false); }}
+                    >
+                      <Ionicons name={item.icon} size={18} color={selectedGenre === item.id ? theme.accent : theme.text} />
+                      <Text style={{ color: selectedGenre === item.id ? theme.accent : theme.text, fontWeight: selectedGenre === item.id ? '600' : '400' }}>{item.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+
+            {/* Language Selection — dropdown because 15 options is too many for a
+                scrollable button grid. The label doubles as the picker trigger. */}
+            <View style={styles.section}>
+              <Text style={[styles.label, { color: theme.text }]}>Language</Text>
+              <TouchableOpacity
+                style={[styles.input, { backgroundColor: theme.surface, borderColor: theme.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
+                onPress={() => setLanguagePickerVisible(!languagePickerVisible)}
+              >
+                <Text style={{ color: theme.text }}>{LANGUAGE_LABELS[selectedLanguage] || selectedLanguage.toUpperCase()}</Text>
+                <Ionicons name={languagePickerVisible ? 'chevron-up' : 'chevron-down'} size={20} color={theme.textSecondary} />
+              </TouchableOpacity>
+              {languagePickerVisible && (
+                <View style={{ backgroundColor: theme.surface, borderColor: theme.border, borderRadius: 12, marginTop: 6, maxHeight: 280, padding: 10, borderWidth: 1.5, width: '100%' }}>
+                  {LANGUAGES.map((item) => (
+                    <TouchableOpacity
+                      key={item}
+                      style={{ paddingVertical: 9, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.divider || theme.border }}
+                      onPress={() => { setSelectedLanguage(item); setLanguagePickerVisible(false); setSearchQuery(''); }}
+                    >
+                      <Text style={{ color: selectedLanguage === item ? theme.accent : theme.text, fontWeight: selectedLanguage === item ? '600' : '400', fontSize: 15 }}>{LANGUAGE_LABELS[item] || item.toUpperCase()}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
             </View>
 
             {/* Prompt Input */}
@@ -350,6 +364,50 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     fontSize: 12,
   },
+  langOption: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  langOptionText: {
+    fontSize: 16,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    maxHeight: 360,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  modalTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  dropdownButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    width: '100%', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12,
+    borderWidth: 1.5,
+  },
+  dropdownSheet: {
+    borderTopLeftRadius: 16, borderTopRightRadius: 16,
+    paddingHorizontal: 14, paddingTop: 12, paddingBottom: 8,
+    maxHeight: 320,
+  },
+  dropdownRow: {
+    paddingVertical: 10, paddingHorizontal: 4,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+  },
   input: {
     fontSize: 16,
     padding: 14,
@@ -464,37 +522,5 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 15,
     fontWeight: '600',
-  },
-
-  // Submit confirmation banner. Lives outside the ScrollView, so it carries its
-  // own horizontal inset instead of inheriting `content`'s padding.
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 14,
-    marginHorizontal: 20,
-    marginTop: 4,
-    marginBottom: 4,
-    gap: 10,
-  },
-  bannerIcon: {
-    marginTop: 1,
-  },
-  bannerBody: {
-    flex: 1,
-  },
-  bannerTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 3,
-  },
-  bannerText: {
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  bannerClose: {
-    marginTop: 1,
   },
 });

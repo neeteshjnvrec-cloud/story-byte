@@ -21,6 +21,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { notifyAndPushAll } = require('./lib/notify');
+const { writeStoryPage } = require('./lib/story-page');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -253,6 +254,9 @@ async function run() {
   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
   fs.mkdirSync(path.join(PUB, 'audio'), { recursive: true });
   fs.mkdirSync(path.join(PUB, 'covers'), { recursive: true });
+  // Shareable story pages. Staged here with the other assets so the single
+  // hosting deploy below picks them up.
+  fs.mkdirSync(path.join(PUB, 's'), { recursive: true });
   if (!fs.existsSync(path.join(PUB, 'index.html'))) {
     fs.writeFileSync(path.join(PUB, 'index.html'), '<!doctype html><title>StoryByte CDN</title><h1>StoryByte content</h1>');
   }
@@ -398,6 +402,26 @@ async function run() {
     process.exit(0);
   }
 
+  // Render each story's shareable page. Done before the deploy so the page ships
+  // in the same push as its audio and cover — a page that referenced assets not
+  // yet uploaded would render broken for anyone who opened the link early.
+  for (const p of pending) {
+    const { pageUrl } = writeStoryPage(PUB, {
+      storyId: p.id,
+      title: p.content.title,
+      description: p.content.description,
+      text: p.content.text,
+      genre: p.slot.genre,
+      language: p.slot.language,
+      duration: p.duration,
+      author: 'StoryByte AI',
+      audioUrl: `${SITE}/audio/${p.id}.mp3`,
+      coverImage: `${SITE}/covers/${p.id}.jpg`,
+    }, { site: SITE });
+    p.pageUrl = pageUrl;
+    console.log('✓ page', pageUrl);
+  }
+
   // Deploy all staged files to Firebase Hosting once
   console.log(`\n🚀 Deploying ${pending.length} daily story(ies) to Firebase Hosting...`);
   execFileSync('npx', ['--yes', 'firebase-tools', 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
@@ -411,13 +435,16 @@ async function run() {
       isKids: !!p.slot.isKids, isSleep: !!p.slot.isSleep, episode: 1,
       text: p.content.text,
       audioUrl: `${SITE}/audio/${p.id}.mp3`, coverImage: `${SITE}/covers/${p.id}.jpg`,
+      // The page the share sheet hands out. Written only now, after the deploy
+      // succeeded, so a shared link never points at a page that isn't up.
+      pageUrl: p.pageUrl,
       duration: p.duration, isPremium: false, isDaily: true,
       // One lifecycle shared with community stories: 'published' means visible,
       // and isCommunityStory is the only thing that decides which feed.
       status: 'published', isCommunityStory: false,
       // Every aggregate present from birth so the metrics store never has to
       // fall back for a fresh story.
-      plays: 0, likesCount: 0, rating: 0, ratingSum: 0, ratingCount: 0,
+      plays: 0, likesCount: 0, rating: 0, ratingSum: 0, ratingCount: 0, sharesCount: 0,
       generatedDate: DATE, voice: p.slot.voice, ttsEngine: 'edge-tts', author: 'StoryByte AI', tags: p.content.tags,
       createdAt: admin.firestore.FieldValue.serverTimestamp(), updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };

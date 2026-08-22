@@ -21,7 +21,8 @@ import {
   limit as fbLimit,
   increment,
   runTransaction,
-  serverTimestamp
+  serverTimestamp,
+  addDoc,
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
 import Groq from 'groq-sdk';
@@ -600,14 +601,15 @@ class ApiService {
   /**
    * Generate story using Groq API with automatic key/model rotation on failure
    */
-  async generateCommunityStory({ title, prompt, genre }) {
+  async generateCommunityStory({ title, prompt, genre, language }) {
     const { keys, models } = await this.fetchGroqConfig();
-    
+
     if (!keys.length || !models.length) {
       throw new Error('No Groq API keys or models configured in Firestore');
     }
 
-    const langInstruction = 'English';
+    const langNames = { en: 'English', hi: 'Hindi', es: 'Spanish', fr: 'French', de: 'German', it: 'Italian', pt: 'Portuguese' };
+    const langInstruction = langNames[language] || 'English';
     const sysPrompt = `You are a storyteller for an audio app. Write a ${genre} story. Write in ${langInstruction}. 
 JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 words, spoken style, no markdown","tags":["${genre}"]}.`;
 
@@ -706,6 +708,7 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
         duration: 0,
         authorName: storyData.authorName || 'Anonymous',
         authorId: this.uid,
+        authorProfilePic: storyData.authorProfilePic || '',
         isCommunityStory: true,
         status: 'under_review',
         // Every aggregate present from birth, under the names the increments
@@ -717,6 +720,7 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
         rating: 0,
         ratingSum: 0,
         ratingCount: 0,
+        sharesCount: 0,
         tags: storyData.tags || [storyData.genre],
         modelUsed: storyData.modelUsed || '',
         ttsEngine: 'edge-tts', // host-on-firebase.js picks this up to generate audio
@@ -790,6 +794,54 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
     } catch (error) {
       console.error('Error creating notification:', error);
       throw error;
+    }
+  }
+
+  // --- Comments ----------------------------------------------------------------
+
+  async getComments(storyId) {
+    try {
+      const snap = await getDocs(collection(db, 'stories', storyId, 'comments'));
+      return snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => {
+        const aTime = a.createdAt?.toDate?.() ?? new Date(0);
+        const bTime = b.createdAt?.toDate?.() ?? new Date(0);
+        return aTime - bTime;
+      });
+    } catch (e) {
+      console.warn('getComments failed:', e.message);
+      return [];
+    }
+  }
+
+  async addComment(storyId, { authorId, authorName, authorPic, text }) {
+    try {
+      const ref = await addDoc(collection(db, 'stories', storyId, 'comments'), {
+        authorId,
+        authorName: authorName || 'Anonymous',
+        authorPic: authorPic || '',
+        text: text.trim(),
+        createdAt: serverTimestamp(),
+      });
+      // Bump the count on the story so the feed shows it without a full re-fetch.
+      await updateDoc(doc(db, 'stories', storyId), {
+        commentsCount: increment(1),
+      }).catch(() => {});
+      return ref.id;
+    } catch (e) {
+      console.error('addComment failed:', e.message);
+      throw e;
+    }
+  }
+
+  async deleteComment(storyId, commentId, authorId) {
+    try {
+      await deleteDoc(doc(db, 'stories', storyId, 'comments', commentId));
+      await updateDoc(doc(db, 'stories', storyId), {
+        commentsCount: increment(-1),
+      }).catch(() => {});
+    } catch (e) {
+      console.error('deleteComment failed:', e.message);
+      throw e;
     }
   }
 }

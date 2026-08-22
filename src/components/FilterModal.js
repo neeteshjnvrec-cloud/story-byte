@@ -6,7 +6,9 @@ import {
   Pressable,
   StyleSheet,
   ScrollView,
-  TouchableOpacity
+  TouchableOpacity,
+  TextInput,
+  FlatList
 } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
 import { AppText } from './ui/AppText';
@@ -15,8 +17,22 @@ import { GENRES } from '../constants/genres';
 
 const LANGUAGES = [
   { id: 'all', label: 'All Languages' },
+  { id: 'hi', label: 'हिन्दी (Hindi)' },
+  { id: 'bn', label: 'বাংলা (Bengali)' },
+  { id: 'mr', label: 'मराठी (Marathi)' },
+  { id: 'te', label: 'తెలుగు (Telugu)' },
+  { id: 'ta', label: 'தமிழ் (Tamil)' },
+  { id: 'gu', label: 'ગુજરાતી (Gujarati)' },
+  { id: 'ur', label: 'اردو (Urdu)' },
+  { id: 'kn', label: 'ಕನ್ನಡ (Kannada)' },
+  { id: 'or', label: 'ଓଡ଼ିଆ (Odia)' },
+  { id: 'ml', label: 'മലയാളം (Malayalam)' },
   { id: 'en', label: 'English' },
-  { id: 'hi', label: 'Hindi' },
+  { id: 'es', label: 'Español (Spanish)' },
+  { id: 'fr', label: 'Français (French)' },
+  { id: 'de', label: 'Deutsch (German)' },
+  { id: 'it', label: 'Italiano (Italian)' },
+  { id: 'pt', label: 'Português (Portuguese)' },
 ];
 
 const DURATIONS = [
@@ -31,6 +47,8 @@ export const FilterModal = ({ visible, onClose, onApply, initialFilters }) => {
   const [selectedGenre, setSelectedGenre] = useState(initialFilters?.genre || 'all');
   const [selectedLanguage, setSelectedLanguage] = useState(initialFilters?.language || 'all');
   const [selectedDuration, setSelectedDuration] = useState(initialFilters?.duration || 'all');
+  const [langPickerOpen, setLangPickerOpen] = useState(false);
+  const [langSearch, setLangSearch] = useState('');
 
   const handleApply = () => {
     onApply({
@@ -106,12 +124,18 @@ export const FilterModal = ({ visible, onClose, onApply, initialFilters }) => {
               selected={selectedGenre}
               onSelect={setSelectedGenre}
             />
-            <FilterSection
-              title="Language"
-              items={LANGUAGES}
-              selected={selectedLanguage}
-              onSelect={setSelectedLanguage}
-            />
+            <View style={styles.section}>
+              <AppText variant="label" color="text" style={styles.sectionTitle}>Language</AppText>
+              <TouchableOpacity
+                style={[styles.dropdown, { backgroundColor: theme.surface, borderColor: theme.border }]}
+                onPress={() => { setLangSearch(''); setLangPickerOpen(true); }}
+              >
+                <AppText variant="caption" color="text">
+                  {LANGUAGES.find((l) => l.id === selectedLanguage)?.label || 'All Languages'}
+                </AppText>
+                <Icon name="chev-down" size={16} color={theme.textSecondary} />
+              </TouchableOpacity>
+            </View>
             <FilterSection
               title="Duration"
               items={DURATIONS}
@@ -119,6 +143,39 @@ export const FilterModal = ({ visible, onClose, onApply, initialFilters }) => {
               onSelect={setSelectedDuration}
             />
           </ScrollView>
+
+          {/* Language dropdown sub-modal */}
+          <Modal visible={langPickerOpen} transparent animationType="fade" onRequestClose={() => setLangPickerOpen(false)}>
+            <Pressable style={[styles.dropdownOverlay, { backgroundColor: 'rgba(0,0,0,0.4)' }]} onPress={() => setLangPickerOpen(false)}>
+              <View style={[styles.dropdownSheet, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <TextInput
+                  style={[styles.input, { backgroundColor: theme.background, borderColor: theme.border, marginHorizontal: 12, marginBottom: 8, fontSize: 14, paddingVertical: 10 }]}
+                  placeholder="Search language…"
+                  placeholderTextColor={theme.textSecondary}
+                  value={langSearch}
+                  onChangeText={setLangSearch}
+                  autoFocus
+                />
+                <FlatList
+                  data={LANGUAGES.filter((l) => {
+                    const q = (langSearch || '').toLowerCase();
+                    if (!q) return true;
+                    return l.label.toLowerCase().includes(q) || l.id.toLowerCase().includes(q);
+                  })}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={[styles.langRow, { borderBottomColor: theme.border }]}
+                      onPress={() => { setSelectedLanguage(item.id); setLangPickerOpen(false); setLangSearch(''); }}
+                    >
+                      <AppText variant="body" color={selectedLanguage === item.id ? 'accent' : 'text'}>{item.label}</AppText>
+                      {selectedLanguage === item.id && <Icon name="checkmark" size={18} color={theme.accent} />}
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            </Pressable>
+          </Modal>
 
           {/* Buttons */}
           <View style={[styles.footer, { borderTopColor: theme.border }]}>
@@ -203,6 +260,41 @@ const styles = StyleSheet.create({
   },
   applyButton: {
     // backgroundColor handled inline
+  },
+  dropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+  },
+  dropdownOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 24,
+  },
+  dropdownSheet: {
+    maxHeight: 420,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  langRow: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  input: {
+    fontSize: 14,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1.5,
   },
 });
 

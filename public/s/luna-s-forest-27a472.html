@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luna&#39;s Forest · StoryByte</title>
+  <meta name="description" content="Join Luna on a magical adventure through an enchanted forest, where friendship and kindness lead to a wonderful discovery">
+  <link rel="canonical" href="https://storybyte-76716.web.app/s/luna-s-forest-27a472">
+  <link rel="icon" href="https://storybyte-76716.web.app/covers/2026-08-16_en_adventure_luna-s-forest.jpg">
+
+  <!-- OpenGraph: this is what renders the preview card when the link is pasted
+       into WhatsApp, iMessage or Telegram. og:type stays "website" — it previews
+       predictably everywhere, where music.song does not. -->
+  <meta property="og:site_name" content="StoryByte">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Luna&#39;s Forest">
+  <meta property="og:description" content="Join Luna on a magical adventure through an enchanted forest, where friendship and kindness lead to a wonderful discovery">
+  <meta property="og:url" content="https://storybyte-76716.web.app/s/luna-s-forest-27a472">
+  <meta property="og:image" content="https://storybyte-76716.web.app/covers/2026-08-16_en_adventure_luna-s-forest.jpg">
+  <meta property="og:image:width" content="768">
+  <meta property="og:image:height" content="768">
+  <meta property="og:image:alt" content="Cover art for Luna&#39;s Forest">
+  <meta property="og:audio" content="https://storybyte-76716.web.app/audio/2026-08-16_en_adventure_luna-s-forest.mp3">
+  <meta property="og:audio:type" content="audio/mpeg">
+  <meta property="og:locale" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Luna&#39;s Forest">
+  <meta name="twitter:description" content="Join Luna on a magical adventure through an enchanted forest, where friendship and kindness lead to a wonderful discovery">
+  <meta name="twitter:image" content="https://storybyte-76716.web.app/covers/2026-08-16_en_adventure_luna-s-forest.jpg">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #F6EFE4;
+      color: #2A2118;
+      line-height: 1.7;
+      padding: 0 20px;
+    }
+    .container { max-width: 680px; margin: 0 auto; padding: 28px 0 72px; }
+    .brand {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+    }
+    .brand-icon {
+      width: 36px; height: 36px; border-radius: 11px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 19px; font-weight: 700;
+    }
+    .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
+    .brand-cta {
+      margin-left: auto; font-size: 14px; font-weight: 600;
+      color: #B5613A; text-decoration: none;
+    }
+    .cover {
+      width: 100%; aspect-ratio: 1 / 1; max-height: 420px;
+      object-fit: cover; border-radius: 20px;
+      border: 1px solid #EADFCC; background: #FCF7EF; display: block;
+    }
+    h1 { font-size: 27px; font-weight: 700; line-height: 1.25; margin: 22px 0 0; }
+    .byline { display: flex; align-items: center; gap: 11px; margin-top: 16px; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      object-fit: cover; flex-shrink: 0; border: 1px solid #EADFCC;
+    }
+    .avatar-fallback {
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 18px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; border: 0;
+    }
+    .byline-name { font-size: 15px; font-weight: 600; }
+    .byline-role { font-size: 13px; color: #A99C89; line-height: 1.3; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .chip {
+      font-size: 13px; font-weight: 600; color: #B5613A;
+      background: rgba(181, 97, 58, 0.1);
+      padding: 5px 12px; border-radius: 999px;
+    }
+    /* Genre arrives lowercase from the generator. Only it gets capitalised —
+       applying this to every chip rendered the duration as "12 Min". */
+    .chip-genre { text-transform: capitalize; }
+    .player {
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 16px;
+      padding: 16px; margin-top: 22px;
+    }
+    .player-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 10px;
+    }
+    audio { width: 100%; display: block; }
+    .lead { font-size: 17px; color: #4A3D2F; margin-top: 24px; }
+    .transcript { margin-top: 34px; }
+    .transcript-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .transcript-body {
+      background: #FCF7EF; border: 1px solid #EADFCC;
+      border-radius: 16px; padding: 22px;
+    }
+    .transcript-body p { font-size: 16px; color: #4A3D2F; margin-bottom: 15px; }
+    .transcript-body p:last-child { margin-bottom: 0; }
+    .get-app {
+      margin-top: 40px; padding: 28px 24px; text-align: center;
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 20px;
+    }
+    .get-app h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .get-app p { font-size: 14px; color: #4A3D2F; margin-bottom: 20px; }
+    .btn {
+      display: inline-block; padding: 15px 30px; border-radius: 999px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 16px; font-weight: 700; text-decoration: none;
+    }
+    .footer {
+      text-align: center; font-size: 13px; color: #A99C89;
+      margin-top: 44px; padding-top: 22px; border-top: 1px solid #EADFCC;
+    }
+    .footer a { color: #A99C89; text-decoration: underline; }
+    @media (max-width: 480px) {
+      h1 { font-size: 23px; }
+      .container { padding-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand">
+      <span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span>
+      <!-- Straight to the store. This whole bar used to be one anchor to the
+           site root, which is a bare "StoryByte content" CDN stub — so the link
+           labelled "Get the app" landed on a blank page. There is no real
+           homepage to point the wordmark at, so it isn't a link. -->
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+    </div>
+
+    <img class="cover" src="https://storybyte-76716.web.app/covers/2026-08-16_en_adventure_luna-s-forest.jpg" alt="Cover art for Luna&#39;s Forest" width="768" height="768">
+
+    <h1>Luna&#39;s Forest</h1>
+
+    <div class="byline">
+      <div class="avatar avatar-fallback">S</div>
+      <div>
+        <div class="byline-name">StoryByte AI</div>
+        <div class="byline-role">Narrated on StoryByte</div>
+      </div>
+    </div>
+
+    <div class="chips"><span class="chip chip-genre">adventure</span><span class="chip">English</span><span class="chip">3 min</span></div>
+
+    <div class="player">
+      <div class="player-label">Listen</div>
+      <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-08-16_en_adventure_luna-s-forest.mp3">
+        Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-08-16_en_adventure_luna-s-forest.mp3">Download the recording</a>.
+      </audio>
+    </div>
+
+    <p class="lead">Join Luna on a magical adventure through an enchanted forest, where friendship and kindness lead to a wonderful discovery</p>
+
+    <div class="transcript">
+      <div class="transcript-label">Story</div>
+      <div class="transcript-body">
+      <p>Once upon a time, in a small village surrounded by a vast and beautiful forest, there lived a little girl named Luna. She was a curious and adventurous child, with hair as bright as the sun and eyes as blue as the sky. Luna loved to explore the forest, discovering new wonders every day. One morning, she decided to go on a special adventure, to find the legendary Golden Acorn. The Golden Acorn was said to have the power to make any wish come true, and Luna&#39;s heart was full of wishes. She packed a small bag with some food, her favorite book, and a map of the forest, and set off early in the morning. As she walked, the trees grew taller and the path grew narrower. Luna heard the sweet songs of birds and the gentle rustling of leaves. She followed a little stream, skipping from stone to stone, and soon found herself in a clearing. In the center of the clearing stood an enormous tree, its branches reaching up to the sky like giant arms. Luna felt a strange sensation, as if the tree was calling to her. She approached the tree and found a small door carved into its trunk. The door was slightly ajar, and Luna pushed it open, revealing a cozy little room inside the tree. The room was filled with soft, golden light, and the air was sweet with the scent of honey. Luna saw a beautiful fairy, no bigger than her thumb, sitting on a tiny chair. The fairy had wings as delicate as a butterfly and hair as bright as the sun. &#39;Welcome, little one,&#39; said the fairy, &#39;I have been waiting for you. My name is Daisy, and I am the guardian of the forest. I have been watching you, Luna, and I see that you have a kind heart and a sense of wonder. The Golden Acorn is not just a treasure, but a symbol of the magic that lives within us all. It is the magic of friendship, of kindness, and of love.&#39; Luna&#39;s eyes sparkled with excitement as she listened to Daisy&#39;s words. She realized that she didn&#39;t need the Golden Acorn to make her wishes come true, because the true magic was already inside her. Daisy smiled and handed Luna a small, shiny acorn. &#39;This is a special acorn,&#39; she said, &#39;it will remind you of the magic that lives within you, and it will guide you on your journey. Remember, Luna, that the greatest adventure is the one that comes from within, and that the most precious treasure is the love and friendship we share with others.&#39; Luna thanked Daisy and promised to always remember her words. She left the tree, feeling happy and fulfilled, with the special acorn in her pocket. From that day on, Luna continued to explore the forest, but now she saw it with new eyes. She saw the magic that lived in every tree, in every flower, and in every creature. And she knew that she would always carry the magic of the Golden Acorn within her heart.</p>
+      </div>
+    </div>
+
+    <div class="get-app">
+      <h2>Listen to more on StoryByte</h2>
+      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 StoryByte · <a href="https://storybyte-76716.web.app/privacy.html">Privacy</a></p>
+    </div>
+  </div>
+</body>
+</html>

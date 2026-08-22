@@ -34,8 +34,11 @@ import { Icon } from '../components/ui/Icon';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
 import { Cover } from '../components/story/Cover';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
+import { CommentSheet } from '../components/comments/CommentSheet';
+import { shareStory } from '../utils/shareStory';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAudioPlayer } from '../context/AudioContext';
+import { Image } from 'expo-image';
 import { collection, query, where, onSnapshot, orderBy, limit as fbLimit } from 'firebase/firestore';
 import { db } from '../services/firebase';
 
@@ -58,12 +61,13 @@ export function CommunityScreen() {
   const { theme } = useTheme();
   const {
     user, communityStories, fetchCommunityStories, receiveCommunityStories,
-    toggleFavorite, getStoryMetrics, toggleLike, rateStory,
+    toggleFavorite, getStoryMetrics, toggleLike, rateStory, recordShare, setLastPlayTab,
   } = useAppContext();
-  const { playStory } = useAudioPlayer();
+  const { playStory, setNextStory } = useAudioPlayer();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [ratingOpenFor, setRatingOpenFor] = useState(null);
+  const [commentStory, setCommentStory] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -122,7 +126,7 @@ export function CommunityScreen() {
   };
 
   const handleComment = (story) => {
-    Alert.alert('Comments', `Comments coming soon for "${story.title}"`);
+    setCommentStory(story);
   };
 
   // Tapping the star swaps the left action cluster for an inline 1–5 row.
@@ -147,8 +151,12 @@ export function CommunityScreen() {
     }
   };
 
-  const handleShare = (story) => {
-    Alert.alert('Share', `Share "${story.title}" — coming soon!`);
+  // Only count a share the OS says actually went out, so dismissing the sheet
+  // doesn't inflate the number. (On Android it always reports success — see
+  // recordShare in AppContext.)
+  const handleShare = async (story) => {
+    const { shared } = await shareStory(story);
+    if (shared) recordShare(story);
   };
 
   const handleSave = async (story) => {
@@ -164,6 +172,17 @@ export function CommunityScreen() {
   };
 
   const handlePlay = async (story) => {
+    setLastPlayTab('community');
+    // Provide the autoplay next-story callback: find this story's index in the
+    // feed and return the next one (wrapping is fine — unlikely in a 50-item
+    // feed, but harmless).
+    setNextStory(() => {
+      const idx = communityStories.findIndex(
+        (s) => (s.id || s.storyId) === (story.id || story.storyId)
+      );
+      if (idx < 0 || idx >= communityStories.length - 1) return null;
+      return communityStories[idx + 1];
+    });
     await playStory(story);
   };
 
@@ -185,7 +204,7 @@ export function CommunityScreen() {
   const renderItem = ({ item }) => {
     const id = item.id || item.storyId;
     // Every metric from one place, so these numbers match Story Detail exactly.
-    const { liked, likesCount, saved, plays, rating, myRating } = getStoryMetrics(item);
+    const { liked, likesCount, saved, plays, rating, sharesCount, myRating } = getStoryMetrics(item);
     const isRatingOpen = ratingOpenFor === id;
     const postedAt = timeAgo(item.createdAt);
     // Trim first: an empty-string authorName passes `||` but ''[0] is undefined.
@@ -199,7 +218,16 @@ export function CommunityScreen() {
             artwork always reads as a patch. ═══════════ */}
         <View style={styles.postHeader}>
           <View style={[styles.headerAvatar, { backgroundColor: theme.accent }]}>
-            <Text style={styles.headerAvatarLetter}>{authorInitial}</Text>
+            {item.authorProfilePic ? (
+              <Image
+                source={{ uri: item.authorProfilePic }}
+                style={styles.headerAvatarImage}
+                contentFit="cover"
+                transition={100}
+              />
+            ) : (
+              <Text style={styles.headerAvatarLetter}>{authorInitial}</Text>
+            )}
           </View>
           <View style={styles.headerTextWrap}>
             <AppText variant="bodySemi" color="text" numberOfLines={1}>
@@ -300,7 +328,7 @@ export function CommunityScreen() {
               {/* ❤️ Like — the heart means "like" here and on Story Detail;
                   saving is the bookmark at the far right. */}
               <TouchableOpacity onPress={() => handleLike(item)} hitSlop={8} style={styles.actionBtn}>
-                <Icon name={liked ? 'heart-fill' : 'heart'} size={22} color={liked ? '#E53E3E' : theme.text} />
+                <Icon name={liked ? 'heart-fill' : 'heart'} size={22} color={liked ? theme.error : theme.text} />
                 {likesCount > 0 ? (
                   <Text style={[styles.actionNum, { color: liked ? '#E53E3E' : theme.textSecondary }]}>
                     {likesCount}
@@ -332,9 +360,12 @@ export function CommunityScreen() {
                 ) : null}
               </TouchableOpacity>
 
-              {/* ✈ Share */}
+              {/* ↗ Share — platform-native glyph; see Icon.js */}
               <TouchableOpacity onPress={() => handleShare(item)} hitSlop={8} style={styles.actionBtn}>
-                <Icon name="send" size={22} color={theme.text} />
+                <Icon name="share" size={22} color={theme.text} />
+                {sharesCount > 0 ? (
+                  <Text style={[styles.actionNum, { color: theme.textSecondary }]}>{sharesCount}</Text>
+                ) : null}
               </TouchableOpacity>
             </>
           )}
@@ -345,15 +376,11 @@ export function CommunityScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ═══════════ CAPTION — bold author + description ═══════════ */}
-        {/* The title already sits on the cover, so the caption carries the
-            description; it falls back to the title only when there's none. */}
-        {(item.description || item.title) ? (
+        {/* ═══════════ CAPTION — story description only; the header already
+            identifies the publisher, so repeating the name here is redundant. */}
+        {item.description || item.title ? (
           <View style={styles.captionRow}>
             <AppText variant="body" color="text" style={styles.caption} numberOfLines={3}>
-              {item.authorName ? (
-                <Text style={styles.captionAuthor}>{authorName}{'  '}</Text>
-              ) : null}
               {item.description || item.title}
             </AppText>
           </View>
@@ -415,6 +442,13 @@ export function CommunityScreen() {
           }
         />
       )}
+      {commentStory ? (
+        <CommentSheet
+          story={commentStory}
+          visible={!!commentStory}
+          onClose={() => setCommentStory(null)}
+        />
+      ) : null}
     </View>
   );
 }
@@ -481,6 +515,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
   },
+  headerAvatarImage: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+  },
   // flex: 1 is correct here (unlike on an absolute node): it pushes the ⋯
   // button to the right edge and lets the name ellipsize.
   headerTextWrap: { flex: 1, minWidth: 0 },
@@ -538,9 +577,6 @@ const styles = StyleSheet.create({
   },
   caption: {
     lineHeight: 20,
-  },
-  captionAuthor: {
-    fontWeight: '700',
   },
 
   // Action bar — 12 here + 8 on actionBtn lands the first icon on the same

@@ -16,6 +16,7 @@
   "hosting": {
     "site": "storybyte-76716",
     "public": "public",
+    "cleanUrls": true,
     "ignore": [
       "firebase.json",
       "**/.*",

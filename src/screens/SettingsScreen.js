@@ -95,13 +95,14 @@ const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
 const THEME_CYCLE = { system: 'light', light: 'dark', dark: 'system' };
 
 export const SettingsScreen = () => {
-  const { theme, themeMode, changeTheme } = useTheme() || { theme: {} };
+  const { theme, themeMode, changeTheme, setMode, mode } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { user, signOut } = useAppContext();
+  // autoplayNext / wifiOnly live in AppContext (and AsyncStorage) — they used
+  // to be local state here, so flipping either toggle changed nothing but the
+  // switch graphic.
+  const { user, signOut, autoplayNext, setAutoplayNext, wifiOnly, setWifiOnly } = useAppContext();
 
-  const [autoplayNext, setAutoplayNext] = useState(true);
-  const [wifiOnly, setWifiOnly] = useState(true);
   const [deleting, setDeleting] = useState(false);
 
   const cycleAppearance = () => changeTheme(THEME_CYCLE[themeMode] || 'light');
@@ -235,17 +236,17 @@ export const SettingsScreen = () => {
         <Group theme={theme} label="MODES">
           <Row
             theme={theme}
-            icon="star"
+            icon="moon"
             label="Sleep mode"
-            right={chevron}
-            onPress={() => Alert.alert('Sleep mode', 'Coming soon.')}
+            right={mode === 'sleep' ? <Icon name="check" size={16} color={theme.accent} /> : chevron}
+            onPress={() => setMode(mode === 'sleep' ? 'normal' : 'sleep')}
           />
           <Row
             theme={theme}
             icon="lock"
             label="Kids mode"
-            right={chevron}
-            onPress={() => Alert.alert('Kids mode', 'Coming soon.')}
+            right={mode === 'kids' ? <Icon name="check" size={16} color={theme.accent} /> : chevron}
+            onPress={() => setMode(mode === 'kids' ? 'normal' : 'kids')}
             isLast
           />
         </Group>

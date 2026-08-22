@@ -59,9 +59,7 @@ function AuthStack() {
 }
 
 // Main app stack shown when signed in: 4 tabs + StoryDetail + Settings + Onboarding
-function MainStack({ isNewUser }) {
-  const navigationRef = React.useRef(null);
-  const [ready, setReady] = React.useState(false);
+function MainStack({ isNewUser, navigationRef, ready }) {
   const { userStats } = useAppContext();
 
   // Check if mandatory profile fields are filled
@@ -92,9 +90,7 @@ function MainStack({ isNewUser }) {
   return (
     <>
       <Stack.Navigator
-        ref={navigationRef}
         screenOptions={{ headerShown: false }}
-        onReady={() => setReady(true)}
       >
         <Stack.Screen name="Main" component={AppNavigator} />
         <Stack.Screen name="StoryDetail" component={StoryDetailScreen} />
@@ -111,7 +107,7 @@ function MainStack({ isNewUser }) {
   );
 }
 
-function Root() {
+function Root({ navigationRef, ready }) {
   const { user, loading, userStats } = useAppContext();
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
@@ -134,11 +130,13 @@ function Root() {
     );
   }
 
-  return user ? <MainStack isNewUser={false} /> : <AuthStack />;
+  return user ? <MainStack isNewUser={false} navigationRef={navigationRef} ready={ready} /> : <AuthStack />;
 }
 
 export default function App() {
   const [fontsLoaded] = useFonts(FONT_MAP);
+  const navigationRef = React.useRef(null);
+  const [ready, setReady] = React.useState(false);
 
   // Hold on the native splash until fonts are ready to avoid a text flash.
   if (!fontsLoaded) return null;
@@ -150,9 +148,9 @@ export default function App() {
           <ThemeProvider>
             <AppContextProvider>
               <AudioProvider>
-                <NavigationContainer>
+                <NavigationContainer ref={navigationRef} onReady={() => setReady(true)}>
                   <StatusBar style="auto" />
-                  <Root />
+                  <Root navigationRef={navigationRef} ready={ready} />
                 </NavigationContainer>
               </AudioProvider>
             </AppContextProvider>
