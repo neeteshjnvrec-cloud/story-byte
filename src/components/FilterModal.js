@@ -8,7 +8,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  FlatList
 } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
 import { AppText } from './ui/AppText';
@@ -156,23 +155,22 @@ export const FilterModal = ({ visible, onClose, onApply, initialFilters }) => {
                   onChangeText={setLangSearch}
                   autoFocus
                 />
-                <FlatList
-                  data={LANGUAGES.filter((l) => {
+                <ScrollView style={{ maxHeight: 320 }} showsVerticalScrollIndicator={false}>
+                  {LANGUAGES.filter((l) => {
                     const q = (langSearch || '').toLowerCase();
                     if (!q) return true;
                     return l.label.toLowerCase().includes(q) || l.id.toLowerCase().includes(q);
-                  })}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
+                  }).map((item) => (
                     <TouchableOpacity
+                      key={item.id}
                       style={[styles.langRow, { borderBottomColor: theme.border }]}
                       onPress={() => { setSelectedLanguage(item.id); setLangPickerOpen(false); setLangSearch(''); }}
                     >
                       <AppText variant="body" color={selectedLanguage === item.id ? 'accent' : 'text'}>{item.label}</AppText>
                       {selectedLanguage === item.id && <Icon name="checkmark" size={18} color={theme.accent} />}
                     </TouchableOpacity>
-                  )}
-                />
+                  ))}
+                </ScrollView>
               </View>
             </Pressable>
           </Modal>
