@@ -38,11 +38,12 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install edge-tts + ffmpeg
+      - name: Install edge-tts + ffmpeg + uv
         run: |
           python -m pip install --upgrade pip
-          pip install edge-tts
+          pip install edge-tts uv
           sudo apt-get update && sudo apt-get install -y ffmpeg
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install pipeline deps
         working-directory: scripts

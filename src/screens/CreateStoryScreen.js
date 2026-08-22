@@ -11,7 +11,6 @@ import {
   Alert,
   Pressable,
   Modal,
-  FlatList,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -197,15 +196,17 @@ export function CreateStoryScreen() {
               </TouchableOpacity>
               {languagePickerVisible && (
                 <View style={{ backgroundColor: theme.surface, borderColor: theme.border, borderRadius: 12, marginTop: 6, maxHeight: 280, padding: 10, borderWidth: 1.5, width: '100%' }}>
-                  {LANGUAGES.map((item) => (
-                    <TouchableOpacity
-                      key={item}
-                      style={{ paddingVertical: 9, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.divider || theme.border }}
-                      onPress={() => { setSelectedLanguage(item); setLanguagePickerVisible(false); setSearchQuery(''); }}
-                    >
-                      <Text style={{ color: selectedLanguage === item ? theme.accent : theme.text, fontWeight: selectedLanguage === item ? '600' : '400', fontSize: 15 }}>{LANGUAGE_LABELS[item] || item.toUpperCase()}</Text>
-                    </TouchableOpacity>
-                  ))}
+                  <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
+                    {LANGUAGES.map((item) => (
+                      <TouchableOpacity
+                        key={item}
+                        style={{ paddingVertical: 9, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.divider || theme.border }}
+                        onPress={() => { setSelectedLanguage(item); setLanguagePickerVisible(false); setSearchQuery(''); }}
+                      >
+                        <Text style={{ color: selectedLanguage === item ? theme.accent : theme.text, fontWeight: selectedLanguage === item ? '600' : '400', fontSize: 15 }}>{LANGUAGE_LABELS[item] || item.toUpperCase()}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
                 </View>
               )}
             </View>

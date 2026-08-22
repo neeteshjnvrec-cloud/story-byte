@@ -608,9 +608,9 @@ class ApiService {
       throw new Error('No Groq API keys or models configured in Firestore');
     }
 
-    const langNames = { en: 'English', hi: 'Hindi', es: 'Spanish', fr: 'French', de: 'German', it: 'Italian', pt: 'Portuguese' };
+    const langNames = { en: 'English', hi: 'Hindi (Devanagari)', bn: 'Bengali (Bengali script)', mr: 'Marathi (Devanagari)', te: 'Telugu (Telugu script)', ta: 'Tamil (Tamil script)', gu: 'Gujarati (Gujarati script)', ur: 'Urdu (Persian-Arabic)', kn: 'Kannada (Kannada script)', or: 'Odia (Odia script)', ml: 'Malayalam (Malayalam script)', es: 'Spanish', fr: 'French', de: 'German', it: 'Italian', pt: 'Portuguese' };
     const langInstruction = langNames[language] || 'English';
-    const sysPrompt = `You are a storyteller for an audio app. Write a ${genre} story. Write in ${langInstruction}. 
+    const sysPrompt = `You are a storyteller for an audio app. Write a ${genre} story. The FULL response — title, description and text — must be written IN ${langInstruction}. Do not mix in English. 
 JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 words, spoken style, no markdown","tags":["${genre}"]}.`;
 
     const errors = [];
@@ -634,7 +634,7 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
             response_format: { type: 'json_object' },
             messages: [
               { role: 'system', content: sysPrompt },
-              { role: 'user', content: `Write a ${genre} story based on this prompt: ${prompt}` }
+              { role: 'user', content: `Write a ${genre} story in ${langInstruction} based on this prompt: ${prompt}` }
             ],
           });
 

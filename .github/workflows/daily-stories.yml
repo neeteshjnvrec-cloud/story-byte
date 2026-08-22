@@ -26,11 +26,12 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install edge-tts + ffmpeg
+      - name: Install edge-tts + ffmpeg + uv
         run: |
           python -m pip install --upgrade pip
-          pip install edge-tts
+          pip install edge-tts uv
           sudo apt-get update && sudo apt-get install -y ffmpeg
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install pipeline deps
         working-directory: scripts
@@ -43,7 +44,9 @@ jobs:
           GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           FIREBASE_PROJECT_ID: storybyte-76716
-        run: node build-stories.js
+        run: |
+          node build-stories.js
+          node build-story-pages.js
 
       # always(): assets already written to public/ must reach the repo even if
       # the generate step failed partway. A Hosting deploy serves only what a
@@ -53,7 +56,7 @@ jobs:
         run: |
           git config user.name "storybyte-bot"
           git config user.email "bot@storybyte.app"
-          git add public/audio public/covers public/index.html 2>/dev/null || true
+          git add public/audio public/covers public/s public/index.html 2>/dev/null || true
           git commit -m "chore: daily story audio + covers ($(date -u +%F))" || echo "nothing to commit"
           # The community workflow pushes to main too; rebase so a stale branch
           # doesn't reject the push. A real push failure must stay loud — it
