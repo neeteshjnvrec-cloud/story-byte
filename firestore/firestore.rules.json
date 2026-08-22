@@ -15,13 +15,20 @@ service cloud.firestore {
     // Stories: public read, authenticated users can create community stories
     match /stories/{storyId} {
       allow read: if true;
-      allow create: if isSignedIn() 
+      allow create: if isSignedIn()
         && request.resource.data.isCommunityStory == true
         && request.resource.data.authorId == request.auth.uid;
       allow delete: if false; // Admin-only
       allow update: if isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['plays', 'rating', 'ratingSum', 'ratingCount', 'lastPlayedAt', 'lastRatedAt', 'lastReview', 'likesCount', 'lastLikedAt']);
+              .hasOnly(['plays', 'rating', 'ratingSum', 'ratingCount', 'lastPlayedAt', 'lastRatedAt', 'lastReview', 'likesCount', 'lastLikedAt', 'commentsCount']);
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        allow delete: if isSignedIn() && request.auth.uid == resource.data.authorId;
+      }
     }
 
     // Pre-built home feed + taxonomy: public read, admin-only write.

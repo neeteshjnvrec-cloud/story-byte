@@ -55,8 +55,12 @@ export function CommentSheet({ story, visible, onClose }) {
         authorPic: userStats?.profilePic || user.photoURL || '',
         text: trimmed,
       });
-      setComments((prev) => [...prev, { id, text: trimmed, authorName: userStats?.fullName || 'Anonymous' }]);
       setText('');
+      // Re-fetch to get the real createdAt from the server and verify the write
+      // landed. This is more reliable than an optimistic add with a client-side
+      // timestamp that won't sort against server-timestamped entries.
+      const fresh = await apiService.getComments(story.id || story.storyId);
+      setComments(fresh);
     } catch (e) {
       console.warn('Failed to post comment:', e.message);
     } finally {
@@ -68,7 +72,8 @@ export function CommentSheet({ story, visible, onClose }) {
     if (!user) return;
     try {
       await apiService.deleteComment(story.id || story.storyId, commentId, user.uid);
-      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      const fresh = await apiService.getComments(story.id || story.storyId);
+      setComments(fresh);
     } catch (e) {
       console.warn('Failed to delete comment:', e.message);
     }

@@ -800,12 +800,12 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
 
   async getComments(storyId) {
     try {
-      const q = query(
-        collection(db, 'stories', storyId, 'comments'),
-        orderBy('createdAt', 'asc')
-      );
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const snap = await getDocs(collection(db, 'stories', storyId, 'comments'));
+      return snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => {
+        const aTime = a.createdAt?.toDate?.() ?? new Date(0);
+        const bTime = b.createdAt?.toDate?.() ?? new Date(0);
+        return aTime - bTime;
+      });
     } catch (e) {
       console.warn('getComments failed:', e.message);
       return [];
