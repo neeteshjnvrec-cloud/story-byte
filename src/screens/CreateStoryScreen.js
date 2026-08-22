@@ -76,6 +76,7 @@ export function CreateStoryScreen() {
     try {
       const published = await publishCommunityStory({
         ...generatedStory,
+        language: selectedLanguage,
         authorName: userStats?.fullName || 'Anonymous',
         authorProfilePic: userStats?.profilePic || userStats?.photoURL || '',
       });
