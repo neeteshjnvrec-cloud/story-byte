@@ -38,31 +38,38 @@ export function CommentSheet({ story, visible, onClose }) {
 
   useEffect(() => {
     if (!visible || !story) return;
+    const storyId = story.id || story.storyId;
+    console.log('[CommentSheet] opening for storyId:', storyId, 'keys:', Object.keys(story));
     setLoading(true);
-    apiService.getComments(story.id || story.storyId)
-      .then((c) => { setComments(c); setLoading(false); })
-      .catch(() => { setComments([]); setLoading(false); });
+    apiService.getComments(storyId)
+      .then((c) => {
+        console.log('[CommentSheet] got', c.length, 'comments:', JSON.stringify(c).slice(0, 200));
+        setComments(c);
+        setLoading(false);
+      })
+      .catch((e) => { console.error('[CommentSheet] get failed:', e.message); setComments([]); setLoading(false); });
   }, [visible, story]);
 
   const handleSend = async () => {
     const trimmed = text.trim();
     if (!trimmed || !user || sending) return;
+    const storyId = story.id || story.storyId;
+    console.log('[CommentSheet] sending comment to storyId:', storyId, 'user:', user.uid);
     setSending(true);
     try {
-      const id = await apiService.addComment(story.id || story.storyId, {
+      const id = await apiService.addComment(storyId, {
         authorId: user.uid,
         authorName: userStats?.fullName || user.displayName || 'Anonymous',
         authorPic: userStats?.profilePic || user.photoURL || '',
         text: trimmed,
       });
+      console.log('[CommentSheet] addComment returned id:', id);
       setText('');
-      // Re-fetch to get the real createdAt from the server and verify the write
-      // landed. This is more reliable than an optimistic add with a client-side
-      // timestamp that won't sort against server-timestamped entries.
-      const fresh = await apiService.getComments(story.id || story.storyId);
+      const fresh = await apiService.getComments(storyId);
+      console.log('[CommentSheet] after add, got', fresh.length, 'comments');
       setComments(fresh);
     } catch (e) {
-      console.warn('Failed to post comment:', e.message);
+      console.error('[CommentSheet] add failed:', e.message, e.code);
     } finally {
       setSending(false);
     }
@@ -84,14 +91,24 @@ export function CommentSheet({ story, visible, onClose }) {
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+        <View style={[styles.sheet, { backgroundColor: '#fff', borderColor: '#ccc' }]}>
           {/* Header */}
-          <View style={[styles.sheetHead, { borderBottomColor: theme.divider }]}>
-            <AppText variant="h3" color="text">Comments</AppText>
+          <View style={[styles.sheetHead, { borderBottomColor: '#eee' }]}>
+            <Text style={[styles.debugCounter, { color: theme.text, backgroundColor: theme.accent, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4, alignSelf: 'flex-start' }]}>
+              {comments.length}
+            </Text>
+            <AppText variant="h3" color="text">
+              Comments
+            </AppText>
             <TouchableOpacity onPress={onClose} hitSlop={10}>
               <Icon name="close" size={22} color={theme.text} />
             </TouchableOpacity>
           </View>
+
+          {/* Debug: raw JSON of comments */}
+          {comments.length > 0 ? (
+            <Text style={[{ color: 'red', backgroundColor: 'yellow', padding: 8, fontSize: 11 }]}>{JSON.stringify(comments).slice(0, 300)}</Text>
+          ) : null}
 
           {/* Comment list */}
           {loading ? (
@@ -101,9 +118,9 @@ export function CommentSheet({ story, visible, onClose }) {
               <AppText variant="body" color="textSecondary">No comments yet. Start the conversation!</AppText>
             </View>
           ) : (
-            <ScrollView style={styles.list}>
-              {comments.map((c) => (
-                <View key={c.id} style={[styles.commentRow, { borderBottomColor: theme.divider }]}>
+            <ScrollView style={styles.list} contentContainerStyle={{ paddingBottom: 100, backgroundColor: 'white' }}>
+              {comments.map((c, idx) => (
+                <View key={c.id} style={[styles.commentRow, { borderBottomColor: '#eee', backgroundColor: idx % 2 === 0 ? '#e8f4ff' : '#fff8e8' }]}>
                   <View style={styles.commentBody}>
                     <View style={styles.commentMeta}>
                       <AppText variant="bodySemi" color="text" style={styles.commentAuthor}>
@@ -113,7 +130,7 @@ export function CommentSheet({ story, visible, onClose }) {
                         {timeAgo(c.createdAt)}
                       </AppText>
                     </View>
-                    <AppText variant="body" color="textSecondary" style={styles.commentText}>
+                    <AppText variant="body" color="text" style={styles.commentText}>
                       {c.text}
                     </AppText>
                   </View>
@@ -129,7 +146,7 @@ export function CommentSheet({ story, visible, onClose }) {
 
           {/* Input */}
           {user ? (
-            <View style={[styles.inputRow, { borderTopColor: theme.divider }]}>
+            <View style={[styles.inputRow, { borderTopColor: '#eee', backgroundColor: '#fff' }]}>
               <TextInput
                 ref={inputRef}
                 value={text}
@@ -137,7 +154,7 @@ export function CommentSheet({ story, visible, onClose }) {
                 placeholder="Add a comment..."
                 placeholderTextColor={theme.textTertiary}
                 multiline
-                style={[styles.input, { color: theme.textPrimary, backgroundColor: theme.card }]}
+                style={[styles.input, { color: '#000', backgroundColor: '#f5f5f5' }]}
                 maxLength={500}
               />
               <TouchableOpacity
@@ -153,7 +170,7 @@ export function CommentSheet({ story, visible, onClose }) {
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={[styles.inputRow, { borderTopColor: theme.divider, paddingHorizontal: 16, paddingVertical: 12 }]}>
+            <View style={[styles.inputRow, { borderTopColor: '#eee', backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 12 }]}>
               <AppText variant="body" color="textSecondary">Sign in to comment.</AppText>
             </View>
           )}
