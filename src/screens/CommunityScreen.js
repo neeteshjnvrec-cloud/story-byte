@@ -24,6 +24,7 @@ import {
   Text,
   Pressable,
   Alert,
+  Share,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -34,8 +35,10 @@ import { Icon } from '../components/ui/Icon';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
 import { Cover } from '../components/story/Cover';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
+import { CommentSheet } from '../components/comments/CommentSheet';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAudioPlayer } from '../context/AudioContext';
+import { Image } from 'expo-image';
 import { collection, query, where, onSnapshot, orderBy, limit as fbLimit } from 'firebase/firestore';
 import { db } from '../services/firebase';
 
@@ -58,12 +61,13 @@ export function CommunityScreen() {
   const { theme } = useTheme();
   const {
     user, communityStories, fetchCommunityStories, receiveCommunityStories,
-    toggleFavorite, getStoryMetrics, toggleLike, rateStory,
+    toggleFavorite, getStoryMetrics, toggleLike, rateStory, setLastPlayTab,
   } = useAppContext();
-  const { playStory } = useAudioPlayer();
+  const { playStory, setNextStory } = useAudioPlayer();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [ratingOpenFor, setRatingOpenFor] = useState(null);
+  const [commentStory, setCommentStory] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -122,7 +126,7 @@ export function CommunityScreen() {
   };
 
   const handleComment = (story) => {
-    Alert.alert('Comments', `Comments coming soon for "${story.title}"`);
+    setCommentStory(story);
   };
 
   // Tapping the star swaps the left action cluster for an inline 1–5 row.
@@ -147,8 +151,13 @@ export function CommunityScreen() {
     }
   };
 
-  const handleShare = (story) => {
-    Alert.alert('Share', `Share "${story.title}" — coming soon!`);
+  const handleShare = async (story) => {
+    try {
+      const text = `"${story.title}" — ${story.description || 'Listen on StoryByte'}`;
+      await Share.share({ message: text, url: story.audioUrl });
+    } catch (e) {
+      console.warn('Share failed:', e);
+    }
   };
 
   const handleSave = async (story) => {
@@ -164,6 +173,17 @@ export function CommunityScreen() {
   };
 
   const handlePlay = async (story) => {
+    setLastPlayTab('community');
+    // Provide the autoplay next-story callback: find this story's index in the
+    // feed and return the next one (wrapping is fine — unlikely in a 50-item
+    // feed, but harmless).
+    setNextStory(() => {
+      const idx = communityStories.findIndex(
+        (s) => (s.id || s.storyId) === (story.id || story.storyId)
+      );
+      if (idx < 0 || idx >= communityStories.length - 1) return null;
+      return communityStories[idx + 1];
+    });
     await playStory(story);
   };
 
@@ -199,7 +219,16 @@ export function CommunityScreen() {
             artwork always reads as a patch. ═══════════ */}
         <View style={styles.postHeader}>
           <View style={[styles.headerAvatar, { backgroundColor: theme.accent }]}>
-            <Text style={styles.headerAvatarLetter}>{authorInitial}</Text>
+            {item.authorProfilePic ? (
+              <Image
+                source={{ uri: item.authorProfilePic }}
+                style={styles.headerAvatarImage}
+                contentFit="cover"
+                transition={100}
+              />
+            ) : (
+              <Text style={styles.headerAvatarLetter}>{authorInitial}</Text>
+            )}
           </View>
           <View style={styles.headerTextWrap}>
             <AppText variant="bodySemi" color="text" numberOfLines={1}>
@@ -345,15 +374,11 @@ export function CommunityScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ═══════════ CAPTION — bold author + description ═══════════ */}
-        {/* The title already sits on the cover, so the caption carries the
-            description; it falls back to the title only when there's none. */}
-        {(item.description || item.title) ? (
+        {/* ═══════════ CAPTION — story description only; the header already
+            identifies the publisher, so repeating the name here is redundant. */}
+        {item.description || item.title ? (
           <View style={styles.captionRow}>
             <AppText variant="body" color="text" style={styles.caption} numberOfLines={3}>
-              {item.authorName ? (
-                <Text style={styles.captionAuthor}>{authorName}{'  '}</Text>
-              ) : null}
               {item.description || item.title}
             </AppText>
           </View>
@@ -415,6 +440,13 @@ export function CommunityScreen() {
           }
         />
       )}
+      {commentStory ? (
+        <CommentSheet
+          story={commentStory}
+          visible={!!commentStory}
+          onClose={() => setCommentStory(null)}
+        />
+      ) : null}
     </View>
   );
 }
@@ -481,6 +513,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
   },
+  headerAvatarImage: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+  },
   // flex: 1 is correct here (unlike on an absolute node): it pushes the ⋯
   // button to the right edge and lets the name ellipsize.
   headerTextWrap: { flex: 1, minWidth: 0 },
@@ -538,9 +575,6 @@ const styles = StyleSheet.create({
   },
   caption: {
     lineHeight: 20,
-  },
-  captionAuthor: {
-    fontWeight: '700',
   },
 
   // Action bar — 12 here + 8 on actionBtn lands the first icon on the same

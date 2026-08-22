@@ -1,5 +1,6 @@
 // App Context for Story Byte
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth, firebaseSignOut, onAuthStateChanged } from '../services/firebase';
 import { setDoc, getDoc, doc, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -8,6 +9,10 @@ import { loginWithEmail as authServiceLogin, signupWithEmail as authServiceSignu
 import { dispatchAudioWorkflow } from '../utils/communityAudioGen';
 import { storyPlays } from '../utils/storyMetrics';
 import { notificationService } from '../services/notificationService';
+import * as FileSystem from 'expo-file-system/legacy';
+
+const STORAGE_AUTOPLAY = 'storybyte-autoplay-next';
+const STORAGE_LAST_TAB = 'storybyte-last-play-tab';
 
 const AppContext = createContext();
 
@@ -369,11 +374,74 @@ export const AppContextProvider = ({ children }) => {
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [communityStories, setCommunityStories] = useState([]);
+  const [autoplayNext, setAutoplayNextState] = useState(true);
+  const [lastPlayTab, setLastPlayTabState] = useState(null); // 'home' | 'community'
+  // Downloads: local file URI + metadata, keyed by story id.
+  const [downloads, setDownloads] = useState({});
+  const [downloadingIds, setDownloadingIds] = useState(new Set());
 
-  const generateStory = async ({ title, prompt, genre }) => {
+  // Restore autoplay + last-tab preferences on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const saved = await AsyncStorage.getItem(STORAGE_AUTOPLAY);
+        if (saved !== null) setAutoplayNextState(saved === 'true');
+        const tab = await AsyncStorage.getItem(STORAGE_LAST_TAB);
+        if (tab) setLastPlayTabState(tab);
+      } catch (e) {}
+    })();
+  }, []);
+
+  const setAutoplayNext = async (val) => {
+    setAutoplayNextState(val);
+    try { await AsyncStorage.setItem(STORAGE_AUTOPLAY, String(val)); } catch (e) {}
+  };
+
+  const setLastPlayTab = useCallback((tab) => {
+    setLastPlayTabState(tab);
+    try { AsyncStorage.setItem(STORAGE_LAST_TAB, tab).catch(() => {}); } catch (e) {}
+  }, []);
+
+  const toggleDownload = useCallback(async (story) => {
+    if (!story?.audioUrl || !story?.id) return { downloaded: false };
+    const id = story.id;
+    const already = downloads[id];
+    if (already) {
+      // Remove from local state and Firestore
+      setDownloads((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      try {
+        await setDoc(doc(db, 'users', auth.currentUser?.uid, 'downloads', id), { downloaded: false }, { merge: true });
+      } catch (e) { /* ignore */ }
+      return { downloaded: false, path: already.path };
+    }
+    // Download: cache to document directory, then persist metadata.
+    const fileName = `storybyte-${id}.mp3`;
+    const localUri = FileSystem.cacheDirectory + fileName;
+    setDownloadingIds((prev) => new Set(prev).add(id));
+    try {
+      const { uri } = await FileSystem.downloadAsync(story.audioUrl, localUri);
+      const meta = { story: { id: story.id, title: story.title, coverImage: story.coverImage, genre: story.genre }, path: uri, downloadedAt: new Date().toISOString() };
+      setDownloads((prev) => ({ ...prev, [id]: meta }));
+      try {
+        await setDoc(doc(db, 'users', auth.currentUser?.uid, 'downloads', id), { ...meta, downloaded: true }, { merge: true });
+      } catch (e) { /* ignore */ }
+      return { downloaded: true, path: uri };
+    } catch (e) {
+      console.warn('[AppContext] download failed:', e.message);
+      return { downloaded: false };
+    } finally {
+      setDownloadingIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+    }
+  }, [downloads]);
+
+  const generateStory = async ({ title, prompt, genre, language }) => {
     setIsGenerating(true);
     try {
-      const result = await apiService.generateCommunityStory({ title, prompt, genre });
+      const result = await apiService.generateCommunityStory({ title, prompt, genre, language });
       return result;
     } catch (error) {
       console.error('Error generating story:', error);
@@ -463,11 +531,21 @@ export const AppContextProvider = ({ children }) => {
     toggleLike,
     rateStory,
     recordPlay,
+    // Autoplay
+    autoplayNext,
+    setAutoplayNext,
+    lastPlayTab,
+    setLastPlayTab,
+    // Downloads
+    downloads,
+    downloadingIds,
+    toggleDownload,
   }), [
     user, loading, userStats, favorites, communityStories, isGenerating,
+    autoplayNext, lastPlayTab,
     toggleFavorite, isInFavorites, updateUserProfile, fetchCommunityStories,
     receiveStoryDocs, receiveCommunityStories, getStoryMetrics, toggleLike,
-    rateStory, recordPlay,
+    rateStory, recordPlay, setAutoplayNext, setLastPlayTab, downloads, downloadingIds, toggleDownload,
   ]);
 
   return (

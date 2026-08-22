@@ -27,7 +27,7 @@ export const FavoritesScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
-  const { favorites, loading: contextLoading } = useAppContext();
+  const { favorites, loading: contextLoading, downloads, downloadingIds, toggleDownload } = useAppContext();
   const { playStory } = useAudioPlayer();
   const [stories, setStories] = useState([]);
   const [history, setHistory] = useState([]);
@@ -110,13 +110,30 @@ export const FavoritesScreen = () => {
     ));
   };
 
-  const renderDownloads = () => (
-    <EmptyState
-      icon="download"
-      title="No downloads yet"
-      caption="Downloaded stories play offline."
-    />
-  );
+  const renderDownloads = () => {
+    const entries = Object.values(downloads);
+    if (entries.length === 0) {
+      return (
+        <EmptyState
+          icon="download"
+          title="No downloads yet"
+          caption="Downloaded stories play offline."
+        />
+      );
+    }
+    return entries.map((d) => (
+      <CompactRow
+        key={d.story.id}
+        story={d.story}
+        onPress={() => playStory({ ...d.story, audioUrl: d.path })}
+        trailing={
+          <Pressable onPress={() => toggleDownload({ id: d.story.id, audioUrl: d.story.audioUrl })} hitSlop={6}>
+            <Icon name="trash" size={18} color={theme.textSecondary} />
+          </Pressable>
+        }
+      />
+    ));
+  };
 
   const renderHistory = () => {
     if (history.length === 0) {

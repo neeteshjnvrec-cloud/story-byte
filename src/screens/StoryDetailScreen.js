@@ -1,6 +1,6 @@
 // Story Detail — warm design: cover, meta, play/resume, favorite, transcript.
 import React, { useState, useEffect, useRef } from 'react';
-import { View, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator, Share } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer } from '../context/AudioContext';
@@ -11,6 +11,7 @@ import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
 import { Cover } from '../components/story/Cover';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
+import { CommentSheet } from '../components/comments/CommentSheet';
 import apiService from '../services/api';
 
 // ---------------------------------------------------------------------------
@@ -90,14 +91,15 @@ export const StoryDetailScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { storyId, story: initialStory } = route.params || {};
-  const { theme } = useTheme() || { theme: {} };
+  const { theme = {} } = useTheme();
   const { playStory, playPause, isPlaying, currentStory } = useAudioPlayer();
   const {
     toggleFavorite, user, getStoryMetrics, toggleLike,
-    rateStory: rateStoryInContext, receiveStoryDocs,
+    rateStory: rateStoryInContext, receiveStoryDocs, downloads, downloadingIds, toggleDownload,
   } = useAppContext();
   const [story, setStory] = useState(initialStory || null);
   const [loading, setLoading] = useState(!initialStory);
+  const [commentVisible, setCommentVisible] = useState(false);
 
   // Chapter state
   const [chapters, setChapters] = useState(null);
@@ -138,6 +140,16 @@ export const StoryDetailScreen = () => {
   // `rating` is the community average; `myRating` is this user's own score.
   const { liked, likesCount, saved, plays, rating, myRating } = getStoryMetrics(story);
 
+  const handleShare = async () => {
+    if (!story) return;
+    try {
+      const text = `"${story.title}" — ${story.description || 'Listen on StoryByte'}`;
+      await Share.share({ message: text, url: story.audioUrl });
+    } catch (e) {
+      console.warn('Share failed:', e);
+    }
+  };
+
   const handlePlay = async () => {
     if (!story) return;
     if (!isHere) await playStory(story); else await playPause();
@@ -153,6 +165,23 @@ export const StoryDetailScreen = () => {
   const handleRate = async (n) => {
     if (!user) return Alert.alert('Sign in required', 'Please sign in to rate stories.');
     try { await rateStoryInContext(story, n); } catch (e) { Alert.alert('Error', 'Could not save rating'); }
+  };
+
+  const handleDownload = async () => {
+    if (!story?.audioUrl) return Alert.alert('No audio', 'This story has no audio available yet.');
+    try {
+      const result = await toggleDownload(story);
+      if (result.downloaded) {
+        Alert.alert('Downloaded', `"${story.title}" saved for offline listening.`, [
+          { text: 'Play Offline', onPress: () => playStory({ ...story, audioUrl: result.path }) },
+          { text: 'OK' },
+        ]);
+      } else {
+        Alert.alert('Download failed', 'Could not download this story. Check your connection.');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Download failed. Please try again.');
+    }
   };
 
   if (loading) {
@@ -172,7 +201,15 @@ export const StoryDetailScreen = () => {
     <View style={{ flex: 1, backgroundColor: theme.background }}>
       <View style={[styles.head, { paddingTop: insets.top + 4 }]}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={10}><Icon name="chev-left" /></Pressable>
-        <Pressable hitSlop={10} onPress={() => Alert.alert('Share', 'Sharing coming soon.')}><Icon name="send" /></Pressable>
+        <Pressable hitSlop={10} onPress={handleShare}><Icon name="send" /></Pressable>
+        <Pressable hitSlop={10} onPress={() => setCommentVisible(true)} style={styles.commentBtn}>
+          <Icon name="chat" />
+          {story?.commentsCount > 0 ? (
+            <View style={[styles.commentBadge, { backgroundColor: theme.accent }]}>
+              <AppText variant="micro" color="onAccent" style={{ paddingHorizontal: 4 }}>{story.commentsCount}</AppText>
+            </View>
+          ) : null}
+        </Pressable>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 140 }} showsVerticalScrollIndicator={false}>
         <Cover story={story} style={styles.cover} radius={22} />
@@ -214,8 +251,9 @@ export const StoryDetailScreen = () => {
           <Pressable onPress={handleFavorite} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <Icon name={saved ? 'bookmark-fill' : 'bookmark'} color={saved ? theme.accent : theme.text} />
           </Pressable>
-          <Pressable onPress={() => Alert.alert('Download', 'Offline downloads coming soon.')} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Icon name="download" />
+          <Pressable onPress={handleDownload} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Icon name={downloads[story?.id]?.path ? 'check-circle' : 'download'} />
+            {downloadingIds.has(story?.id) && <ActivityIndicator size={14} color={theme.accent} style={{ position: 'absolute' }} />}
           </Pressable>
         </View>
 
@@ -287,6 +325,13 @@ export const StoryDetailScreen = () => {
           </View>
         )}
       </ScrollView>
+      {story && (
+        <CommentSheet
+          story={story}
+          visible={commentVisible}
+          onClose={() => setCommentVisible(false)}
+        />
+      )}
     </View>
   );
 };
@@ -301,7 +346,12 @@ function Tag({ theme, label }) {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  head: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 8 },
+  head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingBottom: 8 },
+  commentBtn: { position: 'relative', padding: 4 },
+  commentBadge: {
+    position: 'absolute', top: -2, right: -4, borderRadius: 10,
+    minWidth: 16, height: 16, alignItems: 'center', justifyContent: 'center',
+  },
   cover: { width: '100%', height: 220, marginBottom: 16 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' },
   rate: { flexDirection: 'row', alignItems: 'center', gap: 4 },

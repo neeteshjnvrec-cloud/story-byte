@@ -24,7 +24,8 @@ export const HomeScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { theme, tokens } = useTheme();
-  const { playStory } = useAudioPlayer();
+  const { playStory, setNextStory } = useAudioPlayer();
+  const { setLastPlayTab } = useAppContext();
   const [stories, setStories] = useState([]);
   const [progress, setProgress] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,7 +75,15 @@ export const HomeScreen = () => {
   };
 
   const openStory = (s) => navigation.navigate('StoryDetail', { storyId: s.id, story: s });
-  const play = async (s) => { await playStory(s); };
+  const play = async (s) => {
+    setLastPlayTab('home');
+    setNextStory(() => {
+      const idx = stories.findIndex((st) => st.id === s.id);
+      if (idx < 0 || idx >= stories.length - 1) return null;
+      return stories[idx + 1];
+    });
+    await playStory(s);
+  };
   const handleRetry = () => load(language, activeFilters);
 
   const hero = stories[0];

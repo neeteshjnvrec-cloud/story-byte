@@ -20,16 +20,18 @@ import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
 import { GENRES } from '../constants/genres';
+import { LANGUAGES } from '../types/story';
 
 export function CreateStoryScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
-  const { generateStory, publishCommunityStory, isGenerating } = useAppContext();
-  
+  const { generateStory, publishCommunityStory, isGenerating, userStats } = useAppContext();
+
   const [title, setTitle] = useState('');
   const [prompt, setPrompt] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('romance');
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [generatedStory, setGeneratedStory] = useState(null);
   const [isPreview, setIsPreview] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -45,6 +47,7 @@ export function CreateStoryScreen() {
       title: title || undefined,
       prompt: prompt.trim(),
       genre: selectedGenre,
+      language: selectedLanguage,
     });
 
     if (result) {
@@ -57,7 +60,11 @@ export function CreateStoryScreen() {
     if (!generatedStory) return;
     setIsPublishing(true);
     try {
-      const published = await publishCommunityStory(generatedStory);
+      const published = await publishCommunityStory({
+        ...generatedStory,
+        authorName: userStats?.fullName || 'Anonymous',
+        authorProfilePic: userStats?.profilePic || userStats?.photoURL || '',
+      });
       if (published) {
         // Submitting hands the story to the generation pipeline; it stays
         // invisible (status 'under_review') until narration and cover art are
@@ -84,6 +91,7 @@ export function CreateStoryScreen() {
     setTitle('');
     setPrompt('');
     setSelectedGenre('romance');
+    setSelectedLanguage('en');
     setGeneratedStory(null);
     setIsPreview(false);
   };
@@ -132,14 +140,14 @@ export function CreateStoryScreen() {
 
             {/* Genre Selection */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.text }]}>Genre</Text>
+              <Text style={[styles.label, { color: theme.textPrimary }]}>Genre</Text>
               <View style={styles.genreGrid}>
                 {GENRES.map((genre) => (
                   <TouchableOpacity
                     key={genre.id}
                     style={[
                       styles.genreButton,
-                      { 
+                      {
                         backgroundColor: selectedGenre === genre.id ? theme.primary : theme.surface,
                         borderColor: selectedGenre === genre.id ? theme.primary : theme.border,
                       },
@@ -149,9 +157,9 @@ export function CreateStoryScreen() {
                     <Ionicons
                       name={genre.icon}
                       size={18}
-                      color={selectedGenre === genre.id ? theme.onAccent : theme.text}
+                      color={selectedGenre === genre.id ? theme.onAccent : theme.textPrimary}
                     />
-                    <Text style={[styles.genreLabel, { color: selectedGenre === genre.id ? theme.onAccent : theme.text }]}>
+                    <Text style={[styles.genreLabel, { color: selectedGenre === genre.id ? theme.onAccent : theme.textPrimary }]}>
                       {genre.label}
                     </Text>
                   </TouchableOpacity>
@@ -159,9 +167,36 @@ export function CreateStoryScreen() {
               </View>
             </View>
 
+            {/* Language Selection */}
+            <View style={styles.section}>
+              <Text style={[styles.label, { color: theme.textPrimary }]}>Language</Text>
+              <View style={styles.genreGrid}>
+                {LANGUAGES.map((lang) => {
+                  const langLabel = { en: 'English', hi: 'हिन्दी', es: 'Español', fr: 'Français', de: 'Deutsch', it: 'Italiano', pt: 'Português' }[lang] || lang.toUpperCase();
+                  return (
+                    <TouchableOpacity
+                      key={lang}
+                      style={[
+                        styles.genreButton,
+                        {
+                          backgroundColor: selectedLanguage === lang ? theme.primary : theme.surface,
+                          borderColor: selectedLanguage === lang ? theme.primary : theme.border,
+                        },
+                      ]}
+                      onPress={() => setSelectedLanguage(lang)}
+                    >
+                      <Text style={[styles.genreLabel, { color: selectedLanguage === lang ? theme.onAccent : theme.textPrimary }]}>
+                        {langLabel}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+
             {/* Prompt Input */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.text }]}>Your Story Idea</Text>
+              <Text style={[styles.label, { color: theme.textPrimary }]}>Your Story Idea</Text>
               <TextInput
                 style={[styles.textArea, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
                 placeholder="Describe your story idea... (e.g., A detective finds a watch that stops time for 10 seconds)"
