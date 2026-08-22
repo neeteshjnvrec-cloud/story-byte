@@ -105,11 +105,6 @@ export function CommentSheet({ story, visible, onClose }) {
             </TouchableOpacity>
           </View>
 
-          {/* Debug: raw JSON of comments */}
-          {comments.length > 0 ? (
-            <Text style={[{ color: 'red', backgroundColor: 'yellow', padding: 8, fontSize: 11 }]}>{JSON.stringify(comments).slice(0, 300)}</Text>
-          ) : null}
-
           {/* Comment list */}
           {loading ? (
             <View style={styles.center}><ActivityIndicator color={theme.accent} /></View>
