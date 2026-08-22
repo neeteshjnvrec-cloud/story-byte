@@ -98,10 +98,11 @@ export const SettingsScreen = () => {
   const { theme, themeMode, changeTheme, setMode, mode } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { user, signOut } = useAppContext();
+  // autoplayNext / wifiOnly live in AppContext (and AsyncStorage) — they used
+  // to be local state here, so flipping either toggle changed nothing but the
+  // switch graphic.
+  const { user, signOut, autoplayNext, setAutoplayNext, wifiOnly, setWifiOnly } = useAppContext();
 
-  const [autoplayNext, setAutoplayNext] = useState(true);
-  const [wifiOnly, setWifiOnly] = useState(true);
   const [deleting, setDeleting] = useState(false);
 
   const cycleAppearance = () => changeTheme(THEME_CYCLE[themeMode] || 'light');

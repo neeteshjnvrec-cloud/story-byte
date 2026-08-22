@@ -19,9 +19,11 @@ service cloud.firestore {
         && request.resource.data.isCommunityStory == true
         && request.resource.data.authorId == request.auth.uid;
       allow delete: if false; // Admin-only
+      // Engagement counters only. A key absent from this list makes the whole
+      // update fail, so anything the client increments has to be listed here.
       allow update: if isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['plays', 'rating', 'ratingSum', 'ratingCount', 'lastPlayedAt', 'lastRatedAt', 'lastReview', 'likesCount', 'lastLikedAt', 'commentsCount']);
+              .hasOnly(['plays', 'rating', 'ratingSum', 'ratingCount', 'lastPlayedAt', 'lastRatedAt', 'lastReview', 'likesCount', 'lastLikedAt', 'commentsCount', 'sharesCount', 'lastSharedAt']);
 
       // Comments subcollection
       match /comments/{commentId} {

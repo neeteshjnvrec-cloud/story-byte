@@ -27,6 +27,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { notifyAndPushUser, notifyAndPushAll } = require('./lib/notify');
+const { writeStoryPage } = require('./lib/story-page');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -86,6 +87,28 @@ const EDGE = [
   ['python3', ['-m', 'edge_tts']],
   ['uvx', ['edge-tts']],
 ];
+
+// One edge-tts voice per language offered by the creation-time picker
+// (src/types/story.js LANGUAGES). Keep the two lists in sync.
+const VOICES = {
+  en: 'en-US-AriaNeural',
+  hi: 'hi-IN-SwaraNeural',
+  es: 'es-MX-DaliaNeural',
+  fr: 'fr-FR-DeniseNeural',
+  de: 'de-DE-KatjaNeural',
+  it: 'it-IT-ElsaNeural',
+  pt: 'pt-BR-FranciscaNeural',
+  // Indian-language neural voices, matching the creation-time picker.
+  bn: 'bn-IN-TanishaaNeural',
+  mr: 'mr-IN-AarohiNeural',
+  te: 'te-IN-ShrutiNeural',
+  ta: 'ta-IN-PallaviNeural',
+  gu: 'gu-IN-DhwaniNeural',
+  ur: 'ur-IN-GulNeural',
+  kn: 'kn-IN-SapnaNeural',
+  or: 'or-IN-SubhasiniNeural',
+  ml: 'ml-IN-SobhanaNeural',
+};
 
 function synth(text, voice, out) {
   const txt = path.join(os.tmpdir(), `sb-${Date.now()}.txt`);
@@ -170,6 +193,9 @@ async function sendBroadcastNotification(story) {
 async function main() {
   fs.mkdirSync(path.join(PUB, 'audio'), { recursive: true });
   fs.mkdirSync(path.join(PUB, 'covers'), { recursive: true });
+  // Shareable story pages, staged alongside the audio and covers so the single
+  // hosting deploy below carries them too.
+  fs.mkdirSync(path.join(PUB, 's'), { recursive: true });
 
   // Determine which stories to process.
   // 'failed' is included so a transient cover/TTS failure is retried on the next
@@ -211,15 +237,33 @@ async function main() {
       console.log(`    ✅ Cover: ${Math.round(fs.statSync(coverPath).size / 1024)}KB`);
 
       // 2. Generate audio
-      const voice = story.language === 'hi' ? 'hi-IN-SwaraNeural' : 'en-US-AriaNeural';
+      // Creation-time language picker offers every LANGUAGES entry, so each one
+      // needs a voice here — otherwise a Spanish story is read aloud by an
+      // English voice, which mangles the pronunciation.
+      const voice = VOICES[story.language] || VOICES.en;
       synth(story.text, voice, audioPath);
       const dur = durationSec(audioPath) || Math.max(30, Math.round((story.text || '').split(/\s+/).length / 2.5));
       console.log(`    ✅ Audio: ${Math.round(fs.statSync(audioPath).size / 1024)}KB, ${dur}s`);
 
-      // 3. Deploy to Firebase Hosting
+      // 3. Render the shareable page.
+      // Deployed together with the audio and cover below, so the link and the
+      // assets it references go live in the same push.
+      const { pageUrl } = writeStoryPage(PUB, {
+        ...story,
+        storyId,
+        audioUrl: `${SITE}/audio/${storyId}.mp3`,
+        coverImage: `${SITE}/covers/${storyId}.jpg`,
+        duration: dur,
+      }, { site: SITE });
+      console.log(`    ✅ Page: ${pageUrl}`);
+
+      // 4. Deploy to Firebase Hosting
       // (deployed after all stories are processed)
 
-      processed.push({ id: storyId, title: story.title, authorName: story.authorName, authorId: story.authorId, genre: story.genre, duration: dur });
+      processed.push({
+        id: storyId, title: story.title, authorName: story.authorName,
+        authorId: story.authorId, genre: story.genre, duration: dur, pageUrl,
+      });
     } catch (e) {
       console.error(`    ❌ Failed: ${e.message}`);
       // Mark as failed so it can be retried later
@@ -267,6 +311,9 @@ async function main() {
     await db.collection('stories').doc(item.id).update({
       audioUrl,
       coverImage: coverUrl,
+      // The page the share sheet hands out. Recorded only now, after the deploy
+      // succeeded, so a shared link never points at a page that isn't up.
+      pageUrl: item.pageUrl,
       duration: item.duration,
       status: 'published',
       publishedAt: admin.firestore.FieldValue.serverTimestamp(),

@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,6 +24,16 @@ import { HeaderNotificationButton } from '../components/HeaderNotificationButton
 import { GENRES } from '../constants/genres';
 import { LANGUAGES } from '../types/story';
 
+// The language's own name first — that's how a speaker recognises "its" at a
+// glance — then the English name in parens for everybody else. Orthography is
+// the gloss for English itself, which is why it stays bare.
+const LANGUAGE_LABELS = {
+  en: 'English', hi: 'हिन्दी (Hindi)', es: 'Español (Spanish)', fr: 'Français (French)',
+  de: 'Deutsch (German)', it: 'Italiano (Italian)', pt: 'Português (Portuguese)',
+  bn: 'বাংলা (Bengali)', mr: 'मराठी (Marathi)', te: 'తెలుగు (Telugu)', ta: 'தமிழ் (Tamil)',
+  gu: 'ગુજરાતી (Gujarati)', ur: 'اردو (Urdu)', kn: 'ಕನ್ನಡ (Kannada)', or: 'ଓଡ଼ିଆ (Odia)', ml: 'മലയാളം (Malayalam)',
+};
+
 export function CreateStoryScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -32,6 +44,9 @@ export function CreateStoryScreen() {
   const [prompt, setPrompt] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('romance');
   const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [languagePickerVisible, setLanguagePickerVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [genrePickerVisible, setGenrePickerVisible] = useState(false);
   const [generatedStory, setGeneratedStory] = useState(null);
   const [isPreview, setIsPreview] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -65,6 +80,11 @@ export function CreateStoryScreen() {
         authorName: userStats?.fullName || 'Anonymous',
         authorProfilePic: userStats?.profilePic || userStats?.photoURL || '',
       });
+      if (published?.limited) {
+        Alert.alert('Daily limit', published.message || 'You can publish up to 2 stories per day.');
+        setIsPublishing(false);
+        return;
+      }
       if (published) {
         // Submitting hands the story to the generation pipeline; it stays
         // invisible (status 'under_review') until narration and cover art are
@@ -138,65 +158,61 @@ export function CreateStoryScreen() {
               />
             </View>
 
-            {/* Genre Selection */}
+            {/* Genre — inline list opens below button */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.textPrimary }]}>Genre</Text>
-              <View style={styles.genreGrid}>
-                {GENRES.map((genre) => (
-                  <TouchableOpacity
-                    key={genre.id}
-                    style={[
-                      styles.genreButton,
-                      {
-                        backgroundColor: selectedGenre === genre.id ? theme.primary : theme.surface,
-                        borderColor: selectedGenre === genre.id ? theme.primary : theme.border,
-                      },
-                    ]}
-                    onPress={() => setSelectedGenre(genre.id)}
-                  >
-                    <Ionicons
-                      name={genre.icon}
-                      size={18}
-                      color={selectedGenre === genre.id ? theme.onAccent : theme.textPrimary}
-                    />
-                    <Text style={[styles.genreLabel, { color: selectedGenre === genre.id ? theme.onAccent : theme.textPrimary }]}>
-                      {genre.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              <Text style={[styles.label, { color: theme.text }]}>Genre</Text>
+              <TouchableOpacity
+                style={[styles.input, { backgroundColor: theme.surface, borderColor: theme.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
+                onPress={() => setGenrePickerVisible(!genrePickerVisible)}
+              >
+                <Text style={{ color: theme.text }}>{GENRES.find((g) => g.id === selectedGenre)?.label || selectedGenre}</Text>
+                <Ionicons name={genrePickerVisible ? 'chevron-up' : 'chevron-down'} size={20} color={theme.textSecondary} />
+              </TouchableOpacity>
+              {genrePickerVisible && (
+                <View style={{ backgroundColor: theme.surface, borderColor: theme.border, borderRadius: 12, marginTop: 6, maxHeight: 260, padding: 10, borderWidth: 1.5, width: '100%' }}>
+                  {GENRES.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={{ paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.divider || theme.border }}
+                      onPress={() => { setSelectedGenre(item.id); setGenrePickerVisible(false); }}
+                    >
+                      <Ionicons name={item.icon} size={18} color={selectedGenre === item.id ? theme.accent : theme.text} />
+                      <Text style={{ color: selectedGenre === item.id ? theme.accent : theme.text, fontWeight: selectedGenre === item.id ? '600' : '400' }}>{item.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
             </View>
 
-            {/* Language Selection */}
+            {/* Language Selection — dropdown because 15 options is too many for a
+                scrollable button grid. The label doubles as the picker trigger. */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.textPrimary }]}>Language</Text>
-              <View style={styles.genreGrid}>
-                {LANGUAGES.map((lang) => {
-                  const langLabel = { en: 'English', hi: 'हिन्दी', es: 'Español', fr: 'Français', de: 'Deutsch', it: 'Italiano', pt: 'Português' }[lang] || lang.toUpperCase();
-                  return (
+              <Text style={[styles.label, { color: theme.text }]}>Language</Text>
+              <TouchableOpacity
+                style={[styles.input, { backgroundColor: theme.surface, borderColor: theme.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
+                onPress={() => setLanguagePickerVisible(!languagePickerVisible)}
+              >
+                <Text style={{ color: theme.text }}>{LANGUAGE_LABELS[selectedLanguage] || selectedLanguage.toUpperCase()}</Text>
+                <Ionicons name={languagePickerVisible ? 'chevron-up' : 'chevron-down'} size={20} color={theme.textSecondary} />
+              </TouchableOpacity>
+              {languagePickerVisible && (
+                <View style={{ backgroundColor: theme.surface, borderColor: theme.border, borderRadius: 12, marginTop: 6, maxHeight: 280, padding: 10, borderWidth: 1.5, width: '100%' }}>
+                  {LANGUAGES.map((item) => (
                     <TouchableOpacity
-                      key={lang}
-                      style={[
-                        styles.genreButton,
-                        {
-                          backgroundColor: selectedLanguage === lang ? theme.primary : theme.surface,
-                          borderColor: selectedLanguage === lang ? theme.primary : theme.border,
-                        },
-                      ]}
-                      onPress={() => setSelectedLanguage(lang)}
+                      key={item}
+                      style={{ paddingVertical: 9, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.divider || theme.border }}
+                      onPress={() => { setSelectedLanguage(item); setLanguagePickerVisible(false); setSearchQuery(''); }}
                     >
-                      <Text style={[styles.genreLabel, { color: selectedLanguage === lang ? theme.onAccent : theme.textPrimary }]}>
-                        {langLabel}
-                      </Text>
+                      <Text style={{ color: selectedLanguage === item ? theme.accent : theme.text, fontWeight: selectedLanguage === item ? '600' : '400', fontSize: 15 }}>{LANGUAGE_LABELS[item] || item.toUpperCase()}</Text>
                     </TouchableOpacity>
-                  );
-                })}
-              </View>
+                  ))}
+                </View>
+              )}
             </View>
 
             {/* Prompt Input */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.textPrimary }]}>Your Story Idea</Text>
+              <Text style={[styles.label, { color: theme.text }]}>Your Story Idea</Text>
               <TextInput
                 style={[styles.textArea, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
                 placeholder="Describe your story idea... (e.g., A detective finds a watch that stops time for 10 seconds)"
@@ -347,6 +363,50 @@ const styles = StyleSheet.create({
   optional: {
     fontWeight: '400',
     fontSize: 12,
+  },
+  langOption: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  langOptionText: {
+    fontSize: 16,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    maxHeight: 360,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  modalTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  dropdownButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    width: '100%', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12,
+    borderWidth: 1.5,
+  },
+  dropdownSheet: {
+    borderTopLeftRadius: 16, borderTopRightRadius: 16,
+    paddingHorizontal: 14, paddingTop: 12, paddingBottom: 8,
+    maxHeight: 320,
+  },
+  dropdownRow: {
+    paddingVertical: 10, paddingHorizontal: 4,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
   },
   input: {
     fontSize: 16,

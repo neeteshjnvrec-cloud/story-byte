@@ -720,6 +720,7 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
         rating: 0,
         ratingSum: 0,
         ratingCount: 0,
+        sharesCount: 0,
         tags: storyData.tags || [storyData.genre],
         modelUsed: storyData.modelUsed || '',
         ttsEngine: 'edge-tts', // host-on-firebase.js picks this up to generate audio

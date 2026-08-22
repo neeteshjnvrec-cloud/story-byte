@@ -1,6 +1,6 @@
 // Story Detail — warm design: cover, meta, play/resume, favorite, transcript.
 import React, { useState, useEffect, useRef } from 'react';
-import { View, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator, Share } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer } from '../context/AudioContext';
@@ -12,6 +12,7 @@ import { Button } from '../components/ui/Button';
 import { Cover } from '../components/story/Cover';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import { CommentSheet } from '../components/comments/CommentSheet';
+import { shareStory } from '../utils/shareStory';
 import apiService from '../services/api';
 
 // ---------------------------------------------------------------------------
@@ -94,7 +95,7 @@ export const StoryDetailScreen = () => {
   const { theme = {} } = useTheme();
   const { playStory, playPause, isPlaying, currentStory } = useAudioPlayer();
   const {
-    toggleFavorite, user, getStoryMetrics, toggleLike,
+    toggleFavorite, user, getStoryMetrics, toggleLike, recordShare,
     rateStory: rateStoryInContext, receiveStoryDocs, downloads, downloadingIds, toggleDownload,
   } = useAppContext();
   const [story, setStory] = useState(initialStory || null);
@@ -138,16 +139,14 @@ export const StoryDetailScreen = () => {
   const isHere = story && currentStory?.id === story.id;
   // Same numbers as the community feed — one shared store behind both.
   // `rating` is the community average; `myRating` is this user's own score.
-  const { liked, likesCount, saved, plays, rating, myRating } = getStoryMetrics(story);
+  const { liked, likesCount, saved, plays, rating, sharesCount, myRating } = getStoryMetrics(story);
 
+  // Only count a share the OS confirms went out, so backing out of the sheet
+  // doesn't inflate the number. (Android always reports success — see
+  // recordShare in AppContext.)
   const handleShare = async () => {
-    if (!story) return;
-    try {
-      const text = `"${story.title}" — ${story.description || 'Listen on StoryByte'}`;
-      await Share.share({ message: text, url: story.audioUrl });
-    } catch (e) {
-      console.warn('Share failed:', e);
-    }
+    const { shared } = await shareStory(story);
+    if (shared) recordShare(story);
   };
 
   const handlePlay = async () => {
@@ -176,6 +175,10 @@ export const StoryDetailScreen = () => {
           { text: 'Play Offline', onPress: () => playStory({ ...story, audioUrl: result.path }) },
           { text: 'OK' },
         ]);
+      } else if (result.path) {
+        // toggleDownload removes the file when already present; that's a success,
+        // not a failure. (The icon already updates via downloads state.)
+        Alert.alert('Removed', `"${story.title}" removed from offline listening.`);
       } else {
         Alert.alert('Download failed', 'Could not download this story. Check your connection.');
       }
@@ -201,11 +204,20 @@ export const StoryDetailScreen = () => {
     <View style={{ flex: 1, backgroundColor: theme.background }}>
       <View style={[styles.head, { paddingTop: insets.top + 4 }]}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={10}><Icon name="chev-left" /></Pressable>
-        <Pressable hitSlop={10} onPress={handleShare}><Icon name="send" /></Pressable>
-        <Pressable hitSlop={10} onPress={() => setCommentVisible(true)} style={styles.commentBtn}>
+        {/* Share and comment both carry a count, so both use the same corner
+            badge — an inline number would change this row's height. */}
+        <Pressable hitSlop={10} onPress={handleShare} style={styles.headBtn}>
+          <Icon name="share" />
+          {sharesCount > 0 ? (
+            <View style={[styles.headBadge, { backgroundColor: theme.accent }]}>
+              <AppText variant="micro" color="onAccent" style={{ paddingHorizontal: 4 }}>{fmtPlays(sharesCount)}</AppText>
+            </View>
+          ) : null}
+        </Pressable>
+        <Pressable hitSlop={10} onPress={() => setCommentVisible(true)} style={styles.headBtn}>
           <Icon name="chat" />
           {story?.commentsCount > 0 ? (
-            <View style={[styles.commentBadge, { backgroundColor: theme.accent }]}>
+            <View style={[styles.headBadge, { backgroundColor: theme.accent }]}>
               <AppText variant="micro" color="onAccent" style={{ paddingHorizontal: 4 }}>{story.commentsCount}</AppText>
             </View>
           ) : null}
@@ -243,7 +255,7 @@ export const StoryDetailScreen = () => {
               heart used to toggle favorites here, so a like made on the feed
               looked like it had been lost when you opened the story. */}
           <Pressable onPress={handleLike} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Icon name={liked ? 'heart-fill' : 'heart'} color={liked ? (theme.heart || theme.error) : theme.text} />
+            <Icon name={liked ? 'heart-fill' : 'heart'} color={liked ? theme.error : theme.text} />
             {likesCount > 0 ? (
               <AppText variant="micro" color="textSecondary" style={styles.iconBtnCount}>{fmtPlays(likesCount)}</AppText>
             ) : null}
@@ -347,8 +359,10 @@ function Tag({ theme, label }) {
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingBottom: 8 },
-  commentBtn: { position: 'relative', padding: 4 },
-  commentBadge: {
+  // Shared by the header's share and comment buttons; the badge is positioned
+  // against the padded box, so both need `position: relative`.
+  headBtn: { position: 'relative', padding: 4 },
+  headBadge: {
     position: 'absolute', top: -2, right: -4, borderRadius: 10,
     minWidth: 16, height: 16, alignItems: 'center', justifyContent: 'center',
   },

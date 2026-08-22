@@ -24,7 +24,6 @@ import {
   Text,
   Pressable,
   Alert,
-  Share,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,6 +35,7 @@ import { HeaderNotificationButton } from '../components/HeaderNotificationButton
 import { Cover } from '../components/story/Cover';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import { CommentSheet } from '../components/comments/CommentSheet';
+import { shareStory } from '../utils/shareStory';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAudioPlayer } from '../context/AudioContext';
 import { Image } from 'expo-image';
@@ -61,7 +61,7 @@ export function CommunityScreen() {
   const { theme } = useTheme();
   const {
     user, communityStories, fetchCommunityStories, receiveCommunityStories,
-    toggleFavorite, getStoryMetrics, toggleLike, rateStory, setLastPlayTab,
+    toggleFavorite, getStoryMetrics, toggleLike, rateStory, recordShare, setLastPlayTab,
   } = useAppContext();
   const { playStory, setNextStory } = useAudioPlayer();
   const [error, setError] = useState(null);
@@ -151,13 +151,12 @@ export function CommunityScreen() {
     }
   };
 
+  // Only count a share the OS says actually went out, so dismissing the sheet
+  // doesn't inflate the number. (On Android it always reports success — see
+  // recordShare in AppContext.)
   const handleShare = async (story) => {
-    try {
-      const text = `"${story.title}" — ${story.description || 'Listen on StoryByte'}`;
-      await Share.share({ message: text, url: story.audioUrl });
-    } catch (e) {
-      console.warn('Share failed:', e);
-    }
+    const { shared } = await shareStory(story);
+    if (shared) recordShare(story);
   };
 
   const handleSave = async (story) => {
@@ -205,7 +204,7 @@ export function CommunityScreen() {
   const renderItem = ({ item }) => {
     const id = item.id || item.storyId;
     // Every metric from one place, so these numbers match Story Detail exactly.
-    const { liked, likesCount, saved, plays, rating, myRating } = getStoryMetrics(item);
+    const { liked, likesCount, saved, plays, rating, sharesCount, myRating } = getStoryMetrics(item);
     const isRatingOpen = ratingOpenFor === id;
     const postedAt = timeAgo(item.createdAt);
     // Trim first: an empty-string authorName passes `||` but ''[0] is undefined.
@@ -329,7 +328,7 @@ export function CommunityScreen() {
               {/* ❤️ Like — the heart means "like" here and on Story Detail;
                   saving is the bookmark at the far right. */}
               <TouchableOpacity onPress={() => handleLike(item)} hitSlop={8} style={styles.actionBtn}>
-                <Icon name={liked ? 'heart-fill' : 'heart'} size={22} color={liked ? '#E53E3E' : theme.text} />
+                <Icon name={liked ? 'heart-fill' : 'heart'} size={22} color={liked ? theme.error : theme.text} />
                 {likesCount > 0 ? (
                   <Text style={[styles.actionNum, { color: liked ? '#E53E3E' : theme.textSecondary }]}>
                     {likesCount}
@@ -361,9 +360,12 @@ export function CommunityScreen() {
                 ) : null}
               </TouchableOpacity>
 
-              {/* ✈ Share */}
+              {/* ↗ Share — platform-native glyph; see Icon.js */}
               <TouchableOpacity onPress={() => handleShare(item)} hitSlop={8} style={styles.actionBtn}>
-                <Icon name="send" size={22} color={theme.text} />
+                <Icon name="share" size={22} color={theme.text} />
+                {sharesCount > 0 ? (
+                  <Text style={[styles.actionNum, { color: theme.textSecondary }]}>{sharesCount}</Text>
+                ) : null}
               </TouchableOpacity>
             </>
           )}

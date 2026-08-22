@@ -1,8 +1,15 @@
 // Icon — thin wrapper over @expo/vector-icons (Ionicons) with semantic names
 // so screens don't hardcode the icon library. Add names here as needed.
 import React from 'react';
+import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
+
+// The share glyph is the one icon users read as "the OS share button", so it
+// follows the platform instead of picking one look for both: iOS expects the
+// box-with-an-up-arrow, Android the three-node graph. Anything else (a paper
+// plane, say) reads as "send a DM to one person" rather than "share anywhere".
+const SHARE_ICON = Platform.OS === 'ios' ? 'share-outline' : 'share-social-outline';
 
 const MAP = {
   home: 'home', 'home-outline': 'home-outline',
@@ -14,7 +21,7 @@ const MAP = {
   shuffle: 'shuffle', repeat: 'repeat',
   heart: 'heart-outline', 'heart-fill': 'heart',
   download: 'download-outline', 'check-circle': 'checkmark-circle', check: 'checkmark',
-  share: 'share-social-outline', send: 'paper-plane-outline',
+  share: SHARE_ICON, send: 'paper-plane-outline',
   bookmark: 'bookmark-outline', 'bookmark-fill': 'bookmark',
   moon: 'moon-outline', sun: 'sunny-outline',
   star: 'star', 'star-outline': 'star-outline',

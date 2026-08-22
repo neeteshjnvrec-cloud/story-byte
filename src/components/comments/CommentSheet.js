@@ -2,13 +2,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
   Modal,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../ui/AppText';
@@ -34,142 +35,166 @@ export function CommentSheet({ story, visible, onClose }) {
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState(null);
   const inputRef = useRef(null);
 
+  const storyId = story?.id || story?.storyId;
+
+  // Keyed on storyId rather than the story object: the feed rebuilds story
+  // objects on every metric change, which would re-fetch on each render.
   useEffect(() => {
-    if (!visible || !story) return;
-    const storyId = story.id || story.storyId;
-    console.log('[CommentSheet] opening for storyId:', storyId, 'keys:', Object.keys(story));
+    if (!visible || !storyId) return;
+    let cancelled = false;
     setLoading(true);
+    setError(null);
     apiService.getComments(storyId)
-      .then((c) => {
-        console.log('[CommentSheet] got', c.length, 'comments:', JSON.stringify(c).slice(0, 200));
-        setComments(c);
-        setLoading(false);
-      })
-      .catch((e) => { console.error('[CommentSheet] get failed:', e.message); setComments([]); setLoading(false); });
-  }, [visible, story]);
+      .then((c) => { if (!cancelled) { setComments(c); setLoading(false); } })
+      .catch(() => { if (!cancelled) { setComments([]); setLoading(false); } });
+    return () => { cancelled = true; };
+  }, [visible, storyId]);
 
   const handleSend = async () => {
     const trimmed = text.trim();
-    if (!trimmed || !user || sending) return;
-    const storyId = story.id || story.storyId;
-    console.log('[CommentSheet] sending comment to storyId:', storyId, 'user:', user.uid);
+    if (!trimmed || !user || sending || !storyId) return;
     setSending(true);
+    setError(null);
     try {
-      const id = await apiService.addComment(storyId, {
+      await apiService.addComment(storyId, {
         authorId: user.uid,
         authorName: userStats?.fullName || user.displayName || 'Anonymous',
         authorPic: userStats?.profilePic || user.photoURL || '',
         text: trimmed,
       });
-      console.log('[CommentSheet] addComment returned id:', id);
       setText('');
-      const fresh = await apiService.getComments(storyId);
-      console.log('[CommentSheet] after add, got', fresh.length, 'comments');
-      setComments(fresh);
+      setComments(await apiService.getComments(storyId));
     } catch (e) {
-      console.error('[CommentSheet] add failed:', e.message, e.code);
+      // Shown in the sheet, not just logged: a rules-denied write is the most
+      // likely failure here and it must not look like the button did nothing.
+      setError('Could not post your comment. Please try again.');
     } finally {
       setSending(false);
     }
   };
 
   const handleDelete = async (commentId) => {
-    if (!user) return;
+    if (!user || !storyId) return;
+    setError(null);
     try {
-      await apiService.deleteComment(story.id || story.storyId, commentId, user.uid);
-      const fresh = await apiService.getComments(story.id || story.storyId);
-      setComments(fresh);
+      await apiService.deleteComment(storyId, commentId, user.uid);
+      setComments(await apiService.getComments(storyId));
     } catch (e) {
-      console.warn('Failed to delete comment:', e.message);
+      setError('Could not delete that comment.');
     }
   };
 
-  const ownId = user?.uid;
+  const canSend = !!text.trim() && !sending;
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: '#fff', borderColor: '#ccc' }]}>
-          {/* Header */}
-          <View style={[styles.sheetHead, { borderBottomColor: '#eee' }]}>
-            <Text style={[styles.debugCounter, { color: theme.text, backgroundColor: theme.accent, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4, alignSelf: 'flex-start' }]}>
-              {comments.length}
-            </Text>
-            <AppText variant="h3" color="text">
-              Comments
-            </AppText>
-            <TouchableOpacity onPress={onClose} hitSlop={10}>
-              <Icon name="close" size={22} color={theme.text} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Comment list */}
-          {loading ? (
-            <View style={styles.center}><ActivityIndicator color={theme.accent} /></View>
-          ) : comments.length === 0 ? (
-            <View style={styles.center}>
-              <AppText variant="body" color="textSecondary">No comments yet. Start the conversation!</AppText>
-            </View>
-          ) : (
-            <ScrollView style={styles.list} contentContainerStyle={{ paddingBottom: 100, backgroundColor: 'white' }}>
-              {comments.map((c, idx) => (
-                <View key={c.id} style={[styles.commentRow, { borderBottomColor: '#eee', backgroundColor: idx % 2 === 0 ? '#e8f4ff' : '#fff8e8' }]}>
-                  <View style={styles.commentBody}>
-                    <View style={styles.commentMeta}>
-                      <AppText variant="bodySemi" color="text" style={styles.commentAuthor}>
-                        {c.authorName || 'Anonymous'}
-                      </AppText>
-                      <AppText variant="caption" color="textSecondary" style={styles.commentTime}>
-                        {timeAgo(c.createdAt)}
-                      </AppText>
-                    </View>
-                    <AppText variant="body" color="text" style={styles.commentText}>
-                      {c.text}
-                    </AppText>
-                  </View>
-                  {c.authorId === ownId && (
-                    <TouchableOpacity onPress={() => handleDelete(c.id)} hitSlop={8} style={styles.deleteBtn}>
-                      <Icon name="trash" size={16} color={theme.textTertiary} />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              ))}
-            </ScrollView>
-          )}
-
-          {/* Input */}
-          {user ? (
-            <View style={[styles.inputRow, { borderTopColor: '#eee', backgroundColor: '#fff' }]}>
-              <TextInput
-                ref={inputRef}
-                value={text}
-                onChangeText={setText}
-                placeholder="Add a comment..."
-                placeholderTextColor={theme.textTertiary}
-                multiline
-                style={[styles.input, { color: '#000', backgroundColor: '#f5f5f5' }]}
-                maxLength={500}
-              />
-              <TouchableOpacity
-                onPress={handleSend}
-                disabled={!text.trim() || sending}
-                style={[styles.sendBtn, { backgroundColor: text.trim() && !sending ? theme.accent : theme.border }]}
-              >
-                {sending ? (
-                  <ActivityIndicator size={14} color={theme.onAccent || '#fff'} />
-                ) : (
-                  <Icon name="send" size={18} color={text.trim() && !sending ? '#fff' : theme.textTertiary} />
-                )}
+        {/* Tapping the dimmed area closes the sheet. */}
+        <TouchableOpacity style={styles.backdropTouch} activeOpacity={1} onPress={onClose} />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.sheetWrap}
+        >
+          {/* sheetWrap has a definite height on purpose. The list and the empty
+              state use flex:1, and a flex child of an auto-height parent
+              collapses to zero — which is what made the comment list invisible
+              when the sheet only had maxHeight. */}
+          <View style={[styles.sheet, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            {/* Header */}
+            <View style={[styles.sheetHead, { borderBottomColor: theme.divider }]}>
+              <AppText variant="h3" color="text">
+                {comments.length > 0 ? `Comments (${comments.length})` : 'Comments'}
+              </AppText>
+              <TouchableOpacity onPress={onClose} hitSlop={10}>
+                <Icon name="close" size={22} color={theme.text} />
               </TouchableOpacity>
             </View>
-          ) : (
-            <View style={[styles.inputRow, { borderTopColor: '#eee', backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 12 }]}>
-              <AppText variant="body" color="textSecondary">Sign in to comment.</AppText>
-            </View>
-          )}
-        </View>
+
+            {error ? (
+              <View style={[styles.errorBar, { backgroundColor: theme.errorSoft }]}>
+                <AppText variant="caption" color="error">{error}</AppText>
+              </View>
+            ) : null}
+
+            {/* Comment list */}
+            {loading ? (
+              <View style={styles.center}><ActivityIndicator color={theme.accent} /></View>
+            ) : comments.length === 0 ? (
+              <View style={styles.center}>
+                <Icon name="chat" size={34} color={theme.textTertiary} />
+                <AppText variant="body" color="textSecondary" style={{ marginTop: 12 }}>
+                  No comments yet
+                </AppText>
+                <AppText variant="caption" color="textTertiary" style={{ marginTop: 4 }}>
+                  Start the conversation!
+                </AppText>
+              </View>
+            ) : (
+              <ScrollView
+                style={styles.list}
+                contentContainerStyle={{ paddingBottom: 8 }}
+                keyboardShouldPersistTaps="handled"
+              >
+                {comments.map((c) => (
+                  <View key={c.id} style={[styles.commentRow, { borderBottomColor: theme.divider }]}>
+                    <View style={styles.commentBody}>
+                      <View style={styles.commentMeta}>
+                        <AppText variant="label" color="text">
+                          {c.authorName || 'Anonymous'}
+                        </AppText>
+                        <AppText variant="caption" color="textTertiary">
+                          {timeAgo(c.createdAt)}
+                        </AppText>
+                      </View>
+                      <AppText variant="body" color="text" style={styles.commentText}>
+                        {c.text}
+                      </AppText>
+                    </View>
+                    {c.authorId === user?.uid && (
+                      <TouchableOpacity onPress={() => handleDelete(c.id)} hitSlop={8} style={styles.deleteBtn}>
+                        <Icon name="trash" size={16} color={theme.textTertiary} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+
+            {/* Input */}
+            {user ? (
+              <View style={[styles.inputRow, { borderTopColor: theme.divider }]}>
+                <TextInput
+                  ref={inputRef}
+                  value={text}
+                  onChangeText={setText}
+                  placeholder="Add a comment..."
+                  placeholderTextColor={theme.textTertiary}
+                  multiline
+                  style={[styles.input, { color: theme.text, backgroundColor: theme.card, borderColor: theme.border }]}
+                  maxLength={500}
+                />
+                <TouchableOpacity
+                  onPress={handleSend}
+                  disabled={!canSend}
+                  style={[styles.sendBtn, { backgroundColor: canSend ? theme.accent : theme.border }]}
+                >
+                  {sending ? (
+                    <ActivityIndicator size="small" color={theme.onAccent} />
+                  ) : (
+                    <Icon name="send" size={18} color={canSend ? theme.onAccent : theme.textTertiary} />
+                  )}
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={[styles.signedOut, { borderTopColor: theme.divider }]}>
+                <AppText variant="body" color="textSecondary">Sign in to comment.</AppText>
+              </View>
+            )}
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );
@@ -177,20 +202,37 @@ export function CommentSheet({ story, visible, onClose }) {
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  sheet: { borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '80%', borderWidth: 1, paddingBottom: 32 },
-  sheetHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1 },
+  backdropTouch: { ...StyleSheet.absoluteFillObject },
+  sheetWrap: { height: '35%' },
+  sheet: {
+    flex: 1,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  sheetHead: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1,
+  },
+  errorBar: { paddingHorizontal: 16, paddingVertical: 8 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
-  list: { flex: 1, paddingHorizontal: 16, paddingBottom: 8 },
+  list: { flex: 1, paddingHorizontal: 16 },
   commentRow: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 12, borderBottomWidth: 1, gap: 8 },
   commentBody: { flex: 1 },
   commentMeta: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 4 },
-  commentAuthor: { fontWeight: '600' },
-  commentTime: { fontSize: 11 },
   commentText: { lineHeight: 20 },
   deleteBtn: { padding: 4 },
-  inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 12, paddingVertical: 10, borderTopWidth: 1 },
-  input: { flex: 1, borderRadius: 12, borderWidth: 1, borderColor: 'transparent', padding: 10, fontSize: 15, maxHeight: 100, minHeight: 44 },
-  sendBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
+  inputRow: {
+    flexDirection: 'row', alignItems: 'flex-end', gap: 8,
+    paddingHorizontal: 12, paddingVertical: 10, borderTopWidth: 1,
+  },
+  input: {
+    flex: 1, borderRadius: 12, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10,
+    fontSize: 15, maxHeight: 100, minHeight: 44,
+  },
+  sendBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  signedOut: { borderTopWidth: 1, paddingHorizontal: 16, paddingVertical: 16, alignItems: 'center' },
 });
 
 export default CommentSheet;

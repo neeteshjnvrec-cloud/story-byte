@@ -15,7 +15,10 @@ const GENRES = [
 ];
 
 // Languages
-const LANGUAGES = ['en', 'hi', 'es', 'fr', 'de', 'it', 'pt'];
+const LANGUAGES = [
+  'hi', 'bn', 'mr', 'te', 'ta', 'gu', 'ur', 'kn', 'or', 'ml',
+  'en', 'es', 'fr', 'de', 'it', 'pt',
+];
 
 // Story Status
 const STORY_STATUS = {

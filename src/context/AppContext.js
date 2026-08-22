@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth, firebaseSignOut, onAuthStateChanged } from '../services/firebase';
-import { setDoc, getDoc, doc, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
+import { setDoc, getDoc, doc, serverTimestamp, updateDoc, increment, getDocs, query, where, collection } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import apiService from '../services/api';
 import { loginWithEmail as authServiceLogin, signupWithEmail as authServiceSignup, signOutUser, sendResetEmail } from '../services/auth';
@@ -13,6 +13,8 @@ import * as FileSystem from 'expo-file-system/legacy';
 
 const STORAGE_AUTOPLAY = 'storybyte-autoplay-next';
 const STORAGE_LAST_TAB = 'storybyte-last-play-tab';
+const STORAGE_WIFI_ONLY = 'storybyte-wifi-only';
+const STORAGE_DOWNLOADS = 'storybyte-downloads';
 
 const AppContext = createContext();
 
@@ -203,13 +205,15 @@ export const AppContextProvider = ({ children }) => {
           plays: storyPlays(d),
           rating: d.rating ?? 0,
           ratingCount: d.ratingCount ?? 0,
+          sharesCount: d.sharesCount ?? 0,
         };
         const current = next[id];
         if (current
           && current.likesCount === incoming.likesCount
           && current.plays === incoming.plays
           && current.rating === incoming.rating
-          && current.ratingCount === incoming.ratingCount) continue;
+          && current.ratingCount === incoming.ratingCount
+          && current.sharesCount === incoming.sharesCount) continue;
         next[id] = incoming;
         changed = true;
       }
@@ -306,8 +310,38 @@ export const AppContextProvider = ({ children }) => {
       });
   }, []);
 
-  // --- Favorites --------------------------------------------------------------
+  // Called by the share buttons once the OS share sheet reports a completed
+  // share. Same optimistic-bump-then-revert shape as recordPlay, and likewise
+  // dependency-free so passing it to a memoised list row doesn't re-create the
+  // row every time an unrelated story's metrics change.
+  //
+  // Android caveat: Share.share always resolves to `sharedAction` there — the
+  // platform doesn't report whether the user actually completed the share or
+  // backed out of the chooser. So this over-counts slightly on Android. The
+  // alternative is no share count at all, which is worse.
+  const recordShare = useCallback((story) => {
+    const id = storyIdOf(story);
+    if (!id || !auth.currentUser) return;
 
+    const fallback = typeof story === 'object' ? (story?.sharesCount ?? 0) : 0;
+    setStoryMeta((prev) => {
+      const base = prev[id]?.sharesCount ?? fallback;
+      return { ...prev, [id]: { ...(prev[id] || {}), sharesCount: base + 1 } };
+    });
+
+    updateDoc(doc(db, 'stories', id), { sharesCount: increment(1), lastSharedAt: serverTimestamp() })
+      .catch(() => {
+        // Best-effort: the share itself already happened, so a failed counter
+        // write must stay invisible.
+        setStoryMeta((prev) => {
+          const current = prev[id]?.sharesCount;
+          if (current == null) return prev;
+          return { ...prev, [id]: { ...prev[id], sharesCount: Math.max(0, current - 1) } };
+        });
+      });
+  }, []);
+
+  // --- Favorites --------------------------------------------------------------
   // Optimistic like toggleLike, and functional updates throughout: the previous
   // version read a captured `favorites` inside the setter, so two quick taps on
   // different stories could drop one of them.
@@ -350,6 +384,7 @@ export const AppContextProvider = ({ children }) => {
       plays: meta.plays ?? storyPlays(story),
       rating: meta.rating ?? story?.rating ?? 0,
       ratingCount: meta.ratingCount ?? story?.ratingCount ?? 0,
+      sharesCount: meta.sharesCount ?? story?.sharesCount ?? 0,
       myRating: myRatings[id] || 0,
     };
   }, [storyMeta, likes, myRatings, favorites]);
@@ -375,6 +410,7 @@ export const AppContextProvider = ({ children }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [communityStories, setCommunityStories] = useState([]);
   const [autoplayNext, setAutoplayNextState] = useState(true);
+  const [wifiOnly, setWifiOnlyState] = useState(false);
   const [lastPlayTab, setLastPlayTabState] = useState(null); // 'home' | 'community'
   // Downloads: local file URI + metadata, keyed by story id.
   const [downloads, setDownloads] = useState({});
@@ -386,8 +422,35 @@ export const AppContextProvider = ({ children }) => {
       try {
         const saved = await AsyncStorage.getItem(STORAGE_AUTOPLAY);
         if (saved !== null) setAutoplayNextState(saved === 'true');
+        const wifi = await AsyncStorage.getItem(STORAGE_WIFI_ONLY);
+        if (wifi !== null) setWifiOnlyState(wifi === 'true');
         const tab = await AsyncStorage.getItem(STORAGE_LAST_TAB);
         if (tab) setLastPlayTabState(tab);
+      } catch (e) {}
+    })();
+  }, []);
+
+  // Rehydrate the downloads map from disk. Without this the Downloads tab was
+  // empty after every relaunch even though the audio files were still there:
+  // `downloads` only ever lived in memory. The manifest is the source of truth
+  // and each entry is verified against the filesystem, so a file the OS removed
+  // (or one deleted on another device) doesn't leave a dead row behind.
+  useEffect(() => {
+    (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(STORAGE_DOWNLOADS);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        const verified = {};
+        for (const [id, meta] of Object.entries(saved)) {
+          if (!meta?.path) continue;
+          const info = await FileSystem.getInfoAsync(meta.path).catch(() => null);
+          if (info?.exists) verified[id] = meta;
+        }
+        setDownloads(verified);
+        if (Object.keys(verified).length !== Object.keys(saved).length) {
+          await AsyncStorage.setItem(STORAGE_DOWNLOADS, JSON.stringify(verified));
+        }
       } catch (e) {}
     })();
   }, []);
@@ -397,38 +460,72 @@ export const AppContextProvider = ({ children }) => {
     try { await AsyncStorage.setItem(STORAGE_AUTOPLAY, String(val)); } catch (e) {}
   };
 
+  const setWifiOnly = async (val) => {
+    setWifiOnlyState(val);
+    try { await AsyncStorage.setItem(STORAGE_WIFI_ONLY, String(val)); } catch (e) {}
+  };
+
   const setLastPlayTab = useCallback((tab) => {
     setLastPlayTabState(tab);
     try { AsyncStorage.setItem(STORAGE_LAST_TAB, tab).catch(() => {}); } catch (e) {}
   }, []);
 
+  // Persist the downloads manifest alongside the state update so a relaunch can
+  // rebuild the map. Takes the next map explicitly because setState is async.
+  const persistDownloads = async (nextMap) => {
+    try { await AsyncStorage.setItem(STORAGE_DOWNLOADS, JSON.stringify(nextMap)); } catch (e) {}
+  };
+
   const toggleDownload = useCallback(async (story) => {
     if (!story?.audioUrl || !story?.id) return { downloaded: false };
     const id = story.id;
+    const uid = auth.currentUser?.uid;
     const already = downloads[id];
     if (already) {
-      // Remove from local state and Firestore
-      setDownloads((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
-      try {
-        await setDoc(doc(db, 'users', auth.currentUser?.uid, 'downloads', id), { downloaded: false }, { merge: true });
-      } catch (e) { /* ignore */ }
+      const next = { ...downloads };
+      delete next[id];
+      setDownloads(next);
+      await persistDownloads(next);
+      // Delete the file too — leaving it behind meant "remove" freed no space
+      // and the next download silently reused the stale audio.
+      if (already.path) await FileSystem.deleteAsync(already.path, { idempotent: true }).catch(() => {});
+      if (uid) {
+        try {
+          await setDoc(doc(db, 'users', uid, 'downloads', id), { downloaded: false }, { merge: true });
+        } catch (e) { /* mirror is best-effort; local state is the truth */ }
+      }
       return { downloaded: false, path: already.path };
     }
-    // Download: cache to document directory, then persist metadata.
-    const fileName = `storybyte-${id}.mp3`;
-    const localUri = FileSystem.cacheDirectory + fileName;
+
+    // NOTE: `wifiOnly` is persisted and surfaced in Settings, but not enforced
+    // here — detecting the connection type needs `expo-network`, which isn't in
+    // package.json. Enforcing it with the module absent would crash on import,
+    // so the gate is deliberately left out rather than faked.
+
+    // documentDirectory, not cacheDirectory: the OS may purge the cache dir
+    // under storage pressure, which would delete the audio the user downloaded
+    // precisely so it would survive going offline.
+    const dir = `${FileSystem.documentDirectory}downloads/`;
     setDownloadingIds((prev) => new Set(prev).add(id));
     try {
-      const { uri } = await FileSystem.downloadAsync(story.audioUrl, localUri);
-      const meta = { story: { id: story.id, title: story.title, coverImage: story.coverImage, genre: story.genre }, path: uri, downloadedAt: new Date().toISOString() };
-      setDownloads((prev) => ({ ...prev, [id]: meta }));
-      try {
-        await setDoc(doc(db, 'users', auth.currentUser?.uid, 'downloads', id), { ...meta, downloaded: true }, { merge: true });
-      } catch (e) { /* ignore */ }
+      await FileSystem.makeDirectoryAsync(dir, { intermediates: true }).catch(() => {});
+      const { uri } = await FileSystem.downloadAsync(story.audioUrl, `${dir}storybyte-${id}.mp3`);
+      const meta = {
+        story: {
+          id: story.id, title: story.title, coverImage: story.coverImage,
+          genre: story.genre, duration: story.duration, audioUrl: story.audioUrl,
+        },
+        path: uri,
+        downloadedAt: new Date().toISOString(),
+      };
+      const next = { ...downloads, [id]: meta };
+      setDownloads(next);
+      await persistDownloads(next);
+      if (uid) {
+        try {
+          await setDoc(doc(db, 'users', uid, 'downloads', id), { ...meta, downloaded: true }, { merge: true });
+        } catch (e) { /* mirror is best-effort; local state is the truth */ }
+      }
       return { downloaded: true, path: uri };
     } catch (e) {
       console.warn('[AppContext] download failed:', e.message);
@@ -459,6 +556,24 @@ export const AppContextProvider = ({ children }) => {
       return null;
     }
     publishInProgressRef.current = true;
+
+    // Per-user daily cap: max 2 community stories per author per day.
+    try {
+      const uid = auth.currentUser?.uid;
+      if (uid) {
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const snap = await getDocs(query(
+          collection(db, 'stories'),
+          where('authorId', '==', uid),
+          where('isCommunityStory', '==', true),
+          where('createdAt', '>=', today),
+        ));
+        if (snap.size >= 2) {
+          publishInProgressRef.current = false;
+          return { limited: true, message: 'You can publish up to 2 stories per day.' };
+        }
+      }
+    } catch (_) { /* best-effort; if count fails, allow through */ }
 
     try {
       const published = await apiService.publishCommunityStory(storyData);
@@ -531,21 +646,24 @@ export const AppContextProvider = ({ children }) => {
     toggleLike,
     rateStory,
     recordPlay,
+    recordShare,
     // Autoplay
     autoplayNext,
     setAutoplayNext,
     lastPlayTab,
     setLastPlayTab,
     // Downloads
+    wifiOnly,
+    setWifiOnly,
     downloads,
     downloadingIds,
     toggleDownload,
   }), [
     user, loading, userStats, favorites, communityStories, isGenerating,
-    autoplayNext, lastPlayTab,
+    autoplayNext, lastPlayTab, wifiOnly,
     toggleFavorite, isInFavorites, updateUserProfile, fetchCommunityStories,
     receiveStoryDocs, receiveCommunityStories, getStoryMetrics, toggleLike,
-    rateStory, recordPlay, setAutoplayNext, setLastPlayTab, downloads, downloadingIds, toggleDownload,
+    rateStory, recordPlay, recordShare, setAutoplayNext, setLastPlayTab, downloads, downloadingIds, toggleDownload,
   ]);
 
   return (
@@ -561,5 +679,5 @@ export const useStoryMetrics = (story) => {
   const { getStoryMetrics } = useAppContext() || {};
   return getStoryMetrics
     ? getStoryMetrics(story)
-    : { liked: false, likesCount: 0, saved: false, plays: 0, rating: 0, ratingCount: 0, myRating: 0 };
+    : { liked: false, likesCount: 0, saved: false, plays: 0, rating: 0, ratingCount: 0, sharesCount: 0, myRating: 0 };
 };
