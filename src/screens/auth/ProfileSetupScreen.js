@@ -1,6 +1,6 @@
 // Profile Setup — collect additional user details after signup.
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, ScrollView, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text } from 'react-native';
+import { View, Pressable, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppContext } from '../../context/AppContext';
@@ -8,6 +8,7 @@ import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { KeyboardAwareScroll } from '../../components/ui/KeyboardAvoider';
 import { GENRES } from '../../constants/genres';
 
 const GENDERS = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
@@ -99,15 +100,11 @@ export const ProfileSetupScreen = ({ navigation }) => {
   ));
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAwareScroll
       style={{ flex: 1, backgroundColor: '#F6EFE4' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 40 }]}
+      showsVerticalScrollIndicator={false}
     >
-      <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 40 }]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
         <View style={styles.center}>
           <LinearGradient
             colors={['#B5613A', '#E0913A']}
@@ -190,8 +187,7 @@ export const ProfileSetupScreen = ({ navigation }) => {
             style={{ marginTop: 24 }}
           />
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAwareScroll>
   );
 };
 

@@ -1,6 +1,9 @@
 // Community audio generation utilities — GitHub Actions dispatch.
 // Extracted from AppContext to keep context focused on user state management.
 
+import { db } from '../services/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+
 const GITHUB_OWNER = 'neeteshjnvrec-cloud';
 const GITHUB_REPO = 'story-byte';
 
@@ -16,7 +19,11 @@ const GITHUB_REPO = 'story-byte';
  * @returns {Promise<boolean>} true if GitHub accepted the dispatch
  */
 export async function dispatchAudioWorkflow(storyId) {
-  const token = process.env.EXPO_PUBLIC_GITHUB_TOKEN;
+  let token = process.env.EXPO_PUBLIC_GITHUB_TOKEN || '';
+  try {
+    const snap = await getDoc(doc(db, 'config', 'github'));
+    if (snap.exists()) token = snap.data().token || token;
+  } catch (_) { /* fire-and-forget DB read */ }
   if (!token) {
     console.warn('[communityAudioGen] EXPO_PUBLIC_GITHUB_TOKEN not set — skipping workflow dispatch');
     return false;
@@ -49,7 +56,6 @@ export async function dispatchAudioWorkflow(storyId) {
       return false;
     }
 
-    console.log(`[communityAudioGen] Workflow dispatched for story ${storyId}`);
     return true;
   } catch (e) {
     console.error('[communityAudioGen] Workflow dispatch failed:', e.message);

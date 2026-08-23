@@ -65,3 +65,4 @@ android/app/build/
 android/.gradle/
 ios/Pods/
 ios/build/google-services.json
+/storybyte-76716-firebase-adminsdk-fbsvc-6b83b55d71.json

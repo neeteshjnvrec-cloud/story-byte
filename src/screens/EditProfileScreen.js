@@ -1,10 +1,8 @@
 // Edit Profile Screen — auto-save every field change
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -22,6 +20,7 @@ import { useTheme } from '../hooks/useTheme';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Input } from '../components/ui/Input';
+import { KeyboardAwareScroll } from '../components/ui/KeyboardAvoider';
 import { GENRES } from '../constants/genres';
 
 const GENDERS = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
@@ -267,11 +266,11 @@ export const EditProfileScreen = () => {
   );
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAwareScroll
       style={{ flex: 1, backgroundColor: theme.background }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+      showsVerticalScrollIndicator={false}
     >
-      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8, borderBottomColor: theme.border }]}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={12} style={styles.headerSide}>
           <Icon name="chev-left" size={26} color={theme.text} />
@@ -282,11 +281,7 @@ export const EditProfileScreen = () => {
         </View>
       </View>
 
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+      <View>
         {/* Avatar */}
         <View style={styles.avatarSection}>
           {uploadingPic ? (
@@ -396,8 +391,8 @@ export const EditProfileScreen = () => {
             </View>
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </View>
+    </KeyboardAwareScroll>
   );
 };
 

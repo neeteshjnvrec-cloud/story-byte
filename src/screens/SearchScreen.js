@@ -17,6 +17,7 @@ import apiService from '../services/api';
 import { AppText } from '../components/ui/AppText';
 import { Input } from '../components/ui/Input';
 import { Icon } from '../components/ui/Icon';
+import { KeyboardAwareScroll } from '../components/ui/KeyboardAvoider';
 import { Cover } from '../components/story/Cover';
 import { CompactRow, fmtMin } from '../components/story/StoryCard';
 
@@ -204,11 +205,10 @@ export const SearchScreen = () => {
   const showResults = hasSearched || debouncedQuery.trim().length > 0;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
-      >
+    <KeyboardAwareScroll
+      style={[styles.container, { backgroundColor: theme.background }]}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
+    >
         {/* Header */}
         <View style={styles.header}>
           <AppText variant="displayM">Browse</AppText>
@@ -348,8 +348,7 @@ export const SearchScreen = () => {
             )}
           </View>
         )}
-      </ScrollView>
-    </View>
+      </KeyboardAwareScroll>
   );
 };
 

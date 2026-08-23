@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 12,
+    padding: 18,
     paddingBottom: 40,
   },
   heroSection: {
