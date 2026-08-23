@@ -30,6 +30,7 @@
     },
     "android": {
       "package": "com.storybyte.app",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#667eea"

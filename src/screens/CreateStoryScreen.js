@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
+import { KeyboardAvoider, KeyboardAwareScroll } from '../components/ui/KeyboardAvoider';
 import { GENRES } from '../constants/genres';
 import { LANGUAGES } from '../types/story';
 
@@ -117,7 +118,7 @@ export function CreateStoryScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
+    <KeyboardAvoider style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={8}>
@@ -129,7 +130,7 @@ export function CreateStoryScreen() {
         <HeaderNotificationButton size={22} color={theme.text} />
       </View>
 
-      <ScrollView
+      <KeyboardAwareScroll
         ref={scrollRef}
         style={styles.scrollView}
         contentContainerStyle={styles.content}
@@ -317,8 +318,8 @@ export function CreateStoryScreen() {
             </View>
           </>
         )}
-      </ScrollView>
-    </View>
+      </KeyboardAwareScroll>
+    </KeyboardAvoider>
   );
 }
 
@@ -339,7 +340,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: 18,
     paddingBottom: 40,
   },
   heroSection: {

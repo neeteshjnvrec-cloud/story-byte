@@ -1,6 +1,6 @@
 // Signup — matches the warm auth design.
 import React, { useState } from 'react';
-import { View, ScrollView, KeyboardAvoidingView, Platform, Pressable, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppContext } from '../../context/AppContext';
@@ -9,6 +9,7 @@ import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { KeyboardAwareScroll } from '../../components/ui/KeyboardAvoider';
 import { getAuthErrorMessage } from './LoginScreen';
 
 export const SignupScreen = ({ navigation }) => {
@@ -38,11 +39,11 @@ export const SignupScreen = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       <View style={[styles.top, { paddingTop: insets.top + 6 }]}>
         <Pressable onPress={() => navigation.navigate('Login')} hitSlop={10}><Icon name="chev-left" /></Pressable>
       </View>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <KeyboardAwareScroll contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.center}>
           <LinearGradient colors={[theme.gradientStart, theme.gradientEnd]} style={styles.badge}>
             <Icon name="book" size={38} color="#fff" />
@@ -68,8 +69,8 @@ export const SignupScreen = ({ navigation }) => {
             </Pressable>
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAwareScroll>
+    </View>
   );
 };
 

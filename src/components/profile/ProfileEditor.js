@@ -1,5 +1,5 @@
 // Profile Editor - Compressed inline editor with Base64 picture support
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   View,
   Pressable,
@@ -18,6 +18,7 @@ import { AppText } from '../ui/AppText';
 import { Icon } from '../ui/Icon';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { KeyboardAvoider, KeyboardAwareScroll } from '../ui/KeyboardAvoider';
 
 import { GENRES } from '../../constants/genres';
 const GENDERS = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
@@ -30,6 +31,7 @@ export const ProfileEditor = ({
   onUpdate
 }) => {
   const { theme } = useTheme() || { theme: {} };
+  const scrollRef = useRef(null);
 
   // Form state
   const [fullName, setFullName] = useState('');
@@ -224,7 +226,7 @@ export const ProfileEditor = ({
   ), [profilePic, fullName, theme, uploadingPic, takePhoto, pickImage]);
 
   return (
-    <View style={[styles.overlay, { backgroundColor: theme.scrim }]}>
+    <KeyboardAvoider style={[styles.overlay, { backgroundColor: theme.scrim }]}>
       <Pressable style={{ flex: 1 }} onPress={onClose} />
 
       <View style={[styles.editor, { backgroundColor: theme.surface }]}>
@@ -243,9 +245,8 @@ export const ProfileEditor = ({
           />
         </View>
 
-        <ScrollView
+        <KeyboardAwareScroll
           contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           {/* Avatar */}
@@ -308,9 +309,9 @@ export const ProfileEditor = ({
             numberOfLines={2}
             style={{ minHeight: 56 }}
           />
-        </ScrollView>
+        </KeyboardAwareScroll>
       </View>
-    </View>
+    </KeyboardAvoider>
   );
 };
 

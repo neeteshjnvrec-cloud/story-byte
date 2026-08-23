@@ -80,14 +80,18 @@ export const notificationService = {
     if (!uid) return null;
 
     const granted = await this.requestPermission();
+      console.log('[notif] permission granted=', granted);
     if (!granted) return null;
 
     try {
       const { data: token } = await Notifications.getExpoPushTokenAsync({
         projectId: EAS_PROJECT_ID,
       });
+      console.log('[notif] token received=', !!token);
       if (!token) return null;
+      console.log('[notif] saving token for uid=', uid);
       await this.saveToken(uid, token);
+      console.log('[notif] saved');
       return token;
     } catch (e) {
       // Simulators, missing credentials, offline — none of these should be fatal.

@@ -9,6 +9,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
@@ -78,11 +79,21 @@ function MainStack({ isNewUser, navigationRef, ready }) {
   // Tapping a push notification opens the story it's about. Without this a push
   // just brought the app to whatever screen it was last on, which made the
   // publish/broadcast notifications feel broken even when they arrived.
+  //
+  // We reset to the Main tab navigator first so StoryDetail sits on top of a
+  // real stack — otherwise goBack() (and the Android hardware back button) has
+  // no previous screen to return to.
   React.useEffect(() => {
     if (!ready) return;
     return notificationService.addResponseListener((data) => {
       if (data?.storyId && navigationRef.current) {
-        navigationRef.current.navigate('StoryDetail', { storyId: data.storyId });
+        navigationRef.current.reset({
+          index: 1,
+          routes: [
+            { name: 'Main' },
+            { name: 'StoryDetail', params: { storyId: data.storyId } },
+          ],
+        });
       }
     });
   }, [ready]);
@@ -144,18 +155,30 @@ export default function App() {
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          <ThemeProvider>
-            <AppContextProvider>
-              <AudioProvider>
-                <NavigationContainer ref={navigationRef} onReady={() => setReady(true)}>
-                  <StatusBar style="auto" />
-                  <Root navigationRef={navigationRef} ready={ready} />
-                </NavigationContainer>
-              </AudioProvider>
-            </AppContextProvider>
-          </ThemeProvider>
-        </SafeAreaProvider>
+        {/* KeyboardProvider feeds Android's native keyboard-animation frames to
+            the KeyboardAvoider / KeyboardAwareScroll primitives — see
+            src/components/ui/KeyboardAvoider.js for why RN's own
+            KeyboardAvoidingView can't do the job under edge-to-edge.
+
+            The three translucent flags are set explicitly because Expo (not
+            react-native-edge-to-edge) owns edge-to-edge here, so the library
+            can't auto-detect it. Left at their defaults it would re-apply its
+            own top padding to mimic a non-edge-to-edge app, which would stack
+            on top of the insets.top every screen already adds itself. */}
+        <KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge>
+          <SafeAreaProvider>
+            <ThemeProvider>
+              <AppContextProvider>
+                <AudioProvider>
+                  <NavigationContainer ref={navigationRef} onReady={() => setReady(true)}>
+                    <StatusBar style="auto" />
+                    <Root navigationRef={navigationRef} ready={ready} />
+                  </NavigationContainer>
+                </AudioProvider>
+              </AppContextProvider>
+            </ThemeProvider>
+          </SafeAreaProvider>
+        </KeyboardProvider>
       </GestureHandlerRootView>
     </ErrorBoundary>
   );

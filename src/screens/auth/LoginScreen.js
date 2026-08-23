@@ -1,6 +1,6 @@
 // Login — warm storybook auth. Parchment ground, gradient logo badge, serif.
 import React, { useState } from 'react';
-import { View, ScrollView, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, Pressable, StyleSheet, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppContext } from '../../context/AppContext';
@@ -9,6 +9,7 @@ import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { KeyboardAwareScroll } from '../../components/ui/KeyboardAvoider';
 import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 
 export const LoginScreen = ({ navigation }) => {
@@ -32,8 +33,11 @@ export const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 30 }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+    <KeyboardAwareScroll
+      style={{ flex: 1, backgroundColor: theme.background }}
+      contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 30 }]}
+      showsVerticalScrollIndicator={false}
+    >
         <View style={styles.center}>
           <LinearGradient colors={[theme.gradientStart, theme.gradientEnd]} style={styles.badge}>
             <Icon name="book" size={38} color="#fff" />
@@ -71,8 +75,7 @@ export const LoginScreen = ({ navigation }) => {
             </Pressable>
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAwareScroll>
   );
 };
 

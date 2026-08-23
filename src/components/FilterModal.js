@@ -12,6 +12,7 @@ import {
 import { useTheme } from '../hooks/useTheme';
 import { AppText } from './ui/AppText';
 import { Icon } from './ui/Icon';
+import { KeyboardAvoider } from './ui/KeyboardAvoider';
 import { GENRES } from '../constants/genres';
 
 const LANGUAGES = [
@@ -143,36 +144,42 @@ export const FilterModal = ({ visible, onClose, onApply, initialFilters }) => {
             />
           </ScrollView>
 
-          {/* Language dropdown sub-modal */}
-          <Modal visible={langPickerOpen} transparent animationType="fade" onRequestClose={() => setLangPickerOpen(false)}>
-            <Pressable style={[styles.dropdownOverlay, { backgroundColor: 'rgba(0,0,0,0.4)' }]} onPress={() => setLangPickerOpen(false)}>
-              <View style={[styles.dropdownSheet, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                <TextInput
-                  style={[styles.input, { backgroundColor: theme.background, borderColor: theme.border, marginHorizontal: 12, marginBottom: 8, fontSize: 14, paddingVertical: 10 }]}
-                  placeholder="Search language…"
-                  placeholderTextColor={theme.textSecondary}
-                  value={langSearch}
-                  onChangeText={setLangSearch}
-                  autoFocus
-                />
-                <ScrollView style={{ maxHeight: 320 }} showsVerticalScrollIndicator={false}>
-                  {LANGUAGES.filter((l) => {
-                    const q = (langSearch || '').toLowerCase();
-                    if (!q) return true;
-                    return l.label.toLowerCase().includes(q) || l.id.toLowerCase().includes(q);
-                  }).map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={[styles.langRow, { borderBottomColor: theme.border }]}
-                      onPress={() => { setSelectedLanguage(item.id); setLangPickerOpen(false); setLangSearch(''); }}
-                    >
-                      <AppText variant="body" color={selectedLanguage === item.id ? 'accent' : 'text'}>{item.label}</AppText>
-                      {selectedLanguage === item.id && <Icon name="checkmark" size={18} color={theme.accent} />}
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            </Pressable>
+          {/* Language dropdown sub-modal. The search field autoFocuses, so the
+              keyboard is already up when the sheet appears — without the avoider
+              it opened directly on top of the field. */}
+          <Modal visible={langPickerOpen} transparent animationType="fade" statusBarTranslucent navigationBarTranslucent onRequestClose={() => setLangPickerOpen(false)}>
+            <KeyboardAvoider style={styles.dropdownAvoider}>
+              <Pressable style={[styles.dropdownOverlay, { backgroundColor: 'rgba(0,0,0,0.4)' }]} onPress={() => setLangPickerOpen(false)}>
+                <View style={[styles.dropdownSheet, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                  <TextInput
+                    style={[styles.input, { backgroundColor: theme.background, borderColor: theme.border, marginHorizontal: 12, marginBottom: 8, fontSize: 14, paddingVertical: 10 }]}
+                    placeholder="Search language…"
+                    placeholderTextColor={theme.textSecondary}
+                    value={langSearch}
+                    onChangeText={setLangSearch}
+                    autoFocus
+                  />
+                  {/* persistTaps: otherwise the first tap on a language only
+                      dismisses the keyboard and the selection is dropped. */}
+                  <ScrollView style={{ maxHeight: 320 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                    {LANGUAGES.filter((l) => {
+                      const q = (langSearch || '').toLowerCase();
+                      if (!q) return true;
+                      return l.label.toLowerCase().includes(q) || l.id.toLowerCase().includes(q);
+                    }).map((item) => (
+                      <TouchableOpacity
+                        key={item.id}
+                        style={[styles.langRow, { borderBottomColor: theme.border }]}
+                        onPress={() => { setSelectedLanguage(item.id); setLangPickerOpen(false); setLangSearch(''); }}
+                      >
+                        <AppText variant="body" color={selectedLanguage === item.id ? 'accent' : 'text'}>{item.label}</AppText>
+                        {selectedLanguage === item.id && <Icon name="checkmark" size={18} color={theme.accent} />}
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              </Pressable>
+            </KeyboardAvoider>
           </Modal>
 
           {/* Buttons */}
@@ -267,6 +274,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1.5,
+  },
+  dropdownAvoider: {
+    flex: 1,
   },
   dropdownOverlay: {
     flex: 1,

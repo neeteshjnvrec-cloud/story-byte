@@ -8,12 +8,11 @@ import {
   ScrollView,
   Modal,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../ui/AppText';
 import { Icon } from '../ui/Icon';
+import { KeyboardAvoider } from '../ui/KeyboardAvoider';
 import apiService from '../../services/api';
 import { useAppContext } from '../../context/AppContext';
 
@@ -90,18 +89,20 @@ export function CommentSheet({ story, visible, onClose }) {
   const canSend = !!text.trim() && !sending;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+    <Modal visible={visible} animationType="slide" transparent statusBarTranslucent navigationBarTranslucent onRequestClose={onClose}>
+      {/* The avoider has to BE the backdrop rather than wrap the sheet. It works
+          by adding bottom padding, so it needs a flex-end aligned child with
+          somewhere to be pushed; wrapping the sheet directly just squeezed its
+          fixed height instead of lifting it, which is why the comment box stayed
+          buried under the keyboard on Android. */}
+      <KeyboardAvoider style={styles.backdrop}>
         {/* Tapping the dimmed area closes the sheet. */}
         <TouchableOpacity style={styles.backdropTouch} activeOpacity={1} onPress={onClose} />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.sheetWrap}
-        >
-          {/* sheetWrap has a definite height on purpose. The list and the empty
-              state use flex:1, and a flex child of an auto-height parent
-              collapses to zero — which is what made the comment list invisible
-              when the sheet only had maxHeight. */}
+        {/* sheetWrap has a definite height on purpose. The list and the empty
+            state use flex:1, and a flex child of an auto-height parent
+            collapses to zero — which is what made the comment list invisible
+            when the sheet only had maxHeight. */}
+        <View style={styles.sheetWrap}>
           <View style={[styles.sheet, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             {/* Header */}
             <View style={[styles.sheetHead, { borderBottomColor: theme.divider }]}>
@@ -194,8 +195,8 @@ export function CommentSheet({ story, visible, onClose }) {
               </View>
             )}
           </View>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </KeyboardAvoider>
     </Modal>
   );
 }
@@ -203,6 +204,9 @@ export function CommentSheet({ story, visible, onClose }) {
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   backdropTouch: { ...StyleSheet.absoluteFillObject },
+  // Percentage of the backdrop, which the avoider shrinks by the keyboard height
+  // while typing. At the old 35% that left ~20% of the screen for the sheet —
+  // header plus input row alone ate all of it and the comments vanished.
   sheetWrap: { height: '35%' },
   sheet: {
     flex: 1,

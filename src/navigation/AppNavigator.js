@@ -37,6 +37,10 @@ export function AppNavigator() {
         // Six tabs at the default item padding truncated the longest label
         // ("Community" → "Commun…"); reclaim the horizontal padding instead.
         tabBarItemStyle: { paddingHorizontal: 0 },
+        // Android stacks the tab bar on top of the keyboard, so a focused field
+        // loses another ~58dp of the little room it has. Nothing here is
+        // reachable mid-typing anyway. No-op on iOS.
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: theme.surface,
           borderTopColor: theme.border,
