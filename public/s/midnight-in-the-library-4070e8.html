@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Midnight in the Library · StoryByte</title>
+  <meta name="description" content="Two strangers find love among the quiet stacks on a rainy night, discovering that the heart can read between the lines.">
+  <link rel="canonical" href="https://storybyte-76716.web.app/s/midnight-in-the-library-4070e8">
+  <link rel="icon" href="https://storybyte-76716.web.app/covers/2026-08-23_en_romance_midnight-in-the-library.jpg">
+
+  <!-- OpenGraph: this is what renders the preview card when the link is pasted
+       into WhatsApp, iMessage or Telegram. og:type stays "website" — it previews
+       predictably everywhere, where music.song does not. -->
+  <meta property="og:site_name" content="StoryByte">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Midnight in the Library">
+  <meta property="og:description" content="Two strangers find love among the quiet stacks on a rainy night, discovering that the heart can read between the lines.">
+  <meta property="og:url" content="https://storybyte-76716.web.app/s/midnight-in-the-library-4070e8">
+  <meta property="og:image" content="https://storybyte-76716.web.app/covers/2026-08-23_en_romance_midnight-in-the-library.jpg">
+  <meta property="og:image:width" content="768">
+  <meta property="og:image:height" content="768">
+  <meta property="og:image:alt" content="Cover art for Midnight in the Library">
+  <meta property="og:audio" content="https://storybyte-76716.web.app/audio/2026-08-23_en_romance_midnight-in-the-library.mp3">
+  <meta property="og:audio:type" content="audio/mpeg">
+  <meta property="og:locale" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Midnight in the Library">
+  <meta name="twitter:description" content="Two strangers find love among the quiet stacks on a rainy night, discovering that the heart can read between the lines.">
+  <meta name="twitter:image" content="https://storybyte-76716.web.app/covers/2026-08-23_en_romance_midnight-in-the-library.jpg">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #F6EFE4;
+      color: #2A2118;
+      line-height: 1.7;
+      padding: 0 20px;
+    }
+    .container { max-width: 680px; margin: 0 auto; padding: 28px 0 72px; }
+    .brand {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+    }
+    .brand-icon {
+      width: 36px; height: 36px; border-radius: 11px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 19px; font-weight: 700;
+    }
+    .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
+    .brand-cta {
+      margin-left: auto; font-size: 14px; font-weight: 600;
+      color: #B5613A; text-decoration: none;
+    }
+    .cover {
+      width: 100%; aspect-ratio: 1 / 1; max-height: 420px;
+      object-fit: cover; border-radius: 20px;
+      border: 1px solid #EADFCC; background: #FCF7EF; display: block;
+    }
+    h1 { font-size: 27px; font-weight: 700; line-height: 1.25; margin: 22px 0 0; }
+    .byline { display: flex; align-items: center; gap: 11px; margin-top: 16px; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      object-fit: cover; flex-shrink: 0; border: 1px solid #EADFCC;
+    }
+    .avatar-fallback {
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 18px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; border: 0;
+    }
+    .byline-name { font-size: 15px; font-weight: 600; }
+    .byline-role { font-size: 13px; color: #A99C89; line-height: 1.3; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .chip {
+      font-size: 13px; font-weight: 600; color: #B5613A;
+      background: rgba(181, 97, 58, 0.1);
+      padding: 5px 12px; border-radius: 999px;
+    }
+    /* Genre arrives lowercase from the generator. Only it gets capitalised —
+       applying this to every chip rendered the duration as "12 Min". */
+    .chip-genre { text-transform: capitalize; }
+    .player {
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 16px;
+      padding: 16px; margin-top: 22px;
+    }
+    .player-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 10px;
+    }
+    audio { width: 100%; display: block; }
+    .lead { font-size: 17px; color: #4A3D2F; margin-top: 24px; }
+    .transcript { margin-top: 34px; }
+    .transcript-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .transcript-body {
+      background: #FCF7EF; border: 1px solid #EADFCC;
+      border-radius: 16px; padding: 22px;
+    }
+    .transcript-body p { font-size: 16px; color: #4A3D2F; margin-bottom: 15px; }
+    .transcript-body p:last-child { margin-bottom: 0; }
+    .get-app {
+      margin-top: 40px; padding: 28px 24px; text-align: center;
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 20px;
+    }
+    .get-app h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .get-app p { font-size: 14px; color: #4A3D2F; margin-bottom: 20px; }
+    .btn {
+      display: inline-block; padding: 15px 30px; border-radius: 999px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 16px; font-weight: 700; text-decoration: none;
+    }
+    .footer {
+      text-align: center; font-size: 13px; color: #A99C89;
+      margin-top: 44px; padding-top: 22px; border-top: 1px solid #EADFCC;
+    }
+    .footer a { color: #A99C89; text-decoration: underline; }
+    @media (max-width: 480px) {
+      h1 { font-size: 23px; }
+      .container { padding-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand">
+      <span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span>
+      <!-- Straight to the store. This whole bar used to be one anchor to the
+           site root, which is a bare "StoryByte content" CDN stub — so the link
+           labelled "Get the app" landed on a blank page. There is no real
+           homepage to point the wordmark at, so it isn't a link. -->
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+    </div>
+
+    <img class="cover" src="https://storybyte-76716.web.app/covers/2026-08-23_en_romance_midnight-in-the-library.jpg" alt="Cover art for Midnight in the Library" width="768" height="768">
+
+    <h1>Midnight in the Library</h1>
+
+    <div class="byline">
+      <div class="avatar avatar-fallback">S</div>
+      <div>
+        <div class="byline-name">StoryByte AI</div>
+        <div class="byline-role">Narrated on StoryByte</div>
+      </div>
+    </div>
+
+    <div class="chips"><span class="chip chip-genre">romance</span><span class="chip">English</span><span class="chip">5 min</span></div>
+
+    <div class="player">
+      <div class="player-label">Listen</div>
+      <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-08-23_en_romance_midnight-in-the-library.mp3">
+        Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-08-23_en_romance_midnight-in-the-library.mp3">Download the recording</a>.
+      </audio>
+    </div>
+
+    <p class="lead">Two strangers find love among the quiet stacks on a rainy night, discovering that the heart can read between the lines.</p>
+
+    <div class="transcript">
+      <div class="transcript-label">Story</div>
+      <div class="transcript-body">
+      <p>On a rain‑slick Tuesday, Maya pushed open the heavy oak doors of the downtown library, the scent of old paper and fresh coffee greeting her like an old friend. She had come for a research deadline, but the storm outside made the world feel smaller, cozier, as if the building itself were a sanctuary against the gray. She shook off her umbrella, hung it on the hook by the entrance, and headed toward the third floor, where the rare‑book collection lived in hushed whispers.</p>
+      <p>She was humming a half‑remembered tune when a soft voice interrupted, &quot;Excuse me, could you help me find the first edition of &#39;Wuthering Heights&#39;?&quot; Maya turned to see a man with damp hair, a crooked smile, and eyes the color of wet pavement. He wore a navy sweater, his hands still speckled with raindrops. &quot;Sure,&quot; she said, feeling a flutter she tried to hide. &quot;It&#39;s over there, near the poetry section.&quot;</p>
+      <p>They walked together, side by side, the silence between them filled with the rustle of pages and the distant hum of the HVAC. As they reached the shelf, he pulled out a thin volume, its leather cracked with age. &quot;I’ve been chasing this for years,&quot; he said, his voice low, &quot;My grandmother used to read it to me when I was a child. I promised her I’d find it before she passed.&quot;</p>
+      <p>Maya smiled, touched the book gently. &quot;That’s beautiful. My name’s Maya, by the way.&quot; He turned, eyes meeting hers, and introduced himself as Ethan. In that moment, the library felt less like a place of study and more like a stage for a quiet drama. They talked about literature, about rain, about the way certain stories cling to you long after the last page is turned. Ethan confessed he was a freelance photographer, traveling from city to city, capturing moments that often went unnoticed. Maya revealed she was a teacher, shaping young minds with the same love for stories that had guided her own life.</p>
+      <p>Hours slipped by unnoticed. The storm outside softened to a drizzle, then to a gentle patter against the tall windows. The librarian announced the closing time, but Ethan lingered, his gaze lingering on Maya’s face. &quot;Would you like to grab a coffee? There&#39;s a little café down the street that stays open late on rainy nights.&quot; Maya hesitated, feeling the tug of her schedule, but something in his earnest smile made her say yes.</p>
+      <p>The café was dimly lit, the air warm, the aroma of espresso wrapping around them like a comforting blanket. They ordered two lattes, their fingers brushing the porcelain mugs, sending a spark up their arms. Conversation flowed easily, moving from favorite authors to childhood memories, from fears of the future to hopes for the present. Maya found herself laughing more freely than she had in months, and Ethan’s eyes softened each time she spoke.</p>
+      <p>When the night finally deepened, the rain ceased, leaving the streets glistening under streetlights. Ethan stood, offering his hand. &quot;May I walk you home?&quot; he asked. Maya took his hand, feeling the steady pulse of his heartbeat against hers. They stepped out into the quiet city, the world hushed after the storm.</p>
+      <p>Under the glow of a lone streetlamp, Ethan stopped and turned to Maya. &quot;I’m usually a wanderer,&quot; he said, &quot;but something about tonight makes me want to stay put, at least for a while.&quot; Maya’s heart swelled, her voice barely above a whisper, &quot;Maybe we’re both just looking for a place where we belong, and sometimes that place is right next to someone who understands the same quiet corners of the world.&quot;</p>
+      <p>He smiled, brushed a stray lock of hair from her face, and leaned in. Their kiss was gentle, like the soft closing of a book after a long read, promising more chapters to come. As they walked hand in hand toward her apartment, the city seemed to breathe with them, the rain‑kissed streets reflecting the new light in their eyes.</p>
+      <p>Months later, Maya and Ethan would still meet at the library, their favorite spot now a corner table where they exchanged notes and photographs, each sharing the world they saw through their own lenses. The rare book remained on the shelf, a reminder of the night two strangers found a story of their own, written in whispered words and lingering glances. Their love, like any good novel, had a beginning, a middle, and a future that stretched beyond the final page, satisfying and forever open to new verses.</p>
+      </div>
+    </div>
+
+    <div class="get-app">
+      <h2>Listen to more on StoryByte</h2>
+      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 StoryByte · <a href="https://storybyte-76716.web.app/privacy.html">Privacy</a></p>
+    </div>
+  </div>
+</body>
+</html>
