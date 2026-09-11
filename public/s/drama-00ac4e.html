@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>परिवार की धड़कन · StoryByte</title>
+  <meta name="description" content="एक छोटे से गाँव में दो बहनों और उनके पिता की बीमारी के बाद के संघर्ष की कहानी">
+  <link rel="canonical" href="https://storybyte-76716.web.app/s/drama-00ac4e">
+  <link rel="icon" href="https://storybyte-76716.web.app/covers/2026-09-11_hi_drama_परिवार-की-धड़कन.jpg">
+
+  <!-- OpenGraph: this is what renders the preview card when the link is pasted
+       into WhatsApp, iMessage or Telegram. og:type stays "website" — it previews
+       predictably everywhere, where music.song does not. -->
+  <meta property="og:site_name" content="StoryByte">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="परिवार की धड़कन">
+  <meta property="og:description" content="एक छोटे से गाँव में दो बहनों और उनके पिता की बीमारी के बाद के संघर्ष की कहानी">
+  <meta property="og:url" content="https://storybyte-76716.web.app/s/drama-00ac4e">
+  <meta property="og:image" content="https://storybyte-76716.web.app/covers/2026-09-11_hi_drama_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%A7%E0%A4%A1%E0%A4%BC%E0%A4%95%E0%A4%A8.jpg">
+  <meta property="og:image:width" content="768">
+  <meta property="og:image:height" content="768">
+  <meta property="og:image:alt" content="Cover art for परिवार की धड़कन">
+  <meta property="og:audio" content="https://storybyte-76716.web.app/audio/2026-09-11_hi_drama_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%A7%E0%A4%A1%E0%A4%BC%E0%A4%95%E0%A4%A8.mp3">
+  <meta property="og:audio:type" content="audio/mpeg">
+  <meta property="og:locale" content="hi_IN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="परिवार की धड़कन">
+  <meta name="twitter:description" content="एक छोटे से गाँव में दो बहनों और उनके पिता की बीमारी के बाद के संघर्ष की कहानी">
+  <meta name="twitter:image" content="https://storybyte-76716.web.app/covers/2026-09-11_hi_drama_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%A7%E0%A4%A1%E0%A4%BC%E0%A4%95%E0%A4%A8.jpg">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #F6EFE4;
+      color: #2A2118;
+      line-height: 1.7;
+      padding: 0 20px;
+    }
+    .container { max-width: 680px; margin: 0 auto; padding: 28px 0 72px; }
+    .brand {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+    }
+    .brand-icon {
+      width: 36px; height: 36px; border-radius: 11px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 19px; font-weight: 700;
+    }
+    .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
+    .brand-cta {
+      margin-left: auto; font-size: 14px; font-weight: 600;
+      color: #B5613A; text-decoration: none;
+    }
+    .cover {
+      width: 100%; aspect-ratio: 1 / 1; max-height: 420px;
+      object-fit: cover; border-radius: 20px;
+      border: 1px solid #EADFCC; background: #FCF7EF; display: block;
+    }
+    h1 { font-size: 27px; font-weight: 700; line-height: 1.25; margin: 22px 0 0; }
+    .byline { display: flex; align-items: center; gap: 11px; margin-top: 16px; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      object-fit: cover; flex-shrink: 0; border: 1px solid #EADFCC;
+    }
+    .avatar-fallback {
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 18px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; border: 0;
+    }
+    .byline-name { font-size: 15px; font-weight: 600; }
+    .byline-role { font-size: 13px; color: #A99C89; line-height: 1.3; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .chip {
+      font-size: 13px; font-weight: 600; color: #B5613A;
+      background: rgba(181, 97, 58, 0.1);
+      padding: 5px 12px; border-radius: 999px;
+    }
+    /* Genre arrives lowercase from the generator. Only it gets capitalised —
+       applying this to every chip rendered the duration as "12 Min". */
+    .chip-genre { text-transform: capitalize; }
+    .player {
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 16px;
+      padding: 16px; margin-top: 22px;
+    }
+    .player-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 10px;
+    }
+    audio { width: 100%; display: block; }
+    .lead { font-size: 17px; color: #4A3D2F; margin-top: 24px; }
+    .transcript { margin-top: 34px; }
+    .transcript-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .transcript-body {
+      background: #FCF7EF; border: 1px solid #EADFCC;
+      border-radius: 16px; padding: 22px;
+    }
+    .transcript-body p { font-size: 16px; color: #4A3D2F; margin-bottom: 15px; }
+    .transcript-body p:last-child { margin-bottom: 0; }
+    .get-app {
+      margin-top: 40px; padding: 28px 24px; text-align: center;
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 20px;
+    }
+    .get-app h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .get-app p { font-size: 14px; color: #4A3D2F; margin-bottom: 20px; }
+    .btn {
+      display: inline-block; padding: 15px 30px; border-radius: 999px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 16px; font-weight: 700; text-decoration: none;
+    }
+    .footer {
+      text-align: center; font-size: 13px; color: #A99C89;
+      margin-top: 44px; padding-top: 22px; border-top: 1px solid #EADFCC;
+    }
+    .footer a { color: #A99C89; text-decoration: underline; }
+    @media (max-width: 480px) {
+      h1 { font-size: 23px; }
+      .container { padding-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand">
+      <span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span>
+      <!-- Straight to the store. This whole bar used to be one anchor to the
+           site root, which is a bare "StoryByte content" CDN stub — so the link
+           labelled "Get the app" landed on a blank page. There is no real
+           homepage to point the wordmark at, so it isn't a link. -->
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+    </div>
+
+    <img class="cover" src="https://storybyte-76716.web.app/covers/2026-09-11_hi_drama_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%A7%E0%A4%A1%E0%A4%BC%E0%A4%95%E0%A4%A8.jpg" alt="Cover art for परिवार की धड़कन" width="768" height="768">
+
+    <h1>परिवार की धड़कन</h1>
+
+    <div class="byline">
+      <div class="avatar avatar-fallback">S</div>
+      <div>
+        <div class="byline-name">StoryByte AI</div>
+        <div class="byline-role">Narrated on StoryByte</div>
+      </div>
+    </div>
+
+    <div class="chips"><span class="chip chip-genre">drama</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">4 min</span></div>
+
+    <div class="player">
+      <div class="player-label">Listen</div>
+      <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-09-11_hi_drama_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%A7%E0%A4%A1%E0%A4%BC%E0%A4%95%E0%A4%A8.mp3">
+        Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-09-11_hi_drama_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%A7%E0%A4%A1%E0%A4%BC%E0%A4%95%E0%A4%A8.mp3">Download the recording</a>.
+      </audio>
+    </div>
+
+    <p class="lead">एक छोटे से गाँव में दो बहनों और उनके पिता की बीमारी के बाद के संघर्ष की कहानी</p>
+
+    <div class="transcript">
+      <div class="transcript-label">Story</div>
+      <div class="transcript-body">
+      <p>एक सुनहरी शाम थी, जब गाँव की गलियों में बच्चे कूचों की आवाज़ों से गूँज रहे थे। उसी गाँव में रहने वाले शर्मा परिवार की छत के नीचे, माँ सविता, पिता रघु और दो बेटियाँ – बड़ी प्रिया, जो कॉलेज में पढ़ती थी, और छोटी रिया, जो अभी स्कूल की पहली कक्षा में थी – एक साथ जीवन बिता रहे थे।</p>
+      <p>रघु का छोटा सा व्यापार था – गाँव के पास की बाग़ीचे में सब्ज़ी उगाकर बाजार में बेचते थे। वह अक्सर सुबह जल्दी निकलते और शाम को थके‑हारे लौटते। माँ सविता घर संभालती, खाना बनाती और दो बेटियों को पढ़ाने में मदद करती। प्रिया और रिया अपने-अपने काम में व्यस्त थीं, पर हर शाम को एक साथ बैठकर कहानियाँ सुनतीं, हँसतीं और सपनों की बातें करतीं।</p>
+      <p>एक दिन रघु को अचानक तेज़ बुखार आया। माँ ने तुरंत उसे गाँव के डॉक्टर के पास ले गया। डॉक्टर ने कहा, &quot;बुखार सिर्फ़ नहीं, दिल में भी समस्या है।&quot; रघु को अस्पताल में भर्ती करना पड़ा। घर में एक अजीब सी खामोशी छा गई। प्रिया ने अपनी पढ़ाई छोड़ दी, रिया ने स्कूल से छुट्टी ले ली, और सविता ने रसोई में हाथों में थाली लेकर लगातार दवाइयाँ बनाईं।</p>
+      <p>रात के अंधेरे में, प्रिया ने रिया को गले लगाते हुए कहा, &quot;भाई की तबीयत ठीक नहीं है, हमें धीरज रखना पड़ेगा।&quot; रिया ने आँसू पोंछते हुए जवाब दिया, &quot;मैं भी बड़ी हो जाऊँगी, फिर सब ठीक हो जाएगा।&quot; सविता ने धीरे‑धीरे कहा, &quot;हमारा परिवार हमेशा साथ रहा है, इस बार भी साथ रहेगा।&quot;</p>
+      <p>हफ्ते बीतते गए, डॉक्टर की दवाइयाँ, सविता की दुआएँ और दो बहनों की देखभाल ने रघु को धीरे‑धीरे ठीक किया। एक शाम, जब रघु ने पहली बार घर की छत पर बैठकर सूरज को देखना शुरू किया, तो उन्होंने कहा, &quot;मैं तुम सबके बिना नहीं रह सकता। तुम लोगों ने मेरे लिए जो किया, वह शब्दों में नहीं बयां हो सकता।&quot; प्रिया ने मुस्कुराते हुए कहा, &quot;पिता जी, आपका हाथ थामे हम सबने इस कठिनाई को पार किया।&quot; रिया ने खुशी से चिल्लाते हुए कहा, &quot;अब हम फिर से साथ खेलेंगे, साथ पढ़ेंगे, साथ गाएंगे!&quot;</p>
+      <p>समय के साथ रघु का व्यापार फिर से चल पड़ा, लेकिन इस बार उन्होंने काम और परिवार के बीच संतुलन बनाने का फैसला किया। उन्होंने कहा, &quot;मैं अब रोज़ काम नहीं करूँगा, बल्कि दो‑तीन दिन ही जाऊँगा, बाकी समय घर में रहूँगा।&quot; सविता ने सहमति में सिर हिलाया, &quot;तुम्हारी सेहत सबसे बड़ी पूँजी है, इसे बचाना ज़रूरी है।&quot;</p>
+      <p>प्रिया ने कॉलेज की पढ़ाई फिर से शुरू की, लेकिन अब वह अपने पिता के साथ खेत में मदद करती, सब्ज़ी की देखभाल सीखती। रिया ने स्कूल में फिर से दाखिला लिया, और अब वह पढ़ाई के साथ-साथ घर के छोटे‑छोटे कामों में मदद करती। हर शाम को परिवार के साथ बैठकर चाय की चुस्की लेते, पुराने किस्से सुनते और भविष्य की योजनाएँ बनाते।</p>
+      <p>एक दिन रघु ने सभी को एक साथ बगीचे में बुलाया और कहा, &quot;मैं तुम्हें एक बात बताना चाहता हूँ – जब हम एक-दूसरे के साथ होते हैं, तो कोई भी मुश्किल बड़ी नहीं लगती।&quot; प्रिया ने हाथ में हाथ डालते हुए कहा, &quot;पिता जी, आप ही तो हमारे जीवन की धड़कन हैं।&quot; रिया ने खुशी से कहा, &quot;मैं भी बड़ी होकर आपके जैसा बनना चाहती हूँ, जो हमेशा परिवार को संभालता रहे।&quot;</p>
+      <p>उस शाम के बाद से, शर्मा परिवार की कहानी गाँव में एक मिसाल बन गई। लोग कहते थे, &quot;जब तक एक साथ हैं, तब तक हर दर्द का इलाज है।&quot; इस कहानी में प्रेम, त्याग और एकजुटता की शक्ति दिखती है, जो हमें सिखाती है कि परिवार का बंधन सबसे मजबूत धागा है, जो हर तूफ़ान को सहन कर सकता है।</p>
+      <p>और इस तरह, प्रिया, रिया, सविता और रघु ने मिलकर अपने जीवन की धड़कन को फिर से तेज़ी से चलाया, एक-दूसरे के सपनों को साकार किया और हर नई सुबह को आशा और प्रेम के साथ स्वागत किया।</p>
+      </div>
+    </div>
+
+    <div class="get-app">
+      <h2>Listen to more on StoryByte</h2>
+      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 StoryByte · <a href="https://storybyte-76716.web.app/privacy.html">Privacy</a></p>
+    </div>
+  </div>
+</body>
+</html>
