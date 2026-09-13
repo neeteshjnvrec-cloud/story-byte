@@ -120,4 +120,43 @@ async function postStoryCarousel(story, slideUrls) {
   }
 }
 
-module.exports = { postStoryCarousel, buildCaption };
+/**
+ * Publishes `videoUrl` (a public HTTPS mp4, already deployed — see
+ * lib/video.js) as an Instagram Reel with the story's real narration audio
+ * playing under the slides. No-ops when Instagram isn't configured.
+ */
+async function postStoryReel(story, videoUrl) {
+  const igUserId = process.env.IG_BUSINESS_ACCOUNT_ID;
+  const token = process.env.IG_ACCESS_TOKEN;
+
+  if (!igUserId || !token) {
+    console.log('  ℹ️  Instagram not configured — skipping Reel (see INSTAGRAM-SETUP.md).');
+    return { posted: false, reason: 'not_configured' };
+  }
+  if (!videoUrl) {
+    return { posted: false, reason: 'no_video' };
+  }
+
+  try {
+    const container = await igCall('POST', `/${igUserId}/media`, {
+      media_type: 'REELS',
+      video_url: videoUrl,
+      caption: buildCaption(story),
+    });
+
+    // Video processing takes much longer than an image container.
+    await waitUntilFinished(container.id, { timeoutMs: 5 * 60 * 1000, intervalMs: 5000 });
+
+    const published = await igCall('POST', `/${igUserId}/media_publish`, {
+      creation_id: container.id,
+    });
+
+    console.log(`  ✅ Instagram Reel published (media id ${published.id})`);
+    return { posted: true, mediaId: published.id };
+  } catch (e) {
+    console.warn(`  ⚠️  Instagram Reel failed for "${story.title}": ${e.message}`);
+    return { posted: false, reason: e.message };
+  }
+}
+
+module.exports = { postStoryCarousel, postStoryReel, buildCaption };
