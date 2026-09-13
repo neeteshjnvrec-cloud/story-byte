@@ -685,24 +685,47 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
 
   /**
    * Check if user has already posted a community story today.
+   * Uses a simple timestamp stored in user profile (no composite index needed).
    * Returns true if limit reached (should block publish), false otherwise.
    */
   async checkDailyCommunityLimit(userId) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    try {
+      const userRef = doc(db, 'users', userId);
+      const userDoc = await getDoc(userRef);
 
-    const q = query(
-      collection(db, 'stories'),
-      where('authorId', '==', userId),
-      where('isCommunityStory', '==', true),
-      where('createdAt', '>=', today),
-      where('createdAt', '<', tomorrow)
-    );
+      if (!userDoc.exists()) return false;
 
-    const snap = await getDocs(q);
-    return !snap.empty; // true if already posted today
+      const data = userDoc.data();
+      const lastPublished = data.lastCommunityStoryPublishedAt;
+
+      if (!lastPublished) return false;
+
+      // Convert to Date (handle both timestamps and ISO strings)
+      const lastDate = lastPublished.toDate ? lastPublished.toDate() : new Date(lastPublished);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      // If last published is before today, allow new story
+      return lastDate >= today;
+    } catch (error) {
+      console.error('checkDailyCommunityLimit error:', error);
+      return false; // Fail open - don't block if check fails
+    }
+  }
+
+  /**
+   * Update user's last community story publish timestamp
+   */
+  async updateLastCommunityStoryPublished(userId) {
+    try {
+      await setDoc(doc(db, 'users', userId), {
+        lastCommunityStoryPublishedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (error) {
+      console.error('updateLastCommunityStoryPublished error:', error);
+    }
   }
 
   async publishCommunityStory(storyData) {
@@ -759,6 +782,9 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
       };
 
       await setDoc(storyRef, storyDoc);
+
+      // Update user's last published timestamp (for daily limit check)
+      await this.updateLastCommunityStoryPublished(this.uid);
 
       return { ...storyDoc, id: storyId };
     } catch (error) {
