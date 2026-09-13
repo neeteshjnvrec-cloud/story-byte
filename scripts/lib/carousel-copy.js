@@ -43,15 +43,26 @@ function truncate(s, max) {
  *  image (nothing here can safely describe one without the LLM). */
 function heuristicSlides(text, count) {
   const sents = sentences(text);
-  const groups =
-    sents.length === 0
-      ? [truncate(String(text || ''), 200)]
-      : Array.from({ length: count }, (_, i) => {
-          const start = Math.floor((i * sents.length) / count);
-          const end = Math.max(start + 1, Math.floor(((i + 1) * sents.length) / count));
-          return truncate(sents.slice(start, Math.min(end, start + 2)).join(' '), 220);
-        });
+  if (sents.length === 0) return [{ text: truncate(String(text || ''), 200), image: null }];
+  // Splitting into more buckets than there are sentences forces two buckets
+  // to draw the same start index (e.g. 3 sentences into 5 slides), which
+  // produced two slides with identical text back to back. Capping the
+  // bucket count to the sentence count guarantees every bucket gets at
+  // least one sentence no other bucket has.
+  const n = Math.max(1, Math.min(count, sents.length));
+  const groups = Array.from({ length: n }, (_, i) => {
+    const start = Math.floor((i * sents.length) / n);
+    const end = i === n - 1 ? sents.length : Math.max(start + 1, Math.floor(((i + 1) * sents.length) / n));
+    return truncate(sents.slice(start, Math.min(end, start + 2)).join(' '), 220);
+  });
   return groups.map((text) => ({ text, image: null }));
+}
+
+/** Drops any slide whose text exactly repeats the previous slide's — a
+ *  safety net regardless of which path produced the slides (the LLM itself
+ *  occasionally repeats a line too). */
+function dedupeConsecutive(slides) {
+  return slides.filter((s, i) => i === 0 || s.text.trim() !== slides[i - 1].text.trim());
 }
 
 async function llmCopy({ title, text, genre, description }, count) {
@@ -109,15 +120,17 @@ async function llmCopy({ title, text, genre, description }, count) {
   }
 }
 
-/** Returns { hook, slides }: slides.length between 3 and 6, each
- *  `{ text, image }` where `image` is a scene prompt or null. */
+/** Returns { hook, slides }: slides.length between 3 and 6 (fewer if the
+ *  story doesn't have enough distinct content for that many — see
+ *  dedupeConsecutive), each `{ text, image }` where `image` is a scene
+ *  prompt or null. */
 async function buildCarouselCopy(story) {
   const count = slideCountFor(story.text);
   const llm = await llmCopy(story, count);
-  if (llm) return llm;
+  if (llm) return { ...llm, slides: dedupeConsecutive(llm.slides) };
   return {
     hook: truncate((story.description || story.title || '').trim(), 110),
-    slides: heuristicSlides(story.text, count),
+    slides: dedupeConsecutive(heuristicSlides(story.text, count)),
   };
 }
 
