@@ -1,13 +1,16 @@
 /**
- * Curiosity-driven copy for the Instagram carousel — a short "hook" tagline
- * for the cover slide, and a handful of teaser lines that walk the story's
- * arc without spoiling the ending, for the quote-card slides.
+ * Curiosity-driven copy for the Instagram carousel — for each teaser slide,
+ * a short spoiler-free line that walks the story's arc, plus (when Groq is
+ * available) a one-line scene description so that slide can get its own
+ * generated illustration instead of sitting on a flat gradient.
  *
  * Primary path: ask Groq to write it (it already reads the whole story, so
- * it can tease the middle/climax without giving away the resolution).
+ * it can tease the middle/climax — and describe a matching scene — without
+ * giving away the resolution).
  * Fallback (Groq unavailable/fails): pick evenly-spaced sentences straight
- * from the story text. Never throws — a copy failure must not block a
- * story's own publish.
+ * from the story text, with no per-slide scene image (the renderer falls
+ * back to a themed gradient card for those). Never throws — a copy failure
+ * must not block a story's own publish.
  */
 let Groq;
 try {
@@ -36,17 +39,19 @@ function truncate(s, max) {
 }
 
 /** Evenly-spaced sentence groups across the whole story — a safe, no-LLM
- *  fallback that still reads as an arc rather than a random blob. */
+ *  fallback that still reads as an arc rather than a random blob. No scene
+ *  image (nothing here can safely describe one without the LLM). */
 function heuristicSlides(text, count) {
   const sents = sentences(text);
-  if (sents.length === 0) return [truncate(String(text || ''), 200)];
-  const out = [];
-  for (let i = 0; i < count; i++) {
-    const start = Math.floor((i * sents.length) / count);
-    const end = Math.max(start + 1, Math.floor(((i + 1) * sents.length) / count));
-    out.push(truncate(sents.slice(start, Math.min(end, start + 2)).join(' '), 220));
-  }
-  return out;
+  const groups =
+    sents.length === 0
+      ? [truncate(String(text || ''), 200)]
+      : Array.from({ length: count }, (_, i) => {
+          const start = Math.floor((i * sents.length) / count);
+          const end = Math.max(start + 1, Math.floor(((i + 1) * sents.length) / count));
+          return truncate(sents.slice(start, Math.min(end, start + 2)).join(' '), 220);
+        });
+  return groups.map((text) => ({ text, image: null }));
 }
 
 async function llmCopy({ title, text, genre, description }, count) {
@@ -55,18 +60,20 @@ async function llmCopy({ title, text, genre, description }, count) {
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     const sys =
       'You write Instagram carousel copy that promotes an audio story app. Given a full story, ' +
-      'reply with JSON only: {"hook": string, "slides": string[]}. ' +
+      'reply with JSON only: {"hook": string, "slides": [{"text": string, "image": string}]}. ' +
       '"hook" is one punchy, curiosity-driven line (max 100 characters) that makes someone want to know ' +
       "what happens — a question, a tease, or a striking detail. Never a summary. " +
-      `"slides" must have exactly ${count} entries, each 10-22 words, walking the story's beginning, ` +
-      'middle and turning points in order, vivid and specific to THIS story, building suspense — and must ' +
-      'NEVER reveal how the story ends. Plain text only, no markdown, no quotation marks around the values.';
+      `"slides" must have exactly ${count} entries, in order, walking the story's beginning, middle and ` +
+      'turning points, vivid and specific to THIS story, building suspense — and must NEVER reveal how the ' +
+      'story ends. Each entry: "text" is 10-22 words of teaser copy (plain text, no markdown, no quotation ' +
+      'marks); "image" is a 6-14 word visual description of that exact moment/scene for an illustrator — ' +
+      'concrete subject, setting, and mood, no character names, no text or words in the image, no summary of plot.';
     const user = `Title: ${title}\nGenre: ${genre}\nDescription: ${description || ''}\n\nStory:\n${String(text || '').slice(0, 6000)}`;
 
     const completion = await groq.chat.completions.create({
       model: MODEL,
       temperature: 0.9,
-      max_tokens: 700,
+      max_tokens: 900,
       top_p: 0.95,
       response_format: { type: 'json_object' },
       messages: [
@@ -76,7 +83,15 @@ async function llmCopy({ title, text, genre, description }, count) {
     });
 
     const d = JSON.parse(completion.choices[0].message.content.trim());
-    const slides = Array.isArray(d.slides) ? d.slides.map((s) => String(s).trim()).filter(Boolean) : [];
+    const slides = Array.isArray(d.slides)
+      ? d.slides
+          .map((s) =>
+            typeof s === 'string'
+              ? { text: s.trim(), image: null }
+              : { text: String(s?.text || '').trim(), image: s?.image ? String(s.image).trim() : null }
+          )
+          .filter((s) => s.text)
+      : [];
     if (slides.length === 0) return null;
 
     return {
@@ -89,7 +104,8 @@ async function llmCopy({ title, text, genre, description }, count) {
   }
 }
 
-/** Returns { hook, slides }, `slides.length` between 3 and 6. */
+/** Returns { hook, slides }: slides.length between 3 and 6, each
+ *  `{ text, image }` where `image` is a scene prompt or null. */
 async function buildCarouselCopy(story) {
   const count = slideCountFor(story.text);
   const llm = await llmCopy(story, count);

@@ -2,8 +2,11 @@
 
 ## ✅ What's Done
 
-- ✅ Every published story (daily AI + community) renders a 6–8 slide Instagram
-  carousel: cover slide → story-arc quote cards → "keep listening" CTA.
+- ✅ Every published story (daily AI + community) renders a 4–7 slide
+  Instagram carousel: no separate title card — slide 1 goes straight into
+  the story's cover art + opening teaser, each following slide gets its own
+  AI-illustrated scene for that beat (via Groq + pollinations.ai), and the
+  last slide is a "play the story" CTA.
 - ✅ `scripts/lib/instagram.js` posts that carousel to your Instagram account
   via the Graph API, right after a story flips to `published`.
 - ✅ It's a **silent no-op until you add two secrets** — nothing breaks, no
@@ -101,15 +104,22 @@ also post to Instagram automatically.
 
 ## 📐 How the carousel is built
 
-`scripts/lib/carousel-slides.js` composites plain images + SVG text with
-`sharp` (no browser needed) — see that file for the genre color themes and
-slide layout. `scripts/lib/instagram.js` does the three Graph API calls per
-post (upload each image as a carousel child → create the carousel container →
-publish it), and is a no-op whenever the two secrets above aren't set.
+- `scripts/lib/carousel-copy.js` asks Groq for a spoiler-free hook line, plus
+  one teaser line *and* a scene description per slide — so the copy is
+  curiosity-driven rather than a raw excerpt of the story text. Falls back to
+  evenly-sampled sentences (no scene description) if Groq is unavailable.
+- `scripts/lib/carousel-slides.js` turns each teaser into a slide: when a
+  scene description exists, it fetches a bespoke illustration for it from
+  pollinations.ai (same free service already used for story covers) and
+  composites the teaser text over it; otherwise it falls back to a themed
+  gradient card. All done with `sharp` + inline SVG — no browser needed.
+- `scripts/lib/instagram.js` does the three Graph API calls per post (upload
+  each image as a carousel child → create the carousel container → publish
+  it), and is a no-op whenever the two secrets above aren't set.
 
 ## ⚠️ Limits worth knowing
-- Instagram caps a carousel at **10 items** — the pipeline uses at most 8
-  (cover + up to 5 story-arc slides + CTA).
+- Instagram caps a carousel at **10 items** — the pipeline uses at most 7
+  (up to 6 story-arc slides + CTA).
 - The Graph API caps an account at **25 published posts per 24 hours**, so a
   burst of many stories publishing at once won't all necessarily go out.
 - Captions can't contain a clickable link — the pipeline drops the story's
