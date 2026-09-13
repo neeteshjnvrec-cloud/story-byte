@@ -557,7 +557,7 @@ export const AppContextProvider = ({ children }) => {
     }
     publishInProgressRef.current = true;
 
-    // Per-user daily cap: max 2 community stories per author per day.
+    // Per-user daily cap: max 10 community stories per author per day.
     try {
       const uid = auth.currentUser?.uid;
       if (uid) {
@@ -568,9 +568,9 @@ export const AppContextProvider = ({ children }) => {
           where('isCommunityStory', '==', true),
           where('createdAt', '>=', today),
         ));
-        if (snap.size >= 2) {
+        if (snap.size >= 10) {
           publishInProgressRef.current = false;
-          return { limited: true, message: 'You can publish up to 2 stories per day.' };
+          return { limited: true, message: 'You can publish up to 10 stories per day.' };
         }
       }
     } catch (_) { /* best-effort; if count fails, allow through */ }

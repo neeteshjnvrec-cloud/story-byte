@@ -82,7 +82,7 @@ export function CreateStoryScreen() {
         authorProfilePic: userStats?.profilePic || userStats?.photoURL || '',
       });
       if (published?.limited) {
-        Alert.alert('Daily limit', published.message || 'You can publish up to 2 stories per day.');
+        Alert.alert('Daily limit', published.message || 'You can publish up to 10 stories per day.');
         setIsPublishing(false);
         return;
       }
