@@ -48,8 +48,12 @@ const theme = (genre) => GENRE_THEME[genre] || GENRE_THEME.default;
 const esc = (s = '') =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-const SERIF = "Georgia, 'Noto Serif', 'DejaVu Serif', serif";
-const SANS = "Helvetica, Arial, 'DejaVu Sans', sans-serif";
+// Devanagari-capable families listed first so Hindi/Marathi copy renders as
+// glyphs instead of tofu boxes — the CI runner only ships Latin fonts by
+// default (see the workflow's font-install step), so these must actually be
+// present, not just named.
+const SERIF = "'Noto Serif Devanagari', Georgia, 'Noto Serif', 'DejaVu Serif', serif";
+const SANS = "'Noto Sans Devanagari', Helvetica, Arial, 'DejaVu Sans', sans-serif";
 
 function hashSeed(s) {
   let h = 0;

@@ -68,9 +68,17 @@ function coverPrompt(story) {
   const mood = story.genre === 'sleep' ? 'calm dreamy nighttime, soft moonlight'
     : story.genre === 'romance' ? 'warm golden tender'
     : story.genre === 'mystery' ? 'moody atmospheric, muted tones'
+    : story.genre === 'devotional' ? 'divine and serene, Indian mythology art style, temple and nature imagery, soft golden glow'
+    : story.genre === 'motivation' ? 'bright, uplifting, golden hour light'
+    : story.genre === 'adventure' ? 'sweeping, sunlit, epic vistas'
+    : story.genre === 'drama' ? 'warm cinematic, earthy tones'
     : 'warm cinematic storybook';
-  const desc = story.description || story.title || '';
-  return `${desc}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text`;
+  // Devotional stories are often about a specific deity/figure the user named
+  // in the title (e.g. "Krishna") — say so explicitly, since the description
+  // alone is often too abstract ("a story about faith and love") for the
+  // image model to draw anything devotional-looking from.
+  const subject = story.genre === 'devotional' ? (story.title || story.description || '') : (story.description || story.title || '');
+  return `${subject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text`;
 }
 
 function fetchImage(url, out) {
