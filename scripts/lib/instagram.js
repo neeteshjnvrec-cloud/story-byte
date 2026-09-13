@@ -67,7 +67,9 @@ function buildCaption(story) {
   } else {
     lines.push('▶️ Play the full story — free, fully narrated. Link in bio.');
   }
-  lines.push('', `#StoryByte #AudioStories #${tag} #ShortStory #StoryTime`);
+  const hashtags = ['#StoryByte', '#AudioStories', `#${tag}`, '#ShortStory', '#StoryTime'];
+  if (story.occasionHashtag) hashtags.push(story.occasionHashtag);
+  lines.push('', hashtags.join(' '));
   return lines.join('\n');
 }
 

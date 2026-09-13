@@ -30,6 +30,7 @@ const { notifyAndPushUser, notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { postStoryCarousel } = require('./lib/instagram');
+const { postStoryToFacebook } = require('./lib/facebook');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -359,14 +360,17 @@ async function main() {
       console.warn(`  ⚠️  notifications for ${item.id} failed: ${e.message}`);
     }
 
-    // Instagram carousel — best-effort, never blocks the story itself from
-    // being published (see lib/instagram.js for the no-op-when-unconfigured
-    // behavior and INSTAGRAM-SETUP.md for setting up the credentials).
+    // Instagram + Facebook — best-effort, never blocks the story itself from
+    // being published (see lib/instagram.js and lib/facebook.js for the
+    // no-op-when-unconfigured behavior and INSTAGRAM-SETUP.md for setting up
+    // the credentials).
     if (item.igSlideUrls?.length) {
-      await postStoryCarousel(
-        { title: item.title, text: item.text, description: item.igHook || item.description, genre: item.genre, pageUrl: item.pageUrl },
-        item.igSlideUrls
-      );
+      const socialStory = {
+        title: item.title, text: item.text, description: item.igHook || item.description,
+        genre: item.genre, pageUrl: item.pageUrl,
+      };
+      await postStoryCarousel(socialStory, item.igSlideUrls);
+      await postStoryToFacebook(socialStory, item.igSlideUrls);
     }
   }
 
