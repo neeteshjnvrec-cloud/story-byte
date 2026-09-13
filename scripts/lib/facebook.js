@@ -91,4 +91,34 @@ async function postStoryToFacebook(story, slideUrls) {
   }
 }
 
-module.exports = { postStoryToFacebook };
+/**
+ * Publishes `videoUrl` (a public HTTPS mp4 — see lib/video.js) as a native
+ * Facebook Page video post with the story's real narration audio. No-ops
+ * when Facebook isn't configured.
+ */
+async function postStoryVideo(story, videoUrl) {
+  const pageId = process.env.FB_PAGE_ID;
+  const token = process.env.FB_PAGE_ACCESS_TOKEN;
+
+  if (!pageId || !token) {
+    console.log('  ℹ️  Facebook not configured — skipping video (see INSTAGRAM-SETUP.md).');
+    return { posted: false, reason: 'not_configured' };
+  }
+  if (!videoUrl) {
+    return { posted: false, reason: 'no_video' };
+  }
+
+  try {
+    const result = await fbCall('POST', `/${pageId}/videos`, {
+      file_url: videoUrl,
+      description: buildMessage(story),
+    });
+    console.log(`  ✅ Facebook video published (video id ${result.id})`);
+    return { posted: true, videoId: result.id };
+  } catch (e) {
+    console.warn(`  ⚠️  Facebook video failed for "${story.title}": ${e.message}`);
+    return { posted: false, reason: e.message };
+  }
+}
+
+module.exports = { postStoryToFacebook, postStoryVideo };

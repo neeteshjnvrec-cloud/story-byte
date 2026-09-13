@@ -14,10 +14,9 @@
 - ✅ `node scripts/preview-carousel.js` renders the slide design locally with
   no credentials, so you can see/tweak the look before going live.
 
-Instagram's Graph API only supports **silent image carousels** — there is no
-API for posting a video/Reel with your TTS narration baked in, so the audio
-narration stays an in-app/on-page feature; the Instagram post is the visual
-teaser that drives people to listen.
+The carousel is silent — Instagram/Facebook carousels can't play audio. For
+that, see "Also posting the real narration as a video" below, which posts a
+second, separate piece of content alongside the carousel.
 
 ---
 
@@ -148,6 +147,28 @@ generated for Instagram as one multi-photo Facebook Page post (with a real
 clickable link in the caption, unlike Instagram), right alongside the
 Instagram post. No-ops until both secrets are set.
 
+---
+
+## 🎬 Also posting the real narration as a video
+
+Every published story now also renders a second piece of content: the
+carousel slides + the story's actual TTS narration audio, combined into an
+MP4 with `ffmpeg` (`scripts/lib/video.js` — each slide shown for an equal
+share of the audio's length). That video is posted as:
+- an **Instagram Reel** (`scripts/lib/instagram.js`'s `postStoryReel`)
+- a **Facebook Page video post** (`scripts/lib/facebook.js`'s `postStoryVideo`)
+
+Both go out *in addition to* the silent carousel/photo post above, not
+instead of it — one for feed browsing, one for anyone who wants to actually
+hear the story without leaving Instagram/Facebook.
+
+No new setup needed — it reuses the exact same four secrets
+(`IG_BUSINESS_ACCOUNT_ID`, `IG_ACCESS_TOKEN`, `FB_PAGE_ID`,
+`FB_PAGE_ACCESS_TOKEN`) and the `ffmpeg` already installed in both
+workflows for edge-tts. It only slows down each CI run a little (rendering
+a multi-minute video takes longer than compositing still images) and each
+video file is somewhat larger to deploy, but that's the only cost.
+
 ## ⚠️ Limits worth knowing
 - Instagram caps a carousel at **10 items** — the pipeline uses at most 7
   (up to 6 story-arc slides + CTA).
@@ -156,3 +177,8 @@ Instagram post. No-ops until both secrets are set.
 - Captions can't contain a clickable link — the pipeline drops the story's
   page URL into the caption text (for context/copy-paste) and points people to
   "link in bio" for the tap-through.
+- The narrated video runs as long as the story's full narration does (often
+  several minutes for a longer story) — that's a slow-paced slideshow, not a
+  punchy short-form Reel, since it's genuinely the whole story playing out.
+  Instagram Reels support videos well past that length via the Graph API, so
+  this isn't a hard limit, just a heads-up on the pacing.
