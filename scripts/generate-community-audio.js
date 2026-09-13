@@ -28,6 +28,8 @@ const os = require('os');
 const path = require('path');
 const { notifyAndPushUser, notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
+const { buildCarouselSlides } = require('./lib/carousel-slides');
+const { postStoryCarousel } = require('./lib/instagram');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -257,12 +259,27 @@ async function main() {
       }, { site: SITE });
       console.log(`    ✅ Page: ${pageUrl}`);
 
-      // 4. Deploy to Firebase Hosting
+      // 4. Render Instagram carousel slides (cover + story-arc quote cards +
+      // CTA). Written alongside the audio/cover so the single deploy below
+      // carries them too; the actual IG post happens after publish.
+      let igSlideUrls = [];
+      try {
+        igSlideUrls = await buildCarouselSlides({
+          storyId, title: story.title, text: story.text, genre: story.genre,
+          coverPath, outDir: path.join(PUB, 'instagram', storyId), siteUrl: SITE,
+        });
+        console.log(`    ✅ IG slides: ${igSlideUrls.length}`);
+      } catch (e) {
+        console.warn(`    ⚠️  Carousel render failed: ${e.message}`);
+      }
+
+      // 5. Deploy to Firebase Hosting
       // (deployed after all stories are processed)
 
       processed.push({
         id: storyId, title: story.title, authorName: story.authorName,
         authorId: story.authorId, genre: story.genre, duration: dur, pageUrl,
+        text: story.text, description: story.description, igSlideUrls,
       });
     } catch (e) {
       console.error(`    ❌ Failed: ${e.message}`);
@@ -329,6 +346,16 @@ async function main() {
       await sendBroadcastNotification({ ...item, coverImage: coverUrl, storyId: item.id });
     } catch (e) {
       console.warn(`  ⚠️  notifications for ${item.id} failed: ${e.message}`);
+    }
+
+    // Instagram carousel — best-effort, never blocks the story itself from
+    // being published (see lib/instagram.js for the no-op-when-unconfigured
+    // behavior and INSTAGRAM-SETUP.md for setting up the credentials).
+    if (item.igSlideUrls?.length) {
+      await postStoryCarousel(
+        { title: item.title, text: item.text, description: item.description, genre: item.genre, pageUrl: item.pageUrl },
+        item.igSlideUrls
+      );
     }
   }
 
