@@ -24,6 +24,7 @@ const { notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { postStoryCarousel } = require('./lib/instagram');
+const { getOccasion, occasionPhrase } = require('./occasions');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -148,8 +149,14 @@ async function markSlotSuccess(slot) {
 async function generateText(groq, slot) {
   const langInstruction = slot.language === 'hi' ? 'Hindi (Devanagari).' : 'English.';
   // Compact system prompt to avoid "Request Entity Too Large" (413) errors
-  const sys = `You are a storyteller for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama} Write in ${langInstruction} ` +
+  const occasionInstruction = slot.occasion
+    ? ` ${occasionPhrase(slot.occasion, DATE)} — write a story that genuinely centers this occasion ` +
+      `(${slot.occasion.visual}), not a generic ${slot.genre} story with the festival mentioned in passing. ` +
+      'Each day in this festival season should read as a different story, not a retelling of the same one.'
+    : '';
+  const sys = `You are a storyteller for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama}${occasionInstruction} Write in ${langInstruction} ` +
     `JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 words, spoken style, no markdown","tags":["genre"]}.`;
+  const userPrompt = slot.occasion ? `Write a story for ${slot.occasion.name}.` : `Write a ${slot.genre} story.`;
 
   // Try each model in the fallback chain until one succeeds
   const errors = [];
@@ -158,7 +165,7 @@ async function generateText(groq, slot) {
       const c = await groq.chat.completions.create({
         model, temperature: 0.85, max_tokens: 2048, top_p: 0.95,
         response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: sys }, { role: 'user', content: `Write a ${slot.genre} story.` }],
+        messages: [{ role: 'system', content: sys }, { role: 'user', content: userPrompt }],
       });
       const d = JSON.parse(c.choices[0].message.content.trim());
       if (!d.title || !d.text || d.text.trim().length < 50) throw new Error('incomplete/empty text');
@@ -202,7 +209,12 @@ function coverPrompt(slotOrStory, content) {
   const subject = genre === 'devotional'
     ? (content?.title || slotOrStory.title || content?.description || slotOrStory.description || '')
     : (content?.description || content?.title || slotOrStory.description || slotOrStory.title || '');
-  return `${subject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
+  // An occasion-themed story gets its festival's own visual cues instead —
+  // otherwise "warm golden tender" romance mood etc. has nothing to do with
+  // the actual festival the story is about.
+  const occasion = slotOrStory.occasion || content?.occasion;
+  const finalSubject = occasion ? `${occasion.visual}, ${occasion.name} celebration` : subject;
+  return `${finalSubject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
 }
 
 function fetchImage(url, out) {
@@ -309,6 +321,18 @@ async function run() {
   const shuffled = shuffle(available);
   while (pendingSlots.length < DAILY_COUNT && shuffled.length > 0) {
     pendingSlots.push({ ...shuffled.pop(), retry: false });
+  }
+
+  // If today is a festival/observance, dedicate one of today's slots to it —
+  // reuse a slot whose genre already matches (so voice/vertical stay
+  // sensible), or just retheme the first slot if none matches, since the
+  // whole point is that at least one story today is timely.
+  const occasion = getOccasion(DATE);
+  if (occasion && pendingSlots.length > 0) {
+    console.log(`🎉 Today's occasion: ${occasion.name}`);
+    const idx = pendingSlots.findIndex((s) => s.genre === occasion.genre);
+    const target = idx >= 0 ? idx : 0;
+    pendingSlots[target] = { ...pendingSlots[target], genre: occasion.genre, occasion };
   }
 
   console.log(`🎯 Selected ${pendingSlots.length} slots for today\n`);
@@ -476,7 +500,9 @@ async function run() {
       // Every aggregate present from birth so the metrics store never has to
       // fall back for a fresh story.
       plays: 0, likesCount: 0, rating: 0, ratingSum: 0, ratingCount: 0, sharesCount: 0,
-      generatedDate: DATE, voice: p.slot.voice, ttsEngine: 'edge-tts', author: 'StoryByte AI', tags: p.content.tags,
+      generatedDate: DATE, voice: p.slot.voice, ttsEngine: 'edge-tts', author: 'StoryByte AI',
+      tags: p.slot.occasion ? [...p.content.tags, p.slot.occasion.name] : p.content.tags,
+      occasion: p.slot.occasion?.name || null,
       createdAt: admin.firestore.FieldValue.serverTimestamp(), updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
     await db.collection('stories').doc(p.id).set(storyData, { merge: true });
@@ -491,7 +517,10 @@ async function run() {
     // are configured; see INSTAGRAM-SETUP.md to set those up).
     if (p.igSlideUrls?.length) {
       await postStoryCarousel(
-        { title: p.content.title, text: p.content.text, description: p.igHook || p.content.description, genre: p.slot.genre, pageUrl: p.pageUrl },
+        {
+          title: p.content.title, text: p.content.text, description: p.igHook || p.content.description,
+          genre: p.slot.genre, pageUrl: p.pageUrl, occasionHashtag: p.slot.occasion?.hashtag,
+        },
         p.igSlideUrls
       );
     }
