@@ -30,7 +30,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install edge-tts uv
-          sudo apt-get update && sudo apt-get install -y ffmpeg
+          # fonts-lohit-deva: Devanagari (Hindi/Marathi) glyphs for the
+          # Instagram carousel renderer — without it, non-Latin story text
+          # renders as tofu boxes in the generated slide images.
+          sudo apt-get update && sudo apt-get install -y ffmpeg fonts-noto-core fonts-lohit-deva
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install pipeline deps

@@ -61,13 +61,18 @@ async function llmCopy({ title, text, genre, description }, count) {
     const sys =
       'You write Instagram carousel copy that promotes an audio story app. Given a full story, ' +
       'reply with JSON only: {"hook": string, "slides": [{"text": string, "image": string}]}. ' +
+      '"hook" and every slide "text" must be written in the SAME LANGUAGE as the story text below — ' +
+      'never translate it to English. ' +
       '"hook" is one punchy, curiosity-driven line (max 100 characters) that makes someone want to know ' +
       "what happens — a question, a tease, or a striking detail. Never a summary. " +
       `"slides" must have exactly ${count} entries, in order, walking the story's beginning, middle and ` +
       'turning points, vivid and specific to THIS story, building suspense — and must NEVER reveal how the ' +
       'story ends. Each entry: "text" is 10-22 words of teaser copy (plain text, no markdown, no quotation ' +
-      'marks); "image" is a 6-14 word visual description of that exact moment/scene for an illustrator — ' +
-      'concrete subject, setting, and mood, no character names, no text or words in the image, no summary of plot.';
+      'marks); "image" is, regardless of the story\'s language, always a 6-14 word ENGLISH visual description ' +
+      'of that exact moment/scene for an illustrator — concrete subject, setting and mood, specific to what ' +
+      'actually happens in THIS story (name a well-known deity/mythological/historical figure the story is ' +
+      "about if there is one, e.g. Krishna, Ganesha, Rama — but never invent a name for an ordinary fictional " +
+      'character), no text or words rendered in the image, no summary of plot.';
     const user = `Title: ${title}\nGenre: ${genre}\nDescription: ${description || ''}\n\nStory:\n${String(text || '').slice(0, 6000)}`;
 
     const completion = await groq.chat.completions.create({

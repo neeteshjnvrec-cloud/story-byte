@@ -186,12 +186,23 @@ async function generateText(groq, slot) {
 
 function coverPrompt(slotOrStory, content) {
   // Support both slot objects (daily) and story objects (community)
+  const genre = slotOrStory.genre || content?.genre;
   const mood = (slotOrStory.isSleep || (content && content.isSleep)) ? 'calm dreamy nighttime, soft moonlight' :
     (slotOrStory.isKids || (content && content.isKids)) ? 'bright cheerful playful cartoon' :
-    (slotOrStory.genre === 'mystery' || content?.genre === 'mystery') ? 'moody atmospheric, muted tones' :
-    (slotOrStory.genre === 'romance' || content?.genre === 'romance') ? 'warm golden tender' : 'warm cinematic';
-  const desc = content?.description || content?.title || slotOrStory.description || slotOrStory.title || '';
-  return `${desc}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
+    genre === 'mystery' ? 'moody atmospheric, muted tones' :
+    genre === 'romance' ? 'warm golden tender' :
+    genre === 'devotional' ? 'divine and serene, Indian mythology art style, temple and nature imagery, soft golden glow' :
+    genre === 'motivation' ? 'bright, uplifting, golden hour light' :
+    genre === 'adventure' ? 'sweeping, sunlit, epic vistas' :
+    genre === 'drama' ? 'warm cinematic, earthy tones' : 'warm cinematic';
+  // Devotional stories are often about a specific deity/figure named in the
+  // title (e.g. "Krishna") — prefer that over the description, which is
+  // often too abstract ("a story about faith and love") for the image model
+  // to draw anything devotional-looking from.
+  const subject = genre === 'devotional'
+    ? (content?.title || slotOrStory.title || content?.description || slotOrStory.description || '')
+    : (content?.description || content?.title || slotOrStory.description || slotOrStory.title || '');
+  return `${subject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
 }
 
 function fetchImage(url, out) {
