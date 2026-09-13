@@ -24,7 +24,7 @@ const { notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { postStoryCarousel } = require('./lib/instagram');
-const { getOccasion } = require('./occasions');
+const { getOccasion, occasionPhrase } = require('./occasions');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -150,8 +150,9 @@ async function generateText(groq, slot) {
   const langInstruction = slot.language === 'hi' ? 'Hindi (Devanagari).' : 'English.';
   // Compact system prompt to avoid "Request Entity Too Large" (413) errors
   const occasionInstruction = slot.occasion
-    ? ` Today is ${slot.occasion.name} — write a story that genuinely centers this occasion (${slot.occasion.visual}), ` +
-      `not a generic ${slot.genre} story with the festival mentioned in passing.`
+    ? ` ${occasionPhrase(slot.occasion, DATE)} — write a story that genuinely centers this occasion ` +
+      `(${slot.occasion.visual}), not a generic ${slot.genre} story with the festival mentioned in passing. ` +
+      'Each day in this festival season should read as a different story, not a retelling of the same one.'
     : '';
   const sys = `You are a storyteller for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama}${occasionInstruction} Write in ${langInstruction} ` +
     `JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 words, spoken style, no markdown","tags":["genre"]}.`;
