@@ -364,16 +364,19 @@ async function run() {
         // deploy below carries them too; the actual IG post happens after
         // the story is written to Firestore as published.
         let igSlideUrls = [];
+        let igHook = null;
         try {
-          igSlideUrls = await buildCarouselSlides({
-            storyId: id, title: content.title, text: content.text, genre: slot.genre,
+          const built = await buildCarouselSlides({
+            storyId: id, title: content.title, text: content.text, genre: slot.genre, description: content.description,
             coverPath: cover, outDir: path.join(PUB, 'instagram', id), siteUrl: SITE,
           });
+          igSlideUrls = built.urls;
+          igHook = built.hook;
         } catch (e) {
           console.warn(`  ⚠️  Carousel render failed for ${id}: ${e.message}`);
         }
 
-        generated = { id, slot, content, duration: dur, igSlideUrls };
+        generated = { id, slot, content, duration: dur, igSlideUrls, igHook };
         await markSlotSuccess(slot);
         usedSlots.add(slotKey);
       } catch (e) {
@@ -477,7 +480,7 @@ async function run() {
     // are configured; see INSTAGRAM-SETUP.md to set those up).
     if (p.igSlideUrls?.length) {
       await postStoryCarousel(
-        { title: p.content.title, text: p.content.text, description: p.content.description, genre: p.slot.genre, pageUrl: p.pageUrl },
+        { title: p.content.title, text: p.content.text, description: p.igHook || p.content.description, genre: p.slot.genre, pageUrl: p.pageUrl },
         p.igSlideUrls
       );
     }

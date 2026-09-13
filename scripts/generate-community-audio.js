@@ -263,11 +263,14 @@ async function main() {
       // CTA). Written alongside the audio/cover so the single deploy below
       // carries them too; the actual IG post happens after publish.
       let igSlideUrls = [];
+      let igHook = null;
       try {
-        igSlideUrls = await buildCarouselSlides({
-          storyId, title: story.title, text: story.text, genre: story.genre,
+        const built = await buildCarouselSlides({
+          storyId, title: story.title, text: story.text, genre: story.genre, description: story.description,
           coverPath, outDir: path.join(PUB, 'instagram', storyId), siteUrl: SITE,
         });
+        igSlideUrls = built.urls;
+        igHook = built.hook;
         console.log(`    ✅ IG slides: ${igSlideUrls.length}`);
       } catch (e) {
         console.warn(`    ⚠️  Carousel render failed: ${e.message}`);
@@ -279,7 +282,7 @@ async function main() {
       processed.push({
         id: storyId, title: story.title, authorName: story.authorName,
         authorId: story.authorId, genre: story.genre, duration: dur, pageUrl,
-        text: story.text, description: story.description, igSlideUrls,
+        text: story.text, description: story.description, igSlideUrls, igHook,
       });
     } catch (e) {
       console.error(`    ❌ Failed: ${e.message}`);
@@ -353,7 +356,7 @@ async function main() {
     // behavior and INSTAGRAM-SETUP.md for setting up the credentials).
     if (item.igSlideUrls?.length) {
       await postStoryCarousel(
-        { title: item.title, text: item.text, description: item.description, genre: item.genre, pageUrl: item.pageUrl },
+        { title: item.title, text: item.text, description: item.igHook || item.description, genre: item.genre, pageUrl: item.pageUrl },
         item.igSlideUrls
       );
     }

@@ -55,17 +55,18 @@ function firstSentence(text) {
   return (m ? m[0] : String(text || '').slice(0, 200)).trim();
 }
 
+// `story.description` is expected to already be the curiosity hook produced
+// alongside the slides (lib/carousel-copy) when one was generated — this
+// only falls back to the raw first sentence if that's missing.
 function buildCaption(story) {
-  const teaser = (story.description || firstSentence(story.text) || '').trim();
+  const hook = (story.description || firstSentence(story.text) || '').trim();
   const tag = (story.genre || 'story').replace(/[^a-zA-Z0-9]/g, '');
-  const lines = [
-    story.title || 'A story on StoryByte',
-    '',
-    teaser,
-    '',
-    '🎧 Full story + free audio narration on StoryByte — link in bio.',
-  ];
-  if (story.pageUrl) lines.push(story.pageUrl);
+  const lines = [`🎧 ${story.title || 'A story on StoryByte'}`, '', hook, ''];
+  if (story.pageUrl) {
+    lines.push('▶️ Play the full story — free, fully narrated:', story.pageUrl, '(or tap the link in bio)');
+  } else {
+    lines.push('▶️ Play the full story — free, fully narrated. Link in bio.');
+  }
   lines.push('', `#StoryByte #AudioStories #${tag} #ShortStory #StoryTime`);
   return lines.join('\n');
 }

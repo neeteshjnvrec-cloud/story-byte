@@ -44,17 +44,19 @@ async function main() {
     process.exit(1);
   }
 
-  const urls = await buildCarouselSlides({
+  const { urls, hook } = await buildCarouselSlides({
     storyId: 'preview',
     title: args.title || 'The Compass That Wouldn’t Settle',
     text: args.text || SAMPLE_TEXT,
     genre,
+    description: args.description,
     coverPath: cover,
     outDir,
     siteUrl: 'file://.',
   });
 
   console.log(`✅ Rendered ${urls.length} slides to ${outDir}`);
+  console.log(`   hook: "${hook}"${process.env.GROQ_API_KEY ? '' : ' (heuristic fallback — set GROQ_API_KEY for LLM-written hooks)'}`);
   urls.forEach((u, i) => console.log(`   ${i + 1}. slide-${i + 1}.jpg`));
 }
 
