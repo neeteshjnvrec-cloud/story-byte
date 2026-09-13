@@ -66,3 +66,6 @@ android/.gradle/
 ios/Pods/
 ios/build/google-services.json
 /storybyte-76716-firebase-adminsdk-fbsvc-6b83b55d71.json
+
+# Local Instagram carousel design previews (scripts/preview-carousel.js)
+/.carousel-preview/

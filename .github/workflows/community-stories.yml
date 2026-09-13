@@ -56,6 +56,11 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           FIREBASE_PROJECT_ID: storybyte-76716
           STORIES_FILTER: ${{ github.event.inputs.story_id || '' }}
+          # Optional — Instagram carousel auto-post. Left unset until
+          # INSTAGRAM-SETUP.md's secrets are added; the pipeline just skips
+          # the IG post until then.
+          IG_BUSINESS_ACCOUNT_ID: ${{ secrets.IG_BUSINESS_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
         # The script deploys hosting itself (and refuses to publish when that
         # deploy fails), so the workflow must NOT deploy again — the old second
         # step had no auth and red-exited every successful run.
@@ -70,7 +75,7 @@ jobs:
         run: |
           git config user.name "storybyte-bot"
           git config user.email "bot@storybyte.app"
-          git add public/audio public/covers 2>/dev/null || true
+          git add public/audio public/covers public/instagram 2>/dev/null || true
           git commit -m "chore: community story audio + covers" || echo "nothing to commit"
           # The daily workflow pushes to main too; rebase so a stale branch
           # doesn't reject the push. A real push failure must stay loud — it
