@@ -3,13 +3,14 @@
  *
  * Turns a story into a set of on-brand 1080x1350 JPEGs that read as one
  * connected teaser, not a random blob of screenshots. There's no separate
- * "title card" — every slide already carries the story's own art and a
- * shared eyebrow strip, so slide 1 goes straight into the story:
- *   1. the story's real cover art + its opening teaser line,
- *   2..N-1. each a bespoke AI-illustrated scene for that beat of the story
- *      (curiosity-driven teaser lines from lib/carousel-copy — never the
- *      raw wall of text — falling back to a themed gradient card when no
- *      scene art is available), and
+ * "title card" — every teaser slide (including the first) carries its own
+ * bespoke AI-illustrated scene for that beat of the story (curiosity-driven
+ * teaser lines + scene descriptions from lib/carousel-copy — never the raw
+ * wall of text, and never a generic reused cover), plus a shared eyebrow
+ * strip so a swipe through reads as one designed piece:
+ *   1..N-1. one illustrated beat per slide, falling back to a themed
+ *      gradient card (or, for slide 1 only, the story's own cover art) when
+ *      no scene image is available, and
  *   N. a "play the story" CTA slide with the cover thumbnail.
  *
  * Pure image compositing (sharp + inline SVG, base64-embedded raster where a
@@ -294,17 +295,23 @@ async function buildCarouselSlides({ storyId, title, text, genre, description, c
   for (let i = 0; i < teasers.length; i++) {
     const teaser = teasers[i];
     let bg = null;
-    if (i === 0) {
-      // Slide 1 always uses the story's own cover art — already generated,
-      // guaranteed to exist locally, no network round-trip needed.
+    if (teaser.image) {
+      // Every slide, including the first, gets a bespoke illustration for
+      // its own beat of the story — not a generic reused cover — so the
+      // carousel reads as story-specific art throughout, not a title card
+      // followed by an afterthought.
+      const prompt = `${teaser.image}. ${t.mood}, painterly storybook illustration, cinematic lighting, no text, no words`;
+      bg = await fetchSceneImage(prompt, hashSeed(`${storyId}-${i}`));
+    }
+    if (!bg && i === 0) {
+      // No bespoke art available (Groq off or the fetch failed) — the
+      // opening slide still deserves real art over a flat gradient, so fall
+      // back to the story's own cover (already generated, no network call).
       try {
         bg = await fs.promises.readFile(coverPath);
       } catch {
         bg = null;
       }
-    } else if (teaser.image) {
-      const prompt = `${teaser.image}. ${t.mood}, painterly storybook illustration, cinematic lighting, no text, no words`;
-      bg = await fetchSceneImage(prompt, hashSeed(`${storyId}-${i}`));
     }
 
     if (bg) {
