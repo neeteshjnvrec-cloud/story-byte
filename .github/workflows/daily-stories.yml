@@ -44,6 +44,11 @@ jobs:
           GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           FIREBASE_PROJECT_ID: storybyte-76716
+          # Optional — Instagram carousel auto-post. Left unset until
+          # INSTAGRAM-SETUP.md's secrets are added; the pipeline just skips
+          # the IG post until then.
+          IG_BUSINESS_ACCOUNT_ID: ${{ secrets.IG_BUSINESS_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
         run: |
           node build-stories.js
           node build-story-pages.js
@@ -56,7 +61,7 @@ jobs:
         run: |
           git config user.name "storybyte-bot"
           git config user.email "bot@storybyte.app"
-          git add public/audio public/covers public/s public/index.html 2>/dev/null || true
+          git add public/audio public/covers public/instagram public/s public/index.html 2>/dev/null || true
           git commit -m "chore: daily story audio + covers ($(date -u +%F))" || echo "nothing to commit"
           # The community workflow pushes to main too; rebase so a stale branch
           # doesn't reject the push. A real push failure must stay loud — it

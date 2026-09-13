@@ -22,6 +22,8 @@ const os = require('os');
 const path = require('path');
 const { notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
+const { buildCarouselSlides } = require('./lib/carousel-slides');
+const { postStoryCarousel } = require('./lib/instagram');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -53,7 +55,7 @@ function parseModels(envValue) {
 }
 const MODELS = parseModels(process.env.GROQ_MODEL);
 const DATE = process.env.STORY_DATE || new Date().toISOString().slice(0, 10);
-const DAILY_COUNT = 2; // Exactly 2 stories per day
+const DAILY_COUNT = 1; // Exactly 1 story per day
 const MAX_RETRIES = 6; // Retry each slot up to 6 times (trying different models)
 
 // --- .env loader (local) ---
@@ -356,7 +358,25 @@ async function run() {
         const dur = durationSec(audio) || Math.max(60, Math.round(content.text.split(/\s+/).length / 2.5));
 
         console.log(`✅ generated ${id} (${dur}s)`);
-        generated = { id, slot, content, duration: dur };
+
+        // Step 4: Render Instagram carousel slides (cover + story-arc quote
+        // cards + CTA). Written alongside the audio/cover so the single
+        // deploy below carries them too; the actual IG post happens after
+        // the story is written to Firestore as published.
+        let igSlideUrls = [];
+        let igHook = null;
+        try {
+          const built = await buildCarouselSlides({
+            storyId: id, title: content.title, text: content.text, genre: slot.genre, description: content.description,
+            coverPath: cover, outDir: path.join(PUB, 'instagram', id), siteUrl: SITE,
+          });
+          igSlideUrls = built.urls;
+          igHook = built.hook;
+        } catch (e) {
+          console.warn(`  ⚠️  Carousel render failed for ${id}: ${e.message}`);
+        }
+
+        generated = { id, slot, content, duration: dur, igSlideUrls, igHook };
         await markSlotSuccess(slot);
         usedSlots.add(slotKey);
       } catch (e) {
@@ -454,6 +474,16 @@ async function run() {
       storyId: p.id, title: p.content.title, genre: p.slot.genre,
       coverImage: `${SITE}/covers/${p.id}.jpg`,
     });
+
+    // Instagram carousel — best-effort, never blocks the daily batch (see
+    // lib/instagram.js: no-ops until IG_BUSINESS_ACCOUNT_ID/IG_ACCESS_TOKEN
+    // are configured; see INSTAGRAM-SETUP.md to set those up).
+    if (p.igSlideUrls?.length) {
+      await postStoryCarousel(
+        { title: p.content.title, text: p.content.text, description: p.igHook || p.content.description, genre: p.slot.genre, pageUrl: p.pageUrl },
+        p.igSlideUrls
+      );
+    }
   }
 
   // Log generation

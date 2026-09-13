@@ -79,12 +79,9 @@ export function CommunityScreen() {
       if (!cancelled) { setError(e.message || 'Failed to load stories'); setLoading(false); }
     });
 
-    // Real-time listener. The status filter is what makes an under_review story
-    // invisible to everyone including its author — without it, every client's
-    // snapshot carried other people's unpublished submissions.
+    // Real-time listener — show ALL published stories (daily + community)
     const q = query(
       collection(db, 'stories'),
-      where('isCommunityStory', '==', true),
       where('status', '==', 'published'),
       orderBy('createdAt', 'desc'),
       fbLimit(50)

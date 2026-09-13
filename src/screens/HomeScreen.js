@@ -46,7 +46,7 @@ export const HomeScreen = () => {
         if (filters.duration) params.duration = filters.duration;
       }
       const [res, prog] = await Promise.all([
-        apiService.getStories(params),
+        apiService.getStories({ ...params, community: 'all' }),
         apiService.getUserProgress(),
       ]);
       setStories(res.stories || []);
