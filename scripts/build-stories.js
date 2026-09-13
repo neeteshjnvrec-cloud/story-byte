@@ -55,7 +55,7 @@ function parseModels(envValue) {
 }
 const MODELS = parseModels(process.env.GROQ_MODEL);
 const DATE = process.env.STORY_DATE || new Date().toISOString().slice(0, 10);
-const DAILY_COUNT = 2; // Exactly 2 stories per day
+const DAILY_COUNT = 1; // Exactly 1 story per day
 const MAX_RETRIES = 6; // Retry each slot up to 6 times (trying different models)
 
 // --- .env loader (local) ---

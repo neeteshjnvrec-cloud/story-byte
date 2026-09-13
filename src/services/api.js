@@ -681,8 +681,38 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
     throw new Error(`All Groq combinations failed: ${errorSummary}`);
   }
 
+  // --- Community Story Publishing ---------------------------------------------
+
+  /**
+   * Check if user has already posted a community story today.
+   * Returns true if limit reached (should block publish), false otherwise.
+   */
+  async checkDailyCommunityLimit(userId) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const q = query(
+      collection(db, 'stories'),
+      where('authorId', '==', userId),
+      where('isCommunityStory', '==', true),
+      where('createdAt', '>=', today),
+      where('createdAt', '<', tomorrow)
+    );
+
+    const snap = await getDocs(q);
+    return !snap.empty; // true if already posted today
+  }
+
   async publishCommunityStory(storyData) {
     try {
+      // Check daily limit: max 1 community story per user per day
+      const limitReached = await this.checkDailyCommunityLimit(this.uid);
+      if (limitReached) {
+        throw new Error('You can only publish one community story per day. Please try again tomorrow.');
+      }
+
       const storyId = `community_${Date.now()}_${this.uid}`;
       const storyRef = doc(db, 'stories', storyId);
 
