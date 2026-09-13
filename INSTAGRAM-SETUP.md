@@ -117,6 +117,37 @@ also post to Instagram automatically.
   each image as a carousel child → create the carousel container → publish
   it), and is a no-op whenever the two secrets above aren't set.
 
+---
+
+## 📘 Also posting to Facebook
+
+Since your Instagram is linked through a Facebook Page, posting the same
+carousel to that Page needs only two more secrets — no new Meta app setup.
+
+1. In **Graph API Explorer** (developers.facebook.com/tools/explorer), with
+   your `storybyte` app and your existing long-lived user token loaded, run:
+   ```
+   1036212629585326?fields=access_token,name
+   ```
+   (that's your `Littlekrishna.ai` Page's ID — use `me/accounts` instead if
+   you ever connect a different Page, though that endpoint returned empty
+   for this Business-Manager-assigned Page in our testing; querying the Page
+   ID directly is what worked.)
+2. The `access_token` in that response is a **Page Access Token** — since it
+   was derived from your long-lived user token, it doesn't expire on its own
+   the way a user token does.
+3. Add two more GitHub repo secrets:
+
+   | Secret name | Value |
+   |---|---|
+   | `FB_PAGE_ID` | `1036212629585326` |
+   | `FB_PAGE_ACCESS_TOKEN` | the `access_token` from step 2 |
+
+That's it — `scripts/lib/facebook.js` posts the same slide images already
+generated for Instagram as one multi-photo Facebook Page post (with a real
+clickable link in the caption, unlike Instagram), right alongside the
+Instagram post. No-ops until both secrets are set.
+
 ## ⚠️ Limits worth knowing
 - Instagram caps a carousel at **10 items** — the pipeline uses at most 7
   (up to 6 story-arc slides + CTA).

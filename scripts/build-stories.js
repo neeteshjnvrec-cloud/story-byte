@@ -24,6 +24,7 @@ const { notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { postStoryCarousel } = require('./lib/instagram');
+const { postStoryToFacebook } = require('./lib/facebook');
 const { getOccasion, occasionPhrase } = require('./occasions');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -512,17 +513,16 @@ async function run() {
       coverImage: `${SITE}/covers/${p.id}.jpg`,
     });
 
-    // Instagram carousel — best-effort, never blocks the daily batch (see
-    // lib/instagram.js: no-ops until IG_BUSINESS_ACCOUNT_ID/IG_ACCESS_TOKEN
+    // Instagram + Facebook — best-effort, never blocks the daily batch (see
+    // lib/instagram.js and lib/facebook.js: both no-op until their secrets
     // are configured; see INSTAGRAM-SETUP.md to set those up).
     if (p.igSlideUrls?.length) {
-      await postStoryCarousel(
-        {
-          title: p.content.title, text: p.content.text, description: p.igHook || p.content.description,
-          genre: p.slot.genre, pageUrl: p.pageUrl, occasionHashtag: p.slot.occasion?.hashtag,
-        },
-        p.igSlideUrls
-      );
+      const socialStory = {
+        title: p.content.title, text: p.content.text, description: p.igHook || p.content.description,
+        genre: p.slot.genre, pageUrl: p.pageUrl, occasionHashtag: p.slot.occasion?.hashtag,
+      };
+      await postStoryCarousel(socialStory, p.igSlideUrls);
+      await postStoryToFacebook(socialStory, p.igSlideUrls);
     }
   }
 
