@@ -23,8 +23,9 @@ const path = require('path');
 const { notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
-const { postStoryCarousel } = require('./lib/instagram');
-const { postStoryToFacebook } = require('./lib/facebook');
+const { buildStoryVideo } = require('./lib/video');
+const { postStoryCarousel, postStoryReel } = require('./lib/instagram');
+const { postStoryToFacebook, postStoryVideo } = require('./lib/facebook');
 const { getOccasion, occasionPhrase } = require('./occasions');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -401,10 +402,11 @@ async function run() {
         // the story is written to Firestore as published.
         let igSlideUrls = [];
         let igHook = null;
+        const outDir = path.join(PUB, 'instagram', id);
         try {
           const built = await buildCarouselSlides({
             storyId: id, title: content.title, text: content.text, genre: slot.genre, description: content.description,
-            coverPath: cover, outDir: path.join(PUB, 'instagram', id), siteUrl: SITE,
+            coverPath: cover, outDir, siteUrl: SITE,
           });
           igSlideUrls = built.urls;
           igHook = built.hook;
@@ -412,7 +414,21 @@ async function run() {
           console.warn(`  ⚠️  Carousel render failed for ${id}: ${e.message}`);
         }
 
-        generated = { id, slot, content, duration: dur, igSlideUrls, igHook };
+        // Step 5: Render the narrated video (slides + the real audio) for a
+        // Reel/video post — the only way the actual narration plays on
+        // Instagram/Facebook, since the carousel above is silent.
+        let videoUrl = null;
+        if (igSlideUrls.length) {
+          try {
+            const slideFiles = igSlideUrls.map((_, i) => path.join(outDir, `slide-${i + 1}.jpg`));
+            const videoPath = buildStoryVideo({ slideFiles, audioPath: audio, outPath: path.join(outDir, 'story.mp4') });
+            if (videoPath) videoUrl = `${SITE}/instagram/${id}/story.mp4`;
+          } catch (e) {
+            console.warn(`  ⚠️  Video render failed for ${id}: ${e.message}`);
+          }
+        }
+
+        generated = { id, slot, content, duration: dur, igSlideUrls, igHook, videoUrl };
         await markSlotSuccess(slot);
         usedSlots.add(slotKey);
       } catch (e) {
@@ -523,6 +539,13 @@ async function run() {
       };
       await postStoryCarousel(socialStory, p.igSlideUrls);
       await postStoryToFacebook(socialStory, p.igSlideUrls);
+      // The narrated video — separate from the silent carousel above, so
+      // both go out: one for feed browsing, one for anyone who wants to
+      // actually hear the story without leaving Instagram/Facebook.
+      if (p.videoUrl) {
+        await postStoryReel(socialStory, p.videoUrl);
+        await postStoryVideo(socialStory, p.videoUrl);
+      }
     }
   }
 

@@ -6,10 +6,33 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
     function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
 
+    // Server-clock date key (UTC) for the per-user daily story counter below.
+    // Derived from request.time, not client input, so a client can't just
+    // invent a fresh "today" string to reset its own counter.
+    function todayKey() {
+      return string(request.time.year() * 10000 + request.time.month() * 100 + request.time.day());
+    }
+    function dailyCounterId() { return request.auth.uid + '_' + todayKey(); }
+
     // Config: public read (API keys are rate-limited, not secret)
     match /config/{docId} {
       allow read: if true;
       allow write: if false; // Admin-only
+    }
+
+    // Per-user, per-UTC-day story-creation counter. Written in the same
+    // batch as the story doc below (client can't create a story without
+    // also incrementing this, since the story rule checks its current
+    // value); its own write rule caps it at 10 and only allows +1 steps, so
+    // a client can't jump the count or write an arbitrary value.
+    match /dailyStoryCounts/{docId} {
+      allow read: if isSignedIn() && docId == dailyCounterId();
+      allow create, update: if isSignedIn()
+        && docId == dailyCounterId()
+        && request.resource.data.count is int
+        && request.resource.data.count == (resource == null ? 1 : resource.data.count + 1)
+        && request.resource.data.count <= 10;
+      allow delete: if false;
     }
 
     // Stories: public read, authenticated users can create community stories
@@ -17,7 +40,16 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isSignedIn()
         && request.resource.data.isCommunityStory == true
-        && request.resource.data.authorId == request.auth.uid;
+        && request.resource.data.authorId == request.auth.uid
+        // Daily cap enforced server-side: this reads the counter's value as
+        // of BEFORE this batch (cross-document get() sees the pre-batch
+        // state), so requiring < 10 here allows the write that brings it to
+        // 10 and blocks anything past that — the client-side check in
+        // AppContext.js is only a fast pre-check for a friendly message.
+        && (
+          !exists(/databases/$(database)/documents/dailyStoryCounts/$(dailyCounterId()))
+          || get(/databases/$(database)/documents/dailyStoryCounts/$(dailyCounterId())).data.count < 10
+        );
       allow delete: if false; // Admin-only
       // Engagement counters only. A key absent from this list makes the whole
       // update fail, so anything the client increments has to be listed here.

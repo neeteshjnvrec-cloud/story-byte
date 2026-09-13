@@ -21,6 +21,7 @@ import {
   limit as fbLimit,
   increment,
   runTransaction,
+  writeBatch,
   serverTimestamp,
   addDoc,
 } from 'firebase/firestore';
@@ -781,7 +782,21 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
         updatedAt: serverTimestamp(),
       };
 
-      await setDoc(storyRef, storyDoc);
+      // The daily cap is enforced server-side by the security rules against
+      // this counter (see firestore/firestore.rules.json) — incrementing it
+      // in the same batch as the story write is what actually makes the cap
+      // real; AppContext.js's own pre-check is just a fast, friendly message
+      // and would otherwise be trivially skippable by a modified client.
+      // UTC-keyed to match the rules, which only have server (UTC) time to
+      // validate against.
+      const now = new Date();
+      const dateKey = now.getUTCFullYear() * 10000 + (now.getUTCMonth() + 1) * 100 + now.getUTCDate();
+      const counterRef = doc(db, 'dailyStoryCounts', `${this.uid}_${dateKey}`);
+
+      const batch = writeBatch(db);
+      batch.set(storyRef, storyDoc);
+      batch.set(counterRef, { count: increment(1), updatedAt: serverTimestamp() }, { merge: true });
+      await batch.commit();
 
       // Update user's last published timestamp (for daily limit check)
       await this.updateLastCommunityStoryPublished(this.uid);

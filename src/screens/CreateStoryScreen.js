@@ -82,7 +82,7 @@ export function CreateStoryScreen() {
         authorProfilePic: userStats?.profilePic || userStats?.photoURL || '',
       });
       if (published?.limited) {
-        Alert.alert('Daily limit', published.message || 'You can publish up to 2 stories per day.');
+        Alert.alert('Daily limit', published.message || 'You can publish up to 10 stories per day.');
         setIsPublishing(false);
         return;
       }
@@ -102,7 +102,24 @@ export function CreateStoryScreen() {
         );
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to publish story. Please try again.');
+      // Check for daily limit error
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('one community story per day')) {
+        Alert.alert(
+          'Daily Limit Reached ⚠️',
+          'You can only publish one community story per day.\n\nYour story has been saved as a draft. You can create another story tomorrow!',
+          [
+            { text: 'OK', onPress: () => resetForm() },
+            { text: 'View Draft', style: 'cancel' }
+          ]
+        );
+      } else {
+        Alert.alert(
+          'Publishing Error',
+          errorMessage || 'Failed to publish story. Please check your connection and try again.',
+          [{ text: 'OK' }]
+        );
+      }
     } finally {
       setIsPublishing(false);
     }
