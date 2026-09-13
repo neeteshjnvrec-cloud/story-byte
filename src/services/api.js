@@ -685,31 +685,23 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
   // --- Community Story Publishing ---------------------------------------------
 
   /**
-   * Check if user has already posted a community story today.
-   * Uses a simple timestamp stored in user profile (no composite index needed).
+   * Check if user has reached daily community story limit (max 10 per day).
    * Returns true if limit reached (should block publish), false otherwise.
    */
   async checkDailyCommunityLimit(userId) {
     try {
-      const userRef = doc(db, 'users', userId);
-      const userDoc = await getDoc(userRef);
-
-      if (!userDoc.exists()) return false;
-
-      const data = userDoc.data();
-      const lastPublished = data.lastCommunityStoryPublishedAt;
-
-      if (!lastPublished) return false;
-
-      // Convert to Date (handle both timestamps and ISO strings)
-      const lastDate = lastPublished.toDate ? lastPublished.toDate() : new Date(lastPublished);
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
+      today.setHours(0, 0, 0, 0); // Start of today
 
-      // If last published is before today, allow new story
-      return lastDate >= today;
+      const q = query(
+        collection(db, 'stories'),
+        where('authorId', '==', userId),
+        where('isCommunityStory', '==', true),
+        where('createdAt', '>=', today)
+      );
+
+      const snap = await getDocs(q);
+      return snap.size >= 10; // Block if 10 or more stories today
     } catch (error) {
       console.error('checkDailyCommunityLimit error:', error);
       return false; // Fail open - don't block if check fails
@@ -731,10 +723,10 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
 
   async publishCommunityStory(storyData) {
     try {
-      // Check daily limit: max 1 community story per user per day
+      // Check daily limit: max 10 community stories per user per day
       const limitReached = await this.checkDailyCommunityLimit(this.uid);
       if (limitReached) {
-        throw new Error('You can only publish one community story per day. Please try again tomorrow.');
+        throw new Error('You can only publish 10 community stories per day. Please try again tomorrow.');
       }
 
       const storyId = `community_${Date.now()}_${this.uid}`;
