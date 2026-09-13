@@ -19,7 +19,14 @@ try {
   Groq = null;
 }
 
-const MODEL = process.env.GROQ_MODEL_CAROUSEL || 'llama-3.3-70b-versatile';
+// Groq periodically retires models outright (this list previously defaulted
+// to the now-404ing llama-3.3-70b-versatile) — a fallback chain, same
+// pattern as build-stories.js, means one deprecation doesn't silently kill
+// every carousel's AI copy until someone notices the warning in CI logs.
+const MODELS = (process.env.GROQ_MODEL_CAROUSEL || 'qwen/qwen3.6-27b,openai/gpt-oss-20b,groq/compound,openai/gpt-oss-120b')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 /** How many teaser slides a story earns, scaled to its length. */
 function slideCountFor(text) {
@@ -86,17 +93,27 @@ async function llmCopy({ title, text, genre, description }, count) {
       'character), no text or words rendered in the image, no summary of plot.';
     const user = `Title: ${title}\nGenre: ${genre}\nDescription: ${description || ''}\n\nStory:\n${String(text || '').slice(0, 6000)}`;
 
-    const completion = await groq.chat.completions.create({
-      model: MODEL,
-      temperature: 0.9,
-      max_tokens: 900,
-      top_p: 0.95,
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: sys },
-        { role: 'user', content: user },
-      ],
-    });
+    let completion = null;
+    let lastError = null;
+    for (const model of MODELS) {
+      try {
+        completion = await groq.chat.completions.create({
+          model,
+          temperature: 0.9,
+          max_tokens: 900,
+          top_p: 0.95,
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: sys },
+            { role: 'user', content: user },
+          ],
+        });
+        break;
+      } catch (e) {
+        lastError = e;
+      }
+    }
+    if (!completion) throw lastError || new Error('all carousel-copy models failed');
 
     const d = JSON.parse(completion.choices[0].message.content.trim());
     const slides = Array.isArray(d.slides)
