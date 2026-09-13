@@ -596,6 +596,15 @@ export const AppContextProvider = ({ children }) => {
 
       return published;
     } catch (error) {
+      // The daily cap is actually enforced by the security rules (see
+      // firestore/firestore.rules.json) — the pre-check above is only a
+      // best-effort local count and can occasionally miss (e.g. two rapid
+      // submissions racing each other). When the rules reject the write for
+      // that reason, surface it the same friendly way instead of a raw
+      // Firebase error.
+      if (error?.code === 'permission-denied') {
+        return { limited: true, message: 'You can publish up to 10 stories per day.' };
+      }
       console.error('Error publishing story:', error);
       throw error;
     } finally {
