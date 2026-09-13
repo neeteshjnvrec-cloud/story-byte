@@ -388,15 +388,15 @@ async function main() {
         title: item.title, text: item.text, description: item.igHook || item.description,
         genre: item.genre, pageUrl: item.pageUrl,
       };
-      await postStoryCarousel(socialStory, item.igSlideUrls);
-      await postStoryToFacebook(socialStory, item.igSlideUrls);
-      // The narrated video — separate from the silent carousel above, so
-      // both go out: one for feed browsing, one for anyone who wants to
-      // actually hear the story without leaving Instagram/Facebook.
-      if (item.videoUrl) {
-        await postStoryReel(socialStory, item.videoUrl);
-        await postStoryVideo(socialStory, item.videoUrl);
-      }
+
+      // Prefer the narrated video — it carries the audio, the carousel
+      // doesn't — and only fall back to the silent carousel/photo post if
+      // the video post itself fails, so a story never posts twice.
+      const igReel = item.videoUrl ? await postStoryReel(socialStory, item.videoUrl) : { posted: false };
+      if (!igReel.posted) await postStoryCarousel(socialStory, item.igSlideUrls);
+
+      const fbVideo = item.videoUrl ? await postStoryVideo(socialStory, item.videoUrl) : { posted: false };
+      if (!fbVideo.posted) await postStoryToFacebook(socialStory, item.igSlideUrls);
     }
   }
 
