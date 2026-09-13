@@ -52,6 +52,11 @@ jobs:
           # the IG post until then.
           IG_BUSINESS_ACCOUNT_ID: ${{ secrets.IG_BUSINESS_ACCOUNT_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          # Optional — Facebook Page auto-post (same carousel images as
+          # Instagram). Left unset until INSTAGRAM-SETUP.md's Facebook
+          # section secrets are added; the pipeline just skips the FB post.
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
         run: |
           node build-stories.js
           node build-story-pages.js
