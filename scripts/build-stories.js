@@ -27,6 +27,7 @@ const { buildStoryVideo } = require('./lib/video');
 const { buildVideoScenes } = require('./lib/video-scenes');
 const { parseSrt, toCaptionLines } = require('./lib/subtitles');
 const { bakeInCaptions } = require('./lib/caption-frames');
+const { REEL_MAX_SEC, clipScenes, clipAudio } = require('./lib/video-clip');
 const { postStoryCarousel, postStoryReel } = require('./lib/instagram');
 const { postStoryToFacebook, postStoryVideo } = require('./lib/facebook');
 const { getOccasion, occasionPhrase } = require('./occasions');
@@ -437,6 +438,7 @@ async function run() {
         // video post — the only way the narration plays (with captions) on
         // Instagram/Facebook, since the carousel above is silent and static.
         let videoUrl = null;
+        let reelVideoUrl = null;
         if (igSlideUrls.length) {
           try {
             // Real-content, narration-timed scenes (lib/video-scenes.js) —
@@ -467,14 +469,41 @@ async function run() {
               const slideFiles = igSlideUrls.map((_, i) => path.join(outDir, `slide-${i + 1}.jpg`));
               scenes = slideFiles.map((file) => ({ file }));
             }
+            // clipScenes below needs a real per-scene duration regardless of
+            // which path produced `scenes` — the teaser-slide fallback has
+            // none (buildStoryVideo splits the audio evenly on its own), so
+            // backfill the same even split explicitly here.
+            if (scenes.some((s) => !s.duration)) {
+              const per = Math.max(2, dur / scenes.length);
+              scenes = scenes.map((s) => ({ file: s.file, duration: s.duration || per }));
+            }
             const videoPath = buildStoryVideo({ scenes, audioPath: audio, outPath: path.join(outDir, 'story.mp4') });
             if (videoPath) videoUrl = `${SITE}/instagram/${id}/story.mp4`;
+            reelVideoUrl = videoUrl;
+
+            // Instagram Reels only reliably process clips up to ~90s — a
+            // long narration that publishes fine as a Facebook video
+            // consistently fails Reels' async processing if sent in full.
+            // Facebook keeps the full-length video; Instagram gets a short
+            // clipped one instead.
+            if (videoPath && dur > REEL_MAX_SEC) {
+              try {
+                const clippedAudio = clipAudio(audio, REEL_MAX_SEC, path.join(outDir, 'reel-audio.mp3'));
+                if (clippedAudio) {
+                  const clippedScenes = clipScenes(scenes, REEL_MAX_SEC);
+                  const reelPath = buildStoryVideo({ scenes: clippedScenes, audioPath: clippedAudio, outPath: path.join(outDir, 'story-reel.mp4') });
+                  if (reelPath) reelVideoUrl = `${SITE}/instagram/${id}/story-reel.mp4`;
+                }
+              } catch (e) {
+                console.warn(`  ⚠️  Reel clip failed for ${id}, Instagram will use the full video: ${e.message}`);
+              }
+            }
           } catch (e) {
             console.warn(`  ⚠️  Video render failed for ${id}: ${e.message}`);
           }
         }
 
-        generated = { id, slot, content, duration: dur, igSlideUrls, igHook, videoUrl };
+        generated = { id, slot, content, duration: dur, igSlideUrls, igHook, videoUrl, reelVideoUrl };
         await markSlotSuccess(slot);
         usedSlots.add(slotKey);
       } catch (e) {
@@ -587,7 +616,10 @@ async function run() {
       // Prefer the narrated video — it carries the audio, the carousel
       // doesn't — and only fall back to the silent carousel/photo post if
       // the video post itself fails, so a story never posts twice.
-      const igReel = p.videoUrl ? await postStoryReel(socialStory, p.videoUrl) : { posted: false };
+      // Instagram gets the ~90s-or-under Reel clip (reelVideoUrl falls back
+      // to the full video when no clipping was needed); Facebook keeps the
+      // full-length narration, which has no such duration ceiling.
+      const igReel = p.reelVideoUrl ? await postStoryReel(socialStory, p.reelVideoUrl) : { posted: false };
       if (!igReel.posted) await postStoryCarousel(socialStory, p.igSlideUrls);
 
       const fbVideo = p.videoUrl ? await postStoryVideo(socialStory, p.videoUrl) : { posted: false };
