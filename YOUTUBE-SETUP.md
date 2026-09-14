@@ -99,3 +99,15 @@ you're using. This means either you created a "Desktop app" client (its
 redirect URIs aren't editable after creation — make a new **Web
 application** client instead, per Step 3) or the URI wasn't pasted exactly
 (check for a missing trailing slash, `http` vs `https`, or a typo'd port).
+
+**"invalid_client"** — a refresh token is tied to the specific OAuth
+client that issued it. This error means the `YOUTUBE_CLIENT_ID` /
+`YOUTUBE_CLIENT_SECRET` GitHub secrets don't match the client
+`youtube-auth.js` was run with when it printed the current
+`YOUTUBE_REFRESH_TOKEN` — usually from switching to a new client (e.g.
+Desktop app → Web application, per the redirect_uri_mismatch fix above)
+and only updating the refresh token secret, not the ID/secret to match.
+Fix: update all three secrets together from the same client — the
+Client ID and Client Secret from Google Cloud Console's Credentials
+page for that client, and a refresh token minted by running
+`youtube-auth.js` with those exact same two values.
