@@ -23,14 +23,21 @@ if (!CLIENT_ID || !CLIENT_SECRET) {
   process.exit(1);
 }
 
-// "Desktop app" OAuth clients accept any http://localhost:<port> redirect
-// without pre-registering it, which is what makes this loopback flow work
-// without a public callback URL.
+// Must exactly match an "Authorized redirect URI" on the OAuth client in
+// Google Cloud Console (Web application client type — see
+// YOUTUBE-SETUP.md), trailing slash included. "Desktop app" clients are
+// supposed to auto-allow any localhost port without registering it, but
+// that isn't reliably honored by the current Cloud Console — an exact,
+// explicitly registered URI on a Web application client sidesteps that.
 const PORT = 53682;
-const REDIRECT_URI = `http://localhost:${PORT}`;
+const REDIRECT_URI = `http://localhost:${PORT}/`;
 
 async function main() {
   const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+  console.log(`\nUsing redirect URI: ${REDIRECT_URI}`);
+  console.log('This must be registered EXACTLY (including the trailing slash) as an');
+  console.log('Authorized redirect URI on the OAuth client — see YOUTUBE-SETUP.md if');
+  console.log('you get "redirect_uri_mismatch".\n');
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     // Forces Google to hand back a refresh_token even on a re-auth for an

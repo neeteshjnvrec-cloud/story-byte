@@ -44,8 +44,20 @@ Your Firebase project is already a Google Cloud project, so reuse it:
 
 ### Step 3: Create OAuth credentials
 1. **APIs & Services → Credentials → Create Credentials → OAuth client ID**.
-2. Application type: **Desktop app**. Name it anything.
-3. Save the **Client ID** and **Client Secret** it gives you.
+2. Application type: **Web application** (not "Desktop app" — that type is
+   *supposed* to auto-allow any localhost redirect without registering it,
+   but the current Cloud Console doesn't reliably honor that, and shows up
+   as `Error 400: redirect_uri_mismatch` when you try to authorize).
+3. Name it anything.
+4. Under **Authorized redirect URIs**, click **+ ADD URI** and paste
+   exactly:
+   ```
+   http://localhost:53682/
+   ```
+   (trailing slash included — it has to match `youtube-auth.js`'s
+   `REDIRECT_URI` byte-for-byte.)
+5. **Create**, then save the **Client ID** and **Client Secret** it gives
+   you.
 
 ### Step 4: Mint a refresh token (on your own machine, not CI)
 ```bash
@@ -78,3 +90,12 @@ Once uploads start failing with an auth error in the Actions log (roughly
 every 7 days), just repeat **Step 4** and update the
 `YOUTUBE_REFRESH_TOKEN` secret with the new value from Step 5. Nothing
 else changes — same Client ID/Secret, just a fresh refresh token.
+
+## Troubleshooting
+
+**"Error 400: redirect_uri_mismatch"** — the redirect URI `youtube-auth.js`
+sends (`http://localhost:53682/`) isn't registered on the OAuth client
+you're using. This means either you created a "Desktop app" client (its
+redirect URIs aren't editable after creation — make a new **Web
+application** client instead, per Step 3) or the URI wasn't pasted exactly
+(check for a missing trailing slash, `http` vs `https`, or a typo'd port).
