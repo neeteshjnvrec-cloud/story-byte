@@ -14,27 +14,35 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+// Pollinations' anonymous tier is paced at one request per 15s — a burst of
+// back-to-back retries (what an earlier version of this file did: a couple
+// of seconds of backoff on 429) never gets ahead of that, it just re-trips
+// the same limiter. A single story needs a dozen-plus of these (carousel
+// slides + video scenes both draw from it), so every call — across every
+// caller, sequential or not — is paced through this one module-level gate
+// instead of firing whenever its caller happens to be ready.
+const MIN_INTERVAL_MS = 16000;
+let nextSlotAt = 0;
+
+async function waitForSlot() {
+  const wait = nextSlotAt - Date.now();
+  nextSlotAt = Math.max(nextSlotAt, Date.now()) + MIN_INTERVAL_MS;
+  if (wait > 0) await sleep(wait);
+}
+
 /** Fetches one bespoke scene illustration. Never throws — callers fall back
- *  to a themed gradient card / equal-timing slide when this returns null.
- *
- *  A single long story can need a dozen-plus of these back to back (carousel
- *  slides + video scenes both draw from the same free, unauthenticated API),
- *  which is enough to trip pollinations.ai's burst rate limit (HTTP 429) —
- *  observed in production wiping out every single fetch for one story.
- *  429 specifically means "try again shortly", so it gets a couple of
- *  backoff retries; any other failure (timeout, 5xx, truncated response)
- *  fails fast as before. */
-async function fetchSceneImage(prompt, seed, { width = 1080, height = 1350, timeoutMs = 25000, retries = 2 } = {}) {
+ *  to a themed gradient card / equal-timing slide when this returns null. */
+async function fetchSceneImage(prompt, seed, { width = 1080, height = 1350, timeoutMs = 25000, retries = 1 } = {}) {
   const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&nologo=true&seed=${seed}&model=flux`;
 
   for (let attempt = 0; ; attempt++) {
+    await waitForSlot();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const res = await fetch(url, { signal: controller.signal });
       if (res.status === 429 && attempt < retries) {
         clearTimeout(timer);
-        await sleep(3000 * (attempt + 1));
         continue;
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
