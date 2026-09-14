@@ -30,6 +30,9 @@ const { notifyAndPushUser, notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { buildStoryVideo } = require('./lib/video');
+const { buildVideoScenes } = require('./lib/video-scenes');
+const { parseSrt, toCaptionLines } = require('./lib/subtitles');
+const { bakeInCaptions } = require('./lib/caption-frames');
 const { postStoryCarousel, postStoryReel } = require('./lib/instagram');
 const { postStoryToFacebook, postStoryVideo } = require('./lib/facebook');
 
@@ -122,20 +125,34 @@ const VOICES = {
   ml: 'ml-IN-SobhanaNeural',
 };
 
-function synth(text, voice, out) {
+// `subsOut`, when given, asks edge-tts for a word-timed .srt alongside the
+// mp3 (drives narration-synced captions/scene timing in the video — see
+// lib/video-scenes.js and lib/subtitles.js). Best-effort only: if a
+// --write-subtitles attempt fails on every EDGE candidate (e.g. an older
+// build without the flag), we retry without it rather than let an
+// enhancement break audio synthesis, which every story needs regardless.
+function synth(text, voice, out, subsOut) {
   const txt = path.join(os.tmpdir(), `sb-${Date.now()}.txt`);
   fs.writeFileSync(txt, text, 'utf8');
-  const args = ['--voice', voice, '--file', txt, '--write-media', out];
-  let ok = false, err;
-  for (const [cmd, pre] of EDGE) {
-    try {
-      if (fs.existsSync(out)) fs.unlinkSync(out);
-      execFileSync(cmd, [...pre, ...args], { stdio: 'pipe' });
-      if (fs.existsSync(out) && fs.statSync(out).size > 1024) { ok = true; break; }
-    } catch (e) { err = e; }
-  }
+  const baseArgs = ['--voice', voice, '--file', txt, '--write-media', out];
+
+  let err;
+  const attempt = (args) => {
+    for (const [cmd, pre] of EDGE) {
+      try {
+        if (fs.existsSync(out)) fs.unlinkSync(out);
+        execFileSync(cmd, [...pre, ...args], { stdio: 'pipe' });
+        if (fs.existsSync(out) && fs.statSync(out).size > 1024) return true;
+      } catch (e) { err = e; }
+    }
+    return false;
+  };
+
+  const ok = (subsOut && attempt([...baseArgs, '--write-subtitles', subsOut])) || attempt(baseArgs);
+
   try { fs.unlinkSync(txt); } catch (e) {}
   if (!ok) throw new Error('edge-tts failed: ' + (err?.message ?? 'unknown'));
+  return { subtitlesPath: subsOut && fs.existsSync(subsOut) ? subsOut : null };
 }
 
 function durationSec(file) {
@@ -253,7 +270,8 @@ async function main() {
       // needs a voice here — otherwise a Spanish story is read aloud by an
       // English voice, which mangles the pronunciation.
       const voice = VOICES[story.language] || VOICES.en;
-      synth(story.text, voice, audioPath);
+      const subsPath = path.join(os.tmpdir(), `${storyId}.srt`);
+      const synthResult = synth(story.text, voice, audioPath, subsPath);
       const dur = durationSec(audioPath) || Math.max(30, Math.round((story.text || '').split(/\s+/).length / 2.5));
       console.log(`    ✅ Audio: ${Math.round(fs.statSync(audioPath).size / 1024)}KB, ${dur}s`);
 
@@ -286,15 +304,43 @@ async function main() {
         console.warn(`    ⚠️  Carousel render failed: ${e.message}`);
       }
 
-      // 5. Render the narrated video (slides + the real audio) for a Reel/
-      // video post — the only way the actual narration plays on Instagram/
-      // Facebook, since the carousel above is silent.
+      // 5. Render the narrated video (real story-content scenes, timed to
+      // the actual narration, + burned-in captions) for a Reel/video post —
+      // the only way the narration plays (with captions) on Instagram/
+      // Facebook, since the carousel above is silent and static.
       let videoUrl = null;
       if (igSlideUrls.length) {
         try {
           const outDir = path.join(PUB, 'instagram', storyId);
-          const slideFiles = igSlideUrls.map((_, i) => path.join(outDir, `slide-${i + 1}.jpg`));
-          const videoPath = buildStoryVideo({ slideFiles, audioPath, outPath: path.join(outDir, 'story.mp4') });
+          // Real-content, narration-timed scenes (lib/video-scenes.js) —
+          // walks the actual story with art that tracks what's being said,
+          // not the carousel's spoiler-free teaser slides at equal
+          // intervals. Falls back to those teaser slides at even timing if
+          // Groq/subtitles aren't available, so the video post is never
+          // blocked by this.
+          let scenes = null;
+          if (synthResult.subtitlesPath) {
+            try {
+              const cues = parseSrt(fs.readFileSync(synthResult.subtitlesPath, 'utf8'));
+              if (cues.length) {
+                scenes = await buildVideoScenes({
+                  storyId, title: story.title, text: story.text, genre: story.genre,
+                  description: story.description, cues, audioDurSec: dur, outDir,
+                });
+                if (scenes) {
+                  const captionLines = toCaptionLines(cues);
+                  scenes = await bakeInCaptions(scenes, captionLines, outDir, dur);
+                }
+              }
+            } catch (e) {
+              console.warn(`    ⚠️  Narration-synced scenes failed, using teaser slides: ${e.message}`);
+            }
+          }
+          if (!scenes) {
+            const slideFiles = igSlideUrls.map((_, i) => path.join(outDir, `slide-${i + 1}.jpg`));
+            scenes = slideFiles.map((file) => ({ file }));
+          }
+          const videoPath = buildStoryVideo({ scenes, audioPath, outPath: path.join(outDir, 'story.mp4') });
           if (videoPath) {
             videoUrl = `${SITE}/instagram/${storyId}/story.mp4`;
             console.log(`    ✅ Video: ${Math.round(fs.statSync(videoPath).size / 1024)}KB`);
