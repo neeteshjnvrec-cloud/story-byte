@@ -30,6 +30,7 @@ const { bakeInCaptions } = require('./lib/caption-frames');
 const { REEL_MAX_SEC, clipScenes, clipAudio } = require('./lib/video-clip');
 const { postStoryCarousel, postStoryReel } = require('./lib/instagram');
 const { postStoryToFacebook, postStoryVideo } = require('./lib/facebook');
+const { postStoryToYouTube } = require('./lib/youtube');
 const { getOccasion, occasionPhrase } = require('./occasions');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -615,6 +616,15 @@ async function run() {
 
       const fbVideo = p.videoUrl ? await postStoryVideo(socialStory, p.videoUrl) : { posted: false };
       if (!fbVideo.posted) await postStoryToFacebook(socialStory, p.igSlideUrls);
+
+      // YouTube gets the same full-length video as Facebook (no duration
+      // ceiling to clip for) — independent of whether IG/FB succeeded, so
+      // one platform's failure never costs another. Reads straight off
+      // local disk, so it doesn't need the Firebase Hosting deploy above
+      // to have happened first.
+      if (p.videoUrl) {
+        await postStoryToYouTube(socialStory, path.join(PUB, 'instagram', p.id, 'story.mp4'));
+      }
     }
   }
 

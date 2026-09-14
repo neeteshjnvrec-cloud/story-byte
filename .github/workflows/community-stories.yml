@@ -75,6 +75,14 @@ jobs:
           # section secrets are added; the pipeline just skips the FB post.
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          # Optional — YouTube upload of the full narrated video. Left
+          # unset until YOUTUBE-SETUP.md's secrets are added; the pipeline
+          # just skips the YouTube upload until then. YOUTUBE_REFRESH_TOKEN
+          # expires ~weekly while the OAuth app is in Testing mode — see
+          # YOUTUBE-SETUP.md for the re-mint step.
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         # The script deploys hosting itself (and refuses to publish when that
         # deploy fails), so the workflow must NOT deploy again — the old second
         # step had no auth and red-exited every successful run.
