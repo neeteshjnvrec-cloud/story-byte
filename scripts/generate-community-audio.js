@@ -22,12 +22,12 @@
  */
 const admin = require('firebase-admin');
 const { execFileSync } = require('child_process');
-const https = require('https');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { notifyAndPushUser, notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
+const { fetchPollinationsImage } = require('./lib/scene-image');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { buildStoryVideo } = require('./lib/video');
 const { buildVideoScenes } = require('./lib/video-scenes');
@@ -85,17 +85,6 @@ function coverPrompt(story) {
   // image model to draw anything devotional-looking from.
   const subject = story.genre === 'devotional' ? (story.title || story.description || '') : (story.description || story.title || '');
   return `${subject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text`;
-}
-
-function fetchImage(url, out) {
-  return new Promise((resolve, reject) => {
-    const f = fs.createWriteStream(out);
-    https.get(url, { timeout: 60000 }, (res) => {
-      if (res.statusCode !== 200) { res.resume(); return reject(new Error(`HTTP ${res.statusCode}`)); }
-      res.pipe(f);
-      f.on('finish', () => f.close(() => resolve()));
-    }).on('error', reject).on('timeout', () => this.destroy(new Error('timeout')));
-  });
 }
 
 const EDGE = [
@@ -260,10 +249,8 @@ async function main() {
 
     try {
       // 1. Generate cover image
-      await fetchImage(
-        `https://image.pollinations.ai/prompt/${encodeURIComponent(coverPrompt(story))}?width=768&height=768&nologo=true&seed=${hashSeed(storyId)}&model=flux`,
-        coverPath
-      );
+      const coverBuf = await fetchPollinationsImage(coverPrompt(story), hashSeed(storyId), { width: 768, height: 768 });
+      fs.writeFileSync(coverPath, coverBuf);
       console.log(`    ✅ Cover: ${Math.round(fs.statSync(coverPath).size / 1024)}KB`);
 
       // 2. Generate audio
