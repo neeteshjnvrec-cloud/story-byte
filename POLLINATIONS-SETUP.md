@@ -27,9 +27,14 @@ expects from a real client, so fewer timeouts too.
 ## 🔧 Setup (~2 minutes, one-time)
 
 ### Step 1: Get a token
-1. Go to **[auth.pollinations.ai](https://auth.pollinations.ai)**.
-2. Sign in / register (free — no payment info).
-3. Copy the Bearer token it gives you.
+1. Go to **[enter.pollinations.ai](https://enter.pollinations.ai)** — this is
+   pollinations' current dashboard/login domain. (Their own docs still
+   reference `auth.pollinations.ai`, an older URL that no longer loads —
+   if that one's stuck for you, this is why; use the link above instead.)
+2. Sign in (GitHub login) / register (free — no payment info).
+3. From the dashboard, find your API token (may be labeled "API Key" or
+   "Token" — the dashboard UI has moved around a bit across their recent
+   redesigns, so look under Settings/Account if it's not on the main page).
 
 ### Step 2: Add it as a GitHub secret
 1. Repo → **Settings → Secrets and variables → Actions**.

@@ -14,7 +14,7 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-// Free registration at auth.pollinations.ai gets a Bearer token that lifts
+// Free registration at enter.pollinations.ai gets a Bearer token that lifts
 // the anonymous tier's 1-request/15s pace to 1-request/5s ("seed" tier) —
 // see POLLINATIONS-SETUP.md. Optional: everything here still works
 // anonymously (just slower/more timeout-prone) when this isn't set.
