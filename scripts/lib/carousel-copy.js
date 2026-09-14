@@ -175,4 +175,4 @@ async function buildCarouselCopy(story) {
   };
 }
 
-module.exports = { buildCarouselCopy, slideCountFor };
+module.exports = { buildCarouselCopy, slideCountFor, extractJson };

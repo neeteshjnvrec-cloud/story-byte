@@ -21,29 +21,11 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 const { buildCarouselCopy } = require('./carousel-copy');
+const { fetchSceneImage, hashSeed } = require('./scene-image');
+const { theme } = require('./genre-theme');
 
 const W = 1080;
 const H = 1350;
-
-// Genre → gradient/accent (fallback cards) + a mood phrase folded into every
-// generated scene image so the art stays visually consistent with the copy.
-const GENRE_THEME = {
-  romance: { from: '#5c1a3a', to: '#220b16', accent: '#ff8fab', ink: '#2a0b1c', mood: 'warm, golden, tender, intimate' },
-  mystery: { from: '#1c2140', to: '#080a16', accent: '#8fa0ff', ink: '#12163a', mood: 'moody, atmospheric, muted tones, fog' },
-  drama: { from: '#3a2417', to: '#180d07', accent: '#ffc98b', ink: '#3a2417', mood: 'warm cinematic, earthy tones' },
-  fantasy: { from: '#0f3a34', to: '#051815', accent: '#7fe0c0', ink: '#0c2b26', mood: 'magical, glowing, otherworldly' },
-  thriller: { from: '#3a1414', to: '#140505', accent: '#ff6f61', ink: '#3a1414', mood: 'tense, shadowy, high-contrast' },
-  comedy: { from: '#4a3a00', to: '#1e1700', accent: '#ffd54f', ink: '#4a3a00', mood: 'bright, playful, whimsical' },
-  horror: { from: '#181818', to: '#000000', accent: '#c62828', ink: '#ffffff', mood: 'dark, eerie, unsettling shadows' },
-  adventure: { from: '#3a2a00', to: '#161000', accent: '#ffb300', ink: '#3a2a00', mood: 'sweeping, sunlit, epic vistas' },
-  sleep: { from: '#101a3a', to: '#040713', accent: '#8fa8ff', ink: '#0e1638', mood: 'calm, dreamy nighttime, soft moonlight' },
-  motivation: { from: '#3a2900', to: '#161000', accent: '#ff9f1c', ink: '#3a2900', mood: 'bright, uplifting, golden light' },
-  devotional: { from: '#3a2f0f', to: '#171205', accent: '#e0b84b', ink: '#3a2f0f', mood: 'serene, warm, sacred glow' },
-  'slice-of-life': { from: '#0f3a1a', to: '#051505', accent: '#8bd17c', ink: '#123a1e', mood: 'cozy, everyday, soft natural light' },
-  default: { from: '#241a12', to: '#0e0a06', accent: '#c99a5b', ink: '#241a12', mood: 'warm cinematic storybook' },
-};
-
-const theme = (genre) => GENRE_THEME[genre] || GENRE_THEME.default;
 
 const esc = (s = '') =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -54,12 +36,6 @@ const esc = (s = '') =>
 // present, not just named.
 const SERIF = "'Noto Serif Devanagari', Georgia, 'Noto Serif', 'DejaVu Serif', serif";
 const SANS = "'Noto Sans Devanagari', Helvetica, Arial, 'DejaVu Sans', sans-serif";
-
-function hashSeed(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100000;
-  return h;
-}
 
 /** Greedy word-wrap by estimated character width, capped at maxLines. */
 function wrapLines(text, maxChars, maxLines) {
@@ -125,26 +101,6 @@ async function loadLogoDataUri(size) {
 async function coverThumbDataUri(coverPath, size) {
   const buf = await sharp(coverPath).resize(size, size, { fit: 'cover' }).jpeg({ quality: 90 }).toBuffer();
   return `data:image/jpeg;base64,${buf.toString('base64')}`;
-}
-
-/** Fetches a bespoke scene illustration for one teaser beat. Never throws —
- *  a slide simply falls back to a themed gradient card if this fails. */
-async function fetchSceneImage(prompt, seed, { timeoutMs = 25000 } = {}) {
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${W}&height=${H}&nologo=true&seed=${seed}&model=flux`;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, { signal: controller.signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const buf = Buffer.from(await res.arrayBuffer());
-    if (buf.length < 2048) throw new Error('response too small');
-    return buf;
-  } catch (e) {
-    console.warn(`    ⚠️  Scene image fetch failed ("${prompt.slice(0, 50)}…"): ${e.message}`);
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
 }
 
 /** A slide with real art behind it — the story's own cover (slide 1) or a
@@ -341,4 +297,4 @@ async function buildCarouselSlides({ storyId, title, text, genre, description, c
   return { urls, hook };
 }
 
-module.exports = { buildCarouselSlides };
+module.exports = { buildCarouselSlides, wrapLines, tspans };
