@@ -82,9 +82,12 @@ export function CommunityScreen() {
     // Real-time listener. The status filter is what makes an under_review story
     // invisible to everyone including its author — without it, every client's
     // snapshot carried other people's unpublished submissions.
+    //
+    // No isCommunityStory filter: this feed shows both user-submitted
+    // community stories AND the AI daily library, merged by recency — the
+    // Home tab is the one that stays curated to isCommunityStory === false.
     const q = query(
       collection(db, 'stories'),
-      where('isCommunityStory', '==', true),
       where('status', '==', 'published'),
       orderBy('createdAt', 'desc'),
       fbLimit(50)
@@ -208,7 +211,9 @@ export function CommunityScreen() {
     const isRatingOpen = ratingOpenFor === id;
     const postedAt = timeAgo(item.createdAt);
     // Trim first: an empty-string authorName passes `||` but ''[0] is undefined.
-    const authorName = item.authorName?.trim() || 'Anonymous';
+    // The AI daily library carries its name under `author`, not `authorName`
+    // (see build-stories.js) — fall back to it before "Anonymous".
+    const authorName = item.authorName?.trim() || item.author?.trim() || 'Anonymous';
     const authorInitial = authorName[0].toUpperCase();
 
     return (

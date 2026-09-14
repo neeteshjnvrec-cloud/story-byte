@@ -762,10 +762,13 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
         try {
           const q = query(
             collection(db, 'stories'),
-            where('isCommunityStory', '==', true),
             // under_review stories are invisible to everyone, including their
             // own author — the pipeline flips them to 'published' once audio,
             // cover and doc are all wired.
+            //
+            // No isCommunityStory filter: the Community feed shows both
+            // user-submitted stories and the AI daily library, merged by
+            // recency — Home stays the one curated to isCommunityStory === false.
             where('status', '==', 'published'),
             orderBy('createdAt', 'desc'),
             fbLimit(50)
