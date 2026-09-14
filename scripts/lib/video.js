@@ -56,7 +56,16 @@ function buildStoryVideo({ slideFiles, audioPath, outPath }) {
     execFileSync('ffmpeg', [
       '-y', '-f', 'concat', '-safe', '0', '-i', listFile,
       '-i', audioPath,
-      '-vf', 'format=yuv420p',
+      // Instagram Reels processing (unlike Facebook's video post, which
+      // accepts our native 4:5 slides fine) is strict about both aspect
+      // ratio and frame rate: it wants 9:16, and a concat of still images
+      // with no explicit output rate can produce an effective frame rate
+      // far below what Reels' async processor will accept — both silently
+      // pass container creation and only fail later as
+      // "container ... failed processing". Pad into a 1080x1920 canvas and
+      // force a real constant frame rate to satisfy it.
+      '-vf', 'scale=1080:1350,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black,format=yuv420p',
+      '-r', '30',
       '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23',
       '-c:a', 'aac', '-b:a', '128k',
       '-shortest', '-movflags', '+faststart',
