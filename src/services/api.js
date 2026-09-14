@@ -682,8 +682,53 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
     throw new Error(`All Groq combinations failed: ${errorSummary}`);
   }
 
+  // --- Community Story Publishing ---------------------------------------------
+
+  /**
+   * Check if user has reached daily community story limit (max 10 per day).
+   * Returns true if limit reached (should block publish), false otherwise.
+   */
+  async checkDailyCommunityLimit(userId) {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Start of today
+
+      const q = query(
+        collection(db, 'stories'),
+        where('authorId', '==', userId),
+        where('isCommunityStory', '==', true),
+        where('createdAt', '>=', today)
+      );
+
+      const snap = await getDocs(q);
+      return snap.size >= 10; // Block if 10 or more stories today
+    } catch (error) {
+      console.error('checkDailyCommunityLimit error:', error);
+      return false; // Fail open - don't block if check fails
+    }
+  }
+
+  /**
+   * Update user's last community story publish timestamp
+   */
+  async updateLastCommunityStoryPublished(userId) {
+    try {
+      await setDoc(doc(db, 'users', userId), {
+        lastCommunityStoryPublishedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (error) {
+      console.error('updateLastCommunityStoryPublished error:', error);
+    }
+  }
+
   async publishCommunityStory(storyData) {
     try {
+      // Check daily limit: max 10 community stories per user per day
+      const limitReached = await this.checkDailyCommunityLimit(this.uid);
+      if (limitReached) {
+        throw new Error('You can only publish 10 community stories per day. Please try again tomorrow.');
+      }
+
       const storyId = `community_${Date.now()}_${this.uid}`;
       const storyRef = doc(db, 'stories', storyId);
 
@@ -744,6 +789,9 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
       batch.set(storyRef, storyDoc);
       batch.set(counterRef, { count: increment(1), updatedAt: serverTimestamp() }, { merge: true });
       await batch.commit();
+
+      // Update user's last published timestamp (for daily limit check)
+      await this.updateLastCommunityStoryPublished(this.uid);
 
       return { ...storyDoc, id: storyId };
     } catch (error) {

@@ -6,6 +6,7 @@
     "scheme": "storybyte",
     "version": "2.0.0",
     "orientation": "portrait",
+    "main": "App.js",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {

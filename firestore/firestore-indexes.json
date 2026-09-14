@@ -50,6 +50,15 @@
         { "fieldPath": "userId", "order": "ASCENDING" },
         { "fieldPath": "addedAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "stories",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "authorId", "order": "ASCENDING" },
+        { "fieldPath": "isCommunityStory", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []
