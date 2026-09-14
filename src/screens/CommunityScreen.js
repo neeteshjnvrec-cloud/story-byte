@@ -205,7 +205,9 @@ export function CommunityScreen() {
     const isRatingOpen = ratingOpenFor === id;
     const postedAt = timeAgo(item.createdAt);
     // Trim first: an empty-string authorName passes `||` but ''[0] is undefined.
-    const authorName = item.authorName?.trim() || 'Anonymous';
+    // The AI daily library carries its name under `author`, not `authorName`
+    // (see build-stories.js) — fall back to it before "Anonymous".
+    const authorName = item.authorName?.trim() || item.author?.trim() || 'Anonymous';
     const authorInitial = authorName[0].toUpperCase();
 
     return (

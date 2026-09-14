@@ -45,6 +45,30 @@ function truncate(s, max) {
   return s.slice(0, max - 1).replace(/\s+\S*$/, '') + '…';
 }
 
+/** Some reasoning-capable Groq models prepend prose (e.g. "**Reasoning**...")
+ *  or wrap the object in a ```json fence even with response_format:
+ *  json_object set. Try a plain parse first, then fall back to pulling out
+ *  the first balanced {...} block instead of failing the whole slide. */
+function extractJson(raw) {
+  const text = String(raw || '').trim();
+  try {
+    return JSON.parse(text);
+  } catch {
+    /* fall through to brace scan */
+  }
+  const start = text.indexOf('{');
+  if (start === -1) throw new Error('no JSON object found in model response');
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    else if (text[i] === '}') {
+      depth--;
+      if (depth === 0) return JSON.parse(text.slice(start, i + 1));
+    }
+  }
+  throw new Error('no balanced JSON object found in model response');
+}
+
 /** Evenly-spaced sentence groups across the whole story — a safe, no-LLM
  *  fallback that still reads as an arc rather than a random blob. No scene
  *  image (nothing here can safely describe one without the LLM). */
@@ -115,7 +139,7 @@ async function llmCopy({ title, text, genre, description }, count) {
     }
     if (!completion) throw lastError || new Error('all carousel-copy models failed');
 
-    const d = JSON.parse(completion.choices[0].message.content.trim());
+    const d = extractJson(completion.choices[0].message.content);
     const slides = Array.isArray(d.slides)
       ? d.slides
           .map((s) =>
