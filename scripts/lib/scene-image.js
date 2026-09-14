@@ -31,8 +31,16 @@ async function waitForSlot() {
 }
 
 /** Fetches one bespoke scene illustration. Never throws — callers fall back
- *  to a themed gradient card / equal-timing slide when this returns null. */
-async function fetchSceneImage(prompt, seed, { width = 1080, height = 1350, timeoutMs = 25000, retries = 1 } = {}) {
+ *  to a themed gradient card / equal-timing slide when this returns null.
+ *
+ *  Under load, pollinations' free flux tier routinely takes longer than a
+ *  quick call allows to render at 1080x1350 — observed in production as a
+ *  string of consecutive client-side timeouts, not 429s, once the request
+ *  pacing above was already fixed. So timeouts get the same one-retry
+ *  treatment as a 429 instead of failing on the first slow response, and
+ *  the timeout itself is generous enough to tolerate normal slow-load
+ *  latency rather than just re-triggering the same failure. */
+async function fetchSceneImage(prompt, seed, { width = 1080, height = 1350, timeoutMs = 45000, retries = 1 } = {}) {
   const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&nologo=true&seed=${seed}&model=flux`;
 
   for (let attempt = 0; ; attempt++) {
@@ -41,16 +49,18 @@ async function fetchSceneImage(prompt, seed, { width = 1080, height = 1350, time
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const res = await fetch(url, { signal: controller.signal });
-      if (res.status === 429 && attempt < retries) {
-        clearTimeout(timer);
-        continue;
+      if (res.status === 429) {
+        if (attempt < retries) continue;
+        throw new Error('HTTP 429');
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const buf = Buffer.from(await res.arrayBuffer());
       if (buf.length < 2048) throw new Error('response too small');
       return buf;
     } catch (e) {
-      console.warn(`    ⚠️  Scene image fetch failed ("${prompt.slice(0, 50)}…"): ${e.message}`);
+      if (e.name === 'AbortError' && attempt < retries) continue;
+      const reason = e.name === 'AbortError' ? `timed out after ${timeoutMs / 1000}s` : e.message;
+      console.warn(`    ⚠️  Scene image fetch failed ("${prompt.slice(0, 50)}…"): ${reason}`);
       return null;
     } finally {
       clearTimeout(timer);
