@@ -16,12 +16,12 @@
 const admin = require('firebase-admin');
 const Groq = require('groq-sdk');
 const { execFileSync } = require('child_process');
-const https = require('https');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
+const { fetchPollinationsImage } = require('./lib/scene-image');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { buildStoryVideo } = require('./lib/video');
 const { buildVideoScenes } = require('./lib/video-scenes');
@@ -223,16 +223,6 @@ function coverPrompt(slotOrStory, content) {
   return `${finalSubject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
 }
 
-function fetchImage(url, out) {
-  return new Promise((resolve, reject) => {
-    const f = fs.createWriteStream(out);
-    https.get(url, { timeout: 60000 }, (res) => {
-      if (res.statusCode !== 200) { res.resume(); return reject(new Error('img HTTP ' + res.statusCode)); }
-      res.pipe(f); f.on('finish', () => f.close(() => resolve()));
-    }).on('error', reject).on('timeout', function () { this.destroy(new Error('img timeout')); });
-  });
-}
-
 const EDGE = [['edge-tts', []], ['python3', ['-m', 'edge_tts']], ['uvx', ['edge-tts']]];
 // `subsOut`, when given, asks edge-tts for a word-timed .srt alongside the
 // mp3 (drives narration-synced captions/scene timing in the video — see
@@ -400,12 +390,13 @@ async function run() {
           continue;
         }
 
-        // Step 2: Generate cover
+        // Step 2: Generate cover — throws on failure (unlike the scene art
+        // below), so a missing cover fails this whole attempt and gets
+        // retried by the outer loop, same as before this shared the pacing
+        // gate with the scene/carousel art requests that come after it.
         const cover = path.join(PUB, 'covers', `${id}.jpg`);
-        await fetchImage(
-          `https://image.pollinations.ai/prompt/${encodeURIComponent(coverPrompt(slot, content))}?width=768&height=768&nologo=true&seed=${hashSeed(id)}&model=flux`,
-          cover
-        );
+        const coverBuf = await fetchPollinationsImage(coverPrompt(slot, content), hashSeed(id), { width: 768, height: 768 });
+        fs.writeFileSync(cover, coverBuf);
 
         // Step 3: Generate audio
         const audio = path.join(PUB, 'audio', `${id}.mp3`);

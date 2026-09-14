@@ -47,6 +47,12 @@ jobs:
           GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           FIREBASE_PROJECT_ID: storybyte-76716
+          # Optional — free pollinations.ai "seed" tier registration lifts
+          # the anonymous 1-request/15s image pace to 1-request/5s. Left
+          # unset until POLLINATIONS-SETUP.md's token is added; the
+          # pipeline just paces slower (and times out more under load)
+          # until then.
+          POLLINATIONS_API_TOKEN: ${{ secrets.POLLINATIONS_API_TOKEN }}
           # Optional — Instagram carousel auto-post. Left unset until
           # INSTAGRAM-SETUP.md's secrets are added; the pipeline just skips
           # the IG post until then.
