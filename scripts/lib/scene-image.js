@@ -39,13 +39,19 @@ async function waitForSlot() {
 /**
  * Fetches one pollinations.ai image and returns it as a Buffer, or throws.
  * Paced through the shared gate above and authenticated when a token is
- * configured. Timeouts get the same one-retry treatment as a 429 instead of
- * failing on the first slow response — under load, pollinations' free flux
- * tier routinely takes longer than a quick call allows to render at
- * 1080x1350, observed in production as a string of consecutive client-side
- * timeouts once request pacing on its own was already fixed.
+ * configured. Timeouts and 5xx get the same retry treatment as a 429
+ * instead of failing on the first bad response — under load, pollinations'
+ * free flux tier routinely takes longer than a quick call allows to render
+ * at 1080x1350 (observed as a string of consecutive client-side timeouts
+ * once request pacing on its own was already fixed) and its shared
+ * infrastructure occasionally 500s transiently (observed taking down the
+ * cover fetch — which throws rather than degrading gracefully, since a
+ * missing cover fails the whole story — for 3 straight outer attempts with
+ * no retry at all). A genuine 4xx (bad prompt, bad auth) still fails fast;
+ * only 429/5xx/timeout are treated as "probably transient, worth another
+ * shot at the next paced slot."
  */
-async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 1350, timeoutMs = 45000, retries = 1 } = {}) {
+async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 1350, timeoutMs = 45000, retries = 2 } = {}) {
   const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&nologo=true&seed=${seed}&model=flux`;
   const headers = POLLINATIONS_TOKEN ? { Authorization: `Bearer ${POLLINATIONS_TOKEN}` } : undefined;
 
@@ -55,9 +61,9 @@ async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 135
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const res = await fetch(url, { signal: controller.signal, headers });
-      if (res.status === 429) {
+      if (res.status === 429 || res.status >= 500) {
         if (attempt < retries) continue;
-        throw new Error('HTTP 429');
+        throw new Error(`HTTP ${res.status}`);
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const buf = Buffer.from(await res.arrayBuffer());
