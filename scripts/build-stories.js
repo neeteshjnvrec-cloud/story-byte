@@ -392,12 +392,12 @@ async function run() {
           continue;
         }
 
-        // Step 2: Generate cover — pollinations.ai, falling back to Gemini
-        // (see lib/scene-image.js), falling back to a local themed
-        // gradient card (no network call, can't fail) if both providers
-        // are down. Confirmed in production that a pollinations-only
-        // outage previously aborted the whole story here even though the
-        // actual text/audio content was generating fine.
+        // Step 2: Generate cover — pollinations.ai, falling back to
+        // Cloudflare Workers AI (see lib/scene-image.js), falling back to
+        // a local themed gradient card (no network call, can't fail) if
+        // both providers are down. Confirmed in production that a
+        // pollinations-only outage previously aborted the whole story here
+        // even though the actual text/audio content was generating fine.
         const cover = path.join(PUB, 'covers', `${id}.jpg`);
         let coverBuf;
         try {

@@ -250,12 +250,12 @@ async function main() {
     const audioPath = path.join(PUB, 'audio', `${storyId}.mp3`);
 
     try {
-      // 1. Generate cover image — pollinations.ai, falling back to Gemini
-      // (see lib/scene-image.js), falling back to a local themed gradient
-      // card (no network call, can't fail) if both providers are down.
-      // Confirmed in production that a pollinations-only outage previously
-      // aborted the whole story here even though the actual text/audio
-      // content was generating fine.
+      // 1. Generate cover image — pollinations.ai, falling back to
+      // Cloudflare Workers AI (see lib/scene-image.js), falling back to a
+      // local themed gradient card (no network call, can't fail) if both
+      // providers are down. Confirmed in production that a
+      // pollinations-only outage previously aborted the whole story here
+      // even though the actual text/audio content was generating fine.
       let coverBuf;
       try {
         coverBuf = await fetchStoryImage(coverPrompt(story), hashSeed(storyId), { width: 768, height: 768 });
