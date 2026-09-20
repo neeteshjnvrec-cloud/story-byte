@@ -28,6 +28,7 @@ const path = require('path');
 const { notifyAndPushUser, notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { fetchPollinationsImage } = require('./lib/scene-image');
+const { renderFallbackCover } = require('./lib/fallback-cover');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { buildStoryVideo } = require('./lib/video');
 const { buildVideoScenes } = require('./lib/video-scenes');
@@ -249,8 +250,18 @@ async function main() {
     const audioPath = path.join(PUB, 'audio', `${storyId}.mp3`);
 
     try {
-      // 1. Generate cover image
-      const coverBuf = await fetchPollinationsImage(coverPrompt(story), hashSeed(storyId), { width: 768, height: 768 });
+      // 1. Generate cover image. Falls back to a local themed gradient
+      // card (no network call, can't fail) if pollinations.ai is down —
+      // confirmed in production as a genuine multi-minute outage on their
+      // end, which previously aborted the whole story here even though
+      // the actual text/audio content was generating fine.
+      let coverBuf;
+      try {
+        coverBuf = await fetchPollinationsImage(coverPrompt(story), hashSeed(storyId), { width: 768, height: 768 });
+      } catch (e) {
+        console.warn(`    ⚠️  Cover fetch failed, using a themed fallback: ${e.message}`);
+        coverBuf = await renderFallbackCover(story.genre);
+      }
       fs.writeFileSync(coverPath, coverBuf);
       console.log(`    ✅ Cover: ${Math.round(fs.statSync(coverPath).size / 1024)}KB`);
 
