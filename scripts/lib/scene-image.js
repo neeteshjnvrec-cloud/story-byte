@@ -1,6 +1,6 @@
 /**
- * Shared image fetcher (pollinations.ai, with a Gemini fallback) — used
- * for the story cover AND both the carousel slide renderer and the
+ * Shared image fetcher (Gemini first, pollinations.ai as a fallback) —
+ * used for the story cover AND both the carousel slide renderer and the
  * narrated-video scene renderer, so the image-generation strategy (auth,
  * pacing, sizing, timeout, seeding, fallback) is one implementation
  * instead of three.
@@ -83,24 +83,27 @@ async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 135
 }
 
 /**
- * Fetches one image, trying pollinations.ai first and falling back to
- * Gemini (see lib/gemini-image.js) if that fails — pollinations has shown
- * real multi-hour outages in production, and a missing cover/scene used to
- * mean either aborting the whole story (cover) or just losing the bespoke
- * art (scene) for as long as the outage lasted. Gemini doesn't take an
- * explicit width/height the way pollinations does, so its output gets
- * resized to match. Throws only if both providers fail.
+ * Fetches one image, trying Gemini first (see lib/gemini-image.js) and
+ * falling back to pollinations.ai if that fails. Gemini needs no request
+ * pacing the way pollinations does (see MIN_INTERVAL_MS above), so leading
+ * with it is both faster on the common case and avoids pollinations
+ * entirely on days when Gemini alone can carry the whole story — reserving
+ * pollinations for whenever Gemini itself is unavailable (no key
+ * configured, its own outage, or its free-tier quota exhausted for the
+ * day). Gemini doesn't take an explicit width/height the way pollinations
+ * does, so its output gets resized to match. Throws only if both
+ * providers fail.
  */
 async function fetchStoryImage(prompt, seed, opts = {}) {
   const { width = 1080, height = 1350 } = opts;
   try {
-    return await fetchPollinationsImage(prompt, seed, opts);
+    const buf = await fetchGeminiImage(prompt);
+    return await sharp(buf).resize(width, height, { fit: 'cover' }).jpeg({ quality: 90 }).toBuffer();
   } catch (primaryError) {
     try {
-      const buf = await fetchGeminiImage(prompt);
-      return await sharp(buf).resize(width, height, { fit: 'cover' }).jpeg({ quality: 90 }).toBuffer();
+      return await fetchPollinationsImage(prompt, seed, opts);
     } catch (fallbackError) {
-      throw new Error(`pollinations: ${primaryError.message}; gemini: ${fallbackError.message}`);
+      throw new Error(`gemini: ${primaryError.message}; pollinations: ${fallbackError.message}`);
     }
   }
 }
