@@ -65,12 +65,13 @@ jobs:
           # pipeline just paces slower (and times out more under load)
           # until then.
           POLLINATIONS_API_TOKEN: ${{ secrets.POLLINATIONS_API_TOKEN }}
-          # Optional — Gemini's free image-generation tier as an automatic
-          # fallback when pollinations.ai itself is down (it has had real
-          # multi-hour outages). Left unset until GEMINI-SETUP.md's key is
-          # added; the pipeline just falls straight to a local themed
-          # cover/card instead until then.
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Optional — Cloudflare Workers AI's free image-generation tier
+          # as an automatic fallback when pollinations.ai itself is down
+          # (it has had real multi-hour outages). Left unset until
+          # CLOUDFLARE-SETUP.md's secrets are added; the pipeline just
+          # falls straight to a local themed cover/card instead until then.
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           # Optional — Instagram carousel auto-post. Left unset until
           # INSTAGRAM-SETUP.md's secrets are added; the pipeline just skips
           # the IG post until then.
