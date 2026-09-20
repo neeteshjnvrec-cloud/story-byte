@@ -46,8 +46,20 @@ const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
 // GROQ_MODEL can be:
 //   - comma-separated: "model1,model2,model3"
 //   - JSON array string: '["model1","model2"]' or ["model1","model2"]
+// --- .env loader (local) ---
+(function () {
+  try {
+    const p = path.join(ROOT, '.env');
+    if (!fs.existsSync(p)) return;
+    for (const line of fs.readFileSync(p, 'utf8').split('\n')) {
+      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+      if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
+    }
+  } catch (e) {}
+})();
+
 function parseModels(envValue) {
-  if (!envValue) return ['qwen/qwen3.6-27b', 'openai/gpt-oss-20b', 'groq/compound', 'openai/gpt-oss-120b'];
+  if (!envValue) return ['groq/compound-mini', 'groq/compound', 'openai/gpt-oss-20b', 'openai/gpt-oss-120b'];
   const raw = envValue.trim();
   // Try JSON array first (handles ['model1', 'model2'] format)
   if (raw.startsWith('[') || raw.startsWith('(')) {
@@ -65,18 +77,6 @@ const MODELS = parseModels(process.env.GROQ_MODEL);
 const DATE = process.env.STORY_DATE || new Date().toISOString().slice(0, 10);
 const DAILY_COUNT = 1; // Exactly 1 story per day
 const MAX_RETRIES = 6; // Retry each slot up to 6 times (trying different models)
-
-// --- .env loader (local) ---
-(function () {
-  try {
-    const p = path.join(ROOT, '.env');
-    if (!fs.existsSync(p)) return;
-    for (const line of fs.readFileSync(p, 'utf8').split('\n')) {
-      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
-      if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
-    }
-  } catch (e) {}
-})();
 
 // --- credentials: resolve a service-account file path ---
 function serviceAccountPath() {

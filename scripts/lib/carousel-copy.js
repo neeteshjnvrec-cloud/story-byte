@@ -23,7 +23,7 @@ try {
 // to the now-404ing llama-3.3-70b-versatile) — a fallback chain, same
 // pattern as build-stories.js, means one deprecation doesn't silently kill
 // every carousel's AI copy until someone notices the warning in CI logs.
-const MODELS = (process.env.GROQ_MODEL_CAROUSEL || 'qwen/qwen3.6-27b,openai/gpt-oss-20b,groq/compound,openai/gpt-oss-120b')
+const MODELS = (process.env.GROQ_MODEL_CAROUSEL || 'groq/compound-mini,groq/compound,openai/gpt-oss-20b,openai/gpt-oss-120b')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
