@@ -1,9 +1,13 @@
 /**
- * Shared pollinations.ai image fetcher — used for the story cover AND both
- * the carousel slide renderer and the narrated-video scene renderer, so the
- * image-generation strategy (auth, pacing, sizing, timeout, seeding) is one
- * implementation instead of three.
+ * Shared image fetcher (Gemini first, pollinations.ai as a fallback) —
+ * used for the story cover AND both the carousel slide renderer and the
+ * narrated-video scene renderer, so the image-generation strategy (auth,
+ * pacing, sizing, timeout, seeding, fallback) is one implementation
+ * instead of three.
  */
+const sharp = require('sharp');
+const { fetchGeminiImage } = require('./gemini-image');
+
 function hashSeed(s) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100000;
@@ -78,15 +82,41 @@ async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 135
   }
 }
 
+/**
+ * Fetches one image, trying Gemini first (see lib/gemini-image.js) and
+ * falling back to pollinations.ai if that fails. Gemini needs no request
+ * pacing the way pollinations does (see MIN_INTERVAL_MS above), so leading
+ * with it is both faster on the common case and avoids pollinations
+ * entirely on days when Gemini alone can carry the whole story — reserving
+ * pollinations for whenever Gemini itself is unavailable (no key
+ * configured, its own outage, or its free-tier quota exhausted for the
+ * day). Gemini doesn't take an explicit width/height the way pollinations
+ * does, so its output gets resized to match. Throws only if both
+ * providers fail.
+ */
+async function fetchStoryImage(prompt, seed, opts = {}) {
+  const { width = 1080, height = 1350 } = opts;
+  try {
+    const buf = await fetchGeminiImage(prompt);
+    return await sharp(buf).resize(width, height, { fit: 'cover' }).jpeg({ quality: 90 }).toBuffer();
+  } catch (primaryError) {
+    try {
+      return await fetchPollinationsImage(prompt, seed, opts);
+    } catch (fallbackError) {
+      throw new Error(`gemini: ${primaryError.message}; pollinations: ${fallbackError.message}`);
+    }
+  }
+}
+
 /** Fetches one bespoke scene illustration. Never throws — callers fall back
  *  to a themed gradient card / equal-timing slide when this returns null. */
 async function fetchSceneImage(prompt, seed, opts = {}) {
   try {
-    return await fetchPollinationsImage(prompt, seed, opts);
+    return await fetchStoryImage(prompt, seed, opts);
   } catch (e) {
     console.warn(`    ⚠️  Scene image fetch failed ("${prompt.slice(0, 50)}…"): ${e.message}`);
     return null;
   }
 }
 
-module.exports = { fetchSceneImage, fetchPollinationsImage, hashSeed };
+module.exports = { fetchSceneImage, fetchStoryImage, fetchPollinationsImage, hashSeed };
