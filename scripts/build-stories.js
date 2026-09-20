@@ -22,6 +22,7 @@ const path = require('path');
 const { notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { fetchPollinationsImage } = require('./lib/scene-image');
+const { renderFallbackCover } = require('./lib/fallback-cover');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { buildStoryVideo } = require('./lib/video');
 const { buildVideoScenes } = require('./lib/video-scenes');
@@ -391,12 +392,19 @@ async function run() {
           continue;
         }
 
-        // Step 2: Generate cover — throws on failure (unlike the scene art
-        // below), so a missing cover fails this whole attempt and gets
-        // retried by the outer loop, same as before this shared the pacing
-        // gate with the scene/carousel art requests that come after it.
+        // Step 2: Generate cover. Falls back to a local themed gradient
+        // card (no network call, can't fail) if pollinations.ai is down —
+        // confirmed in production as a genuine multi-minute outage on
+        // their end, which previously aborted the whole story here even
+        // though the actual text/audio content was generating fine.
         const cover = path.join(PUB, 'covers', `${id}.jpg`);
-        const coverBuf = await fetchPollinationsImage(coverPrompt(slot, content), hashSeed(id), { width: 768, height: 768 });
+        let coverBuf;
+        try {
+          coverBuf = await fetchPollinationsImage(coverPrompt(slot, content), hashSeed(id), { width: 768, height: 768 });
+        } catch (e) {
+          console.warn(`  ⚠️  Cover fetch failed for ${id}, using a themed fallback: ${e.message}`);
+          coverBuf = await renderFallbackCover(slot.genre);
+        }
         fs.writeFileSync(cover, coverBuf);
 
         // Step 3: Generate audio
