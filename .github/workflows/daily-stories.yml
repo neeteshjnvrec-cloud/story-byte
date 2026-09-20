@@ -2,7 +2,7 @@ name: Daily Stories
 
 on:
   schedule:
-    - cron: '30 0 * * *'   # 08:50 UTC = 2:20 PM IST (TEST schedule; revert to '30 0 * * *' for 6 AM IST)
+    - cron: '0 2 * * *'   # 08:50 UTC = 2:20 PM IST (TEST schedule; revert to '30 0 * * *' for 6 AM IST)
   workflow_dispatch:
 
 concurrency:
