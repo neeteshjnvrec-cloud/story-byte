@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>अदृश्य पेंच · StoryByte</title>
+  <meta name="description" content="एक रहस्यमयी पते पर, एक गुमशुदा चाबी और एक उलझा हुआ परिवार, जहाँ सबका साया एक ही रहस्य को छिपाए हुए है।">
+  <link rel="canonical" href="https://storybyte-76716.web.app/s/mystery-29fee2">
+  <link rel="icon" href="https://storybyte-76716.web.app/covers/2026-09-21_hi_mystery_अदृश्य-पेंच.jpg">
+
+  <!-- OpenGraph: this is what renders the preview card when the link is pasted
+       into WhatsApp, iMessage or Telegram. og:type stays "website" — it previews
+       predictably everywhere, where music.song does not. -->
+  <meta property="og:site_name" content="StoryByte">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="अदृश्य पेंच">
+  <meta property="og:description" content="एक रहस्यमयी पते पर, एक गुमशुदा चाबी और एक उलझा हुआ परिवार, जहाँ सबका साया एक ही रहस्य को छिपाए हुए है।">
+  <meta property="og:url" content="https://storybyte-76716.web.app/s/mystery-29fee2">
+  <meta property="og:image" content="https://storybyte-76716.web.app/covers/2026-09-21_hi_mystery_%E0%A4%85%E0%A4%A6%E0%A5%83%E0%A4%B6%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A5%87%E0%A4%82%E0%A4%9A.jpg">
+  <meta property="og:image:width" content="768">
+  <meta property="og:image:height" content="768">
+  <meta property="og:image:alt" content="Cover art for अदृश्य पेंच">
+  <meta property="og:audio" content="https://storybyte-76716.web.app/audio/2026-09-21_hi_mystery_%E0%A4%85%E0%A4%A6%E0%A5%83%E0%A4%B6%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A5%87%E0%A4%82%E0%A4%9A.mp3">
+  <meta property="og:audio:type" content="audio/mpeg">
+  <meta property="og:locale" content="hi_IN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="अदृश्य पेंच">
+  <meta name="twitter:description" content="एक रहस्यमयी पते पर, एक गुमशुदा चाबी और एक उलझा हुआ परिवार, जहाँ सबका साया एक ही रहस्य को छिपाए हुए है।">
+  <meta name="twitter:image" content="https://storybyte-76716.web.app/covers/2026-09-21_hi_mystery_%E0%A4%85%E0%A4%A6%E0%A5%83%E0%A4%B6%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A5%87%E0%A4%82%E0%A4%9A.jpg">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #F6EFE4;
+      color: #2A2118;
+      line-height: 1.7;
+      padding: 0 20px;
+    }
+    .container { max-width: 680px; margin: 0 auto; padding: 28px 0 72px; }
+    .brand {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+    }
+    .brand-icon {
+      width: 36px; height: 36px; border-radius: 11px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 19px; font-weight: 700;
+    }
+    .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
+    .brand-cta {
+      margin-left: auto; font-size: 14px; font-weight: 600;
+      color: #B5613A; text-decoration: none;
+    }
+    .cover {
+      width: 100%; aspect-ratio: 1 / 1; max-height: 420px;
+      object-fit: cover; border-radius: 20px;
+      border: 1px solid #EADFCC; background: #FCF7EF; display: block;
+    }
+    h1 { font-size: 27px; font-weight: 700; line-height: 1.25; margin: 22px 0 0; }
+    .byline { display: flex; align-items: center; gap: 11px; margin-top: 16px; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      object-fit: cover; flex-shrink: 0; border: 1px solid #EADFCC;
+    }
+    .avatar-fallback {
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 18px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; border: 0;
+    }
+    .byline-name { font-size: 15px; font-weight: 600; }
+    .byline-role { font-size: 13px; color: #A99C89; line-height: 1.3; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .chip {
+      font-size: 13px; font-weight: 600; color: #B5613A;
+      background: rgba(181, 97, 58, 0.1);
+      padding: 5px 12px; border-radius: 999px;
+    }
+    /* Genre arrives lowercase from the generator. Only it gets capitalised —
+       applying this to every chip rendered the duration as "12 Min". */
+    .chip-genre { text-transform: capitalize; }
+    .player {
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 16px;
+      padding: 16px; margin-top: 22px;
+    }
+    .player-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 10px;
+    }
+    audio { width: 100%; display: block; }
+    .lead { font-size: 17px; color: #4A3D2F; margin-top: 24px; }
+    .transcript { margin-top: 34px; }
+    .transcript-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .transcript-body {
+      background: #FCF7EF; border: 1px solid #EADFCC;
+      border-radius: 16px; padding: 22px;
+    }
+    .transcript-body p { font-size: 16px; color: #4A3D2F; margin-bottom: 15px; }
+    .transcript-body p:last-child { margin-bottom: 0; }
+    .get-app {
+      margin-top: 40px; padding: 28px 24px; text-align: center;
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 20px;
+    }
+    .get-app h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .get-app p { font-size: 14px; color: #4A3D2F; margin-bottom: 20px; }
+    .btn {
+      display: inline-block; padding: 15px 30px; border-radius: 999px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 16px; font-weight: 700; text-decoration: none;
+    }
+    .footer {
+      text-align: center; font-size: 13px; color: #A99C89;
+      margin-top: 44px; padding-top: 22px; border-top: 1px solid #EADFCC;
+    }
+    .footer a { color: #A99C89; text-decoration: underline; }
+    @media (max-width: 480px) {
+      h1 { font-size: 23px; }
+      .container { padding-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand">
+      <span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span>
+      <!-- Straight to the store. This whole bar used to be one anchor to the
+           site root, which is a bare "StoryByte content" CDN stub — so the link
+           labelled "Get the app" landed on a blank page. There is no real
+           homepage to point the wordmark at, so it isn't a link. -->
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+    </div>
+
+    <img class="cover" src="https://storybyte-76716.web.app/covers/2026-09-21_hi_mystery_%E0%A4%85%E0%A4%A6%E0%A5%83%E0%A4%B6%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A5%87%E0%A4%82%E0%A4%9A.jpg" alt="Cover art for अदृश्य पेंच" width="768" height="768">
+
+    <h1>अदृश्य पेंच</h1>
+
+    <div class="byline">
+      <div class="avatar avatar-fallback">S</div>
+      <div>
+        <div class="byline-name">StoryByte AI</div>
+        <div class="byline-role">Narrated on StoryByte</div>
+      </div>
+    </div>
+
+    <div class="chips"><span class="chip chip-genre">mystery</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">5 min</span></div>
+
+    <div class="player">
+      <div class="player-label">Listen</div>
+      <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-09-21_hi_mystery_%E0%A4%85%E0%A4%A6%E0%A5%83%E0%A4%B6%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A5%87%E0%A4%82%E0%A4%9A.mp3">
+        Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-09-21_hi_mystery_%E0%A4%85%E0%A4%A6%E0%A5%83%E0%A4%B6%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A5%87%E0%A4%82%E0%A4%9A.mp3">Download the recording</a>.
+      </audio>
+    </div>
+
+    <p class="lead">एक रहस्यमयी पते पर, एक गुमशुदा चाबी और एक उलझा हुआ परिवार, जहाँ सबका साया एक ही रहस्य को छिपाए हुए है।</p>
+
+    <div class="transcript">
+      <div class="transcript-label">Story</div>
+      <div class="transcript-body">
+      <p>एक बार की बात है, एक छोटे से कस्बे में एक अजीब घटना घटी।</p>
+      <p>सभी लोग जानते थे कि मिस्टर शर्मा का घर हमेशा से रहस्यमय था।</p>
+      <p>शहर के लोग कहते थे कि उसके घर के अंदर एक पेंच है, जो सबको उलझा देता है।</p>
+      <p>एक दिन, पुलिस को एक गुमशुदा चाबी के बारे में सूचना मिली।</p>
+      <p>चाबी मिस्टर शर्मा के पुराने दरवाजे के लिए थी, पर वह गायब हो गई थी।</p>
+      <p>पुलिस ने तुरंत जांच शुरू की।</p>
+      <p>मिस्टर शर्मा ने पुलिस को अपने घर का दौरा कराया।</p>
+      <p>दरवाजे के पास एक पेंच था, जिसे खोलने पर एक गुप्त कमरा दिखता था।</p>
+      <p>लेकिन चाबी नहीं मिली।</p>
+      <p>पुलिस ने एक जासूस, श्री गुप्ता को बुलाया।</p>
+      <p>श्री गुप्ता ने तुरंत चाबी की तलाश शुरू की।</p>
+      <p>वह मिस्टर शर्मा के बेटे, राजेश, से बात करने लगे।</p>
+      <p>राजेश ने कहा, “माँ, मैंने वह चाबी कभी नहीं देखी।”</p>
+      <p>श्री गुप्ता ने कहा, “अगर आपने चाबी खो दी है, तो शायद यह किसी ने चुरा ली है।”</p>
+      <p>पर मिस्टर शर्मा ने तुरंत कहा, “मैंने चाबी खो नहीं दी, मैं ही खोई हुई चाबी के लिए जिम्मेदार हूँ।”</p>
+      <p>श्री गुप्ता ने सोचा कि मिस्टर शर्मा एक रहस्य छिपा रहे हैं।</p>
+      <p>वह रात को घर के अंदर छिपे हुए कमरे की खोज करने लगे।</p>
+      <p>कमरे के अंदर एक किताब थी, जिसमें एक गुप्त कोड लिखा हुआ था।</p>
+      <p>किताब खोलते ही, एक छोटी सी धातु की बॉक्स निकल आई।</p>
+      <p>बॉक्स के अंदर एक नोट लिखा था, “मैंने यह सब अपनी भूतपूर्व प्रेमिका को दिया था।”</p>
+      <p>श्री गुप्ता ने फिर मिस्टर शर्मा से पूछा, “आपने यह नोट क्यों लिखा?”</p>
+      <p>मिस्टर शर्मा ने कहा, “मेरी भूतपूर्व प्रेमिका ने इस पेंच को चुरा लिया था, और वह चाबी मुझे वापस नहीं देती थी।”</p>
+      <p>श्री गुप्ता ने फिर एक और सवाल पूछा, “तो, चाबी कहाँ है?”</p>
+      <p>मिस्टर शर्मा ने कहा, “यहाँ, इस पेंच के अंदर है।”</p>
+      <p>श्री गुप्ता ने पेंच खोला।</p>
+      <p>लेकिन पेंच के अंदर केवल एक खाली बॉक्स मिला।</p>
+      <p>वह बॉक्स खोलते ही एक धुंधली आवाज़ आई, “मुझे चाबी मिल गई है, लेकिन मैं इसे वापस नहीं करना चाहता।”</p>
+      <p>श्री गुप्ता ने चौंक कर कहा, “यह कौन कह रहा है?”</p>
+      <p>वह आवाज़ एक छोटी सी बिल्ली के जैसी थी।</p>
+      <p>श्री गुप्ता ने बिल्ली को पकड़ने की कोशिश की, पर बिल्ली ने तुरंत भाग गई।</p>
+      <p>बिल्ली ने फिर एक अजीब आवाज़ के साथ चाबी चूम ली।</p>
+      <p>श्री गुप्ता ने फिर सोचा, “यह बिल्ली ही चाबी ले गई है।”</p>
+      <p>लेकिन बिल्ली ने फिर एक बात कही, “आपको यह चाबी चाहिए, तो आपको इसका सारा रहस्य समझना होगा।”</p>
+      <p>श्री गुप्ता ने फिर एक आखिरी सवाल पूछा, “मिस्टर शर्मा, क्या आप वास्तव में चाबी को खो दिया है?”</p>
+      <p>मिस्टर शर्मा ने गहरी सांस ली और कहा, “नहीं, मैं चाबी को खो नहीं पाया, पर मैं उसे भूल गया हूँ।”</p>
+      <p>श्री गुप्ता ने फिर चाबी खोजने की कोशिश की।</p>
+      <p>पर चाबी कहीं नहीं मिली।</p>
+      <p>अंत में, मिस्टर शर्मा ने अपनी गुप्त पेंच के अंदर एक नोट लिखा, “अगर आप चाबी चाहते हैं, तो आपको यह सारा रहस्य हल करना होगा।”</p>
+      <p>श्री गुप्ता ने फिर एक आखिरी सवाल पूछा, “क्या आप चाबी को वापस कर सकते हैं?”</p>
+      <p>मिस्टर शर्मा ने फिर एक छोटी सी मुस्कान के साथ कहा, “मैं चाबी को वापस नहीं करूँगा, पर मैं आपको एक नया पेंच दूँगा।”</p>
+      <p>श्री गुप्ता ने फिर एक आखिरी सवाल पूछा, “आप कौन हैं?”</p>
+      <p>मिस्टर शर्मा ने फिर एक गहरी आवाज़ में कहा, “मैं वही हूँ, जो सबको उलझा देता हूँ।”</p>
+      <p>श्री गुप्ता ने फिर एक आखिरी सवाल पूछा, “क्या आप इस पेंच को खोलते हैं?”</p>
+      <p>मिस्टर शर्मा ने फिर एक आखिरी सवाल पूछा, “आपको क्या लगता है, चाबी कहाँ है?”</p>
+      <p>श्री गुप्ता ने फिर एक आखिरी सवाल पूछा, “क्या आप चाबी को खोया हुआ मानते हैं?”</p>
+      <p>मिस्टर शर्मा ने फिर एक आखिरी सवाल पूछा, “क्या आप चाबी को खोया हुआ मानते हैं?”</p>
+      <p>श्री गुप्ता ने फिर एक आखिरी सवाल पूछा, “क्या आप चाबी को खोया हुआ मानते हैं?”</p>
+      <p>श्री गुप्ता ने फिर एक आखिरी सवाल पूछा, “क्या आप चाबी को खोया हुआ मानते हैं?”</p>
+      <p>श्री गुप्ता ने फिर एक आखिरी सवाल पूछा, “क्या आप चाबी को खोया हुआ मानते हैं?”</p>
+      <p>श्री गुप्ता ने फिर एक आखिरी सवाल पूछा, “क्या आप चाबी को खोया हुआ मानते हैं?”</p>
+      </div>
+    </div>
+
+    <div class="get-app">
+      <h2>Listen to more on StoryByte</h2>
+      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 StoryByte · <a href="https://storybyte-76716.web.app/privacy.html">Privacy</a></p>
+    </div>
+  </div>
+</body>
+</html>
