@@ -21,6 +21,7 @@ try {
 const { fetchSceneImage, hashSeed } = require('./scene-image');
 const { theme } = require('./genre-theme');
 const { extractJson } = require('./carousel-copy');
+const { renderFallbackCover } = require('./fallback-cover');
 
 // Same fallback-chain pattern as carousel-copy.js / build-stories.js — one
 // model deprecating outright must not silently kill this feature.
@@ -31,12 +32,12 @@ const MODELS = (process.env.GROQ_MODEL_VIDEO_SCENES || 'groq/compound-mini,groq/
 
 /** ~6s/scene is a reasonable pace for a narrated reel — few enough cuts to
  *  stay legible, many enough that the art keeps tracking the story. Capped
- *  at 6 (not higher) because each scene is a paced pollinations.ai request
- *  (see lib/scene-image.js — one per ~16s, shared with the carousel's own
- *  slides): a long story already pushes total image-generation time past a
- *  couple of minutes without also maximizing this count. */
+ *  at 8 (not higher) because each scene is an image-generation call (see
+ *  lib/scene-image.js, shared with the carousel's own slides): a long story
+ *  already pushes total image-generation time up without also maximizing
+ *  this count. */
 function sceneCountFor(durationSec) {
-  return Math.max(3, Math.min(6, Math.round((durationSec || 60) / 6)));
+  return Math.max(3, Math.min(8, Math.round((durationSec || 60) / 6)));
 }
 
 async function llmSceneList({ title, text, genre, description }, count) {
@@ -115,8 +116,17 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
     const prompt = `${prompts[i]}. ${t.mood}, painterly storybook illustration, cinematic lighting, no text, no words`;
     // A seed space distinct from the carousel's own scene art (`${storyId}-${i}`)
     // so a story's video doesn't just replay its carousel image set.
-    const image = await fetchSceneImage(prompt, hashSeed(`${storyId}-video-${i}`));
-    if (!image) continue;
+    let image = await fetchSceneImage(prompt, hashSeed(`${storyId}-video-${i}`));
+    if (!image) {
+      // Never drop a scene outright: unlike the carousel (each slide stands
+      // alone), these scenes are concatenated back to back against a fixed
+      // narration track — skipping one shrinks the video below the audio's
+      // real length, so ffmpeg's `-shortest` cuts the narration off early.
+      // A local themed card (no network call, can't fail) keeps every
+      // slot filled and the full narration playing, even in the rare case
+      // both image providers are down for this one scene.
+      image = await renderFallbackCover(genre, { width: 1080, height: 1350 });
+    }
     const file = path.join(outDir, `video-scene-${i + 1}.jpg`);
     fs.writeFileSync(file, image);
     const start = timeAt(cues, i / prompts.length, audioDurSec);

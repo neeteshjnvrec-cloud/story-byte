@@ -46,21 +46,28 @@ async function drawCaptionFrame(imagePath, text) {
 }
 
 /**
- * Returns [{ file, duration }] — one baked-caption frame per caption line,
- * using whichever `scenes` background art (the [{ file, duration }] list
- * from lib/video-scenes.js, chronological from t=0) is on screen at that
- * line's midpoint. The final frame's duration is stretched to `audioDurSec`
- * so the video never falls short of the narration and gets its tail
- * clipped by ffmpeg's `-shortest`.
+ * Returns [{ file, duration, sceneIndex, sceneElapsed }] — one baked-caption
+ * frame per caption line, using whichever `scenes` background art (the
+ * [{ file, duration }] list from lib/video-scenes.js, chronological from
+ * t=0) is on screen at that line's midpoint. The final frame's duration is
+ * stretched to `audioDurSec` so the video never falls short of the
+ * narration and gets its tail clipped by ffmpeg's `-shortest`.
+ *
+ * A single background scene often spans several caption lines (captions
+ * change every line, art doesn't), so multiple frames here can share one
+ * `sceneIndex`. `sceneElapsed` — this frame's offset into that shared
+ * scene's own timeline, not its own start time — lets lib/video.js render
+ * one continuous Ken Burns zoom across all of a scene's caption frames
+ * instead of the animation restarting every time the caption text changes.
  */
 async function bakeInCaptions(scenes, captionLines, outDir, audioDurSec) {
   if (!scenes?.length || !captionLines?.length) return scenes;
   try {
     let t = 0;
-    const withRange = scenes.map((s) => {
+    const withRange = scenes.map((s, i) => {
       const start = t;
       t += s.duration;
-      return { file: s.file, start, end: t };
+      return { file: s.file, start, end: t, index: i };
     });
 
     const frames = [];
@@ -73,7 +80,12 @@ async function bakeInCaptions(scenes, captionLines, outDir, audioDurSec) {
       fs.writeFileSync(file, buf);
       const isLast = i === captionLines.length - 1;
       const end = isLast ? Math.max(line.end, audioDurSec || line.end) : line.end;
-      frames.push({ file, duration: Math.max(0.5, end - line.start) });
+      frames.push({
+        file,
+        duration: Math.max(0.5, end - line.start),
+        sceneIndex: scene.index,
+        sceneElapsed: Math.max(0, line.start - scene.start),
+      });
     }
     return frames.length ? frames : scenes;
   } catch (e) {
