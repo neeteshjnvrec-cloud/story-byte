@@ -31,12 +31,12 @@ const MODELS = (process.env.GROQ_MODEL_VIDEO_SCENES || 'qwen/qwen3.6-27b,openai/
 
 /** ~6s/scene is a reasonable pace for a narrated reel — few enough cuts to
  *  stay legible, many enough that the art keeps tracking the story. Capped
- *  at 6 (not higher) because each scene is a paced pollinations.ai request
- *  (see lib/scene-image.js — one per ~16s, shared with the carousel's own
- *  slides): a long story already pushes total image-generation time past a
- *  couple of minutes without also maximizing this count. */
+ *  at 8 (not higher) because each scene is an image-generation call (see
+ *  lib/scene-image.js, shared with the carousel's own slides): a long story
+ *  already pushes total image-generation time up without also maximizing
+ *  this count. */
 function sceneCountFor(durationSec) {
-  return Math.max(3, Math.min(6, Math.round((durationSec || 60) / 6)));
+  return Math.max(3, Math.min(8, Math.round((durationSec || 60) / 6)));
 }
 
 async function llmSceneList({ title, text, genre, description }, count) {
