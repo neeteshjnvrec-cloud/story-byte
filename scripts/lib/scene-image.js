@@ -18,6 +18,14 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/** Exponential backoff (2s, 4s, 8s, 16s, capped at 20s) on top of the paced
+ *  slot below — a transient 429/5xx/timeout deserves real waiting, not an
+ *  immediate re-fire at the same failing moment. Taking longer here is a
+ *  fine trade for not losing a scene's art. */
+function backoffMs(attempt) {
+  return Math.min(2000 * 2 ** attempt, 20000);
+}
+
 // Free registration at enter.pollinations.ai gets a Bearer token that lifts
 // the anonymous tier's 1-request/15s pace to 1-request/5s ("seed" tier) —
 // see POLLINATIONS-SETUP.md. Optional: everything here still works
@@ -55,7 +63,7 @@ async function waitForSlot() {
  * only 429/5xx/timeout are treated as "probably transient, worth another
  * shot at the next paced slot."
  */
-async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 1350, timeoutMs = 45000, retries = 2 } = {}) {
+async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 1350, timeoutMs = 45000, retries = 3 } = {}) {
   const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&nologo=true&seed=${seed}&model=flux`;
   const headers = POLLINATIONS_TOKEN ? { Authorization: `Bearer ${POLLINATIONS_TOKEN}` } : undefined;
 
@@ -66,7 +74,7 @@ async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 135
     try {
       const res = await fetch(url, { signal: controller.signal, headers });
       if (res.status === 429 || res.status >= 500) {
-        if (attempt < retries) continue;
+        if (attempt < retries) { await sleep(backoffMs(attempt)); continue; }
         throw new Error(`HTTP ${res.status}`);
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -74,7 +82,7 @@ async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 135
       if (buf.length < 2048) throw new Error('response too small');
       return buf;
     } catch (e) {
-      if (e.name === 'AbortError' && attempt < retries) continue;
+      if (e.name === 'AbortError' && attempt < retries) { await sleep(backoffMs(attempt)); continue; }
       throw e.name === 'AbortError' ? new Error(`timed out after ${timeoutMs / 1000}s`) : e;
     } finally {
       clearTimeout(timer);
@@ -92,21 +100,31 @@ async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 135
  * Cloudflare itself is unavailable (no credentials configured, its own
  * outage, or its free daily neuron allocation exhausted). Cloudflare's
  * Flux model has no explicit width/height parameter (it always returns
- * 1024x1024), so its output gets resized to match. Throws only if both
- * providers fail.
+ * 1024x1024), so its output gets resized to match.
+ *
+ * Both providers already retry their own transient failures with backoff;
+ * if the whole chain still comes up empty, that's rare enough (both down
+ * at once) to be worth one more full pass after a real wait rather than
+ * giving up — a slower story build is a fine trade for not losing a
+ * scene's bespoke art. Throws only if every pass fails.
  */
 async function fetchStoryImage(prompt, seed, opts = {}) {
-  const { width = 1080, height = 1350 } = opts;
-  try {
-    const buf = await fetchCloudflareImage(prompt);
-    return await sharp(buf).resize(width, height, { fit: 'cover' }).jpeg({ quality: 90 }).toBuffer();
-  } catch (primaryError) {
+  const { width = 1080, height = 1350, chainRetries = 1 } = opts;
+  let lastError;
+  for (let pass = 0; pass <= chainRetries; pass++) {
     try {
-      return await fetchPollinationsImage(prompt, seed, opts);
-    } catch (fallbackError) {
-      throw new Error(`cloudflare: ${primaryError.message}; pollinations: ${fallbackError.message}`);
+      const buf = await fetchCloudflareImage(prompt);
+      return await sharp(buf).resize(width, height, { fit: 'cover' }).jpeg({ quality: 90 }).toBuffer();
+    } catch (primaryError) {
+      try {
+        return await fetchPollinationsImage(prompt, seed, opts);
+      } catch (fallbackError) {
+        lastError = new Error(`cloudflare: ${primaryError.message}; pollinations: ${fallbackError.message}`);
+        if (pass < chainRetries) await sleep(10000 * (pass + 1));
+      }
     }
   }
+  throw lastError;
 }
 
 /** Fetches one bespoke scene illustration. Never throws — callers fall back
