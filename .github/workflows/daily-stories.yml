@@ -2,7 +2,11 @@ name: Daily Stories
 
 on:
   schedule:
-    - cron: '0 2 * * *'   # 08:50 UTC = 2:20 PM IST (TEST schedule; revert to '30 0 * * *' for 6 AM IST)
+    # 22:47 UTC = 4:17 AM IST. Deliberately NOT :00 or :30 — this repo's own
+    # run history shows delays growing to 5+ hours at those two (the most
+    # oversubscribed minutes on GitHub's shared scheduler, since most crons
+    # default to a round number); an off-peak minute gets queued far less.
+    - cron: '47 22 * * *'
   workflow_dispatch:
 
 concurrency:

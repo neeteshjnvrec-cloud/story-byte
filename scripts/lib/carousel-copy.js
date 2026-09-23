@@ -34,8 +34,18 @@ function slideCountFor(text) {
   return Math.max(3, Math.min(6, Math.round(words / 180)));
 }
 
+// '।'/'॥' (U+0964/U+0965, danda/double danda) end a sentence in Hindi —
+// this pipeline's other supported language (see SLOTS in build-stories.js).
+// Missing them here isn't cosmetic: with none matched, the whole story
+// reads as one giant "sentence" and every slide count below collapses to
+// 1, however many the story earned by length — confirmed in production on
+// a Hindi story that fell back to this heuristic (its LLM copy call failed)
+// and got a 2-slide carousel, and a video that inherited those same 2
+// slides, instead of the ~4-5 both should have had.
+const SENTENCE_END = '.!?।॥';
 function sentences(text) {
-  return (String(text || '').replace(/\s+/g, ' ').trim().match(/[^.!?]+[.!?]+(?=\s|$)|[^.!?]+$/g) || [])
+  const re = new RegExp(`[^${SENTENCE_END}]+[${SENTENCE_END}]+(?=\\s|$)|[^${SENTENCE_END}]+$`, 'g');
+  return (String(text || '').replace(/\s+/g, ' ').trim().match(re) || [])
     .map((s) => s.trim())
     .filter(Boolean);
 }

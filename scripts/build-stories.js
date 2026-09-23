@@ -422,6 +422,7 @@ async function run() {
         // the story is written to Firestore as published.
         let igSlideUrls = [];
         let igHook = null;
+        let igPlainSceneFiles = [];
         const outDir = path.join(PUB, 'instagram', id);
         try {
           const built = await buildCarouselSlides({
@@ -430,6 +431,7 @@ async function run() {
           });
           igSlideUrls = built.urls;
           igHook = built.hook;
+          igPlainSceneFiles = built.plainSceneFiles;
         } catch (e) {
           console.warn(`  ⚠️  Carousel render failed for ${id}: ${e.message}`);
         }
@@ -445,9 +447,11 @@ async function run() {
             // Real-content, narration-timed scenes (lib/video-scenes.js) —
             // walks the actual story with art that tracks what's being
             // said, not the carousel's spoiler-free teaser slides at equal
-            // intervals. Falls back to those teaser slides at even timing
-            // if Groq/subtitles aren't available, so the video post is
-            // never blocked by this.
+            // intervals. Falls back to the carousel's own PLAIN backgrounds
+            // (no wordmark/page-counter/teaser text — see plainSceneFiles in
+            // lib/carousel-slides.js) at even timing if Groq/subtitles
+            // aren't available, so the video post is never blocked by this
+            // — and never shows carousel UI baked into a video frame.
             let scenes = null;
             if (synthResult.subtitlesPath) {
               try {
@@ -463,12 +467,11 @@ async function run() {
                   }
                 }
               } catch (e) {
-                console.warn(`  ⚠️  Narration-synced scenes failed for ${id}, using teaser slides: ${e.message}`);
+                console.warn(`  ⚠️  Narration-synced scenes failed for ${id}, using plain backgrounds: ${e.message}`);
               }
             }
             if (!scenes) {
-              const slideFiles = igSlideUrls.map((_, i) => path.join(outDir, `slide-${i + 1}.jpg`));
-              scenes = slideFiles.map((file) => ({ file }));
+              scenes = igPlainSceneFiles.map((file) => ({ file }));
             }
             // clipScenes below needs a real per-scene duration regardless of
             // which path produced `scenes` — the teaser-slide fallback has
