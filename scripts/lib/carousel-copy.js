@@ -136,7 +136,15 @@ async function llmCopy({ title, text, genre, description }, count) {
           temperature: 0.9,
           max_tokens: 900,
           top_p: 0.95,
-          response_format: { type: 'json_object' },
+          // No response_format: json_object — Groq rejects the WHOLE
+          // completion server-side (400 json_validate_failed, empty
+          // failed_generation) if the model's raw output isn't itself
+          // valid JSON, and reasoning models leaking so much as one
+          // stray token before their answer trips that on a system
+          // prompt this dense. extractJson() below already handles a
+          // prefixed/fenced response via brace-scanning, so parsing
+          // leniently client-side is strictly safer than an all-or-
+          // nothing server-side gate.
           messages: [
             { role: 'system', content: sys },
             { role: 'user', content: user },
