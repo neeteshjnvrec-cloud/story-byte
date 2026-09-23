@@ -23,6 +23,7 @@ const sharp = require('sharp');
 const { buildCarouselCopy } = require('./carousel-copy');
 const { fetchSceneImage, hashSeed } = require('./scene-image');
 const { theme } = require('./genre-theme');
+const { renderFallbackCover } = require('./fallback-cover');
 
 const W = 1080;
 const H = 1350;
@@ -242,8 +243,13 @@ async function renderCtaSlide({ title, hook, genre, coverPath }) {
 
 /**
  * Renders the full carousel for a story and writes JPEGs to `outDir`.
- * Returns `{ urls, hook }` — `urls` in post order (4-7 slides), `hook` the
- * curiosity tagline also worth reusing in the Instagram caption.
+ * Returns `{ urls, hook, plainSceneFiles }` — `urls` in post order (4-7
+ * slides), `hook` the curiosity tagline also worth reusing in the
+ * Instagram caption, `plainSceneFiles` local paths to one brand-free
+ * background per teaser slide (no StoryByte wordmark, page counter or
+ * teaser text baked on) for build-stories.js to reuse as video scenes if
+ * the video's own narration-synced scenes (lib/video-scenes.js) can't be
+ * built — the composited `slides` below are carousel UI, not video content.
  */
 async function buildCarouselSlides({ storyId, title, text, genre, description, coverPath, outDir, siteUrl }) {
   fs.mkdirSync(outDir, { recursive: true });
@@ -252,6 +258,7 @@ async function buildCarouselSlides({ storyId, title, text, genre, description, c
   const t = theme(genre);
 
   const slides = [];
+  const plainBgs = [];
   for (let i = 0; i < teasers.length; i++) {
     const teaser = teasers[i];
     let bg = null;
@@ -285,6 +292,18 @@ async function buildCarouselSlides({ storyId, title, text, genre, description, c
         await renderGradientTeaserSlide({ title, genre, text: teaser.text, index: i, total: teasers.length })
       );
     }
+    // Same resolution order as `bg` above, but never null (see docstring) —
+    // a themed card with no text is still a fine video background, unlike
+    // the gradient TEASER SLIDE pushed above, which has this slide's own
+    // caption baked in and would double up with the video's own captions.
+    // `bg` isn't guaranteed to already be W×H (the i===0 cover-reuse case
+    // above is 768x768, not this 4:5 ratio) — renderArtTeaserSlide resizes
+    // it internally before compositing; this path needs the same resize
+    // since nothing downstream will do it.
+    const plainBg = bg
+      ? await sharp(bg).resize(W, H, { fit: 'cover' }).jpeg({ quality: 90 }).toBuffer()
+      : await renderFallbackCover(genre, { width: W, height: H });
+    plainBgs.push(plainBg);
   }
   slides.push(await renderCtaSlide({ title, hook, genre, coverPath }));
 
@@ -294,7 +313,12 @@ async function buildCarouselSlides({ storyId, title, text, genre, description, c
     fs.writeFileSync(file, slides[i]);
     urls.push(`${siteUrl}/instagram/${storyId}/slide-${i + 1}.jpg`);
   }
-  return { urls, hook };
+  const plainSceneFiles = plainBgs.map((buf, i) => {
+    const file = path.join(outDir, `plain-scene-${i + 1}.jpg`);
+    fs.writeFileSync(file, buf);
+    return file;
+  });
+  return { urls, hook, plainSceneFiles };
 }
 
 module.exports = { buildCarouselSlides, wrapLines, tspans };
