@@ -64,7 +64,12 @@ async function llmSceneList({ title, text, genre, description }, count) {
           temperature: 0.8,
           max_tokens: 700,
           top_p: 0.95,
-          response_format: { type: 'json_object' },
+          // No response_format: json_object — same reasoning as
+          // carousel-copy.js's llmCopy: Groq rejects the whole
+          // completion server-side if the model's raw output isn't
+          // itself valid JSON, which reasoning models trip on with a
+          // system prompt this dense. extractJson() already handles a
+          // prefixed/fenced response leniently client-side.
           messages: [
             { role: 'system', content: sys },
             { role: 'user', content: user },
