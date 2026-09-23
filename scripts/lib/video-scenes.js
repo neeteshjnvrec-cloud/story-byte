@@ -25,7 +25,7 @@ const { renderFallbackCover } = require('./fallback-cover');
 
 // Same fallback-chain pattern as carousel-copy.js / build-stories.js — one
 // model deprecating outright must not silently kill this feature.
-const MODELS = (process.env.GROQ_MODEL_VIDEO_SCENES || 'qwen/qwen3.6-27b,openai/gpt-oss-20b,groq/compound,openai/gpt-oss-120b')
+const MODELS = (process.env.GROQ_MODEL_VIDEO_SCENES || 'groq/compound-mini,groq/compound,openai/gpt-oss-20b,openai/gpt-oss-120b')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
