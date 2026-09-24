@@ -20,7 +20,7 @@ try {
 }
 const { fetchSceneImage, hashSeed } = require('./scene-image');
 const { theme } = require('./genre-theme');
-const { extractJson } = require('./carousel-copy');
+const { extractJson, callGroqJson } = require('./carousel-copy');
 const { renderFallbackCover } = require('./fallback-cover');
 
 // Same fallback-chain pattern as carousel-copy.js / build-stories.js — one
@@ -55,34 +55,12 @@ async function llmSceneList({ title, text, genre, description }, count) {
       'in the image.';
     const user = `Title: ${title}\nGenre: ${genre}\nDescription: ${description || ''}\n\nStory:\n${String(text || '').slice(0, 6000)}`;
 
-    let completion = null;
-    let lastError = null;
-    for (const model of MODELS) {
-      try {
-        completion = await groq.chat.completions.create({
-          model,
-          temperature: 0.8,
-          max_tokens: 700,
-          top_p: 0.95,
-          // No response_format: json_object — same reasoning as
-          // carousel-copy.js's llmCopy: Groq rejects the whole
-          // completion server-side if the model's raw output isn't
-          // itself valid JSON, which reasoning models trip on with a
-          // system prompt this dense. extractJson() already handles a
-          // prefixed/fenced response leniently client-side.
-          messages: [
-            { role: 'system', content: sys },
-            { role: 'user', content: user },
-          ],
-        });
-        break;
-      } catch (e) {
-        lastError = e;
-      }
-    }
-    if (!completion) throw lastError || new Error('all video-scene models failed');
-
-    const d = extractJson(completion.choices[0].message.content);
+    // Generous headroom over what the JSON payload itself needs — see
+    // callGroqJson in carousel-copy.js for why both response_format modes
+    // get tried per model, and why truncating a reasoning model's hidden
+    // thinking is how a completion comes back with no JSON in it at all.
+    const content = await callGroqJson(groq, MODELS, { sys, user, temperature: 0.8, maxTokens: 1600, topP: 0.95 });
+    const d = extractJson(content);
     const scenes = Array.isArray(d.scenes) ? d.scenes.map((s) => String(s || '').trim()).filter(Boolean) : [];
     return scenes.length ? scenes.slice(0, count) : null;
   } catch (e) {
