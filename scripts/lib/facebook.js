@@ -30,6 +30,8 @@ async function fbCall(method, path, params) {
   return json;
 }
 
+const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.app';
+
 // Facebook Page posts support a real clickable link (unlike Instagram
 // captions), so lead with that instead of a "link in bio" workaround.
 function buildMessage(story) {
@@ -40,6 +42,7 @@ function buildMessage(story) {
   } else {
     lines.push('▶️ Listen free — full story, fully narrated, on StoryByte.');
   }
+  lines.push('', `📱 Get the app: ${APP_LINK}`);
   const tag = (story.genre || 'story').replace(/[^a-zA-Z0-9]/g, '');
   const hashtags = ['#StoryByte', '#AudioStories', `#${tag}`];
   if (story.occasionHashtag) hashtags.push(story.occasionHashtag);
