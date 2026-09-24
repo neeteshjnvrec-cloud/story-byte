@@ -3,6 +3,7 @@ const { execFileSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+
 const { fetchSceneImage, hashSeed } = require('./lib/scene-image');
 const { renderLandscapeVideo } = require('./lib/video-landscape');
 
@@ -18,17 +19,9 @@ const voice = language === 'hi'
   ? 'hi-IN-SwaraNeural'
   : 'en-US-AriaNeural';
 
-/**
- * Accepts all of these formats:
- *
- * openai/gpt-oss-20b,openai/gpt-oss-120b
- * ["openai/gpt-oss-20b", "openai/gpt-oss-120b"]
- * ['openai/gpt-oss-20b', 'openai/gpt-oss-120b']
- */
 function parseModels(value) {
+  // Keep only models known to be available in the current test.
   const fallback = [
-    'groq/compound-mini',
-    'groq/compound',
     'openai/gpt-oss-20b',
     'openai/gpt-oss-120b',
   ];
@@ -39,7 +32,8 @@ function parseModels(value) {
 
   const raw = String(value).trim();
 
-  // First support valid JSON arrays.
+  // Supports JSON arrays:
+  // ["openai/gpt-oss-20b", "openai/gpt-oss-120b"]
   try {
     const parsed = JSON.parse(raw);
 
@@ -53,10 +47,13 @@ function parseModels(value) {
       }
     }
   } catch {
-    // Continue with tolerant parsing below.
+    // Continue with tolerant parsing.
   }
 
-  // Then support JavaScript-style arrays and comma-separated values.
+  // Supports:
+  // ['model-a', 'model-b']
+  // ["model-a", "model-b"]
+  // model-a,model-b
   const models = raw
     .replace(/^\s*\[\s*/, '')
     .replace(/\s*\]\s*$/, '')
@@ -85,7 +82,7 @@ function shell(command, args) {
   }).toString().trim();
 }
 
-function duration(file) {
+function getDuration(file) {
   try {
     return Number(
       shell('ffprobe', [
@@ -117,14 +114,16 @@ async function generateText() {
     : 'English';
 
   const systemPrompt =
-    `You write serialized audio fiction. Return JSON only with these fields: ` +
+    `You write serialized audio fiction. Return JSON only with exactly these fields: ` +
     `title, description, and text. ` +
     `Write episode ${episode} of a continuing ${genre} series called "${title}" ` +
     `in ${languageName}. ` +
-    `Make it a complete, engaging episode with a strong hook, escalating middle, ` +
-    `emotional development, and a satisfying cliffhanger. ` +
-    `Target approximately 1,800 to 2,100 spoken words, which is about 15 minutes ` +
-    `of narration. Do not use markdown, sound-effect labels, or chapter headings.`;
+    `This is a long-form episode for approximately 15 minutes of narration. ` +
+    `Write between 2,000 and 2,500 spoken words. ` +
+    `Do not summarize or shorten the story. ` +
+    `Include a strong opening hook, detailed scenes, natural dialogue, emotional development, ` +
+    `an escalating middle, and a satisfying cliffhanger ending. ` +
+    `Use complete paragraphs. Do not use markdown, sound-effect labels, or chapter headings.`;
 
   const messages = [
     {
@@ -133,7 +132,9 @@ async function generateText() {
     },
     {
       role: 'user',
-      content: `Write episode ${episode} now.`,
+      content:
+        `Write episode ${episode} now. ` +
+        `The final text must be a complete long-form episode, not an outline or summary.`,
     },
   ];
 
@@ -146,7 +147,7 @@ async function generateText() {
       const response = await groq.chat.completions.create({
         model,
         temperature: 0.85,
-        max_tokens: 7000,
+        max_tokens: 10000,
         top_p: 0.95,
         response_format: {
           type: 'json_object',
@@ -161,6 +162,7 @@ async function generateText() {
       }
 
       const data = JSON.parse(rawContent.trim());
+
       const wordCount = String(data.text || '')
         .split(/\s+/)
         .filter(Boolean)
@@ -170,8 +172,17 @@ async function generateText() {
         throw new Error('Response did not contain title and text');
       }
 
-      if (wordCount < 1200) {
+      // Reject only clearly unusable responses. Some models may produce
+      // less than the ideal target even with a large token budget.
+      if (wordCount < 800) {
         throw new Error(`Story is too short: ${wordCount} words`);
+      }
+
+      if (wordCount < 1800) {
+        console.warn(
+          `Warning: story has only ${wordCount} words; ` +
+          'the final episode may be shorter than 15 minutes.'
+        );
       }
 
       console.log(`Model succeeded: ${model}`);
@@ -181,6 +192,7 @@ async function generateText() {
         title: String(data.title).trim(),
         description: String(data.description || '').trim(),
         text: String(data.text).trim(),
+        wordCount,
       };
     } catch (error) {
       const message = error?.message || String(error);
@@ -313,12 +325,13 @@ async function main() {
     path.join(outputDirectory, 'story.json'),
     JSON.stringify(
       {
-        title,
+        seriesTitle: title,
         episode,
         genre,
         language,
         generatedTitle: content.title,
         description: content.description,
+        wordCount: content.wordCount,
         text: content.text,
       },
       null,
@@ -332,7 +345,7 @@ async function main() {
   console.log('Generating narration...');
   synthesize(content.text, audioPath, subtitlesPath);
 
-  const audioDuration = duration(audioPath);
+  const audioDuration = getDuration(audioPath);
 
   if (!audioDuration) {
     throw new Error('Could not determine generated audio duration');
@@ -342,20 +355,22 @@ async function main() {
 
   if (audioDuration < 780) {
     console.warn(
-      `Audio is shorter than the expected 13-minute minimum: ${Math.round(audioDuration)} seconds`
+      `Audio is shorter than the expected 13-minute minimum: ` +
+      `${Math.round(audioDuration)} seconds`
     );
   }
 
   if (audioDuration > 960) {
     console.warn(
-      `Audio is longer than the expected 16-minute maximum: ${Math.round(audioDuration)} seconds`
+      `Audio is longer than the expected 16-minute maximum: ` +
+      `${Math.round(audioDuration)} seconds`
     );
   }
 
   const cues = parseSrt(subtitlesPath, audioDuration);
 
-  // Approximately one visual every 45 seconds.
-  // For a 15-minute episode this creates about 20 landscape images.
+  // Approximately one visual scene every 45 seconds.
+  // A 15-minute episode creates approximately 20 scenes.
   const sceneCount = Math.max(
     12,
     Math.min(24, Math.round(audioDuration / 45))
@@ -376,7 +391,9 @@ async function main() {
       `cinematic lighting, detailed environment, widescreen composition, ` +
       `no text, no captions, no logos, no words.`;
 
-    console.log(`Generating scene ${sceneNumber}/${sceneCount}...`);
+    console.log(
+      `Generating scene ${sceneNumber}/${sceneCount}...`
+    );
 
     const image = await fetchSceneImage(
       prompt,
@@ -384,7 +401,9 @@ async function main() {
     );
 
     if (!image) {
-      throw new Error(`Image generation failed for scene ${sceneNumber}`);
+      throw new Error(
+        `Image generation failed for scene ${sceneNumber}`
+      );
     }
 
     const imagePath = path.join(
@@ -436,13 +455,14 @@ async function main() {
       `Episode: ${episode}`,
       `Language: ${language}`,
       `Genre: ${genre}`,
+      `Words: ${content.wordCount}`,
       `Duration: ${Math.round(audioDuration)} seconds`,
       'Resolution: 1920x1080',
       'Frame rate: 30 FPS',
       `Frames: ${Math.round(audioDuration * 30)}`,
       `Scenes: ${sceneCount}`,
       '',
-      'This file was generated by the isolated landscape test workflow.',
+      'Generated by the isolated landscape test workflow.',
     ].join('\n')
   );
 
