@@ -6,7 +6,7 @@ on:
     # run history shows delays growing to 5+ hours at those two (the most
     # oversubscribed minutes on GitHub's shared scheduler, since most crons
     # default to a round number); an off-peak minute gets queued far less.
-    - cron: '47 22 * * *'
+    - cron: '47 23 * * *'
   workflow_dispatch:
 
 concurrency:

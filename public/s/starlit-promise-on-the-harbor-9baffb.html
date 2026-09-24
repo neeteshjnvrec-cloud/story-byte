@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Starlit Promise on the Harbor · StoryByte</title>
+  <meta name="description" content="Two strangers find love under the glow of a seaside lighthouse.">
+  <link rel="canonical" href="https://storybyte-76716.web.app/s/starlit-promise-on-the-harbor-9baffb">
+  <link rel="icon" href="https://storybyte-76716.web.app/covers/community_1789298076805_nMfZCz7XnqhFUC8e7TV3HuW3V2t2.jpg">
+
+  <!-- OpenGraph: this is what renders the preview card when the link is pasted
+       into WhatsApp, iMessage or Telegram. og:type stays "website" — it previews
+       predictably everywhere, where music.song does not. -->
+  <meta property="og:site_name" content="StoryByte">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Starlit Promise on the Harbor">
+  <meta property="og:description" content="Two strangers find love under the glow of a seaside lighthouse.">
+  <meta property="og:url" content="https://storybyte-76716.web.app/s/starlit-promise-on-the-harbor-9baffb">
+  <meta property="og:image" content="https://storybyte-76716.web.app/covers/community_1789298076805_nMfZCz7XnqhFUC8e7TV3HuW3V2t2.jpg">
+  <meta property="og:image:width" content="768">
+  <meta property="og:image:height" content="768">
+  <meta property="og:image:alt" content="Cover art for Starlit Promise on the Harbor">
+  <meta property="og:audio" content="https://storybyte-76716.web.app/audio/community_1789298076805_nMfZCz7XnqhFUC8e7TV3HuW3V2t2.mp3">
+  <meta property="og:audio:type" content="audio/mpeg">
+  <meta property="og:locale" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Starlit Promise on the Harbor">
+  <meta name="twitter:description" content="Two strangers find love under the glow of a seaside lighthouse.">
+  <meta name="twitter:image" content="https://storybyte-76716.web.app/covers/community_1789298076805_nMfZCz7XnqhFUC8e7TV3HuW3V2t2.jpg">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #F6EFE4;
+      color: #2A2118;
+      line-height: 1.7;
+      padding: 0 20px;
+    }
+    .container { max-width: 680px; margin: 0 auto; padding: 28px 0 72px; }
+    .brand {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+    }
+    .brand-icon {
+      width: 36px; height: 36px; border-radius: 11px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 19px; font-weight: 700;
+    }
+    .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
+    .brand-cta {
+      margin-left: auto; font-size: 14px; font-weight: 600;
+      color: #B5613A; text-decoration: none;
+    }
+    .cover {
+      width: 100%; aspect-ratio: 1 / 1; max-height: 420px;
+      object-fit: cover; border-radius: 20px;
+      border: 1px solid #EADFCC; background: #FCF7EF; display: block;
+    }
+    h1 { font-size: 27px; font-weight: 700; line-height: 1.25; margin: 22px 0 0; }
+    .byline { display: flex; align-items: center; gap: 11px; margin-top: 16px; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      object-fit: cover; flex-shrink: 0; border: 1px solid #EADFCC;
+    }
+    .avatar-fallback {
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 18px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; border: 0;
+    }
+    .byline-name { font-size: 15px; font-weight: 600; }
+    .byline-role { font-size: 13px; color: #A99C89; line-height: 1.3; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .chip {
+      font-size: 13px; font-weight: 600; color: #B5613A;
+      background: rgba(181, 97, 58, 0.1);
+      padding: 5px 12px; border-radius: 999px;
+    }
+    /* Genre arrives lowercase from the generator. Only it gets capitalised —
+       applying this to every chip rendered the duration as "12 Min". */
+    .chip-genre { text-transform: capitalize; }
+    .player {
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 16px;
+      padding: 16px; margin-top: 22px;
+    }
+    .player-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 10px;
+    }
+    audio { width: 100%; display: block; }
+    .lead { font-size: 17px; color: #4A3D2F; margin-top: 24px; }
+    .transcript { margin-top: 34px; }
+    .transcript-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .transcript-body {
+      background: #FCF7EF; border: 1px solid #EADFCC;
+      border-radius: 16px; padding: 22px;
+    }
+    .transcript-body p { font-size: 16px; color: #4A3D2F; margin-bottom: 15px; }
+    .transcript-body p:last-child { margin-bottom: 0; }
+    .get-app {
+      margin-top: 40px; padding: 28px 24px; text-align: center;
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 20px;
+    }
+    .get-app h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .get-app p { font-size: 14px; color: #4A3D2F; margin-bottom: 20px; }
+    .btn {
+      display: inline-block; padding: 15px 30px; border-radius: 999px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 16px; font-weight: 700; text-decoration: none;
+    }
+    .footer {
+      text-align: center; font-size: 13px; color: #A99C89;
+      margin-top: 44px; padding-top: 22px; border-top: 1px solid #EADFCC;
+    }
+    .footer a { color: #A99C89; text-decoration: underline; }
+    @media (max-width: 480px) {
+      h1 { font-size: 23px; }
+      .container { padding-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand">
+      <span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span>
+      <!-- Straight to the store. This whole bar used to be one anchor to the
+           site root, which is a bare "StoryByte content" CDN stub — so the link
+           labelled "Get the app" landed on a blank page. There is no real
+           homepage to point the wordmark at, so it isn't a link. -->
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+    </div>
+
+    <img class="cover" src="https://storybyte-76716.web.app/covers/community_1789298076805_nMfZCz7XnqhFUC8e7TV3HuW3V2t2.jpg" alt="Cover art for Starlit Promise on the Harbor" width="768" height="768">
+
+    <h1>Starlit Promise on the Harbor</h1>
+
+    <div class="byline">
+      <div class="avatar avatar-fallback">M</div>
+      <div>
+        <div class="byline-name">Muenster</div>
+        <div class="byline-role">Narrated on StoryByte</div>
+      </div>
+    </div>
+
+    <div class="chips"><span class="chip chip-genre">romance</span><span class="chip">English</span><span class="chip">4 min</span></div>
+
+    <div class="player">
+      <div class="player-label">Listen</div>
+      <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/community_1789298076805_nMfZCz7XnqhFUC8e7TV3HuW3V2t2.mp3">
+        Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/community_1789298076805_nMfZCz7XnqhFUC8e7TV3HuW3V2t2.mp3">Download the recording</a>.
+      </audio>
+    </div>
+
+    <p class="lead">Two strangers find love under the glow of a seaside lighthouse.</p>
+
+    <div class="transcript">
+      <div class="transcript-label">Story</div>
+      <div class="transcript-body">
+      <p>Listen, I want to tell you about Maya and Leo, two people who never thought a night could change everything. It started on a breezy August evening, the kind where the sea smells of salt and distant fireworks, and the old lighthouse on the pier flickered its amber light like a shy smile. Maya had just finished her shift at the bakery, her hands still dusted with flour, and she was walking home, humming a tune she couldn&#39;t name, when she heard the faint strum of a guitar coming from the boardwalk.</p>
+      <p>She followed the music and found Leo perched on a rusted railing, his old acoustic cradled in his arms. He was a traveler, a photographer who chased sunsets, and tonight his song was a soft ballad about longing. Their eyes met over the strings, and something clicked, like the first chord of a familiar song. He smiled, a shy, crooked grin, and gestured for her to come closer. Maya, curious and a little bold, stepped onto the plank.</p>
+      <p>&quot;Hey,&quot; she said, her voice trembling just enough to sound real. &quot;That&#39;s beautiful.&quot;</p>
+      <p>Leo&#39;s eyes lit up. &quot;Thanks. I wrote it for a place that feels like a promise.&quot;</p>
+      <p>They talked as the tide whispered against the pier, sharing stories about childhood seashell collections, missed trains, and the taste of fresh croissants. Maya told him how she dreamed of opening a café by the water, a place where people could linger over coffee and watch the horizon. Leo confessed he was chasing a photograph of the lighthouse beam cutting through the night fog—a shot that would capture hope.</p>
+      <p>Time slipped, and the lighthouse&#39;s beam swept across the water in slow, rhythmic arcs, like a metronome marking their growing connection. Leo asked Maya if she’d like to see the view from the lighthouse lantern room, and she nodded, heart thudding like a drum. They climbed the narrow stairs, the wooden steps creaking under their feet, each step echoing the rhythm of their conversation.</p>
+      <p>When they reached the top, the world opened up: the city lights twinkling below, the sea a dark silk sheet, and the stars scattered like confetti. Leo pulled out his camera, but instead of pointing it at the scene, he turned it toward Maya. &quot;I wanted to capture this moment,&quot; he whispered, &quot;the way your smile lights up the night better than any lantern.&quot;</p>
+      <p>Maya blushed, feeling the warmth of his words settle into her chest. She reached for his hand, and their fingers intertwined naturally, as if they had always been meant to fit together. The wind brushed their faces, carrying the scent of seaweed and distant jasmine, and for a heartbeat, the world seemed to pause.</p>
+      <p>They stayed up there until the first hint of dawn painted the sky in soft pinks and golds. When the sun finally rose, Leo slipped a small, weathered notebook onto the ledge. Inside, he had scribbled a simple promise: &quot;Whenever you hear a guitar at night, think of me, and know I&#39;m somewhere chasing the next sunrise with you.&quot;</p>
+      <p>Maya read the words aloud, her voice trembling with emotion, and Leo kissed her forehead, sealing the promise with a gentle press. They descended the lighthouse hand in hand, the sunrise bathing them in a golden glow, and the harbor seemed to cheer them on with the calls of gulls.</p>
+      <p>From that night on, Maya opened her seaside café, naming it &quot;The Lighthouse Brew.&quot; Every evening, as the lantern flickered, a soft guitar melody drifted from the pier, and Leo would appear, camera in tow, ready to capture another chapter of their love. Their story became the kind of romance that locals whispered about—two souls who found each other under a starlit promise, forever guided by the light of the lighthouse and the music of their hearts.</p>
+      </div>
+    </div>
+
+    <div class="get-app">
+      <h2>Listen to more on StoryByte</h2>
+      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 StoryByte · <a href="https://storybyte-76716.web.app/privacy.html">Privacy</a></p>
+    </div>
+  </div>
+</body>
+</html>
