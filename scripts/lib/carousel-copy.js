@@ -106,6 +106,71 @@ function dedupeConsecutive(slides) {
   return slides.filter((s, i) => i === 0 || s.text.trim() !== slides[i - 1].text.trim());
 }
 
+/**
+ * Calls Groq across a model fallback chain, trying each model up to twice:
+ * first with strict `response_format: json_object`, then — only if THAT
+ * attempt's own failure looks like the JSON grammar constraint itself was
+ * the problem — the same model again without it.
+ *
+ * Neither mode alone is reliable for a reasoning model (gpt-oss-* is the
+ * one this pipeline's fallback chain lands on most): strict mode makes
+ * Groq reject the WHOLE completion server-side if the model's raw output
+ * isn't itself valid JSON from the first token (400 json_validate_failed,
+ * empty failed_generation) — which a reasoning model trips by design if it
+ * leaks so much as one token of reasoning before its answer. Relaxed mode
+ * avoids that gate but risks the model never emitting JSON at all within
+ * its token budget (confirmed in production: "no JSON object found in
+ * model response" — a completion that came back with zero `{` in it).
+ * Trying strict first (the better guarantee when a model supports it) and
+ * relaxed second per model covers both failure modes instead of picking
+ * one and eating the other's failures across the whole chain. A 404
+ * (renamed/retired model) or auth error fails identically either way, so
+ * only a validation-flavored failure earns the same-model retry.
+ *
+ * Returns the raw completion content string; throws with every attempt's
+ * error aggregated if the whole chain comes up empty.
+ */
+async function callGroqJson(groq, models, { sys, user, temperature, maxTokens, topP }) {
+  const errors = [];
+  for (const model of models) {
+    let strictError;
+    try {
+      const completion = await groq.chat.completions.create({
+        model,
+        temperature,
+        max_tokens: maxTokens,
+        top_p: topP,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: sys },
+          { role: 'user', content: user },
+        ],
+      });
+      return completion.choices[0].message.content;
+    } catch (e) {
+      strictError = e;
+      errors.push(`${model}: ${e.message}`);
+    }
+    if (!/json_validate_failed|Failed to (validate|generate) JSON/i.test(strictError.message)) continue;
+    try {
+      const completion = await groq.chat.completions.create({
+        model,
+        temperature,
+        max_tokens: maxTokens,
+        top_p: topP,
+        messages: [
+          { role: 'system', content: sys },
+          { role: 'user', content: user },
+        ],
+      });
+      return completion.choices[0].message.content;
+    } catch (e) {
+      errors.push(`${model} (relaxed): ${e.message}`);
+    }
+  }
+  throw new Error(`all models failed: ${errors.join(' | ')}`);
+}
+
 async function llmCopy({ title, text, genre, description }, count) {
   if (!Groq || !process.env.GROQ_API_KEY) return null;
   try {
@@ -127,37 +192,12 @@ async function llmCopy({ title, text, genre, description }, count) {
       'character), no text or words rendered in the image, no summary of plot.';
     const user = `Title: ${title}\nGenre: ${genre}\nDescription: ${description || ''}\n\nStory:\n${String(text || '').slice(0, 6000)}`;
 
-    let completion = null;
-    let lastError = null;
-    for (const model of MODELS) {
-      try {
-        completion = await groq.chat.completions.create({
-          model,
-          temperature: 0.9,
-          max_tokens: 900,
-          top_p: 0.95,
-          // No response_format: json_object — Groq rejects the WHOLE
-          // completion server-side (400 json_validate_failed, empty
-          // failed_generation) if the model's raw output isn't itself
-          // valid JSON, and reasoning models leaking so much as one
-          // stray token before their answer trips that on a system
-          // prompt this dense. extractJson() below already handles a
-          // prefixed/fenced response via brace-scanning, so parsing
-          // leniently client-side is strictly safer than an all-or-
-          // nothing server-side gate.
-          messages: [
-            { role: 'system', content: sys },
-            { role: 'user', content: user },
-          ],
-        });
-        break;
-      } catch (e) {
-        lastError = e;
-      }
-    }
-    if (!completion) throw lastError || new Error('all carousel-copy models failed');
-
-    const d = extractJson(completion.choices[0].message.content);
+    // Generous headroom over the ~900 tokens the JSON payload itself needs —
+    // a reasoning model spends real budget thinking before it answers, and
+    // truncating that mid-thought is exactly how a completion comes back
+    // with no JSON in it at all.
+    const content = await callGroqJson(groq, MODELS, { sys, user, temperature: 0.9, maxTokens: 2000, topP: 0.95 });
+    const d = extractJson(content);
     const slides = Array.isArray(d.slides)
       ? d.slides
           .map((s) =>
@@ -193,4 +233,4 @@ async function buildCarouselCopy(story) {
   };
 }
 
-module.exports = { buildCarouselCopy, slideCountFor, extractJson };
+module.exports = { buildCarouselCopy, slideCountFor, extractJson, callGroqJson };
