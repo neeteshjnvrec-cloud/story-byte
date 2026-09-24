@@ -325,19 +325,21 @@ async function main() {
           // available, so the video post is never blocked by this — and
           // never shows carousel UI baked into a video frame.
           let scenes = null;
+          let cues = null;
           if (synthResult.subtitlesPath) {
             try {
-              const cues = parseSrt(fs.readFileSync(synthResult.subtitlesPath, 'utf8'));
-              if (cues.length) {
-                scenes = await buildVideoScenes({
-                  storyId, title: story.title, text: story.text, genre: story.genre,
-                  description: story.description, cues, audioDurSec: dur, outDir,
-                });
-                if (scenes) {
-                  const captionLines = toCaptionLines(cues);
-                  scenes = await bakeInCaptions(scenes, captionLines, outDir, dur);
-                }
-              }
+              const parsed = parseSrt(fs.readFileSync(synthResult.subtitlesPath, 'utf8'));
+              if (parsed.length) cues = parsed;
+            } catch (e) {
+              console.warn(`    ⚠️  Subtitle parsing failed: ${e.message}`);
+            }
+          }
+          if (cues) {
+            try {
+              scenes = await buildVideoScenes({
+                storyId, title: story.title, text: story.text, genre: story.genre,
+                description: story.description, cues, audioDurSec: dur, outDir,
+              });
             } catch (e) {
               console.warn(`    ⚠️  Narration-synced scenes failed, using plain backgrounds: ${e.message}`);
             }
@@ -346,12 +348,23 @@ async function main() {
             scenes = igPlainSceneFiles.map((file) => ({ file }));
           }
           // clipScenes below needs a real per-scene duration regardless of
-          // which path produced `scenes` — the teaser-slide fallback has
-          // none (buildStoryVideo splits the audio evenly on its own), so
-          // backfill the same even split explicitly here.
+          // which path produced `scenes` — the plain-background fallback
+          // has none (buildStoryVideo splits the audio evenly on its own),
+          // so backfill the same even split explicitly here. Must happen
+          // before bakeInCaptions, which needs every scene's duration to
+          // know which background is on screen at a given caption's time.
           if (scenes.some((s) => !s.duration)) {
             const per = Math.max(2, dur / scenes.length);
             scenes = scenes.map((s) => ({ file: s.file, duration: s.duration || per }));
+          }
+          // Captions track the real narration regardless of which path
+          // produced the backgrounds above — skipping this on the plain-
+          // background fallback previously meant a fallback video played
+          // the full narration with no on-screen text at all past
+          // whatever the first background happened to be.
+          if (cues) {
+            const captionLines = toCaptionLines(cues);
+            scenes = await bakeInCaptions(scenes, captionLines, outDir, dur);
           }
           const videoPath = buildStoryVideo({ scenes, audioPath, outPath: path.join(outDir, 'story.mp4') });
           if (videoPath) {
