@@ -55,6 +55,12 @@ function firstSentence(text) {
   return (m ? m[0] : String(text || '').slice(0, 200)).trim();
 }
 
+// Instagram captions can't render a clickable link (only the bio link can),
+// so this is plain text for anyone reading the caption rather than tapping
+// through the story page — a viewer who already knows they want the app
+// shouldn't have to detour through a browser to find it.
+const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.app';
+
 // `story.description` is expected to already be the curiosity hook produced
 // alongside the slides (lib/carousel-copy) when one was generated — this
 // only falls back to the raw first sentence if that's missing.
@@ -67,6 +73,7 @@ function buildCaption(story) {
   } else {
     lines.push('▶️ Play the full story — free, fully narrated. Link in bio.');
   }
+  lines.push('', `📱 Get the app: ${APP_LINK}`);
   const hashtags = ['#StoryByte', '#AudioStories', `#${tag}`, '#ShortStory', '#StoryTime'];
   if (story.occasionHashtag) hashtags.push(story.occasionHashtag);
   lines.push('', hashtags.join(' '));
