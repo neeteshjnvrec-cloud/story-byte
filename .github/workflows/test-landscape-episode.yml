@@ -81,6 +81,9 @@ jobs:
         run: |
           git config user.name "storybyte-landscape-test"
           git config user.email "bot@storybyte.app"
+          # Only the last day's videos stay in the repo — nothing reads them
+          # after posting, and each one otherwise rides along in every deploy.
+          node scripts/prune-old-videos.js || true
           git add public/episodes 2>/dev/null || true
           git commit -m "test: render landscape episode ${{ inputs.episode }}" || echo "nothing to commit"
           git pull --rebase --autostash || true

@@ -703,6 +703,8 @@ async function main() {
       {
         seriesTitle: title,
         episode,
+        // Read by scripts/prune-old-videos.js to age out episode.mp4.
+        renderedAt: new Date().toISOString(),
         genre,
         language,
         generatedTitle: plan.title,
