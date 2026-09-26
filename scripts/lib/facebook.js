@@ -124,12 +124,31 @@ async function postStoryVideo(story, videoUrl) {
   }
 }
 
+const VIDEO_GRAPH = `https://graph-video.facebook.com/${process.env.IG_GRAPH_VERSION || 'v21.0'}`;
+
+async function fbVideoPhase(pageId, form) {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(`${VIDEO_GRAPH}/${pageId}/videos`, { method: 'POST', body: form });
+    const json = await res.json().catch(() => ({}));
+    if (res.ok && !json.error) return json;
+    const message = json.error?.message || `HTTP ${res.status}`;
+    // A chunk that hits a transient 5xx/timeout is retried in place; the
+    // session stays open on Facebook's side.
+    if (attempt < 3 && (res.status >= 500 || json.error?.is_transient)) {
+      await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt));
+      continue;
+    }
+    throw new Error(message);
+  }
+}
+
 /**
- * Uploads a long-form landscape episode straight from disk (multipart
- * `source`, not `file_url`) — episodes aren't deployed to Firebase Hosting,
- * so there's no public URL for Facebook to fetch. `thumb` sets the video's
- * cover image in the same request. Graph API accepts files up to 1GB this
- * way; a 15-minute episode is ~150MB.
+ * Uploads a long-form landscape episode straight from disk — episodes
+ * aren't deployed to Firebase Hosting, so there's no public URL for
+ * Facebook to fetch. Uses Graph's resumable upload (start / transfer
+ * chunks / finish): a single-request `source` upload of a 30-minute 1080p
+ * episode was rejected with HTTP 413 in a real run. `thumb` sets the
+ * video's cover image on the finish call.
  */
 async function uploadEpisodeToFacebook({ videoPath, thumbnailPath, title, description }) {
   const pageId = process.env.FB_PAGE_ID;
@@ -142,25 +161,57 @@ async function uploadEpisodeToFacebook({ videoPath, thumbnailPath, title, descri
   const path = require('path');
   if (!videoPath || !fs.existsSync(videoPath)) return { posted: false, reason: 'no_video' };
 
-  try {
+  const fields = (entries) => {
     const form = new FormData();
     form.append('access_token', token);
-    form.append('title', String(title || '').slice(0, 255));
-    form.append('description', String(description || ''));
-    form.append('published', 'true');
-    form.append('source', await fs.openAsBlob(videoPath, { type: 'video/mp4' }), path.basename(videoPath));
-    if (thumbnailPath && fs.existsSync(thumbnailPath)) {
-      form.append('thumb', await fs.openAsBlob(thumbnailPath, { type: 'image/jpeg' }), path.basename(thumbnailPath));
+    for (const [k, v] of Object.entries(entries)) form.append(k, v);
+    return form;
+  };
+
+  try {
+    const fileSize = fs.statSync(videoPath).size;
+    const session = await fbVideoPhase(pageId, fields({ upload_phase: 'start', file_size: String(fileSize) }));
+    let start = Number(session.start_offset);
+    let end = Number(session.end_offset);
+    const fd = fs.openSync(videoPath, 'r');
+    try {
+      while (start < end) {
+        const chunk = Buffer.alloc(end - start);
+        fs.readSync(fd, chunk, 0, chunk.length, start);
+        const form = fields({ upload_phase: 'transfer', upload_session_id: session.upload_session_id, start_offset: String(start) });
+        form.append('video_file_chunk', new Blob([chunk]), 'chunk');
+        const next = await fbVideoPhase(pageId, form);
+        start = Number(next.start_offset);
+        end = Number(next.end_offset);
+      }
+    } finally {
+      fs.closeSync(fd);
     }
-    const res = await fetch(`https://graph-video.facebook.com/${process.env.IG_GRAPH_VERSION || 'v21.0'}/${pageId}/videos`, {
-      method: 'POST',
-      body: form,
-    });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok || json.error) throw new Error(json.error?.message || `HTTP ${res.status}`);
-    const url = `https://www.facebook.com/${pageId}/videos/${json.id}`;
+
+    const finish = async (withThumb) => {
+      const form = fields({
+        upload_phase: 'finish',
+        upload_session_id: session.upload_session_id,
+        title: String(title || '').slice(0, 255),
+        description: String(description || ''),
+        published: 'true',
+      });
+      if (withThumb) form.append('thumb', await fs.openAsBlob(thumbnailPath, { type: 'image/jpeg' }), path.basename(thumbnailPath));
+      return fbVideoPhase(pageId, form);
+    };
+    const hasThumb = Boolean(thumbnailPath && fs.existsSync(thumbnailPath));
+    try {
+      await finish(hasThumb);
+    } catch (e) {
+      // The upload itself is done; don't lose the whole post over the cover.
+      if (!hasThumb) throw e;
+      console.warn(`  ⚠️  Facebook rejected the thumbnail (${e.message}) — publishing without it`);
+      await finish(false);
+    }
+
+    const url = `https://www.facebook.com/${pageId}/videos/${session.video_id}`;
     console.log(`  ✅ Facebook episode published: ${url}`);
-    return { posted: true, videoId: json.id, url };
+    return { posted: true, videoId: session.video_id, url };
   } catch (e) {
     console.warn(`  ⚠️  Facebook episode upload failed: ${e.message}`);
     return { posted: false, reason: e.message };

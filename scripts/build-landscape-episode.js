@@ -25,7 +25,7 @@ const { fetchSceneImage, fetchStoryImage, hashSeed } = require('./lib/scene-imag
 const { renderLandscapeVideo, WIDTH, HEIGHT } = require('./lib/video-landscape');
 const { callGroqJson, extractJson } = require('./lib/carousel-copy');
 const { parseSrt } = require('./lib/subtitles');
-const { toCaptionChunks, buildAss, captionFont } = require('./lib/landscape-captions');
+const { toCaptionChunks, captionFont } = require('./lib/landscape-captions');
 const { renderFallbackCover } = require('./lib/fallback-cover');
 const { GENRE_THEME, theme } = require('./lib/genre-theme');
 const { renderEpisodeThumbnail, THUMB_WIDTH, THUMB_HEIGHT } = require('./lib/episode-thumbnail');
@@ -350,16 +350,57 @@ function stripPartHeading(text) {
   return text.replace(/^\s*(\*+)?\s*(part|भाग)\s*\d+[^\n]*\n+/i, '').trim();
 }
 
-async function writePart(groq, plan, bible, index, storySoFar) {
+// Normalised for "is this paragraph a repeat" checks only.
+function squash(text) {
+  return String(text).replace(/\s+/g, ' ').trim();
+}
+
+// Models asked to continue a story sometimes restate its last paragraphs
+// before carrying on — narrated twice, and counted against the length.
+function dropRepeatedStart(text, storySoFar) {
+  if (!storySoFar) return text;
+  const seen = squash(storySoFar);
+  const paragraphs = text.split(/\n\s*\n/);
+  let i = 0;
+  while (i < paragraphs.length - 1 && squash(paragraphs[i]).length > 40 && seen.includes(squash(paragraphs[i]).slice(0, 160))) i += 1;
+  return paragraphs.slice(i).join('\n\n');
+}
+
+/**
+ * Cuts `text` down to about `maxWords` on paragraph boundaries. A middle
+ * part keeps its opening (the next part continues from wherever it now
+ * stops); the final part keeps its opening and its ending — the climax and
+ * cliffhanger — and loses paragraphs from the middle instead.
+ */
+function trimToWords(text, maxWords, { keepEnding = false } = {}) {
+  const paragraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const count = (list) => countWords(list.join(' '));
+  if (count(paragraphs) <= maxWords || paragraphs.length < 2) return text;
+  const tail = [];
+  if (keepEnding) {
+    while (paragraphs.length > 2 && count(tail) < maxWords * 0.35) tail.unshift(paragraphs.pop());
+  }
+  const head = [];
+  for (const p of paragraphs) {
+    if (head.length && count([...head, p, ...tail]) > maxWords) break;
+    head.push(p);
+  }
+  return [...head, ...tail].join('\n\n');
+}
+
+async function writePart(groq, plan, bible, index, storySoFar, budget) {
   const isLast = index === PARTS - 1;
   const outline = plan.parts.map((summary, i) => `Part ${i + 1}: ${summary}`).join('\n');
   const system =
     `You write serialized audio fiction for narration. Series: "${title}", season ${season}, episode ${episode}, genre: ${genre}. ` +
     `Episode title: "${plan.title}".\nCharacters — use exactly these names, spelled exactly like this:\n${characterBlock(bible)}\n` +
     `${storySoFarBlock(bible)}\nFull outline of this episode:\n${outline}\n\n` +
-    `Write ONLY part ${index + 1} of ${PARTS}, in ${languageName()}, about ${WORDS_PER_PART} words ` +
-    `(never fewer than ${Math.round(WORDS_PER_PART * 0.8)}). Detailed scenes, natural dialogue, emotional depth. ` +
-    (index === 0 ? 'Open with a strong hook. ' : 'Continue seamlessly from exactly where the story so far stops. ') +
+    `Write ONLY part ${index + 1} of ${PARTS}, in ${languageName()}, about ${budget} words ` +
+    `(at least ${Math.round(budget * 0.8)}, never more than ${Math.round(budget * 1.15)} — the episode must fit 15 minutes of narration). ` +
+    'Detailed scenes, natural dialogue, emotional depth. ' +
+    (index === 0
+      ? 'Open with a strong hook. '
+      : 'Continue seamlessly from exactly where the story so far stops — never repeat or summarise text that was already written. ') +
     (isLast
       ? 'This is the final part: build to the climax and end on a cliffhanger for the next episode. '
       : 'Do not wrap up or end the episode — the story continues in the next part. ') +
@@ -368,9 +409,17 @@ async function writePart(groq, plan, bible, index, storySoFar) {
     ? `The story so far ends with:\n\n${storySoFar.slice(-2500)}\n\nWrite part ${index + 1} now.`
     : 'Write part 1 now.';
 
-  const text = stripPartHeading(await callGroqText(groq, { system, user, maxTokens: 8000 }));
+  const text = dropRepeatedStart(stripPartHeading(await callGroqText(groq, { system, user, maxTokens: 8000 })), storySoFar);
   const words = countWords(text);
-  if (words < WORDS_PER_PART * 0.4) throw new Error(`part ${index + 1} too short: ${words} words`);
+  if (words < budget * 0.4) throw new Error(`part ${index + 1} too short: ${words} words`);
+  // A real Hindi run came back with 1,003 / 1,425 / 1,937 words against a
+  // 733-word ask — a 31-minute "15-minute" episode that also took 80+
+  // minutes to render. Length instructions alone don't hold these models.
+  const limit = Math.round(budget * 1.15);
+  if (words > limit) {
+    console.warn(`Part ${index + 1}: ${words} words is over the ${budget}-word budget — trimming to ~${limit}`);
+    return trimToWords(text, limit, { keepEnding: isLast });
+  }
   return text;
 }
 
@@ -389,7 +438,11 @@ async function generateStory(groq) {
 
   const parts = [];
   for (let index = 0; index < PARTS; index += 1) {
-    const text = await withRetries(`Part ${index + 1}`, () => writePart(groq, plan, bible, index, parts.join('\n\n')));
+    // Each part's budget is what's left of the episode's, so one long or
+    // short part is balanced out by the ones after it.
+    const written = countWords(parts.join(' '));
+    const budget = Math.round(Math.max(WORDS_PER_PART * 0.6, Math.min(WORDS_PER_PART * 1.2, (TARGET_WORDS - written) / (PARTS - index))));
+    const text = await withRetries(`Part ${index + 1}`, () => writePart(groq, plan, bible, index, parts.join('\n\n'), budget));
     console.log(`Part ${index + 1}/${PARTS}: ${countWords(text)} words`);
     parts.push(text);
   }
@@ -686,11 +739,12 @@ async function main() {
   const videoPath = path.join(outputDirectory, 'episode.mp4');
   console.log('Rendering 1920x1080 landscape video with captions...');
   const captionLines = toCaptionChunks(parsed);
-  const rendered = renderLandscapeVideo({
+  const rendered = await renderLandscapeVideo({
     scenes,
     audioPath,
     outPath: videoPath,
-    assContent: captionLines.length ? buildAss(captionLines, { font: captionFont(language) }) : null,
+    captions: captionLines,
+    font: captionFont(language),
   });
   if (!rendered || !fs.existsSync(videoPath)) {
     throw new Error('Landscape video rendering failed');

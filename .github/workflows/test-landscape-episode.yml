@@ -41,8 +41,8 @@ permissions:
 jobs:
   render-landscape-episode:
     runs-on: ubuntu-latest
-    # ~15 minutes of 1080p video at high quality renders in roughly 25-60
-    # minutes depending on the runner's core count.
+    # A 15-minute 1080p episode takes roughly 30-40 minutes end to end on a
+    # standard 4-core runner (most of it rendering).
     timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
@@ -82,15 +82,33 @@ jobs:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
         run: node build-landscape-episode.js
+      # The finished mp4 never goes into git: a 15-minute 1080p episode is
+      # well over GitHub's 100MB file limit (a real run's push failed on it),
+      # and YouTube/Facebook keep their own copies. It's kept here instead,
+      # downloadable from the run page for a day.
+      - name: Keep the rendered video for a day
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: episode-s${{ inputs.season }}e${{ inputs.episode }}
+          path: public/episodes/**/*.mp4
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: ignore
       - name: Persist generated test output
         if: always()
         run: |
           git config user.name "storybyte-landscape-test"
           git config user.email "bot@storybyte.app"
-          # Only the last day's videos stay in the repo — nothing reads them
-          # after posting, and each one otherwise rides along in every deploy.
-          node scripts/prune-old-videos.js || true
+          # Story text, scene art, thumbnail and the series bible (which the
+          # next episode reads for its characters) — everything but the mp4,
+          # which .gitignore keeps out.
           git add public/episodes 2>/dev/null || true
           git commit -m "test: render landscape S${{ inputs.season }}E${{ inputs.episode }}" || echo "nothing to commit"
-          git pull --rebase --autostash || true
-          git push
+          for delay in 2 4 8 16; do
+            git pull --rebase --autostash || true
+            git push && exit 0
+            sleep "$delay"
+          done
+          exit 1
