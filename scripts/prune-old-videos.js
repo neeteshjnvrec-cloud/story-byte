@@ -9,7 +9,7 @@
  * fresh CI checkout stamps every file with the checkout time):
  *   public/instagram/2026-09-24_...        -> that UTC date
  *   public/instagram/community_<ms>_...    -> that timestamp
- *   public/episodes/<series>/episode-N/    -> story.json `renderedAt`
+ *   public/episodes/<series>/season-S/episode-N/ -> story.json `renderedAt`
  * A folder that can't be dated is left alone, except an episode with no
  * `renderedAt` — those all predate the field, so they're old by definition.
  *
@@ -51,7 +51,11 @@ function episodeFolderTime(dir) {
 
 const folders = [
   ...subdirs(path.join(PUBLIC, 'instagram')).map((dir) => ({ dir, time: socialFolderTime(dir) })),
-  ...subdirs(path.join(PUBLIC, 'episodes')).flatMap(subdirs).map((dir) => ({ dir, time: episodeFolderTime(dir) })),
+  // season-S/episode-N, or a bare episode-N from before seasons existed.
+  ...subdirs(path.join(PUBLIC, 'episodes'))
+    .flatMap(subdirs)
+    .flatMap((dir) => (/^season-\d+$/.test(path.basename(dir)) ? subdirs(dir) : [dir]))
+    .map((dir) => ({ dir, time: episodeFolderTime(dir) })),
 ];
 
 let removed = 0;

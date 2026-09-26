@@ -8,6 +8,11 @@ on:
         required: true
         default: 'Alien Is My Girlfriend'
         type: string
+      season:
+        description: 'Season number'
+        required: true
+        default: '1'
+        type: string
       episode:
         description: 'Episode number'
         required: true
@@ -66,6 +71,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           EPISODE_TITLE: ${{ inputs.title }}
+          EPISODE_SEASON: ${{ inputs.season }}
           EPISODE_NUMBER: ${{ inputs.episode }}
           EPISODE_LANGUAGE: ${{ inputs.language }}
           EPISODE_GENRE: ${{ inputs.genre }}
@@ -85,6 +91,6 @@ jobs:
           # after posting, and each one otherwise rides along in every deploy.
           node scripts/prune-old-videos.js || true
           git add public/episodes 2>/dev/null || true
-          git commit -m "test: render landscape episode ${{ inputs.episode }}" || echo "nothing to commit"
+          git commit -m "test: render landscape S${{ inputs.season }}E${{ inputs.episode }}" || echo "nothing to commit"
           git pull --rebase --autostash || true
           git push

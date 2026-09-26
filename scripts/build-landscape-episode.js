@@ -7,6 +7,8 @@
  * scenes planned from the narration -> render with burned-in captions ->
  * thumbnail -> optionally publish to YouTube + Facebook (EPISODE_PUBLISH).
  *
+ * Episodes live in public/episodes/<series>/season-<S>/episode-<E>/.
+ *
  * Continuity lives in public/episodes/<series>/series.json — the series
  * bible: every recurring character's fixed name (and native-script
  * spelling) and look, the setting, and each episode's summary. Every
@@ -35,6 +37,7 @@ const PUBLIC = path.join(ROOT, 'public');
 
 const title = process.env.EPISODE_TITLE || 'Alien Is My Girlfriend';
 const episode = String(process.env.EPISODE_NUMBER || '1');
+const season = String(process.env.EPISODE_SEASON || '1');
 const language = process.env.EPISODE_LANGUAGE || 'en';
 const genre = process.env.EPISODE_GENRE || 'science fiction romance';
 const publish = process.env.EPISODE_PUBLISH === 'true';
@@ -120,6 +123,13 @@ function slug(value) {
 }
 
 const seriesDirectory = path.join(PUBLIC, 'episodes', slug(title));
+
+// Episodes order by season, then episode — S2E1 comes after S1E12.
+const orderKey = (s, e) => Number(s || 1) * 1000 + Number(e);
+const currentKey = orderKey(season, episode);
+const isEarlier = (x) => orderKey(x.season, x.episode) < currentKey;
+const byOrder = (a, b) => orderKey(a.season, a.episode) - orderKey(b.season, b.episode);
+const seasonEpisode = `Season ${season} Episode ${episode}`;
 const biblePath = path.join(seriesDirectory, 'series.json');
 
 function shell(command, args) {
@@ -215,13 +225,23 @@ function readJson(file) {
   }
 }
 
-/** story.json of every earlier episode already rendered for this series. */
+/** story.json of every earlier episode already rendered for this series, in
+ *  season/episode order. A bare episode-N folder (from before seasons
+ *  existed) counts as season 1. */
 function previousEpisodes() {
   if (!fs.existsSync(seriesDirectory)) return [];
-  return fs.readdirSync(seriesDirectory)
-    .map((dir) => readJson(path.join(seriesDirectory, dir, 'story.json')))
-    .filter((s) => s && Number(s.episode) < Number(episode))
-    .sort((a, b) => Number(a.episode) - Number(b.episode));
+  const dirs = [];
+  for (const name of fs.readdirSync(seriesDirectory)) {
+    const full = path.join(seriesDirectory, name);
+    if (/^season-\d+$/.test(name)) dirs.push(...fs.readdirSync(full).map((e) => path.join(full, e)));
+    else if (/^episode-/.test(name)) dirs.push(full);
+  }
+  return dirs
+    .map((dir) => readJson(path.join(dir, 'story.json')))
+    .filter(Boolean)
+    .map((s) => ({ ...s, season: String(s.season || '1') }))
+    .filter(isEarlier)
+    .sort(byOrder);
 }
 
 function cleanCharacters(list) {
@@ -258,7 +278,7 @@ async function bootstrapBible(groq, previous) {
     language,
     characters: cleanCharacters(reply.characters),
     setting: String(reply.setting || '').trim(),
-    episodes: previous.map((s) => ({ episode: String(s.episode), title: s.generatedTitle, description: s.description, summary: (s.outline || []).join(' ') || s.description })),
+    episodes: previous.map((s) => ({ season: s.season, episode: String(s.episode), title: s.generatedTitle, description: s.description, summary: (s.outline || []).join(' ') || s.description })),
   };
 }
 
@@ -267,7 +287,8 @@ async function loadBible(groq) {
   if (existing?.characters?.length) return existing;
   const previous = previousEpisodes();
   if (!previous.length) return null;
-  console.log(`No series bible yet — reconstructing it from episode ${previous[previous.length - 1].episode}`);
+  const latest = previous[previous.length - 1];
+  console.log(`No series bible yet — reconstructing it from season ${latest.season} episode ${latest.episode}`);
   const bible = await withRetries('Series bible', () => bootstrapBible(groq, previous));
   return bible.characters.length ? bible : null;
 }
@@ -279,8 +300,8 @@ function characterBlock(bible) {
 }
 
 function storySoFarBlock(bible) {
-  const eps = (bible?.episodes || []).filter((e) => Number(e.episode) < Number(episode)).slice(-4);
-  return eps.length ? `Story so far:\n${eps.map((e) => `Episode ${e.episode}: ${e.summary}`).join('\n')}` : '';
+  const eps = (bible?.episodes || []).filter(isEarlier).sort(byOrder).slice(-4);
+  return eps.length ? `Story so far:\n${eps.map((e) => `Season ${e.season || 1} Episode ${e.episode}: ${e.summary}`).join('\n')}` : '';
 }
 
 // ---------------------------------------------------------------------------
@@ -297,7 +318,7 @@ async function planEpisode(groq, bible) {
     : '"characters": [{"name": string, "nativeName": string, "role": string, "look": string}], "setting": string';
   const system =
     `You plan episodes of serialized audio fiction. ${continuity}` +
-    `Plan episode ${episode} of the continuing ${genre} series "${title}". Reply with JSON only: ` +
+    `Plan episode ${episode} of season ${season} of the continuing ${genre} series "${title}". Reply with JSON only: ` +
     `{"title": string, "description": string, "chapters": [string, ...], "parts": [string, ...], ${castFields}}. ` +
     `"title" is this episode's own title (not the series name), "description" one enticing sentence, and ` +
     `"chapters" exactly ${PARTS} short chapter titles — all three in ${languageName()}. ` +
@@ -309,7 +330,7 @@ async function planEpisode(groq, bible) {
       : '"characters" defines the 2-5 recurring characters: "name" in English letters, "nativeName" exactly as the story ' +
         'text will spell it, "look" a fixed drawable English description (age, face, hair, clothing); "setting" one English sentence. ') +
     'Refer to characters by name in the parts.';
-  const plan = await groqJson(groq, system, `Plan episode ${episode} now.`, 5000);
+  const plan = await groqJson(groq, system, `Plan season ${season} episode ${episode} now.`, 5000);
   const parts = Array.isArray(plan.parts) ? plan.parts.map((p) => String(p || '').trim()).filter(Boolean) : [];
   if (!plan.title || parts.length < PARTS) throw new Error('episode plan is missing a title or parts');
   const chapters = Array.isArray(plan.chapters) ? plan.chapters.map((c) => String(c || '').trim()).filter(Boolean) : [];
@@ -333,7 +354,7 @@ async function writePart(groq, plan, bible, index, storySoFar) {
   const isLast = index === PARTS - 1;
   const outline = plan.parts.map((summary, i) => `Part ${i + 1}: ${summary}`).join('\n');
   const system =
-    `You write serialized audio fiction for narration. Series: "${title}", episode ${episode}, genre: ${genre}. ` +
+    `You write serialized audio fiction for narration. Series: "${title}", season ${season}, episode ${episode}, genre: ${genre}. ` +
     `Episode title: "${plan.title}".\nCharacters — use exactly these names, spelled exactly like this:\n${characterBlock(bible)}\n` +
     `${storySoFarBlock(bible)}\nFull outline of this episode:\n${outline}\n\n` +
     `Write ONLY part ${index + 1} of ${PARTS}, in ${languageName()}, about ${WORDS_PER_PART} words ` +
@@ -527,13 +548,13 @@ function hashtag(value) {
 }
 
 function buildMetadata({ plan, bible, cues, parts }) {
-  const full = `${title} | Episode ${episode}: ${plan.title}`;
-  const videoTitle = full.length <= 100 ? full : `${title} | Episode ${episode}`.slice(0, 100);
+  const full = `${title} | ${seasonEpisode}: ${plan.title}`;
+  const videoTitle = full.length <= 100 ? full : `${title} | S${season} E${episode}: ${plan.title}`.slice(0, 100);
 
-  const previous = (bible.episodes || []).filter((e) => Number(e.episode) < Number(episode)).slice(-1)[0];
+  const previous = (bible.episodes || []).filter(isEarlier).sort(byOrder).slice(-1)[0];
   const chapters = chapterMarks(cues, parts, plan.chapters);
   const tags = [
-    title, `${title} episode ${episode}`, genre, 'audio story', 'StoryByte', 'web series', 'story',
+    title, `${title} season ${season}`, `${title} s${season}e${episode}`, genre, 'audio story', 'StoryByte', 'web series', 'story',
     language === 'hi' ? 'hindi story' : 'english story', ...bible.characters.slice(0, 4).map((c) => c.name),
   ];
   const cappedTags = [];
@@ -545,14 +566,14 @@ function buildMetadata({ plan, bible, cues, parts }) {
   const description = [
     plan.description,
     '',
-    `📺 ${title} — Episode ${episode}`,
+    `📺 ${title} — Season ${season}, Episode ${episode}`,
     ...(previous?.description ? ['', `⏪ Previously: ${previous.description}`] : []),
     ...(chapters.length ? ['', '⏱️ Chapters', ...chapters.map((m) => `${timestamp(m.time)} ${m.label}`)] : []),
     '',
     '🎧 More stories, free and fully narrated, on StoryByte',
     `📱 Get the app: ${APP_LINK}`,
     '',
-    [hashtag(title), `#Episode${episode}`, '#AudioStory', '#StoryByte', language === 'hi' ? '#HindiStory' : '#Story'].join(' '),
+    [hashtag(title), `#Season${season}`, `#S${season}E${episode}`, '#AudioStory', '#StoryByte', language === 'hi' ? '#HindiStory' : '#Story'].join(' '),
   ].join('\n');
 
   return { title: videoTitle, description, tags: cappedTags, chapters };
@@ -565,7 +586,7 @@ async function thumbnailArt(plan, bible, fallbackImage) {
     `${leads}. Characters on the right half of the frame, darker empty space on the left, intense emotional ` +
     `expressions, ${mood}, movie poster lighting, highly detailed, no text, no letters, no logos, no words.`;
   try {
-    return await fetchStoryImage(prompt, hashSeed(`${title}-${episode}-thumbnail`), {
+    return await fetchStoryImage(prompt, hashSeed(`${title}-s${season}-${episode}-thumbnail`), {
       width: THUMB_WIDTH, height: THUMB_HEIGHT, steps: IMAGE_STEPS,
     });
   } catch (error) {
@@ -575,9 +596,9 @@ async function thumbnailArt(plan, bible, fallbackImage) {
 }
 
 function saveBible(bible, plan) {
-  const entry = { episode, title: plan.title, description: plan.description, summary: plan.parts.join(' ') };
-  bible.episodes = [...(bible.episodes || []).filter((e) => String(e.episode) !== episode), entry]
-    .sort((a, b) => Number(a.episode) - Number(b.episode));
+  const entry = { season, episode, title: plan.title, description: plan.description, summary: plan.parts.join(' ') };
+  const same = (e) => String(e.season || '1') === season && String(e.episode) === episode;
+  bible.episodes = [...(bible.episodes || []).filter((e) => !same(e)), entry].sort(byOrder);
   fs.mkdirSync(seriesDirectory, { recursive: true });
   fs.writeFileSync(biblePath, JSON.stringify(bible, null, 2));
 }
@@ -590,10 +611,10 @@ async function main() {
   }
   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-  const outputDirectory = path.join(seriesDirectory, `episode-${episode}`);
+  const outputDirectory = path.join(seriesDirectory, `season-${season}`, `episode-${episode}`);
   fs.mkdirSync(outputDirectory, { recursive: true });
 
-  console.log(`Generating "${title}" episode ${episode}`);
+  console.log(`Generating "${title}" ${seasonEpisode}`);
   console.log(`Language: ${language}`);
   console.log(`Genre: ${genre}`);
   console.log(`Publish: ${publish ? 'yes (public on YouTube and Facebook)' : 'no'}`);
@@ -649,7 +670,7 @@ async function main() {
     console.log(`Generating scene ${sceneNumber}/${sceneCount}...`);
     let image = await fetchSceneImage(
       scenePrompt(description, bible),
-      hashSeed(`${title}-${episode}-${sceneNumber}`),
+      hashSeed(`${title}-s${season}-${episode}-${sceneNumber}`),
       { width: WIDTH, height: HEIGHT, steps: IMAGE_STEPS }
     );
     if (!image) {
@@ -679,7 +700,7 @@ async function main() {
   const thumbnailPath = path.join(outputDirectory, 'thumbnail.jpg');
   const art = await thumbnailArt(plan, bible, scenes[Math.floor(scenes.length / 2)].file);
   fs.writeFileSync(thumbnailPath, await renderEpisodeThumbnail({
-    art, seriesTitle: title, episode, episodeTitle: plan.title, accent,
+    art, seriesTitle: title, season, episode, episodeTitle: plan.title, accent,
   }));
 
   const metadata = buildMetadata({ plan, bible, cues: parsed, parts });
@@ -702,6 +723,7 @@ async function main() {
     JSON.stringify(
       {
         seriesTitle: title,
+        season,
         episode,
         // Read by scripts/prune-old-videos.js to age out episode.mp4.
         renderedAt: new Date().toISOString(),
@@ -727,6 +749,7 @@ async function main() {
     path.join(outputDirectory, 'README.txt'),
     [
       `Series: ${title}`,
+      `Season: ${season}`,
       `Episode: ${episode} — ${plan.title}`,
       `Language: ${language}`,
       `Genre: ${genre}`,
