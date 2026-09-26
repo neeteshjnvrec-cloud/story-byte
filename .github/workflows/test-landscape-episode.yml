@@ -24,6 +24,17 @@ on:
         required: true
         default: 'science fiction romance'
         type: string
+      publish:
+        description: 'Publish the finished episode to YouTube and Facebook'
+        required: true
+        default: false
+        type: boolean
+      privacy:
+        description: 'YouTube visibility when publishing'
+        required: true
+        default: 'public'
+        type: choice
+        options: [public, unlisted, private]
 
 permissions:
   contents: write
@@ -31,6 +42,9 @@ permissions:
 jobs:
   render-landscape-episode:
     runs-on: ubuntu-latest
+    # ~15 minutes of 1080p video at high quality renders in roughly 25-60
+    # minutes depending on the runner's core count.
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,12 +58,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install edge-tts uv
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-noto-core fonts-lohit-deva
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-lohit-deva fonts-dejavu-core
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Install pipeline dependencies
         working-directory: scripts
         run: npm install
-      - name: Generate 15-minute landscape episode
+      - name: Generate (and optionally publish) 15-minute landscape episode
         working-directory: scripts
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -61,6 +75,13 @@ jobs:
           EPISODE_NUMBER: ${{ inputs.episode }}
           EPISODE_LANGUAGE: ${{ inputs.language }}
           EPISODE_GENRE: ${{ inputs.genre }}
+          EPISODE_PUBLISH: ${{ inputs.publish }}
+          EPISODE_PRIVACY: ${{ inputs.privacy }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
         run: node build-landscape-episode.js
       - name: Persist generated test output
         if: always()

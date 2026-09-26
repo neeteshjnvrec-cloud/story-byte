@@ -124,4 +124,46 @@ async function postStoryVideo(story, videoUrl) {
   }
 }
 
-module.exports = { postStoryToFacebook, postStoryVideo };
+/**
+ * Uploads a long-form landscape episode straight from disk (multipart
+ * `source`, not `file_url`) — episodes aren't deployed to Firebase Hosting,
+ * so there's no public URL for Facebook to fetch. `thumb` sets the video's
+ * cover image in the same request. Graph API accepts files up to 1GB this
+ * way; a 15-minute episode is ~150MB.
+ */
+async function uploadEpisodeToFacebook({ videoPath, thumbnailPath, title, description }) {
+  const pageId = process.env.FB_PAGE_ID;
+  const token = process.env.FB_PAGE_ACCESS_TOKEN;
+  if (!pageId || !token) {
+    console.log('  ℹ️  Facebook not configured — skipping (see INSTAGRAM-SETUP.md).');
+    return { posted: false, reason: 'not_configured' };
+  }
+  const fs = require('fs');
+  const path = require('path');
+  if (!videoPath || !fs.existsSync(videoPath)) return { posted: false, reason: 'no_video' };
+
+  try {
+    const form = new FormData();
+    form.append('access_token', token);
+    form.append('title', String(title || '').slice(0, 255));
+    form.append('description', String(description || ''));
+    form.append('source', await fs.openAsBlob(videoPath, { type: 'video/mp4' }), path.basename(videoPath));
+    if (thumbnailPath && fs.existsSync(thumbnailPath)) {
+      form.append('thumb', await fs.openAsBlob(thumbnailPath, { type: 'image/jpeg' }), path.basename(thumbnailPath));
+    }
+    const res = await fetch(`https://graph-video.facebook.com/${process.env.IG_GRAPH_VERSION || 'v21.0'}/${pageId}/videos`, {
+      method: 'POST',
+      body: form,
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || json.error) throw new Error(json.error?.message || `HTTP ${res.status}`);
+    const url = `https://www.facebook.com/${pageId}/videos/${json.id}`;
+    console.log(`  ✅ Facebook episode published: ${url}`);
+    return { posted: true, videoId: json.id, url };
+  } catch (e) {
+    console.warn(`  ⚠️  Facebook episode upload failed: ${e.message}`);
+    return { posted: false, reason: e.message };
+  }
+}
+
+module.exports = { postStoryToFacebook, postStoryVideo, uploadEpisodeToFacebook };

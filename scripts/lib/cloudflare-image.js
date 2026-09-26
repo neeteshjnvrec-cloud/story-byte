@@ -30,7 +30,7 @@ function sleep(ms) {
  *  of failing on the first blip — a slower render is worth it to not drop
  *  a scene's art. Missing configuration and a genuine 4xx (bad prompt, bad
  *  auth) still fail immediately; those never get fixed by waiting. */
-async function fetchCloudflareImage(prompt, { timeoutMs = 45000, retries = 3 } = {}) {
+async function fetchCloudflareImage(prompt, { timeoutMs = 45000, retries = 3, steps } = {}) {
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
   const apiToken = process.env.CLOUDFLARE_API_TOKEN;
   if (!accountId || !apiToken) throw new Error('CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_API_TOKEN not configured');
@@ -44,7 +44,9 @@ async function fetchCloudflareImage(prompt, { timeoutMs = 45000, retries = 3 } =
       const res = await fetch(url, {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
+        // steps: Flux-schnell defaults to 4 and accepts up to 8 — more
+        // detail per image at roughly double the (free) neuron cost.
+        body: JSON.stringify(steps ? { prompt, steps } : { prompt }),
         signal: controller.signal,
       });
       if (res.status === 429 || res.status >= 500) {
