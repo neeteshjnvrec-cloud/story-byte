@@ -38,7 +38,6 @@ const episode = String(process.env.EPISODE_NUMBER || '1');
 const language = process.env.EPISODE_LANGUAGE || 'en';
 const genre = process.env.EPISODE_GENRE || 'science fiction romance';
 const publish = process.env.EPISODE_PUBLISH === 'true';
-const privacy = process.env.EPISODE_PRIVACY || 'public';
 
 const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.app';
 
@@ -597,7 +596,7 @@ async function main() {
   console.log(`Generating "${title}" episode ${episode}`);
   console.log(`Language: ${language}`);
   console.log(`Genre: ${genre}`);
-  console.log(`Publish: ${publish ? `yes (${privacy})` : 'no'}`);
+  console.log(`Publish: ${publish ? 'yes (public on YouTube and Facebook)' : 'no'}`);
 
   const { plan, bible, parts, text, wordCount } = await generateStory(groq);
 
@@ -691,7 +690,7 @@ async function main() {
     console.log('Publishing...');
     published.youtube = await uploadEpisodeToYouTube({
       videoPath, thumbnailPath, title: metadata.title, description: metadata.description,
-      tags: metadata.tags, language, privacy,
+      tags: metadata.tags, language, privacy: 'public',
     });
     published.facebook = await uploadEpisodeToFacebook({
       videoPath, thumbnailPath, title: metadata.title, description: metadata.description,

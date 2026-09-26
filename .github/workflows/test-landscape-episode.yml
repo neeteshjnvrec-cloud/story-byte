@@ -25,16 +25,10 @@ on:
         default: 'science fiction romance'
         type: string
       publish:
-        description: 'Publish the finished episode to YouTube and Facebook'
+        description: 'Publish the finished episode publicly to YouTube and Facebook'
         required: true
-        default: false
+        default: true
         type: boolean
-      privacy:
-        description: 'YouTube visibility when publishing'
-        required: true
-        default: 'public'
-        type: choice
-        options: [public, unlisted, private]
 
 permissions:
   contents: write
@@ -76,7 +70,6 @@ jobs:
           EPISODE_LANGUAGE: ${{ inputs.language }}
           EPISODE_GENRE: ${{ inputs.genre }}
           EPISODE_PUBLISH: ${{ inputs.publish }}
-          EPISODE_PRIVACY: ${{ inputs.privacy }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}

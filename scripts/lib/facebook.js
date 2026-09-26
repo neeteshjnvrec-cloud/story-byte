@@ -147,6 +147,7 @@ async function uploadEpisodeToFacebook({ videoPath, thumbnailPath, title, descri
     form.append('access_token', token);
     form.append('title', String(title || '').slice(0, 255));
     form.append('description', String(description || ''));
+    form.append('published', 'true');
     form.append('source', await fs.openAsBlob(videoPath, { type: 'video/mp4' }), path.basename(videoPath));
     if (thumbnailPath && fs.existsSync(thumbnailPath)) {
       form.append('thumb', await fs.openAsBlob(thumbnailPath, { type: 'image/jpeg' }), path.basename(thumbnailPath));
