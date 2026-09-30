@@ -53,4 +53,19 @@ function styleOfDay(dateStr) {
   };
 }
 
-module.exports = { styleOfDay };
+// YouTube classifies vertical uploads of up to 3 minutes as Shorts. A
+// complete katha is written for ~2.5 minutes; one that runs a little over
+// is sped up (pitch unchanged) by at most MAX_TEMPO to stay a Short, and
+// anything longer still posts complete, just as a regular video.
+const SHORTS_MAX_SEC = 176;
+const MAX_TEMPO = 1.12;
+// Music carries on this long after the last word, then fades.
+const END_TAIL_SEC = 2.5;
+
+/** Narration speed-up (1 = none) that fits `durSec` plus the tail into a Short. */
+function shortsTempo(durSec) {
+  const room = SHORTS_MAX_SEC - END_TAIL_SEC;
+  return durSec > room ? Math.min(MAX_TEMPO, durSec / room) : 1;
+}
+
+module.exports = { styleOfDay, shortsTempo, END_TAIL_SEC };

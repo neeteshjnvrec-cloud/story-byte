@@ -81,14 +81,13 @@ function artStyle(genre) {
 /**
  * Returns [{ file, duration }] — real-content scene image files (written
  * under `outDir`) with durations aligned to the real narration — or null.
- * Pass only the cues (and duration) of the stretch being illustrated — the
- * devotional Short passes just its first minute — and the scene count and
- * timing follow from that.
+ * `sceneCount` overrides the default pacing (~6s a scene, capped at 8) —
+ * the devotional Shorts ask for more so a ~3-minute story keeps moving.
  */
-async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir }) {
+async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir, sceneCount }) {
   if (!cues?.length || !audioDurSec) return null;
 
-  const prompts = await llmSceneList({ title, text, genre, description }, sceneCountFor(audioDurSec));
+  const prompts = await llmSceneList({ title, text, genre, description }, sceneCount || sceneCountFor(audioDurSec));
   if (!prompts?.length) return null;
   // Boundaries snap to cue starts so each picture changes on a spoken
   // word, not mid-syllable.

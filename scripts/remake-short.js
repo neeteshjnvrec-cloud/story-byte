@@ -5,11 +5,11 @@
  * Remake Short workflow) for you to edit and upload yourself.
  *
  * The remake is deliberately not a copy of the original: new scene art
- * (new seeds, and 8 pictures across the minute instead of 6), a different
- * look (grade, caption style, camera moves, music key) and fresh narration.
+ * (new seeds), a different look (grade, caption style, camera moves, music
+ * key) and fresh narration — of the complete katha, like the daily video.
  *
  * Outputs:
- *   short.mp4             finished Short with captions + music
+ *   short.mp4             finished video with captions + music
  *   short-clean.mp4       same video with no captions, for your own text
  *   voice.mp3             narration alone;  mix.mp3  narration + music
  *   scene-*.jpg           the scene art;  captions.srt
@@ -32,8 +32,7 @@ const { buildVideoScenes } = require('./lib/video-scenes');
 const { bakeInCaptions } = require('./lib/caption-frames');
 const { buildStoryVideo } = require('./lib/video');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
-const { clipAudio, clipScenes, shortCutoff, SHORT_MAX_SEC } = require('./lib/video-clip');
-const { styleOfDay } = require('./lib/short-style');
+const { styleOfDay, shortsTempo, END_TAIL_SEC } = require('./lib/short-style');
 const { DEITIES, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -62,19 +61,6 @@ function bestFromReport() {
   return ranked[0].story.id;
 }
 
-/** The first sentences, enough for a bit over a minute of narration. */
-function opening(text, words = 190) {
-  const sentences = String(text).split(/(?<=[।॥.!?])\s+/);
-  const out = [];
-  let count = 0;
-  for (const sentence of sentences) {
-    out.push(sentence);
-    count += sentence.split(/\s+/).length;
-    if (count >= words) break;
-  }
-  return out.join(' ');
-}
-
 async function main() {
   const firestore = db();
   const id = process.env.REMAKE_STORY_ID || bestFromReport();
@@ -88,21 +74,26 @@ async function main() {
   fs.mkdirSync(outDir, { recursive: true });
   console.log(`Remaking "${story.title}" (variant ${VARIANT})`);
 
-  // Fresh narration of just the opening.
+  // Fresh narration of the whole katha — a remake, like the daily video,
+  // tells the complete story.
   const voice = path.join(outDir, 'voice.mp3');
   const subs = path.join(outDir, 'captions.srt');
-  const text = opening(story.text);
+  const text = story.text;
   const narrated = (await synthSarvam(text, { out: voice, subsOut: subs, language: story.language || 'hi' })) ||
     synth(text, { voice: process.env.DEVOTIONAL_VOICE || 'hi-IN-MadhurNeural', rate: process.env.DEVOTIONAL_RATE || '-5%' }, voice, subs);
-  const cues = narrated.subtitlesPath ? parseSrt(fs.readFileSync(subs, 'utf8')) : [];
+  let cues = narrated.subtitlesPath ? parseSrt(fs.readFileSync(subs, 'utf8')) : [];
   if (!cues.length) throw new Error('Narration produced no caption timings');
-  const cut = shortCutoff(cues, SHORT_MAX_SEC);
-  const shortCues = cues.filter((c) => c.start < cut);
+  const dur = parseFloat(require('child_process').execFileSync('ffprobe', ['-v', 'quiet', '-show_entries', 'format=duration', '-of', 'csv=p=0', voice]).toString()) || cues[cues.length - 1].end;
+  const tempo = shortsTempo(dur);
+  if (tempo !== 1) cues = cues.map((c) => ({ ...c, start: c.start / tempo, end: c.end / tempo }));
+  const videoDur = dur / tempo;
+  const total = videoDur + END_TAIL_SEC;
 
   const look = styleOfDay(`${id}:remake:${VARIANT}`);
-  let scenes = await buildVideoScenes({
+  const scenes = await buildVideoScenes({
     storyId: `${id}-remake-${VARIANT}`, title: story.title, text, genre: 'devotional',
-    description: story.description, cues: shortCues, audioDurSec: cut, outDir,
+    description: story.description, cues, audioDurSec: videoDur, outDir,
+    sceneCount: Math.max(8, Math.min(18, Math.round(videoDur / 9))),
   });
   if (!scenes) throw new Error('Scene generation failed');
   scenes.forEach((s, i) => {
@@ -110,15 +101,15 @@ async function main() {
     fs.renameSync(s.file, file);
     s.file = file;
   });
+  scenes[scenes.length - 1].duration += END_TAIL_SEC;
 
-  const mix = mixDevotionalMusic(voice, path.join(outDir, 'mix-full.mp3'), { variant: look.seed });
-  const clippedMix = clipAudio(mix || voice, cut, path.join(outDir, 'mix.mp3'), { fadeOutSec: 1.2 });
-  fs.rmSync(path.join(outDir, 'mix-full.mp3'), { force: true });
+  const mix = mixDevotionalMusic(voice, path.join(outDir, 'mix.mp3'), { variant: look.seed, tempo, tailSec: END_TAIL_SEC });
+  if (!mix) throw new Error('Could not mix the narration');
 
   const frameDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sb-remake-frames-'));
-  const captioned = await bakeInCaptions(scenes, toCaptionLines(shortCues), frameDir, cut, { format: 'short', look });
-  buildStoryVideo({ scenes: clipScenes(captioned, cut), audioPath: clippedMix, outPath: path.join(outDir, 'short.mp4'), format: 'short', look });
-  buildStoryVideo({ scenes: clipScenes(scenes, cut), audioPath: clippedMix, outPath: path.join(outDir, 'short-clean.mp4'), format: 'short', look });
+  const captioned = await bakeInCaptions(scenes, toCaptionLines(cues), frameDir, total, { format: 'short', look });
+  buildStoryVideo({ scenes: captioned, audioPath: mix, outPath: path.join(outDir, 'short.mp4'), format: 'short', look });
+  buildStoryVideo({ scenes, audioPath: mix, outPath: path.join(outDir, 'short-clean.mp4'), format: 'short', look });
   fs.rmSync(frameDir, { recursive: true, force: true });
 
   const hashtags = [...new Set(['#shorts', ...(deity?.hashtags || []), ...GENERAL_HASHTAGS])];
@@ -138,7 +129,7 @@ async function main() {
     `Look: ${look.grade.name} grade, ${look.captionColour} captions`,
   ].join('\n'));
 
-  console.log(`Remake ready in ${path.relative(ROOT, outDir)}/ (${cut.toFixed(1)}s)`);
+  console.log(`Remake ready in ${path.relative(ROOT, outDir)}/ (${total.toFixed(1)}s)`);
 }
 
 main().catch((e) => {

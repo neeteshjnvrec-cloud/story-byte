@@ -311,7 +311,9 @@ async function buildCarouselSlides({ storyId, title, text, genre, description, c
   for (let i = 0; i < slides.length; i++) {
     const file = path.join(outDir, `slide-${i + 1}.jpg`);
     fs.writeFileSync(file, slides[i]);
-    urls.push(`${siteUrl}/instagram/${storyId}/slide-${i + 1}.jpg`);
+    // The folder actually written to (see lib/media-key.js), not the raw
+    // story id, which can contain Devanagari Instagram can't fetch.
+    urls.push(`${siteUrl}/instagram/${path.basename(outDir)}/slide-${i + 1}.jpg`);
   }
   const plainSceneFiles = plainBgs.map((buf, i) => {
     const file = path.join(outDir, `plain-scene-${i + 1}.jpg`);
