@@ -109,11 +109,11 @@ async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 135
  * scene's bespoke art. Throws only if every pass fails.
  */
 async function fetchStoryImage(prompt, seed, opts = {}) {
-  const { width = 1080, height = 1350, chainRetries = 1 } = opts;
+  const { width = 1080, height = 1350, chainRetries = 1, steps } = opts;
   let lastError;
   for (let pass = 0; pass <= chainRetries; pass++) {
     try {
-      const buf = await fetchCloudflareImage(prompt);
+      const buf = await fetchCloudflareImage(prompt, { steps });
       return await sharp(buf).resize(width, height, { fit: 'cover' }).jpeg({ quality: 90 }).toBuffer();
     } catch (primaryError) {
       try {
