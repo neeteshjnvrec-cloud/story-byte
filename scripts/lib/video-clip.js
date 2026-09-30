@@ -39,4 +39,20 @@ function clipAudio(audioPath, maxDurationSec, outPath) {
   }
 }
 
-module.exports = { REEL_MAX_SEC, clipScenes, clipAudio };
+// The daily devotional story's Short — the same clip goes to YouTube Shorts,
+// Instagram Reels and Facebook. Under a minute: that's where this channel's
+// Shorts get their views (its 3-5 minute vertical uploads count as regular
+// videos and drew 1-7 views each).
+const SHORT_MAX_SEC = 58;
+
+/** Where to cut a Short so it ends on a finished sentence: the end of the
+ *  last cue that closes a sentence before `maxSec` (edge-tts cues are
+ *  sentence-sized), else the last cue before it, else `maxSec` itself. */
+function shortCutoff(cues, maxSec = SHORT_MAX_SEC) {
+  const fits = (cues || []).filter((c) => c.end <= maxSec);
+  const sentence = [...fits].reverse().find((c) => /[.!?।॥]["'”’]?\s*$/.test(String(c.text || '').trim()));
+  const pick = sentence || fits[fits.length - 1];
+  return pick && pick.end >= maxSec * 0.5 ? pick.end + 0.3 : maxSec;
+}
+
+module.exports = { REEL_MAX_SEC, SHORT_MAX_SEC, clipScenes, clipAudio, shortCutoff };

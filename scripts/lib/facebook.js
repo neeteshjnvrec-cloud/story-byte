@@ -44,8 +44,8 @@ function buildMessage(story) {
   }
   lines.push('', `📱 Get the app: ${APP_LINK}`);
   const tag = (story.genre || 'story').replace(/[^a-zA-Z0-9]/g, '');
-  const hashtags = ['#StoryByte', '#AudioStories', `#${tag}`];
-  if (story.occasionHashtag) hashtags.push(story.occasionHashtag);
+  const hashtags = story.hashtags ? [...story.hashtags] : ['#StoryByte', '#AudioStories', `#${tag}`];
+  if (story.occasionHashtag && !hashtags.includes(story.occasionHashtag)) hashtags.push(story.occasionHashtag);
   lines.push('', hashtags.join(' '));
   return lines.join('\n');
 }

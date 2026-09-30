@@ -37,8 +37,16 @@ function buildDescription(story) {
   const lines = [(story.description || '').trim(), ''];
   if (story.pageUrl) lines.push('▶️ Play the full story — free, fully narrated:', story.pageUrl, '');
   lines.push(`📱 Get the app: ${APP_LINK}`, '');
-  lines.push('#StoryByte #AudioStory');
+  lines.push(story.hashtags ? ['#shorts', ...story.hashtags].join(' ') : '#StoryByte #AudioStory');
   return lines.join('\n');
+}
+
+// A Short under a minute is classified as a Short by its length and aspect
+// ratio; #shorts in the title is the conventional extra signal.
+function shortTitle(story) {
+  const title = String(story.title || 'A story on StoryByte');
+  if (!story.isShort) return title.slice(0, 100);
+  return `${title.slice(0, 100 - ' #shorts'.length)} #shorts`;
 }
 
 /**
@@ -61,9 +69,9 @@ async function postStoryToYouTube(story, videoPath) {
       part: ['snippet', 'status'],
       requestBody: {
         snippet: {
-          title: (story.title || 'A story on StoryByte').slice(0, 100),
+          title: shortTitle(story),
           description: buildDescription(story),
-          tags: ['storybyte', 'audio story', story.genre].filter(Boolean),
+          tags: [...(story.tagWords || []), 'storybyte', 'audio story', story.genre].filter(Boolean),
           categoryId: '24', // Entertainment
         },
         status: { privacyStatus: 'public', selfDeclaredMadeForKids: false },

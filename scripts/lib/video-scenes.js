@@ -69,34 +69,58 @@ async function llmSceneList({ title, text, genre, description }, count) {
   }
 }
 
-/** Maps scene boundary `fraction` (0..1) onto the real narration timeline.
- *  Cues don't need to line up 1:1 with text.split(/\s+/) — tokenization
- *  differs, especially for non-Latin scripts — they just need to be
- *  chronologically ordered across the whole narration, which edge-tts's
- *  per-word cues are. */
-function timeAt(cues, fraction, totalDur) {
-  if (fraction <= 0) return 0;
-  if (fraction >= 1) return totalDur;
-  const idx = Math.min(cues.length - 1, Math.floor(fraction * cues.length));
-  return cues[idx].start;
+// The devotional Shorts that do well on this channel (1K-41K views) are
+// hyper-real "divine" renders, not storybook paintings.
+function artStyle(genre) {
+  return genre === 'devotional'
+    ? 'divine hyper-realistic cinematic art, glowing golden aura, rich colours, 8K detail, no text, no words'
+    : 'painterly storybook illustration, cinematic lighting, no text, no words';
+}
+
+/** Cues' spoken text between `from` and `to` seconds. */
+function textBetween(cues, from, to) {
+  return cues.filter((c) => c.start >= from && c.start < to).map((c) => c.text).join(' ');
 }
 
 /**
  * Returns [{ file, duration }] — real-content scene image files (written
  * under `outDir`) with durations aligned to the real narration — or null.
+ *
+ * `frontLoad` ({ seconds, count }) gives the opening `seconds` their own
+ * `count` scenes, planned from just that part of the narration — that
+ * opening is what gets posted as the Short, where one picture held for
+ * 30s loses the viewer. The rest of the story gets the usual pacing.
  */
-async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir }) {
+async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir, frontLoad }) {
   if (!cues?.length || !audioDurSec) return null;
 
-  const count = sceneCountFor(audioDurSec);
-  const prompts = await llmSceneList({ title, text, genre, description }, count);
-  if (!prompts?.length) return null;
+  const spans = [];
+  if (frontLoad && audioDurSec > frontLoad.seconds + 20) {
+    spans.push({ from: 0, to: frontLoad.seconds, count: frontLoad.count, text: textBetween(cues, 0, frontLoad.seconds) });
+    spans.push({ from: frontLoad.seconds, to: audioDurSec, count: sceneCountFor(audioDurSec - frontLoad.seconds), text: textBetween(cues, frontLoad.seconds, audioDurSec) });
+  } else {
+    spans.push({ from: 0, to: audioDurSec, count: sceneCountFor(audioDurSec), text });
+  }
+
+  const planned = [];
+  for (const span of spans) {
+    const prompts = await llmSceneList({ title, text: span.text || text, genre, description }, span.count);
+    if (!prompts?.length) return null;
+    const spanCues = cues.filter((c) => c.start >= span.from && c.start < span.to);
+    prompts.forEach((prompt, i) => {
+      // Boundaries snap to cue starts inside the span so each picture
+      // changes on a spoken word, not mid-syllable.
+      const at = (k) => (k <= 0 ? span.from : k >= prompts.length ? span.to
+        : (spanCues[Math.floor((k / prompts.length) * spanCues.length)]?.start ?? span.from + ((span.to - span.from) * k) / prompts.length));
+      planned.push({ prompt, start: at(i), end: at(i + 1) });
+    });
+  }
 
   fs.mkdirSync(outDir, { recursive: true });
   const t = theme(genre);
   const scenes = [];
-  for (let i = 0; i < prompts.length; i++) {
-    const prompt = `${prompts[i]}. ${t.mood}, painterly storybook illustration, cinematic lighting, no text, no words`;
+  for (let i = 0; i < planned.length; i++) {
+    const prompt = `${planned[i].prompt}. ${t.mood}, ${artStyle(genre)}`;
     // A seed space distinct from the carousel's own scene art (`${storyId}-${i}`)
     // so a story's video doesn't just replay its carousel image set.
     let image = await fetchSceneImage(prompt, hashSeed(`${storyId}-video-${i}`));
@@ -112,9 +136,7 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
     }
     const file = path.join(outDir, `video-scene-${i + 1}.jpg`);
     fs.writeFileSync(file, image);
-    const start = timeAt(cues, i / prompts.length, audioDurSec);
-    const end = timeAt(cues, (i + 1) / prompts.length, audioDurSec);
-    scenes.push({ file, duration: Math.max(1.5, end - start) });
+    scenes.push({ file, duration: Math.max(1.5, planned[i].end - planned[i].start) });
   }
   return scenes.length ? scenes : null;
 }
