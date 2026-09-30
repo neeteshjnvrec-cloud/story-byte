@@ -44,7 +44,9 @@ async function main() {
     // account that already granted consent once before (otherwise a
     // repeat consent can silently omit it).
     prompt: 'consent',
-    scope: ['https://www.googleapis.com/auth/youtube.upload'],
+    // youtube.force-ssl lets the pipeline post the first comment on each
+    // Short (lib/youtube.js commentOnYouTube); upload alone can't.
+    scope: ['https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtube.force-ssl'],
   });
 
   console.log("\nOpen this URL in a browser signed into the YouTube channel's Google account:\n");

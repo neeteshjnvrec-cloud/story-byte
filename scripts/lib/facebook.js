@@ -44,8 +44,8 @@ function buildMessage(story) {
   }
   lines.push('', `📱 Get the app: ${APP_LINK}`);
   const tag = (story.genre || 'story').replace(/[^a-zA-Z0-9]/g, '');
-  const hashtags = ['#StoryByte', '#AudioStories', `#${tag}`];
-  if (story.occasionHashtag) hashtags.push(story.occasionHashtag);
+  const hashtags = story.hashtags ? [...story.hashtags] : ['#StoryByte', '#AudioStories', `#${tag}`];
+  if (story.occasionHashtag && !hashtags.includes(story.occasionHashtag)) hashtags.push(story.occasionHashtag);
   lines.push('', hashtags.join(' '));
   return lines.join('\n');
 }
@@ -218,4 +218,19 @@ async function uploadEpisodeToFacebook({ videoPath, thumbnailPath, title, descri
   }
 }
 
-module.exports = { postStoryToFacebook, postStoryVideo, uploadEpisodeToFacebook };
+/** Comments `text` on a Page post or video as the Page. Needs the
+ *  pages_manage_engagement permission on FB_PAGE_ACCESS_TOKEN; without it
+ *  the error is logged and nothing else is affected. */
+async function commentOnFacebook(objectId, text) {
+  if (!process.env.FB_PAGE_ACCESS_TOKEN || !objectId || !text) return { posted: false };
+  try {
+    const res = await fbCall('POST', `/${objectId}/comments`, { message: text });
+    console.log('  💬 Facebook first comment posted');
+    return { posted: true, commentId: res.id };
+  } catch (e) {
+    console.warn(`  ⚠️  Facebook comment failed (needs pages_manage_engagement): ${e.message}`);
+    return { posted: false, reason: e.message };
+  }
+}
+
+module.exports = { postStoryToFacebook, postStoryVideo, uploadEpisodeToFacebook, commentOnFacebook };

@@ -67,15 +67,16 @@ const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.ap
 function buildCaption(story) {
   const hook = (story.description || firstSentence(story.text) || '').trim();
   const tag = (story.genre || 'story').replace(/[^a-zA-Z0-9]/g, '');
-  const lines = [`🎧 ${story.title || 'A story on StoryByte'}`, '', hook, ''];
+  // A devotional Short's title already opens with its own emoji hook.
+  const lines = [story.isShort ? story.title : `🎧 ${story.title || 'A story on StoryByte'}`, '', hook, ''];
   if (story.pageUrl) {
     lines.push('▶️ Play the full story — free, fully narrated:', story.pageUrl, '(or tap the link in bio)');
   } else {
     lines.push('▶️ Play the full story — free, fully narrated. Link in bio.');
   }
   lines.push('', `📱 Get the app: ${APP_LINK}`);
-  const hashtags = ['#StoryByte', '#AudioStories', `#${tag}`, '#ShortStory', '#StoryTime'];
-  if (story.occasionHashtag) hashtags.push(story.occasionHashtag);
+  const hashtags = story.hashtags || ['#StoryByte', '#AudioStories', `#${tag}`, '#ShortStory', '#StoryTime'];
+  if (story.occasionHashtag && !hashtags.includes(story.occasionHashtag)) hashtags.push(story.occasionHashtag);
   lines.push('', hashtags.join(' '));
   return lines.join('\n');
 }
@@ -166,4 +167,19 @@ async function postStoryReel(story, videoUrl) {
   }
 }
 
-module.exports = { postStoryCarousel, postStoryReel, buildCaption };
+/** Comments `text` on a published media item. Needs the
+ *  instagram_manage_comments permission on IG_ACCESS_TOKEN; without it the
+ *  error is logged and nothing else is affected. */
+async function commentOnInstagram(mediaId, text) {
+  if (!process.env.IG_ACCESS_TOKEN || !mediaId || !text) return { posted: false };
+  try {
+    const res = await igCall('POST', `/${mediaId}/comments`, { message: text });
+    console.log('  💬 Instagram first comment posted');
+    return { posted: true, commentId: res.id };
+  } catch (e) {
+    console.warn(`  ⚠️  Instagram comment failed (needs instagram_manage_comments): ${e.message}`);
+    return { posted: false, reason: e.message };
+  }
+}
+
+module.exports = { postStoryCarousel, postStoryReel, buildCaption, commentOnInstagram };

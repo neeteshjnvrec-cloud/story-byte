@@ -74,3 +74,6 @@ ios/build/google-services.json
 # keeps each one as a 1-day run artifact instead (YouTube/Facebook hold the
 # published copies).
 /public/episodes/**/*.mp4
+
+# Remake Short outputs (scripts/remake-short.js) — a run artifact, never committed
+/remakes/

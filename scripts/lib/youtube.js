@@ -37,8 +37,16 @@ function buildDescription(story) {
   const lines = [(story.description || '').trim(), ''];
   if (story.pageUrl) lines.push('▶️ Play the full story — free, fully narrated:', story.pageUrl, '');
   lines.push(`📱 Get the app: ${APP_LINK}`, '');
-  lines.push('#StoryByte #AudioStory');
+  lines.push(story.hashtags ? ['#shorts', ...story.hashtags].join(' ') : '#StoryByte #AudioStory');
   return lines.join('\n');
+}
+
+// A Short under a minute is classified as a Short by its length and aspect
+// ratio; #shorts in the title is the conventional extra signal.
+function shortTitle(story) {
+  const title = String(story.title || 'A story on StoryByte');
+  if (!story.isShort) return title.slice(0, 100);
+  return `${title.slice(0, 100 - ' #shorts'.length)} #shorts`;
 }
 
 /**
@@ -61,9 +69,9 @@ async function postStoryToYouTube(story, videoPath) {
       part: ['snippet', 'status'],
       requestBody: {
         snippet: {
-          title: (story.title || 'A story on StoryByte').slice(0, 100),
+          title: shortTitle(story),
           description: buildDescription(story),
-          tags: ['storybyte', 'audio story', story.genre].filter(Boolean),
+          tags: [...(story.tagWords || []), 'storybyte', 'audio story', story.genre].filter(Boolean),
           categoryId: '24', // Entertainment
         },
         status: { privacyStatus: 'public', selfDeclaredMadeForKids: false },
@@ -136,4 +144,28 @@ async function uploadEpisodeToYouTube({ videoPath, thumbnailPath, title, descrip
   return { posted: true, videoId, url: `https://youtu.be/${videoId}`, thumbnailSet };
 }
 
-module.exports = { postStoryToYouTube, uploadEpisodeToYouTube };
+/**
+ * Posts `text` as the first comment on `videoId`, to start the replies that
+ * Shorts ranking weighs heavily. Needs the youtube.force-ssl scope — a
+ * refresh token minted with youtube.upload only gets a 403, logged with the
+ * fix (re-run scripts/youtube-auth.js, see YOUTUBE-SETUP.md). The API can't
+ * pin comments; pin it by hand in YouTube Studio if wanted.
+ */
+async function commentOnYouTube(videoId, text) {
+  const youtube = client();
+  if (!youtube || !videoId || !text) return { posted: false };
+  try {
+    const res = await youtube.commentThreads.insert({
+      part: ['snippet'],
+      requestBody: { snippet: { videoId, topLevelComment: { snippet: { textOriginal: text } } } },
+    });
+    console.log('  💬 YouTube first comment posted');
+    return { posted: true, commentId: res.data.id };
+  } catch (e) {
+    const scope = /insufficient|permission|scope/i.test(e.message) ? ' — re-mint YOUTUBE_REFRESH_TOKEN with the youtube.force-ssl scope (YOUTUBE-SETUP.md)' : '';
+    console.warn(`  ⚠️  YouTube comment failed: ${e.message}${scope}`);
+    return { posted: false, reason: e.message };
+  }
+}
+
+module.exports = { postStoryToYouTube, uploadEpisodeToYouTube, commentOnYouTube };

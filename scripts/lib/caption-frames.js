@@ -46,6 +46,42 @@ async function drawCaptionFrame(imagePath, text) {
 }
 
 /**
+ * Full-screen 9:16 caption frame for the devotional Shorts: the art is
+ * cover-cropped to 1080x1920 around its most salient region (sharp's
+ * attention strategy keeps the deity in frame when a square image is cut
+ * down to portrait), and the caption sits at `look.captionBottom` — inside
+ * the Shorts/Reels safe zone, clear of the title and buttons along the
+ * bottom — in the day's caption colour with a heavy outline instead of a
+ * dark box.
+ */
+async function drawShortCaptionFrame(imagePath, text, look = {}) {
+  const w = 1080;
+  const h = 1920;
+  const base = await sharp(imagePath).resize(w, h, { fit: 'cover', position: sharp.strategy.attention }).toBuffer();
+  const lines = wrapLines(text, 20, 3);
+  const lineHeight = 78;
+  const bottom = Math.round(h * (look.captionBottom || 0.7));
+  const startY = bottom - (lines.length - 1) * lineHeight;
+  const svg = `
+  <svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="scrim" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="50%" stop-color="#000000" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="${startY - lineHeight - 60}" width="${w}" height="${(lines.length + 1) * lineHeight + 120}" fill="url(#scrim)"/>
+    <text font-family="'Noto Sans Devanagari', 'Lohit Devanagari', Helvetica, Arial, 'DejaVu Sans', sans-serif" font-weight="800" font-size="64"
+      fill="${look.captionColour || '#ffffff'}" stroke="#000000" stroke-width="8" paint-order="stroke" stroke-linejoin="round" text-anchor="middle">
+      ${tspans(lines, { x: w / 2, startY, lineHeight })}
+    </text>
+  </svg>`;
+  const overlay = await sharp(Buffer.from(svg)).png().toBuffer();
+  return sharp(base).composite([{ input: overlay, top: 0, left: 0 }]).jpeg({ quality: 92 }).toBuffer();
+}
+
+/**
  * Returns [{ file, duration, sceneIndex, sceneElapsed }] — one baked-caption
  * frame per caption line, using whichever `scenes` background art (the
  * [{ file, duration }] list from lib/video-scenes.js, chronological from
@@ -59,8 +95,11 @@ async function drawCaptionFrame(imagePath, text) {
  * scene's own timeline, not its own start time — lets lib/video.js render
  * one continuous Ken Burns zoom across all of a scene's caption frames
  * instead of the animation restarting every time the caption text changes.
+ *
+ * `format: 'short'` draws full-screen 9:16 frames in the day's `look`
+ * (drawShortCaptionFrame); otherwise the original 4:5 frames.
  */
-async function bakeInCaptions(scenes, captionLines, outDir, audioDurSec) {
+async function bakeInCaptions(scenes, captionLines, outDir, audioDurSec, { format, look } = {}) {
   if (!scenes?.length || !captionLines?.length) return scenes;
   try {
     let t = 0;
@@ -75,7 +114,9 @@ async function bakeInCaptions(scenes, captionLines, outDir, audioDurSec) {
       const line = captionLines[i];
       const mid = (line.start + line.end) / 2;
       const scene = withRange.find((s) => mid >= s.start && mid < s.end) || withRange[withRange.length - 1];
-      const buf = await drawCaptionFrame(scene.file, line.text);
+      const buf = format === 'short'
+        ? await drawShortCaptionFrame(scene.file, line.text, look)
+        : await drawCaptionFrame(scene.file, line.text);
       const file = path.join(outDir, `caption-frame-${i + 1}.jpg`);
       fs.writeFileSync(file, buf);
       const isLast = i === captionLines.length - 1;
@@ -85,6 +126,8 @@ async function bakeInCaptions(scenes, captionLines, outDir, audioDurSec) {
         duration: Math.max(0.5, end - line.start),
         sceneIndex: scene.index,
         sceneElapsed: Math.max(0, line.start - scene.start),
+        // Lets lib/video.js spread one camera move over the whole scene.
+        sceneDuration: scene.end - scene.start,
       });
     }
     return frames.length ? frames : scenes;

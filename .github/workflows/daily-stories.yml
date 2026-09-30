@@ -82,6 +82,11 @@ jobs:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          # Optional — Sarvam AI's natural Hindi narration for the daily
+          # devotional story (see scripts/lib/sarvam-tts.js). Unset, the
+          # pipeline narrates with edge-tts as before.
+          SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
+          SARVAM_SPEAKER: ${{ vars.SARVAM_SPEAKER }}
         run: |
           node build-stories.js
           node build-story-pages.js
