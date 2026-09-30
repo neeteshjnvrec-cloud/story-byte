@@ -8,6 +8,11 @@ on:
         required: true
         default: 'Alien Is My Girlfriend'
         type: string
+      season:
+        description: 'Season number'
+        required: true
+        default: '1'
+        type: string
       episode:
         description: 'Episode number'
         required: true
@@ -24,6 +29,11 @@ on:
         required: true
         default: 'science fiction romance'
         type: string
+      publish:
+        description: 'Publish the finished episode publicly to YouTube and Facebook'
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -31,6 +41,9 @@ permissions:
 jobs:
   render-landscape-episode:
     runs-on: ubuntu-latest
+    # A 15-minute 1080p episode takes roughly 30-40 minutes end to end on a
+    # standard 4-core runner (most of it rendering).
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,12 +57,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install edge-tts uv
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-noto-core fonts-lohit-deva
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-lohit-deva fonts-dejavu-core
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Install pipeline dependencies
         working-directory: scripts
         run: npm install
-      - name: Generate 15-minute landscape episode
+      - name: Generate (and optionally publish) 15-minute landscape episode
         working-directory: scripts
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -58,16 +71,44 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           EPISODE_TITLE: ${{ inputs.title }}
+          EPISODE_SEASON: ${{ inputs.season }}
           EPISODE_NUMBER: ${{ inputs.episode }}
           EPISODE_LANGUAGE: ${{ inputs.language }}
           EPISODE_GENRE: ${{ inputs.genre }}
+          EPISODE_PUBLISH: ${{ inputs.publish }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
         run: node build-landscape-episode.js
+      # The finished mp4 never goes into git: a 15-minute 1080p episode is
+      # well over GitHub's 100MB file limit (a real run's push failed on it),
+      # and YouTube/Facebook keep their own copies. It's kept here instead,
+      # downloadable from the run page for a day.
+      - name: Keep the rendered video for a day
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: episode-s${{ inputs.season }}e${{ inputs.episode }}
+          path: public/episodes/**/*.mp4
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: ignore
       - name: Persist generated test output
         if: always()
         run: |
           git config user.name "storybyte-landscape-test"
           git config user.email "bot@storybyte.app"
+          # Story text, scene art, thumbnail and the series bible (which the
+          # next episode reads for its characters) — everything but the mp4,
+          # which .gitignore keeps out.
           git add public/episodes 2>/dev/null || true
-          git commit -m "test: render landscape episode ${{ inputs.episode }}" || echo "nothing to commit"
-          git pull --rebase --autostash || true
-          git push
+          git commit -m "test: render landscape S${{ inputs.season }}E${{ inputs.episode }}" || echo "nothing to commit"
+          for delay in 2 4 8 16; do
+            git pull --rebase --autostash || true
+            git push && exit 0
+            sleep "$delay"
+          done
+          exit 1

@@ -79,4 +79,61 @@ async function postStoryToYouTube(story, videoPath) {
   }
 }
 
-module.exports = { postStoryToYouTube };
+// YouTube rejects `<` and `>` anywhere in a title or description.
+const ytSafe = (s) => String(s || '').replace(/[<>]/g, '');
+
+/**
+ * Uploads a long-form landscape episode, then sets its custom thumbnail.
+ * Separate from postStoryToYouTube (the daily Reels' upload) so the two
+ * pipelines never change each other's behaviour.
+ *
+ * The thumbnail step can fail on its own — YouTube only allows custom
+ * thumbnails on phone-verified channels — so the video is still reported as
+ * published and `thumbnailSet` says whether the thumbnail made it.
+ */
+async function uploadEpisodeToYouTube({ videoPath, thumbnailPath, title, description, tags = [], language, privacy = 'public' }) {
+  const youtube = client();
+  if (!youtube) {
+    console.log('  ℹ️  YouTube not configured — skipping (see YOUTUBE-SETUP.md).');
+    return { posted: false, reason: 'not_configured' };
+  }
+  if (!videoPath || !fs.existsSync(videoPath)) return { posted: false, reason: 'no_video' };
+
+  let videoId;
+  try {
+    const res = await youtube.videos.insert({
+      part: ['snippet', 'status'],
+      requestBody: {
+        snippet: {
+          title: ytSafe(title).slice(0, 100),
+          description: ytSafe(description).slice(0, 5000),
+          tags,
+          categoryId: '24', // Entertainment
+          defaultLanguage: language,
+          defaultAudioLanguage: language,
+        },
+        status: { privacyStatus: privacy, selfDeclaredMadeForKids: false },
+      },
+      media: { body: fs.createReadStream(videoPath) },
+    });
+    videoId = res.data.id;
+    console.log(`  ✅ YouTube episode published: https://youtu.be/${videoId}`);
+  } catch (e) {
+    console.warn(`  ⚠️  YouTube episode upload failed: ${e.message}`);
+    return { posted: false, reason: e.message };
+  }
+
+  let thumbnailSet = false;
+  if (thumbnailPath && fs.existsSync(thumbnailPath)) {
+    try {
+      await youtube.thumbnails.set({ videoId, media: { mimeType: 'image/jpeg', body: fs.createReadStream(thumbnailPath) } });
+      thumbnailSet = true;
+      console.log('  ✅ YouTube thumbnail set');
+    } catch (e) {
+      console.warn(`  ⚠️  YouTube thumbnail failed (custom thumbnails need a phone-verified channel): ${e.message}`);
+    }
+  }
+  return { posted: true, videoId, url: `https://youtu.be/${videoId}`, thumbnailSet };
+}
+
+module.exports = { postStoryToYouTube, uploadEpisodeToYouTube };

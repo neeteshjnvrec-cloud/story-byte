@@ -94,6 +94,9 @@ jobs:
         run: |
           git config user.name "storybyte-bot"
           git config user.email "bot@storybyte.app"
+          # Only the last day's videos stay in the repo — nothing reads them
+          # after posting, and each one otherwise rides along in every deploy.
+          node scripts/prune-old-videos.js || true
           git add public/audio public/covers public/instagram public/s public/index.html 2>/dev/null || true
           git commit -m "chore: daily story audio + covers ($(date -u +%F))" || echo "nothing to commit"
           # The community workflow pushes to main too; rebase so a stale branch
