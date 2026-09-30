@@ -34,13 +34,37 @@ function parseSrt(srtText) {
   }
 }
 
+/** Newer edge-tts builds write one cue per *sentence*, not per word — a
+ *  whole sentence then became one caption, truncated with "…" after three
+ *  lines and held on screen for 8+ seconds (seen in a real Short). Splits
+ *  any multi-word cue into per-word cues across its time span, weighted by
+ *  word length, so the grouping below always works on words. */
+function toWordCues(cues) {
+  const out = [];
+  for (const cue of cues) {
+    const words = String(cue.text || '').split(/\s+/).filter(Boolean);
+    if (words.length <= 1) {
+      out.push(cue);
+      continue;
+    }
+    const weight = words.reduce((sum, w) => sum + w.length + 1, 0);
+    let t = cue.start;
+    for (const word of words) {
+      const d = (cue.end - cue.start) * ((word.length + 1) / weight);
+      out.push({ start: t, end: t + d, text: word });
+      t += d;
+    }
+  }
+  return out;
+}
+
 /** Groups consecutive word cues into short caption lines — each line still
  *  starts/ends exactly when its first/last word is actually spoken, just
  *  merged so captions don't flash one word at a time. */
 function toCaptionLines(cues, { maxWords = 6, maxDurSec = 2.5 } = {}) {
   const lines = [];
   let cur = null;
-  for (const cue of cues) {
+  for (const cue of toWordCues(cues)) {
     if (!cur) {
       cur = { start: cue.start, end: cue.end, words: [cue.text] };
       continue;
