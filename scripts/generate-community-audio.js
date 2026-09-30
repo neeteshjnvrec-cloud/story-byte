@@ -35,6 +35,7 @@ const { buildVideoScenes } = require('./lib/video-scenes');
 const { parseSrt, toCaptionLines } = require('./lib/subtitles');
 const { bakeInCaptions } = require('./lib/caption-frames');
 const { REEL_MAX_SEC, clipScenes, clipAudio } = require('./lib/video-clip');
+const { mediaKey } = require('./lib/media-key');
 const { postStoryCarousel, postStoryReel } = require('./lib/instagram');
 const { postStoryToFacebook, postStoryVideo } = require('./lib/facebook');
 const { postStoryToYouTube } = require('./lib/youtube');
@@ -297,7 +298,7 @@ async function main() {
       try {
         const built = await buildCarouselSlides({
           storyId, title: story.title, text: story.text, genre: story.genre, description: story.description,
-          coverPath, outDir: path.join(PUB, 'instagram', storyId), siteUrl: SITE,
+          coverPath, outDir: path.join(PUB, 'instagram', mediaKey(storyId)), siteUrl: SITE,
         });
         igSlideUrls = built.urls;
         igHook = built.hook;
@@ -315,7 +316,7 @@ async function main() {
       let reelVideoUrl = null;
       if (igSlideUrls.length) {
         try {
-          const outDir = path.join(PUB, 'instagram', storyId);
+          const outDir = path.join(PUB, 'instagram', mediaKey(storyId));
           // Real-content, narration-timed scenes (lib/video-scenes.js) —
           // walks the actual story with art that tracks what's being said,
           // not the carousel's spoiler-free teaser slides at equal
@@ -368,7 +369,7 @@ async function main() {
           }
           const videoPath = buildStoryVideo({ scenes, audioPath, outPath: path.join(outDir, 'story.mp4') });
           if (videoPath) {
-            videoUrl = `${SITE}/instagram/${storyId}/story.mp4`;
+            videoUrl = `${SITE}/instagram/${mediaKey(storyId)}/story.mp4`;
             reelVideoUrl = videoUrl;
             console.log(`    ✅ Video: ${Math.round(fs.statSync(videoPath).size / 1024)}KB`);
           }
@@ -383,7 +384,7 @@ async function main() {
               if (clippedAudio) {
                 const clippedScenes = clipScenes(scenes, REEL_MAX_SEC);
                 const reelPath = buildStoryVideo({ scenes: clippedScenes, audioPath: clippedAudio, outPath: path.join(outDir, 'story-reel.mp4') });
-                if (reelPath) reelVideoUrl = `${SITE}/instagram/${storyId}/story-reel.mp4`;
+                if (reelPath) reelVideoUrl = `${SITE}/instagram/${mediaKey(storyId)}/story-reel.mp4`;
               }
             } catch (e) {
               console.warn(`    ⚠️  Reel clip failed, Instagram will use the full video: ${e.message}`);
@@ -497,7 +498,7 @@ async function main() {
       // local disk, so it doesn't need the Firebase Hosting deploy above
       // to have happened first.
       if (item.videoUrl) {
-        await postStoryToYouTube(socialStory, path.join(PUB, 'instagram', item.id, 'story.mp4'));
+        await postStoryToYouTube(socialStory, path.join(PUB, 'instagram', mediaKey(item.id), 'story.mp4'));
       }
     }
   }

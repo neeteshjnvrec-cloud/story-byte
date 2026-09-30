@@ -41,6 +41,7 @@ const { styleOfDay } = require('./lib/short-style');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synth } = require('./lib/narrate');
+const { mediaKey } = require('./lib/media-key');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -405,7 +406,9 @@ async function run() {
         let igSlideUrls = [];
         let igHook = null;
         let igPlainSceneFiles = [];
-        const outDir = path.join(PUB, 'instagram', id);
+        // ASCII-only folder: Instagram can't fetch media from a Devanagari path.
+        const media = mediaKey(id);
+        const outDir = path.join(PUB, 'instagram', media);
         try {
           const built = await buildCarouselSlides({
             storyId: id, title: content.title, text: content.text, genre: slot.genre, description: content.description,
@@ -495,7 +498,7 @@ async function run() {
               const reelPath = shortAudio &&
                 buildStoryVideo({ scenes: shortScenes, audioPath: shortAudio, outPath: path.join(outDir, 'story-reel.mp4'), format: 'short', look });
               if (reelPath) {
-                reelVideoUrl = `${SITE}/instagram/${id}/story-reel.mp4`;
+                reelVideoUrl = `${SITE}/instagram/${media}/story-reel.mp4`;
                 shortPath = reelPath;
               }
             } else {
@@ -509,7 +512,7 @@ async function run() {
                 scenes = await bakeInCaptions(scenes, captionLines, outDir, dur);
               }
               const videoPath = buildStoryVideo({ scenes, audioPath: audio, outPath: path.join(outDir, 'story.mp4') });
-              if (videoPath) videoUrl = `${SITE}/instagram/${id}/story.mp4`;
+              if (videoPath) videoUrl = `${SITE}/instagram/${media}/story.mp4`;
               reelVideoUrl = videoUrl;
 
               // Instagram Reels only reliably process clips up to ~90s — a
@@ -523,7 +526,7 @@ async function run() {
                   if (clippedAudio) {
                     const clippedScenes = clipScenes(scenes, REEL_MAX_SEC);
                     const reelPath = buildStoryVideo({ scenes: clippedScenes, audioPath: clippedAudio, outPath: path.join(outDir, 'story-reel.mp4') });
-                    if (reelPath) reelVideoUrl = `${SITE}/instagram/${id}/story-reel.mp4`;
+                    if (reelPath) reelVideoUrl = `${SITE}/instagram/${media}/story-reel.mp4`;
                   }
                 } catch (e) {
                   console.warn(`  ⚠️  Reel clip failed for ${id}, Instagram will use the full video: ${e.message}`);
@@ -674,7 +677,7 @@ async function run() {
       // Independent of whether IG/FB succeeded, so one platform's failure
       // never costs another. Reads straight off local disk, so it doesn't
       // need the Firebase Hosting deploy above to have happened first.
-      const ytVideo = devotional ? p.shortPath : (p.videoUrl && path.join(PUB, 'instagram', p.id, 'story.mp4'));
+      const ytVideo = devotional ? p.shortPath : (p.videoUrl && path.join(PUB, 'instagram', mediaKey(p.id), 'story.mp4'));
       const ytPost = ytVideo ? await postStoryToYouTube(socialStory, ytVideo) : { posted: false };
 
       // A question as the first comment on each Short, to start the replies
