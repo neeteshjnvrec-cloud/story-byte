@@ -124,4 +124,19 @@ async function postStoryVideo(story, videoUrl) {
   }
 }
 
-module.exports = { postStoryToFacebook, postStoryVideo };
+/** Comments `text` on a Page post or video as the Page. Needs the
+ *  pages_manage_engagement permission on FB_PAGE_ACCESS_TOKEN; without it
+ *  the error is logged and nothing else is affected. */
+async function commentOnFacebook(objectId, text) {
+  if (!process.env.FB_PAGE_ACCESS_TOKEN || !objectId || !text) return { posted: false };
+  try {
+    const res = await fbCall('POST', `/${objectId}/comments`, { message: text });
+    console.log('  💬 Facebook first comment posted');
+    return { posted: true, commentId: res.id };
+  } catch (e) {
+    console.warn(`  ⚠️  Facebook comment failed (needs pages_manage_engagement): ${e.message}`);
+    return { posted: false, reason: e.message };
+  }
+}
+
+module.exports = { postStoryToFacebook, postStoryVideo, commentOnFacebook };

@@ -22,17 +22,24 @@ function clipScenes(scenes, maxDurationSec) {
   for (const scene of scenes) {
     if (elapsed >= maxDurationSec) break;
     const duration = Math.min(scene.duration, maxDurationSec - elapsed);
-    out.push({ file: scene.file, duration });
+    // Keep sceneIndex/sceneElapsed/sceneDuration: without them every
+    // caption frame of the clip restarted its scene's camera move.
+    out.push({ ...scene, duration });
     elapsed += duration;
   }
   return out;
 }
 
 /** Trims `audioPath` to `maxDurationSec` via a fast stream copy (no
- *  re-encode). Returns the output path, or null on failure. */
-function clipAudio(audioPath, maxDurationSec, outPath) {
+ *  re-encode), or with a `fadeOutSec` fade at the end (re-encoded) so a
+ *  music bed doesn't stop dead at the cut. Returns the output path, or
+ *  null on failure. */
+function clipAudio(audioPath, maxDurationSec, outPath, { fadeOutSec = 0 } = {}) {
   try {
-    execFileSync('ffmpeg', ['-y', '-i', audioPath, '-t', String(maxDurationSec), '-c', 'copy', outPath], { stdio: 'pipe' });
+    const codec = fadeOutSec > 0
+      ? ['-af', `afade=t=out:st=${Math.max(0, maxDurationSec - fadeOutSec).toFixed(2)}:d=${fadeOutSec}`, '-c:a', 'libmp3lame', '-b:a', '160k']
+      : ['-c', 'copy'];
+    execFileSync('ffmpeg', ['-y', '-i', audioPath, '-t', String(maxDurationSec), ...codec, outPath], { stdio: 'pipe' });
     return fs.existsSync(outPath) ? outPath : null;
   } catch {
     return null;

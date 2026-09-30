@@ -167,4 +167,19 @@ async function postStoryReel(story, videoUrl) {
   }
 }
 
-module.exports = { postStoryCarousel, postStoryReel, buildCaption };
+/** Comments `text` on a published media item. Needs the
+ *  instagram_manage_comments permission on IG_ACCESS_TOKEN; without it the
+ *  error is logged and nothing else is affected. */
+async function commentOnInstagram(mediaId, text) {
+  if (!process.env.IG_ACCESS_TOKEN || !mediaId || !text) return { posted: false };
+  try {
+    const res = await igCall('POST', `/${mediaId}/comments`, { message: text });
+    console.log('  💬 Instagram first comment posted');
+    return { posted: true, commentId: res.id };
+  } catch (e) {
+    console.warn(`  ⚠️  Instagram comment failed (needs instagram_manage_comments): ${e.message}`);
+    return { posted: false, reason: e.message };
+  }
+}
+
+module.exports = { postStoryCarousel, postStoryReel, buildCaption, commentOnInstagram };

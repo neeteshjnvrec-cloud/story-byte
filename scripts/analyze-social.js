@@ -204,7 +204,8 @@ async function app() {
   const stories = snap.docs.map((d) => {
     const s = d.data();
     return {
-      id: d.id, title: s.title, genre: s.genre, language: s.language, occasion: s.occasion || null,
+      id: d.id, title: s.title, socialTitle: s.socialTitle || null, deity: s.deity || null,
+      genre: s.genre, language: s.language, occasion: s.occasion || null,
       isDaily: Boolean(s.isDaily), isCommunityStory: Boolean(s.isCommunityStory), status: s.status,
       generatedDate: s.generatedDate || null, duration: s.duration || null,
       plays: s.plays || 0, likes: s.likesCount || 0, shares: s.sharesCount || 0,
@@ -246,6 +247,21 @@ function summary(report) {
     out.push('## YouTube', `${yt.videos.length} videos (${sum(yt.videos, 'views')} views), ${yt.shorts.length} Shorts (${sum(yt.shorts, 'views')} views)`, '');
     out.push(table([...all].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 15),
       [['Views', (r) => r.views], ['Format', (r) => r.format], ['Title', (r) => r.title]]), '');
+  }
+  // Daily devotional Shorts, matched to their stories by the social title
+  // they were posted under — the story id is what the Remake Short
+  // workflow takes to re-cut a winner.
+  const titled = (report.app?.stories || []).filter((st) => st.socialTitle);
+  if (yt?.shorts && titled.length) {
+    const rows = [...yt.shorts, ...yt.videos]
+      .map((v) => ({ v, st: titled.find((st) => String(v.title || '').startsWith(st.socialTitle)) }))
+      .filter((x) => x.st)
+      .sort((a, b) => (b.v.views || 0) - (a.v.views || 0));
+    if (rows.length) {
+      out.push('## Daily Shorts ranked', 'Re-cut a winner: Actions → Remake Short, with its story id.', '');
+      out.push(table(rows.slice(0, 15), [['Views', (r) => r.v.views], ['Likes', (r) => r.v.likes], ['Deity', (r) => r.st.deity],
+        ['Plays in app', (r) => r.st.plays], ['Story id', (r) => r.st.id], ['Title', (r) => r.v.title]]), '');
+    }
   }
   const ig = report.instagram;
   if (ig?.media) {

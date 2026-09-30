@@ -73,48 +73,28 @@ async function llmSceneList({ title, text, genre, description }, count) {
 // hyper-real "divine" renders, not storybook paintings.
 function artStyle(genre) {
   return genre === 'devotional'
-    ? 'divine hyper-realistic cinematic art, glowing golden aura, rich colours, 8K detail, no text, no words'
+    ? 'divine hyper-realistic cinematic art, glowing golden aura, rich colours, 8K detail, ' +
+      'main figure centred in the frame, no text, no words'
     : 'painterly storybook illustration, cinematic lighting, no text, no words';
-}
-
-/** Cues' spoken text between `from` and `to` seconds. */
-function textBetween(cues, from, to) {
-  return cues.filter((c) => c.start >= from && c.start < to).map((c) => c.text).join(' ');
 }
 
 /**
  * Returns [{ file, duration }] — real-content scene image files (written
  * under `outDir`) with durations aligned to the real narration — or null.
- *
- * `frontLoad` ({ seconds, count }) gives the opening `seconds` their own
- * `count` scenes, planned from just that part of the narration — that
- * opening is what gets posted as the Short, where one picture held for
- * 30s loses the viewer. The rest of the story gets the usual pacing.
+ * Pass only the cues (and duration) of the stretch being illustrated — the
+ * devotional Short passes just its first minute — and the scene count and
+ * timing follow from that.
  */
-async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir, frontLoad }) {
+async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir }) {
   if (!cues?.length || !audioDurSec) return null;
 
-  const spans = [];
-  if (frontLoad && audioDurSec > frontLoad.seconds + 20) {
-    spans.push({ from: 0, to: frontLoad.seconds, count: frontLoad.count, text: textBetween(cues, 0, frontLoad.seconds) });
-    spans.push({ from: frontLoad.seconds, to: audioDurSec, count: sceneCountFor(audioDurSec - frontLoad.seconds), text: textBetween(cues, frontLoad.seconds, audioDurSec) });
-  } else {
-    spans.push({ from: 0, to: audioDurSec, count: sceneCountFor(audioDurSec), text });
-  }
-
-  const planned = [];
-  for (const span of spans) {
-    const prompts = await llmSceneList({ title, text: span.text || text, genre, description }, span.count);
-    if (!prompts?.length) return null;
-    const spanCues = cues.filter((c) => c.start >= span.from && c.start < span.to);
-    prompts.forEach((prompt, i) => {
-      // Boundaries snap to cue starts inside the span so each picture
-      // changes on a spoken word, not mid-syllable.
-      const at = (k) => (k <= 0 ? span.from : k >= prompts.length ? span.to
-        : (spanCues[Math.floor((k / prompts.length) * spanCues.length)]?.start ?? span.from + ((span.to - span.from) * k) / prompts.length));
-      planned.push({ prompt, start: at(i), end: at(i + 1) });
-    });
-  }
+  const prompts = await llmSceneList({ title, text, genre, description }, sceneCountFor(audioDurSec));
+  if (!prompts?.length) return null;
+  // Boundaries snap to cue starts so each picture changes on a spoken
+  // word, not mid-syllable.
+  const at = (k) => (k <= 0 ? 0 : k >= prompts.length ? audioDurSec
+    : cues[Math.min(cues.length - 1, Math.floor((k / prompts.length) * cues.length))].start);
+  const planned = prompts.map((prompt, i) => ({ prompt, start: at(i), end: at(i + 1) }));
 
   fs.mkdirSync(outDir, { recursive: true });
   const t = theme(genre);
@@ -123,7 +103,11 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
     const prompt = `${planned[i].prompt}. ${t.mood}, ${artStyle(genre)}`;
     // A seed space distinct from the carousel's own scene art (`${storyId}-${i}`)
     // so a story's video doesn't just replay its carousel image set.
-    let image = await fetchSceneImage(prompt, hashSeed(`${storyId}-video-${i}`));
+    // Devotional Shorts are cropped to full-screen 9:16 later
+    // (lib/caption-frames.js): keep the whole square render so that crop
+    // can centre on the deity, instead of pre-cutting it to 4:5 here.
+    let image = await fetchSceneImage(prompt, hashSeed(`${storyId}-video-${i}`),
+      genre === 'devotional' ? { width: 1024, height: 1024 } : undefined);
     if (!image) {
       // Never drop a scene outright: unlike the carousel (each slide stands
       // alone), these scenes are concatenated back to back against a fixed

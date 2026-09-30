@@ -87,4 +87,28 @@ async function postStoryToYouTube(story, videoPath) {
   }
 }
 
-module.exports = { postStoryToYouTube };
+/**
+ * Posts `text` as the first comment on `videoId`, to start the replies that
+ * Shorts ranking weighs heavily. Needs the youtube.force-ssl scope — a
+ * refresh token minted with youtube.upload only gets a 403, logged with the
+ * fix (re-run scripts/youtube-auth.js, see YOUTUBE-SETUP.md). The API can't
+ * pin comments; pin it by hand in YouTube Studio if wanted.
+ */
+async function commentOnYouTube(videoId, text) {
+  const youtube = client();
+  if (!youtube || !videoId || !text) return { posted: false };
+  try {
+    const res = await youtube.commentThreads.insert({
+      part: ['snippet'],
+      requestBody: { snippet: { videoId, topLevelComment: { snippet: { textOriginal: text } } } },
+    });
+    console.log('  💬 YouTube first comment posted');
+    return { posted: true, commentId: res.data.id };
+  } catch (e) {
+    const scope = /insufficient|permission|scope/i.test(e.message) ? ' — re-mint YOUTUBE_REFRESH_TOKEN with the youtube.force-ssl scope (YOUTUBE-SETUP.md)' : '';
+    console.warn(`  ⚠️  YouTube comment failed: ${e.message}${scope}`);
+    return { posted: false, reason: e.message };
+  }
+}
+
+module.exports = { postStoryToYouTube, commentOnYouTube };

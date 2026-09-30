@@ -69,3 +69,6 @@ ios/build/google-services.json
 
 # Local Instagram carousel design previews (scripts/preview-carousel.js)
 /.carousel-preview/
+
+# Remake Short outputs (scripts/remake-short.js) — a run artifact, never committed
+/remakes/

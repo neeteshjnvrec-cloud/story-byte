@@ -32,11 +32,15 @@ const { buildVideoScenes } = require('./lib/video-scenes');
 const { parseSrt, toCaptionLines } = require('./lib/subtitles');
 const { bakeInCaptions } = require('./lib/caption-frames');
 const { REEL_MAX_SEC, SHORT_MAX_SEC, clipScenes, clipAudio, shortCutoff } = require('./lib/video-clip');
-const { postStoryCarousel, postStoryReel } = require('./lib/instagram');
-const { postStoryToFacebook, postStoryVideo } = require('./lib/facebook');
-const { postStoryToYouTube } = require('./lib/youtube');
+const { postStoryCarousel, postStoryReel, commentOnInstagram } = require('./lib/instagram');
+const { postStoryToFacebook, postStoryVideo, commentOnFacebook } = require('./lib/facebook');
+const { postStoryToYouTube, commentOnYouTube } = require('./lib/youtube');
 const { getOccasion, occasionPhrase } = require('./occasions');
 const { deityOfDay, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
+const { styleOfDay } = require('./lib/short-style');
+const { mixDevotionalMusic } = require('./lib/devotional-music');
+const { synthSarvam } = require('./lib/sarvam-tts');
+const { synth } = require('./lib/narrate');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -113,7 +117,13 @@ const PROMPTS = {
 // genre/language slots; across Instagram, Facebook and YouTube those drew
 // 1-7 views/likes a post while the same accounts' devotional content drew
 // 1K-41K (reports/social, Sept 2026).
-const DAILY_SLOT = { language: 'hi', genre: 'devotional', vertical: 'hindi', voice: 'hi-IN-SwaraNeural' };
+// edge-tts fallback voice: Madhur, a male voice in the kathavachak
+// tradition, slightly slowed for storytelling. SARVAM_API_KEY switches to
+// Sarvam's far more natural Bulbul voices (lib/sarvam-tts.js).
+const DAILY_SLOT = {
+  language: 'hi', genre: 'devotional', vertical: 'hindi',
+  voice: process.env.DEVOTIONAL_VOICE || 'hi-IN-MadhurNeural', rate: process.env.DEVOTIONAL_RATE || '-5%',
+};
 const SLOTS = [DAILY_SLOT];
 
 const slug = (s) => (s || 'story').toLowerCase().replace(/[^a-z0-9ऀ-ॿ]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40);
@@ -159,12 +169,14 @@ async function generateText(groq, slot) {
   // The first minute becomes the YouTube Short / Reel, so it has to grip on
   // its own.
   const hookInstruction = slot.genre === 'devotional'
-    ? ' The first two sentences must be a gripping hook — the most astonishing moment or question of the story — ' +
+    ? ` The first two sentences must be a gripping hook — ${slot.look?.hook || 'the most astonishing moment or question of the story'} — ` +
       'because the first minute is posted on its own as a Short.'
     : '';
   const socialTitleSpec = slot.genre === 'devotional'
     ? ',"socialTitle":"Hindi curiosity hook for YouTube Shorts/Reels, max 70 chars, starting with one fitting emoji and ' +
-      'naming the deity, e.g. \\"😱 जब बाल कृष्ण के मुँह में माँ यशोदा ने देखा पूरा ब्रह्मांड\\""'
+      'naming the deity, e.g. \\"😱 जब बाल कृष्ण के मुँह में माँ यशोदा ने देखा पूरा ब्रह्मांड\\"",' +
+      '"commentQuestion":"one warm Hindi question inviting viewers to reply in the comments about this katha, max 120 chars, ' +
+      'ending with 🙏 — e.g. which moment moved them, or which katha they want next"'
     : '';
   const sys = `You are a storyteller for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama}${occasionInstruction}${kathaInstruction}${hookInstruction} Write in ${langInstruction} ` +
     `JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 words, spoken style, no markdown","tags":["genre"]${socialTitleSpec}}.`;
@@ -190,6 +202,7 @@ async function generateText(groq, slot) {
         text: String(d.text).trim(),
         tags: Array.isArray(d.tags) ? d.tags.slice(0, 6) : [slot.genre],
         socialTitle: d.socialTitle ? String(d.socialTitle).replace(/^["']|["']$/g, '').slice(0, 80) : null,
+        commentQuestion: d.commentQuestion ? String(d.commentQuestion).trim().slice(0, 200) : null,
       };
     } catch (e) {
       errors.push({ model, error: e.message });
@@ -231,37 +244,6 @@ function coverPrompt(slotOrStory, content) {
   const finalSubject = occasion ? `${occasion.visual}, ${occasion.name} celebration`
     : deity ? `${deity.visual}, ${deity.katha}` : subject;
   return `${finalSubject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
-}
-
-const EDGE = [['edge-tts', []], ['python3', ['-m', 'edge_tts']], ['uvx', ['edge-tts']]];
-// `subsOut`, when given, asks edge-tts for a word-timed .srt alongside the
-// mp3 (drives narration-synced captions/scene timing in the video — see
-// lib/video-scenes.js and lib/subtitles.js). Best-effort only: if a
-// --write-subtitles attempt fails on every EDGE candidate (e.g. an older
-// build without the flag), we retry without it rather than let an
-// enhancement break audio synthesis, which every story needs regardless.
-function synth(text, slot, out, subsOut) {
-  const txt = path.join(os.tmpdir(), `sb-${Date.now()}.txt`);
-  fs.writeFileSync(txt, text, 'utf8');
-  const baseArgs = ['--voice', slot.voice, '--file', txt, '--write-media', out];
-  if (slot.rate) baseArgs.push(`--rate=${slot.rate}`);
-
-  let err;
-  const attempt = (args) => {
-    for (const [cmd, pre] of EDGE) {
-      try { try { fs.existsSync(out) && fs.unlinkSync(out); } catch (e) {}
-        execFileSync(cmd, [...pre, ...args], { stdio: 'pipe' });
-        if (fs.existsSync(out) && fs.statSync(out).size > 1024) return true;
-      } catch (e) { err = e; }
-    }
-    return false;
-  };
-
-  const ok = (subsOut && attempt([...baseArgs, '--write-subtitles', subsOut])) || attempt(baseArgs);
-
-  try { fs.unlinkSync(txt); } catch (e) {}
-  if (!ok) throw new Error('edge-tts failed: ' + (err && err.message));
-  return { subtitlesPath: subsOut && fs.existsSync(subsOut) ? subsOut : null };
 }
 
 function durationSec(file) {
@@ -339,6 +321,8 @@ async function run() {
   const slot = occasion?.genre === 'devotional'
     ? { ...DAILY_SLOT, occasion }
     : { ...DAILY_SLOT, deity: deityOfDay(DATE) };
+  // The day's look: camera moves, colour grade, captions, hook style, music.
+  slot.look = styleOfDay(DATE);
   if (slot.occasion) console.log(`🎉 Today's occasion: ${occasion.name}`);
   else console.log(`🙏 Today's katha: ${slot.deity.name} — ${slot.deity.katha}`);
   const pendingSlots = [{ ...slot, retry: failedSlots.length > 0 }];
@@ -407,7 +391,9 @@ async function run() {
         // Step 3: Generate audio
         const audio = path.join(PUB, 'audio', `${id}.mp3`);
         const subsPath = path.join(os.tmpdir(), `${id}.srt`);
-        const synthResult = synth(content.text, slot, audio, subsPath);
+        const synthResult = (slot.genre === 'devotional' &&
+            await synthSarvam(content.text, { out: audio, subsOut: subsPath, language: slot.language })) ||
+          synth(content.text, slot, audio, subsPath);
         const dur = durationSec(audio) || Math.max(60, Math.round(content.text.split(/\s+/).length / 2.5));
 
         console.log(`✅ generated ${id} (${dur}s)`);
@@ -459,13 +445,16 @@ async function run() {
                 console.warn(`  ⚠️  Subtitle parsing failed for ${id}: ${e.message}`);
               }
             }
+            // A devotional story only becomes its first-minute Short, so only
+            // that minute is illustrated — 8 pictures, a new one every ~7s.
+            const shortSec = slot.genre === 'devotional' ? Math.min(dur, shortCutoff(cues, SHORT_MAX_SEC)) : null;
             if (cues) {
               try {
+                const sceneCues = shortSec ? cues.filter((c) => c.start < shortSec) : cues;
                 scenes = await buildVideoScenes({
-                  storyId: id, title: content.title, text: content.text, genre: slot.genre,
-                  description: content.description, cues, audioDurSec: dur, outDir,
-                  // The first minute is the Short: a new picture every ~10s.
-                  frontLoad: slot.genre === 'devotional' ? { seconds: SHORT_MAX_SEC, count: 6 } : undefined,
+                  storyId: id, title: content.title, genre: slot.genre, description: content.description,
+                  text: shortSec ? sceneCues.map((c) => c.text).join(' ') : content.text,
+                  cues: sceneCues, audioDurSec: shortSec || dur, outDir,
                 });
               } catch (e) {
                 console.warn(`  ⚠️  Narration-synced scenes failed for ${id}, using plain backgrounds: ${e.message}`);
@@ -484,39 +473,61 @@ async function run() {
               const per = Math.max(2, dur / scenes.length);
               scenes = scenes.map((s) => ({ file: s.file, duration: s.duration || per }));
             }
-            // Captions track the real narration regardless of which path
-            // produced the backgrounds above — skipping this on the plain-
-            // background fallback previously meant a fallback video played
-            // the full narration with no on-screen text at all past
-            // whatever the first background happened to be.
-            if (cues) {
-              const captionLines = toCaptionLines(cues);
-              scenes = await bakeInCaptions(scenes, captionLines, outDir, dur);
-            }
-            const videoPath = buildStoryVideo({ scenes, audioPath: audio, outPath: path.join(outDir, 'story.mp4') });
-            if (videoPath) videoUrl = `${SITE}/instagram/${id}/story.mp4`;
-            reelVideoUrl = videoUrl;
-            shortPath = videoPath;
+            if (slot.genre === 'devotional') {
+              // The devotional story's opening minute, cut on a sentence end,
+              // is the Short posted to YouTube, Instagram and Facebook — full-
+              // screen 9:16 in the day's look, over a soft devotional music
+              // bed. Only that minute is rendered: the full narration lives
+              // in the app (whose mp3 stays plain narration), and nothing
+              // posts a full-length video for these stories.
+              const look = slot.look;
+              const clipSec = shortSec;
+              const mixed = mixDevotionalMusic(audio, path.join(outDir, 'video-audio.mp3'), { variant: look.seed }) || audio;
+              const shortAudio = clipAudio(mixed, clipSec, path.join(outDir, 'reel-audio.mp3'), { fadeOutSec: 1.2 });
+              // The full-length mix is only an intermediate — don't let the
+              // daily commit of public/instagram carry it.
+              if (mixed !== audio) fs.rmSync(mixed, { force: true });
+              let shortScenes = clipScenes(scenes, clipSec);
+              if (cues) {
+                const lines = toCaptionLines(cues).filter((l) => l.start < clipSec);
+                shortScenes = await bakeInCaptions(shortScenes, lines, outDir, clipSec, { format: 'short', look });
+              }
+              const reelPath = shortAudio &&
+                buildStoryVideo({ scenes: shortScenes, audioPath: shortAudio, outPath: path.join(outDir, 'story-reel.mp4'), format: 'short', look });
+              if (reelPath) {
+                reelVideoUrl = `${SITE}/instagram/${id}/story-reel.mp4`;
+                shortPath = reelPath;
+              }
+            } else {
+              // Captions track the real narration regardless of which path
+              // produced the backgrounds above — skipping this on the plain-
+              // background fallback previously meant a fallback video played
+              // the full narration with no on-screen text at all past
+              // whatever the first background happened to be.
+              if (cues) {
+                const captionLines = toCaptionLines(cues);
+                scenes = await bakeInCaptions(scenes, captionLines, outDir, dur);
+              }
+              const videoPath = buildStoryVideo({ scenes, audioPath: audio, outPath: path.join(outDir, 'story.mp4') });
+              if (videoPath) videoUrl = `${SITE}/instagram/${id}/story.mp4`;
+              reelVideoUrl = videoUrl;
 
-            // The devotional story's opening minute, cut on a sentence end,
-            // is the Short posted to YouTube, Instagram and Facebook; the
-            // full narration lives in the app. Anything else keeps the old
-            // ~85s Instagram-only clip (Reels only reliably process up to
-            // ~90s; Facebook took the full video).
-            const clipSec = slot.genre === 'devotional' ? shortCutoff(cues, SHORT_MAX_SEC) : REEL_MAX_SEC;
-            if (videoPath && dur > clipSec) {
-              try {
-                const clippedAudio = clipAudio(audio, clipSec, path.join(outDir, 'reel-audio.mp3'));
-                if (clippedAudio) {
-                  const clippedScenes = clipScenes(scenes, clipSec);
-                  const reelPath = buildStoryVideo({ scenes: clippedScenes, audioPath: clippedAudio, outPath: path.join(outDir, 'story-reel.mp4') });
-                  if (reelPath) {
-                    reelVideoUrl = `${SITE}/instagram/${id}/story-reel.mp4`;
-                    shortPath = reelPath;
+              // Instagram Reels only reliably process clips up to ~90s — a
+              // long narration that publishes fine as a Facebook video
+              // consistently fails Reels' async processing if sent in full.
+              // Facebook keeps the full-length video; Instagram gets a short
+              // clipped one instead.
+              if (videoPath && dur > REEL_MAX_SEC) {
+                try {
+                  const clippedAudio = clipAudio(audio, REEL_MAX_SEC, path.join(outDir, 'reel-audio.mp3'));
+                  if (clippedAudio) {
+                    const clippedScenes = clipScenes(scenes, REEL_MAX_SEC);
+                    const reelPath = buildStoryVideo({ scenes: clippedScenes, audioPath: clippedAudio, outPath: path.join(outDir, 'story-reel.mp4') });
+                    if (reelPath) reelVideoUrl = `${SITE}/instagram/${id}/story-reel.mp4`;
                   }
+                } catch (e) {
+                  console.warn(`  ⚠️  Reel clip failed for ${id}, Instagram will use the full video: ${e.message}`);
                 }
-              } catch (e) {
-                console.warn(`  ⚠️  Reel clip failed for ${id}, Instagram will use the full video: ${e.message}`);
               }
             }
           } catch (e) {
@@ -616,6 +627,10 @@ async function run() {
       generatedDate: DATE, voice: p.slot.voice, ttsEngine: 'edge-tts', author: 'StoryByte AI',
       tags: p.slot.occasion ? [...p.content.tags, p.slot.occasion.name] : p.content.tags,
       occasion: p.slot.occasion?.name || null,
+      // What the social posts were titled, so reports/social can tie each
+      // YouTube/Instagram/Facebook post back to its story.
+      socialTitle: p.content.socialTitle || null,
+      deity: p.slot.deity?.key || null,
       createdAt: admin.firestore.FieldValue.serverTimestamp(), updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
     await db.collection('stories').doc(p.id).set(storyData, { merge: true });
@@ -660,8 +675,18 @@ async function run() {
       // never costs another. Reads straight off local disk, so it doesn't
       // need the Firebase Hosting deploy above to have happened first.
       const ytVideo = devotional ? p.shortPath : (p.videoUrl && path.join(PUB, 'instagram', p.id, 'story.mp4'));
-      if (ytVideo) {
-        await postStoryToYouTube(socialStory, ytVideo);
+      const ytPost = ytVideo ? await postStoryToYouTube(socialStory, ytVideo) : { posted: false };
+
+      // A question as the first comment on each Short, to start the replies
+      // Shorts/Reels ranking weighs heavily. Each needs its own permission
+      // (see the setup docs) and just logs when it's missing. None of the
+      // APIs can pin a comment — pin it by hand if wanted.
+      if (devotional) {
+        const deityName = p.slot.deity?.hindi || p.slot.occasion?.name || 'भगवान';
+        const question = p.content.commentQuestion || `🙏 ${deityName} की कौन सी कथा आप अगली बार सुनना चाहेंगे? कमेंट में लिखिए 🙏`;
+        if (ytPost.posted) await commentOnYouTube(ytPost.videoId, question);
+        if (fbVideo.posted && fbVideo.videoId) await commentOnFacebook(fbVideo.videoId, question);
+        if (igReel.posted && igReel.mediaId) await commentOnInstagram(igReel.mediaId, question);
       }
     }
   }
