@@ -120,12 +120,18 @@ async function bakeInCaptions(scenes, captionLines, outDir, audioDurSec, { forma
       const file = path.join(outDir, `caption-frame-${i + 1}.jpg`);
       fs.writeFileSync(file, buf);
       const isLast = i === captionLines.length - 1;
-      const end = isLast ? Math.max(line.end, audioDurSec || line.end) : line.end;
+      // Frames tile the timeline with no gaps: each runs from its line's
+      // start (the first from 0) to the next line's start, so the pauses
+      // between sentences stay in the video. Ending each at its own line's
+      // end dropped every pause, and over a long story the captions and
+      // art drifted seconds ahead of the voice.
+      const start = i === 0 ? 0 : line.start;
+      const end = isLast ? Math.max(line.end, audioDurSec || line.end) : captionLines[i + 1].start;
       frames.push({
         file,
-        duration: Math.max(0.5, end - line.start),
+        duration: Math.max(0.5, end - start),
         sceneIndex: scene.index,
-        sceneElapsed: Math.max(0, line.start - scene.start),
+        sceneElapsed: Math.max(0, start - scene.start),
         // Lets lib/video.js spread one camera move over the whole scene.
         sceneDuration: scene.end - scene.start,
       });

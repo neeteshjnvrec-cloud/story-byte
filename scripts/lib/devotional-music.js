@@ -48,11 +48,21 @@ function durationOf(file) {
 
 /**
  * Mixes the music bed under `narrationPath` into `outPath` (mp3). `variant`
- * (any integer, e.g. the day's style seed) picks the tonic.
+ * (any integer, e.g. the day's style seed) picks the tonic. `tempo` (>= 1)
+ * speeds the narration up slightly without changing its pitch (atempo), to
+ * fit a story that runs just over the Shorts limit; `tailSec` lets the music
+ * carry on after the last word and fade out, so the video ends on a proper
+ * close instead of cutting off with the voice.
+ *
+ * If the music itself fails, the tempo and tail are still applied to the
+ * plain narration — callers have already timed captions and scenes to that
+ * adjusted length. Returns null only if ffmpeg can't process the audio at all.
  */
-function mixDevotionalMusic(narrationPath, outPath, { variant = 0 } = {}) {
+function mixDevotionalMusic(narrationPath, outPath, { variant = 0, tempo = 1, tailSec = 0 } = {}) {
   const dur = durationOf(narrationPath);
   if (!dur) return null;
+  const total = dur / tempo + tailSec;
+  const voiceChain = `atempo=${tempo.toFixed(4)},apad=pad_dur=${tailSec}`;
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sb-music-'));
   try {
     const loop = path.join(dir, 'loop.wav');
@@ -60,22 +70,27 @@ function mixDevotionalMusic(narrationPath, outPath, { variant = 0 } = {}) {
     execFileSync('ffmpeg', ['-y', '-f', 'lavfi', '-i', `aevalsrc='${droneExpression(f0)}':s=44100:d=${LOOP_SEC}`,
       '-af', 'lowpass=f=3500', loop], { stdio: 'pipe' });
 
-    const fadeOut = Math.max(0, dur - 3).toFixed(2);
+    const fadeOut = Math.max(0, total - 3).toFixed(2);
     execFileSync('ffmpeg', ['-y', '-i', narrationPath, '-stream_loop', '-1', '-i', loop,
       '-filter_complex',
       // Echo gives the dry synth a temple-hall space; the bed then ducks
       // ~6:1 whenever the narrator speaks, so it fills pauses without ever
       // competing with the words.
-      `[1:a]atrim=0:${dur.toFixed(2)},aecho=0.8:0.7:60|120:0.3|0.2,volume=0.7,` +
+      `[1:a]atrim=0:${total.toFixed(2)},aecho=0.8:0.7:60|120:0.3|0.2,volume=0.7,` +
       `afade=t=in:d=2,afade=t=out:st=${fadeOut}:d=3[bed];` +
-      '[0:a]asplit=2[voice][key];' +
+      `[0:a]${voiceChain},asplit=2[voice][key];` +
       '[bed][key]sidechaincompress=threshold=0.04:ratio=6:attack=30:release=500[ducked];' +
       '[voice][ducked]amix=inputs=2:duration=first:normalize=0[out]',
       '-map', '[out]', '-c:a', 'libmp3lame', '-b:a', '160k', outPath], { stdio: 'pipe' });
     return fs.existsSync(outPath) ? outPath : null;
   } catch (e) {
     console.warn(`  ⚠️  Music bed failed, using plain narration: ${e.message.split('\n')[0]}`);
-    return null;
+    try {
+      execFileSync('ffmpeg', ['-y', '-i', narrationPath, '-af', voiceChain, '-c:a', 'libmp3lame', '-b:a', '160k', outPath], { stdio: 'pipe' });
+      return fs.existsSync(outPath) ? outPath : null;
+    } catch {
+      return null;
+    }
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
