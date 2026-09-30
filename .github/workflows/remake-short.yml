@@ -1,0 +1,59 @@
+name: Remake Short
+
+# Re-cuts one daily story's Short — new art, look, music key and narration —
+# as raw material to finish by hand (scripts/remake-short.js). Posts
+# nothing; download the result from the run's artifacts.
+on:
+  workflow_dispatch:
+    inputs:
+      story_id:
+        description: 'Story id (from reports/social/summary.md "Daily Shorts ranked"); blank = the best-performing one'
+        required: false
+        type: string
+      variant:
+        description: 'Any word — change it to get a different remake of the same story'
+        required: false
+        default: 'v1'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  remake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install edge-tts + ffmpeg + fonts
+        run: |
+          pip install edge-tts
+          sudo apt-get update && sudo apt-get install -y ffmpeg fonts-noto-core fonts-lohit-deva
+      - name: Install pipeline deps
+        working-directory: scripts
+        run: npm install
+      - name: Remake
+        working-directory: scripts
+        env:
+          REMAKE_STORY_ID: ${{ inputs.story_id }}
+          REMAKE_VARIANT: ${{ inputs.variant }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          POLLINATIONS_API_TOKEN: ${{ secrets.POLLINATIONS_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
+          SARVAM_SPEAKER: ${{ vars.SARVAM_SPEAKER }}
+        run: node remake-short.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: remake-${{ github.run_id }}
+          path: remakes/
+          retention-days: 7

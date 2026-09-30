@@ -70,6 +70,41 @@ function buildKenBurnsClip({ imageFile, duration, sceneIndex, sceneElapsed, clip
   ], { stdio: 'pipe' });
 }
 
+const SHORT_ZOOM = 0.14;
+
+/**
+ * Full-screen 9:16 variant for the devotional Shorts: the still fills the
+ * whole 1080x1920 frame (cover-cropped, no black bars), and each scene gets
+ * one of four moves — push in, pull out, pan across, tilt up — spread over
+ * the scene's whole length (`sceneDuration`), cycled from the day's
+ * `motionOffset` so consecutive days don't open on the same move. `grade`
+ * is the day's colour grade (lib/short-style.js).
+ */
+function buildShortClip({ imageFile, duration, sceneIndex, sceneElapsed, sceneDuration, clipPath, look }) {
+  const frames = Math.max(1, Math.round(duration * FPS));
+  const p = `min(1,(${sceneElapsed}+on/${FPS})/${Math.max(1, sceneDuration || duration)})`;
+  const centre = { x: 'iw/2-(iw/zoom/2)', y: 'ih/2-(ih/zoom/2)' };
+  const move = (sceneIndex + (look?.motionOffset || 0)) % 4;
+  const { z, x, y } = [
+    { z: `1+${SHORT_ZOOM}*${p}`, ...centre },
+    { z: `${1 + SHORT_ZOOM}-${SHORT_ZOOM}*${p}`, ...centre },
+    { z: `${1 + SHORT_ZOOM}`, x: `(iw-iw/zoom)*${p}`, y: centre.y },
+    { z: `${1 + SHORT_ZOOM}`, x: centre.x, y: `(ih-ih/zoom)*(1-${p})` },
+  ][move];
+  const grade = look?.grade ? `,${look.grade.eq},${look.grade.balance},vignette=PI/6` : '';
+  // One input frame, and zoompan's d= emits every output frame from it: the
+  // 4K cover-scale runs once per clip instead of once per output frame.
+  execFileSync('ffmpeg', [
+    '-y', '-i', imageFile,
+    '-vf',
+      `scale=2160:3840:force_original_aspect_ratio=increase:flags=lanczos,crop=2160:3840,` +
+      `zoompan=z='${z}':d=${frames}:x='${x}':y='${y}':s=1080x1920:fps=${FPS}${grade},format=yuv420p`,
+    '-frames:v', String(frames),
+    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p',
+    clipPath,
+  ], { stdio: 'pipe' });
+}
+
 /**
  * Builds an MP4 at `outPath` from `scenes` ([{ file, duration?, sceneIndex?,
  * sceneElapsed? }], local image paths in display order) and `audioPath`
@@ -85,9 +120,12 @@ function buildKenBurnsClip({ imageFile, duration, sceneIndex, sceneElapsed, clip
  * whole scene; only lib/caption-frames.js's fragments need to pass them
  * explicitly.
  *
+ * `format: 'short'` renders full-screen 9:16 with the day's `look` (see
+ * buildShortClip); anything else is the original 4:5-on-9:16 layout.
+ *
  * Returns `outPath` on success, or null.
  */
-function buildStoryVideo({ scenes, audioPath, outPath }) {
+function buildStoryVideo({ scenes, audioPath, outPath, format, look }) {
   if (!scenes?.length || !fs.existsSync(audioPath)) return null;
 
   let perSlide = 0;
@@ -105,13 +143,17 @@ function buildStoryVideo({ scenes, audioPath, outPath }) {
   try {
     const clipFiles = scenes.map((scene, i) => {
       const clipPath = path.join(clipDir, `clip-${i}.mp4`);
-      buildKenBurnsClip({
+      const clip = {
         imageFile: scene.file,
         duration: Math.max(0.5, scene.duration || perSlide),
         sceneIndex: scene.sceneIndex ?? i,
         sceneElapsed: scene.sceneElapsed ?? 0,
+        sceneDuration: scene.sceneDuration ?? (scene.duration || perSlide),
         clipPath,
-      });
+        look,
+      };
+      if (format === 'short') buildShortClip(clip);
+      else buildKenBurnsClip(clip);
       return clipPath;
     });
 

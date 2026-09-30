@@ -69,37 +69,45 @@ async function llmSceneList({ title, text, genre, description }, count) {
   }
 }
 
-/** Maps scene boundary `fraction` (0..1) onto the real narration timeline.
- *  Cues don't need to line up 1:1 with text.split(/\s+/) — tokenization
- *  differs, especially for non-Latin scripts — they just need to be
- *  chronologically ordered across the whole narration, which edge-tts's
- *  per-word cues are. */
-function timeAt(cues, fraction, totalDur) {
-  if (fraction <= 0) return 0;
-  if (fraction >= 1) return totalDur;
-  const idx = Math.min(cues.length - 1, Math.floor(fraction * cues.length));
-  return cues[idx].start;
+// The devotional Shorts that do well on this channel (1K-41K views) are
+// hyper-real "divine" renders, not storybook paintings.
+function artStyle(genre) {
+  return genre === 'devotional'
+    ? 'divine hyper-realistic cinematic art, glowing golden aura, rich colours, 8K detail, ' +
+      'main figure centred in the frame, no text, no words'
+    : 'painterly storybook illustration, cinematic lighting, no text, no words';
 }
 
 /**
  * Returns [{ file, duration }] — real-content scene image files (written
  * under `outDir`) with durations aligned to the real narration — or null.
+ * Pass only the cues (and duration) of the stretch being illustrated — the
+ * devotional Short passes just its first minute — and the scene count and
+ * timing follow from that.
  */
 async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir }) {
   if (!cues?.length || !audioDurSec) return null;
 
-  const count = sceneCountFor(audioDurSec);
-  const prompts = await llmSceneList({ title, text, genre, description }, count);
+  const prompts = await llmSceneList({ title, text, genre, description }, sceneCountFor(audioDurSec));
   if (!prompts?.length) return null;
+  // Boundaries snap to cue starts so each picture changes on a spoken
+  // word, not mid-syllable.
+  const at = (k) => (k <= 0 ? 0 : k >= prompts.length ? audioDurSec
+    : cues[Math.min(cues.length - 1, Math.floor((k / prompts.length) * cues.length))].start);
+  const planned = prompts.map((prompt, i) => ({ prompt, start: at(i), end: at(i + 1) }));
 
   fs.mkdirSync(outDir, { recursive: true });
   const t = theme(genre);
   const scenes = [];
-  for (let i = 0; i < prompts.length; i++) {
-    const prompt = `${prompts[i]}. ${t.mood}, painterly storybook illustration, cinematic lighting, no text, no words`;
+  for (let i = 0; i < planned.length; i++) {
+    const prompt = `${planned[i].prompt}. ${t.mood}, ${artStyle(genre)}`;
     // A seed space distinct from the carousel's own scene art (`${storyId}-${i}`)
     // so a story's video doesn't just replay its carousel image set.
-    let image = await fetchSceneImage(prompt, hashSeed(`${storyId}-video-${i}`));
+    // Devotional Shorts are cropped to full-screen 9:16 later
+    // (lib/caption-frames.js): keep the whole square render so that crop
+    // can centre on the deity, instead of pre-cutting it to 4:5 here.
+    let image = await fetchSceneImage(prompt, hashSeed(`${storyId}-video-${i}`),
+      genre === 'devotional' ? { width: 1024, height: 1024 } : undefined);
     if (!image) {
       // Never drop a scene outright: unlike the carousel (each slide stands
       // alone), these scenes are concatenated back to back against a fixed
@@ -112,9 +120,7 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
     }
     const file = path.join(outDir, `video-scene-${i + 1}.jpg`);
     fs.writeFileSync(file, image);
-    const start = timeAt(cues, i / prompts.length, audioDurSec);
-    const end = timeAt(cues, (i + 1) / prompts.length, audioDurSec);
-    scenes.push({ file, duration: Math.max(1.5, end - start) });
+    scenes.push({ file, duration: Math.max(1.5, planned[i].end - planned[i].start) });
   }
   return scenes.length ? scenes : null;
 }

@@ -44,7 +44,12 @@ Meta developer app to mint an access token.
 1. Go to https://developers.facebook.com/tools/explorer/, select your app.
 2. Click **Get Token → Get User Access Token**, and check these permissions:
    `instagram_basic`, `instagram_content_publish`, `pages_show_list`,
-   `pages_read_engagement`.
+   `pages_read_engagement`. Optional extras — each just unlocks one feature,
+   and everything else works without them:
+   - `instagram_manage_comments` and `pages_manage_engagement`: post a
+     question as the first comment on each Reel / Facebook video.
+   - `instagram_manage_insights` and `read_insights`: reach and view counts
+     in the weekly Social Analytics report (reports/social).
 3. Generate the token, then exchange it for a **long-lived** one (valid ~60
    days) by calling, once, in your browser or via curl:
    ```

@@ -1,0 +1,57 @@
+name: Social Analytics
+
+# Read-only: pulls post metrics from Instagram, Facebook, YouTube and the
+# app's own Firestore stats into reports/social/ (see scripts/analyze-social.js).
+on:
+  workflow_dispatch:
+  schedule:
+    # Mondays 03:13 UTC (8:43 AM IST) — off the :00/:30 rush.
+    - cron: '13 3 * * 1'
+  # Runs once when the script or this file changes on the working branch,
+  # since workflow_dispatch only works once the workflow is on main.
+  push:
+    branches: [claude/new-session-x6j28s]
+    paths:
+      - scripts/analyze-social.js
+      - .github/workflows/social-analytics.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: social-analytics
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install pipeline dependencies
+        working-directory: scripts
+        run: npm install
+      - name: Collect metrics
+        working-directory: scripts
+        env:
+          IG_BUSINESS_ACCOUNT_ID: ${{ secrets.IG_BUSINESS_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node analyze-social.js
+      - name: Commit the snapshot
+        run: |
+          git config user.name "storybyte-bot"
+          git config user.email "bot@storybyte.app"
+          git add reports/social
+          git commit -m "chore: social analytics snapshot ($(date -u +%F))" || exit 0
+          for delay in 2 4 8 16; do
+            git pull --rebase --autostash || true
+            git push && exit 0
+            sleep "$delay"
+          done
+          exit 1

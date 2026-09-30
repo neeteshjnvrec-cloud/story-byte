@@ -1,0 +1,55 @@
+{
+  "seriesTitle": "Alien Is My Girlfriend",
+  "genre": "science fiction romance",
+  "language": "hi",
+  "characters": [
+    {
+      "name": "Anjali",
+      "nativeName": "अंजलि",
+      "role": "Lead scientist",
+      "look": "Late twenties, short dark hair, wearing a white lab coat over casual attire, focused eyes"
+    },
+    {
+      "name": "Dr. Meera",
+      "nativeName": "मीरा",
+      "role": "Friend & colleague",
+      "look": "Late twenties, long black hair, glasses, wearing a lab coat"
+    },
+    {
+      "name": "Dr. Arsha",
+      "nativeName": "अर्शा",
+      "role": "Alien researcher",
+      "look": "Late forties, silver hair, deep eyes, wearing flowing robes with crystalline accents"
+    },
+    {
+      "name": "Zor",
+      "nativeName": "ज़ोर",
+      "role": "Antagonist",
+      "look": "Tall male, black suit, glowing ring on wrist, sharp eyes, menacing presence"
+    }
+  ],
+  "setting": "The story unfolds in a secret laboratory and hidden hall on Earth where a young scientist, her friend, an alien researcher, and an antagonist confront a cosmic energy threat.",
+  "episodes": [
+    {
+      "season": "1",
+      "episode": "1",
+      "title": "Alien Is My Girlfriend",
+      "description": "एक युवा वैज्ञानिक अर्जुन की ज़िन्दगी बदल जाती है जब एक रहस्यमय संकेत उसे एक एलियन से जोड़ देता है, और प्रेम की अनोखी यात्रा शुरू होती है।",
+      "summary": "एक युवा वैज्ञानिक अर्जुन की ज़िन्दगी बदल जाती है जब एक रहस्यमय संकेत उसे एक एलियन से जोड़ देता है, और प्रेम की अनोखी यात्रा शुरू होती है।"
+    },
+    {
+      "season": "1",
+      "episode": "2",
+      "title": "Alien Is My Girlfriend - Episode 2",
+      "description": "इस एपिसोड में अराजकता और रहस्य की धुंध में अंजलि और अराजकता का सामना करते हुए, प्रेम की नई परत खुलती है।",
+      "summary": "इस एपिसोड में अराजकता और रहस्य की धुंध में अंजलि और अराजकता का सामना करते हुए, प्रेम की नई परत खुलती है।"
+    },
+    {
+      "season": "1",
+      "episode": "3",
+      "title": "रहस्य का द्वार",
+      "description": "गुप्त प्रयोगशाला में एक नई ऊर्जा की धमक के साथ, प्यार और खतरे की कहानी फिर से गहराई में उतरती है।",
+      "summary": "Anjali’s instruments flash an impossible signal as she steps into the lab’s heart, hinting at a cosmic doorway. Dr. Arsha waits in the dim chamber, warning her of the energy’s instability. Dr. Meera, skeptical yet intrigued, follows closely, her glasses reflecting the eerie glow. Together, they realize the signal might be a plea from beyond. Suddenly, Zor’s silhouette appears, his glowing wrist ring pulsing with authority, demanding the data. He forces the trio to confront a corrupted simulation that erases their shared memories. Dr. Meera fights to retain her memories, while Anjali’s heart races with both fear and newfound affection. The tension rises as the simulation threatens to overwrite their love. In the climax, Dr. Arsha pulls out a dormant crystalline key, promising to seal the cosmic threat. As they activate the key, a surge of energy erupts, throwing the lab into swirling darkness. The facility trembles, and the trio is caught in a vortex that seems to pull them out of time. The episode ends as the vortex collapses, leaving them suspended, and the screen fades to black—leaving listeners on a cliffhanger."
+    }
+  ]
+}
