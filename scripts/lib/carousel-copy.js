@@ -19,11 +19,11 @@ try {
   Groq = null;
 }
 
-// Groq periodically retires models outright (this list previously defaulted
-// to the now-404ing llama-3.3-70b-versatile) — a fallback chain, same
+// Groq periodically retires models outright (qwen3.6 and groq/compound on
+// 2026-10-01; llama-3.3-70b-versatile once 404'd for this account) — a fallback chain, same
 // pattern as build-stories.js, means one deprecation doesn't silently kill
 // every carousel's AI copy until someone notices the warning in CI logs.
-const MODELS = (process.env.GROQ_MODEL_CAROUSEL || 'groq/compound-mini,groq/compound,openai/gpt-oss-20b,openai/gpt-oss-120b')
+const MODELS = (process.env.GROQ_MODEL_CAROUSEL || 'openai/gpt-oss-120b,openai/gpt-oss-20b,llama-3.3-70b-versatile,qwen/qwen3.8-27b')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
@@ -196,7 +196,7 @@ async function llmCopy({ title, text, genre, description }, count) {
     // a reasoning model spends real budget thinking before it answers, and
     // truncating that mid-thought is exactly how a completion comes back
     // with no JSON in it at all.
-    const content = await callGroqJson(groq, MODELS, { sys, user, temperature: 0.9, maxTokens: 6000, topP: 0.95 });
+    const content = await callGroqJson(groq, MODELS, { sys, user, temperature: 0.9, maxTokens: 4000, topP: 0.95 });
     const d = extractJson(content);
     const slides = Array.isArray(d.slides)
       ? d.slides

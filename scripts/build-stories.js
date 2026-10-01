@@ -48,11 +48,13 @@ const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
 const PROJECT = process.env.FIREBASE_PROJECT_ID || 'storybyte-76716';
 const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
-// Model fallback chain (ordered by speed/reliability based on tests):
-// 1. qwen/qwen3.6-27b — fastest (259ms), reliable
-// 2. openai/gpt-oss-20b — good speed, cheap, occasionally empty (caught below)
-// 3. groq/compound — slower (3s) but very reliable
-// 4. openai/gpt-oss-120b — best quality but rate-limited on free tier
+// Model fallback chain (Groq's production models as of Oct 2026; qwen3.6
+// and groq/compound were retired on 2026-10-01 and took a day's story down):
+// 1. openai/gpt-oss-120b — best writing quality (reasoning model)
+// 2. openai/gpt-oss-20b — faster, same JSON handling
+// 3. llama-3.3-70b-versatile — non-reasoning; once 404'd for this account,
+//    so it sits after the gpt-oss pair where a 404 just costs one call
+// 4. qwen/qwen3.8-27b — preview, may be retired at short notice
 //
 // GROQ_MODEL can be:
 //   - comma-separated: "model1,model2,model3"
@@ -70,7 +72,7 @@ const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
 })();
 
 function parseModels(envValue) {
-  if (!envValue) return ['groq/compound-mini', 'groq/compound', 'openai/gpt-oss-20b', 'openai/gpt-oss-120b'];
+  if (!envValue) return ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.3-70b-versatile', 'qwen/qwen3.8-27b'];
   const raw = envValue.trim();
   // Try JSON array first (handles ['model1', 'model2'] format)
   if (raw.startsWith('[') || raw.startsWith('(')) {
@@ -193,14 +195,15 @@ async function generateText(groq, slot) {
 
   // Try each model in the fallback chain until one succeeds. The token
   // budget leaves room for reasoning models (gpt-oss), which think before
-  // answering: at 2048, a Hindi story plus that thinking got cut off
+  // answering, while staying under the free tier's 8K tokens-per-minute
+  // cap (prompt + max_tokens counts against it): at 2048, a Hindi story plus that thinking got cut off
   // mid-JSON and Groq rejected it ("Failed to validate JSON") — on the day
   // the first model in the chain was retired, that failed the whole story.
   // A JSON-validation failure gets one more try on the same model without
   // strict JSON mode, with the object pulled out of the reply.
   const errors = [];
   const ask = (model, strict) => groq.chat.completions.create({
-    model, temperature: 0.85, max_tokens: 8000, top_p: 0.95,
+    model, temperature: 0.85, max_tokens: 6500, top_p: 0.95,
     ...(strict ? { response_format: { type: 'json_object' } } : {}),
     messages: [{ role: 'system', content: sys }, { role: 'user', content: userPrompt }],
   });

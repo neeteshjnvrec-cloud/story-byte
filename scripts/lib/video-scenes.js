@@ -25,7 +25,7 @@ const { renderFallbackCover } = require('./fallback-cover');
 
 // Same fallback-chain pattern as carousel-copy.js / build-stories.js — one
 // model deprecating outright must not silently kill this feature.
-const MODELS = (process.env.GROQ_MODEL_VIDEO_SCENES || 'groq/compound-mini,groq/compound,openai/gpt-oss-20b,openai/gpt-oss-120b')
+const MODELS = (process.env.GROQ_MODEL_VIDEO_SCENES || 'openai/gpt-oss-120b,openai/gpt-oss-20b,llama-3.3-70b-versatile,qwen/qwen3.8-27b')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
@@ -59,7 +59,7 @@ async function llmSceneList({ title, text, genre, description }, count) {
     // callGroqJson in carousel-copy.js for why both response_format modes
     // get tried per model, and why truncating a reasoning model's hidden
     // thinking is how a completion comes back with no JSON in it at all.
-    const content = await callGroqJson(groq, MODELS, { sys, user, temperature: 0.8, maxTokens: 6000, topP: 0.95 });
+    const content = await callGroqJson(groq, MODELS, { sys, user, temperature: 0.8, maxTokens: 4000, topP: 0.95 });
     const d = extractJson(content);
     const scenes = Array.isArray(d.scenes) ? d.scenes.map((s) => String(s || '').trim()).filter(Boolean) : [];
     return scenes.length ? scenes.slice(0, count) : null;
