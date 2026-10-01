@@ -196,7 +196,7 @@ async function llmCopy({ title, text, genre, description }, count) {
     // a reasoning model spends real budget thinking before it answers, and
     // truncating that mid-thought is exactly how a completion comes back
     // with no JSON in it at all.
-    const content = await callGroqJson(groq, MODELS, { sys, user, temperature: 0.9, maxTokens: 2000, topP: 0.95 });
+    const content = await callGroqJson(groq, MODELS, { sys, user, temperature: 0.9, maxTokens: 6000, topP: 0.95 });
     const d = extractJson(content);
     const slides = Array.isArray(d.slides)
       ? d.slides

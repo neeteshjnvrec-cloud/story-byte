@@ -27,6 +27,7 @@ const { writeStoryPage } = require('./lib/story-page');
 const { fetchStoryImage } = require('./lib/scene-image');
 const { renderFallbackCover } = require('./lib/fallback-cover');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
+const { extractJson } = require('./lib/carousel-copy');
 const { buildStoryVideo } = require('./lib/video');
 const { buildVideoScenes } = require('./lib/video-scenes');
 const { parseSrt, toCaptionLines } = require('./lib/subtitles');
@@ -190,33 +191,44 @@ async function generateText(groq, slot) {
   const userPrompt = slot.occasion ? `Write a story for ${slot.occasion.name}.`
     : slot.deity ? `Tell the katha: ${slot.deity.katha}.` : `Write a ${slot.genre} story.`;
 
-  // Try each model in the fallback chain until one succeeds
+  // Try each model in the fallback chain until one succeeds. The token
+  // budget leaves room for reasoning models (gpt-oss), which think before
+  // answering: at 2048, a Hindi story plus that thinking got cut off
+  // mid-JSON and Groq rejected it ("Failed to validate JSON") — on the day
+  // the first model in the chain was retired, that failed the whole story.
+  // A JSON-validation failure gets one more try on the same model without
+  // strict JSON mode, with the object pulled out of the reply.
   const errors = [];
+  const ask = (model, strict) => groq.chat.completions.create({
+    model, temperature: 0.85, max_tokens: 8000, top_p: 0.95,
+    ...(strict ? { response_format: { type: 'json_object' } } : {}),
+    messages: [{ role: 'system', content: sys }, { role: 'user', content: userPrompt }],
+  });
   for (const model of MODELS) {
-    try {
-      const c = await groq.chat.completions.create({
-        model, temperature: 0.85, max_tokens: 2048, top_p: 0.95,
-        response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: sys }, { role: 'user', content: userPrompt }],
-      });
-      const d = JSON.parse(c.choices[0].message.content.trim());
-      if (!d.title || !d.text || d.text.trim().length < 50) throw new Error('incomplete/empty text');
-      // Log which model succeeded (useful for debugging)
-      console.log(`  ✅ Model: ${model}`);
-      return {
-        title: String(d.title).replace(/^["']|["']$/g, '').slice(0, 70),
-        description: String(d.description || `A ${slot.genre} story`).slice(0, 160),
-        text: String(d.text).trim(),
-        tags: Array.isArray(d.tags) ? d.tags.slice(0, 6) : [slot.genre],
-        socialTitle: d.socialTitle ? String(d.socialTitle).replace(/^["']|["']$/g, '').slice(0, 80) : null,
-        commentQuestion: d.commentQuestion ? String(d.commentQuestion).trim().slice(0, 200) : null,
-      };
-    } catch (e) {
-      errors.push({ model, error: e.message });
-      console.log(`  ✗ ${model}: ${e.message.slice(0, 60)}`);
-      // If it's a model not found / auth error, don't bother trying next
-      if (e.message.includes('not found') || e.message.includes('authentication') || e.message.includes('Invalid API Key')) {
-        throw new Error(`Model ${model} failed permanently: ${e.message}`);
+    for (const strict of [true, false]) {
+      try {
+        const c = await ask(model, strict);
+        const d = extractJson(c.choices[0].message.content || '');
+        if (!d.title || !d.text || d.text.trim().length < 50) throw new Error('incomplete/empty text');
+        // Log which model succeeded (useful for debugging)
+        console.log(`  ✅ Model: ${model}${strict ? '' : ' (relaxed JSON)'}`);
+        return {
+          title: String(d.title).replace(/^["']|["']$/g, '').slice(0, 70),
+          description: String(d.description || `A ${slot.genre} story`).slice(0, 160),
+          text: String(d.text).trim(),
+          tags: Array.isArray(d.tags) ? d.tags.slice(0, 6) : [slot.genre],
+          socialTitle: d.socialTitle ? String(d.socialTitle).replace(/^["']|["']$/g, '').slice(0, 80) : null,
+          commentQuestion: d.commentQuestion ? String(d.commentQuestion).trim().slice(0, 200) : null,
+        };
+      } catch (e) {
+        errors.push({ model, error: e.message });
+        console.log(`  ✗ ${model}${strict ? '' : ' (relaxed)'}: ${e.message.slice(0, 80)}`);
+        // A bad key fails every model the same way — stop early. A retired
+        // model (404) just moves on to the next one.
+        if (e.message.includes('authentication') || e.message.includes('Invalid API Key')) {
+          throw new Error(`Model ${model} failed permanently: ${e.message}`);
+        }
+        if (!strict || !/json_validate_failed|Failed to (validate|generate) JSON|no JSON|Unexpected token|JSON/i.test(e.message)) break;
       }
     }
   }
