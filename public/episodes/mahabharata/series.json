@@ -1,0 +1,35 @@
+{
+  "seriesTitle": "Mahabharata ",
+  "genre": "devotional and educational",
+  "language": "hi",
+  "characters": [
+    {
+      "name": "Krishna",
+      "nativeName": "कृष्ण",
+      "role": "Divine guide",
+      "look": "ageless, serene face, dark hair tied in a bun, wearing golden dhoti and peacock feather crown"
+    },
+    {
+      "name": "Arjuna",
+      "nativeName": "अर्जुन",
+      "role": "Pandava prince",
+      "look": "young, determined face, long black hair, bow slung over shoulder, saffron dhoti"
+    },
+    {
+      "name": "Draupadi",
+      "nativeName": "द्रौपदी",
+      "role": "Princess of Panchala",
+      "look": "graceful, almond eyes, dark hair in a braid, elegant silk sari with red border"
+    }
+  ],
+  "setting": "The ancient kingdom of Hastinapur, with its grand palaces and bustling courtyards, serves as the backdrop for the unfolding saga.",
+  "episodes": [
+    {
+      "season": "1",
+      "episode": "1",
+      "title": "अंधकार की पहली किरण",
+      "description": "An ominous omen sparks the first clash of destiny in Hastinapur.",
+      "summary": "The dawn over Hastinapur is broken by a sudden, blood‑red comet that frightens the courtiers and whispers of war; Krishna appears in the palace garden, his eyes reflecting the strange sky, and warns that the balance of dharma is about to tilt. Arjuna trains with his bow, haunted by doubts, while Draupadi receives a cryptic message about a hidden weapon in the palace vault; the trio faces sabotage from unseen forces, and a sudden attack by a band of rogue Kaurava soldiers forces them into a desperate defense, testing their resolve and unity. Just as Krishna prepares to reveal the true nature of the comet, the palace walls tremble and the vault bursts open, spilling a glowing, ancient artifact that hums with power; Arjuna reaches for it, but a shadowy figure steps from the darkness, and the episode ends with the artifact’s light blinding the screen, leaving the fate of the heroes unknown."
+    }
+  ]
+}
