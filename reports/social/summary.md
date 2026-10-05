@@ -1,7 +1,7 @@
 # Social performance snapshot — 2026-10-05
 
 ## YouTube
-30 videos (179 views), 48 Shorts (112435 views)
+30 videos (133 views), 48 Shorts (112878 views)
 
 | Views | Format | Title |
 | --- | --- | --- |
@@ -26,11 +26,11 @@ Re-cut a winner: Actions → Remake Short, with its story id.
 
 | Views | Likes | Deity | Plays in app | Story id | Title |
 | --- | --- | --- | --- | --- | --- |
-| 45 |  | krishna | 1 | 2026-10-04_hi_devotional_यशोदा-ने-बाल-कृष्ण-के-मुँह-में-देखा-ब्रह | 😱 जब बाल कृष्ण के मुँह में माँ यशोदा ने देखा पूरा ब्रह्मांड #shorts |
-| 26 |  | devi | 1 | 2026-10-02_hi_devotional_समुद्र-मंथन-से-उभरी-माँ-लक्ष्मी-की-कथा | 🌊 जब समुद्र मंथन में चमकी माँ लक्ष्मी, देखिए अद्भुत रहस्य #shorts |
-| 16 |  | shiva | 1 | 2026-10-05_hi_devotional_शिव-ने-जटाओं-में-थामा-गंगा-का-जल | 😲 जब शिव ने जटाओं में थामा गंगा का जल, बची पृथ्वी #shorts |
-| 9 |  | ganesh | 1 | 2026-09-30_hi_devotional_गणेश-की-उत्पत्ति-माँ-पार्वती-की-अद्भुत-र | 🐘 जब माँ पार्वती ने बनाया गणेश, मिला हाथी का सिर? #shorts |
-| 4 |  | shani | 0 | 2026-10-03_hi_devotional_शनि-देव-का-विक्रमादित्य-पर-परीक्षण | ⚡️ शनि देव ने किया राजा विक्रमादित्य की अद्भुत परीक्षा |
+| 243 | 12 | shiva | 1 | 2026-10-05_hi_devotional_शिव-ने-जटाओं-में-थामा-गंगा-का-जल | 😲 जब शिव ने जटाओं में थामा गंगा का जल, बची पृथ्वी #shorts |
+| 46 | 0 | krishna | 1 | 2026-10-04_hi_devotional_यशोदा-ने-बाल-कृष्ण-के-मुँह-में-देखा-ब्रह | 😱 जब बाल कृष्ण के मुँह में माँ यशोदा ने देखा पूरा ब्रह्मांड #shorts |
+| 26 | 1 | devi | 1 | 2026-10-02_hi_devotional_समुद्र-मंथन-से-उभरी-माँ-लक्ष्मी-की-कथा | 🌊 जब समुद्र मंथन में चमकी माँ लक्ष्मी, देखिए अद्भुत रहस्य #shorts |
+| 9 | 1 | ganesh | 1 | 2026-09-30_hi_devotional_गणेश-की-उत्पत्ति-माँ-पार्वती-की-अद्भुत-र | 🐘 जब माँ पार्वती ने बनाया गणेश, मिला हाथी का सिर? #shorts |
+| 5 | 0 | shani | 0 | 2026-10-03_hi_devotional_शनि-देव-का-विक्रमादित्य-पर-परीक्षण | ⚡️ शनि देव ने किया राजा विक्रमादित्य की अद्भुत परीक्षा |
 
 ## Instagram
 @cute_krishna.ai: 13 followers, 55 posts
@@ -54,7 +54,7 @@ Re-cut a winner: Actions → Remake Short, with its story id.
 | 18 | 0 | 198 | REELS | 2026-05-26 | Divine Bal Krishna Childhood Stories / Vrindavan Cinematic . . . . #ha |
 
 ## Facebook
-Littlekrishna.ai: 4214 followers, 78 posts
+Littlekrishna.ai: 4215 followers, 79 posts
 
 | Reactions | Comments | Shares | Date | Message |
 | --- | --- | --- | --- | --- |
