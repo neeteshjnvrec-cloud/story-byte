@@ -37,8 +37,9 @@ const { postStoryCarousel, postStoryReel, commentOnInstagram } = require('./lib/
 const { postStoryToFacebook, postStoryVideo, commentOnFacebook } = require('./lib/facebook');
 const { postStoryToYouTube, commentOnYouTube } = require('./lib/youtube');
 const { getOccasion, occasionPhrase } = require('./occasions');
-const { deityOfDay, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
-const { styleOfDay, shortsTempo, END_TAIL_SEC } = require('./lib/short-style');
+const { deityOfDay, navratriDeity, istDate, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
+const { devotionalTrends } = require('./lib/trends');
+const { styleOfDay, fitShort } = require('./lib/short-style');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synth } = require('./lib/narrate');
@@ -180,15 +181,32 @@ async function generateText(groq, slot) {
     ? ',"socialTitle":"Hindi curiosity hook for YouTube Shorts/Reels, max 70 chars, starting with one fitting emoji and ' +
       'naming the deity, e.g. \\"😱 जब बाल कृष्ण के मुँह में माँ यशोदा ने देखा पूरा ब्रह्मांड\\"",' +
       '"commentQuestion":"one warm Hindi question inviting viewers to reply in the comments about this katha, max 120 chars, ' +
-      'ending with 🙏 — e.g. which moment moved them, or which katha they want next"'
+      'ending with 🙏 — e.g. which moment moved them, or which katha they want next",' +
+      '"searchTags":["8-12 short YouTube search tags for this katha, Hindi and Hinglish, e.g. the deity\'s name + कथा"]'
     : '';
   // Devotional: the complete katha is the ~2.5-minute Short, so it's
   // shorter than other stories — and must actually finish.
+  // 280-340 Hindi words narrates in ~2.2-2.6 minutes — inside the 3-minute
+  // Shorts limit with room to spare (see lib/short-style.js fitShort);
+  // slot.maxWords tightens it for the one retry when a story runs long.
+  const words = slot.maxWords ? `${slot.maxWords - 40}-${slot.maxWords}` : '280-340';
   const textSpec = slot.genre === 'devotional'
-    ? '320-380 words, spoken style, no markdown — the COMPLETE katha with a clear beginning, middle and ending: tell ' +
+    ? `${words} words, spoken style, no markdown — the COMPLETE katha with a clear beginning, middle and ending: tell ` +
       'the resolution fully, then close with one line of blessing or its lesson. Never stop mid-story'
     : '450-800 words, spoken style, no markdown';
-  const sys = `You are a storyteller for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama}${occasionInstruction}${kathaInstruction}${hookInstruction} Write in ${langInstruction} ` +
+  // Viewers' own search words in the title/description/tags is how a new
+  // Short gets found beyond the subscriber feed.
+  const searches = slot.trends?.searches || [];
+  const trending = slot.trends?.trending || [];
+  const trendInstruction = slot.genre === 'devotional' && (searches.length || trending.length)
+    ? (searches.length ? ` Right now people in India are searching YouTube for: ${searches.map((q) => `"${q}"`).join(', ')}. ` +
+        'Use the one or two of these exact phrases that truly describe this katha naturally in socialTitle and description, ' +
+        'so the video is found in search, and draw searchTags from them — never phrases about songs, aarti, drawings or photos it is ' +
+        'not, and never other singers\', channels\' or regions\' names.' : '') +
+      (trending.length ? ` Trending in India today: ${trending.join(', ')} — if one genuinely connects to this katha, ` +
+        'reference it in the description.' : '')
+    : '';
+  const sys = `You are a storyteller for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama}${occasionInstruction}${kathaInstruction}${hookInstruction}${trendInstruction} Write in ${langInstruction} ` +
     `JSON only: {"title":"max 60 chars","description":"one sentence","text":"${textSpec}","tags":["genre"]${socialTitleSpec}}.`;
   const userPrompt = slot.occasion ? `Write a story for ${slot.occasion.name}.`
     : slot.deity ? `Tell the katha: ${slot.deity.katha}.` : `Write a ${slot.genre} story.`;
@@ -222,6 +240,7 @@ async function generateText(groq, slot) {
           tags: Array.isArray(d.tags) ? d.tags.slice(0, 6) : [slot.genre],
           socialTitle: d.socialTitle ? String(d.socialTitle).replace(/^["']|["']$/g, '').slice(0, 80) : null,
           commentQuestion: d.commentQuestion ? String(d.commentQuestion).trim().slice(0, 200) : null,
+        searchTags: Array.isArray(d.searchTags) ? d.searchTags.map((t) => String(t).trim()).filter(Boolean).slice(0, 12) : [],
         };
       } catch (e) {
         errors.push({ model, error: e.message });
@@ -263,9 +282,15 @@ function coverPrompt(slotOrStory, content) {
   // the actual festival the story is about.
   const occasion = slotOrStory.occasion || content?.occasion;
   const deity = slotOrStory.deity;
-  const finalSubject = occasion ? `${occasion.visual}, ${occasion.name} celebration`
-    : deity ? `${deity.visual}, ${deity.katha}` : subject;
+  // A Navratri day has both — its own goddess is the better picture.
+  const finalSubject = deity ? `${deity.visual}, ${deity.katha}`
+    : occasion ? `${occasion.visual}, ${occasion.name} celebration` : subject;
   return `${finalSubject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
+}
+
+function exactDuration(file) {
+  try { return parseFloat(execFileSync('ffprobe', ['-v', 'quiet', '-show_entries', 'format=duration', '-of', 'csv=p=0', file]).toString().trim()) || 0; }
+  catch (e) { return 0; }
 }
 
 function durationSec(file) {
@@ -336,17 +361,29 @@ async function run() {
     process.exit(0);
   }
 
-  // A devotional festival (occasions.js) takes the day; otherwise it's the
-  // weekday's deity and this week's katha. Non-devotional occasions (e.g.
-  // Gandhi Jayanti, Karva Chauth) no longer replace the devotional story.
+  // During Navratri each day is that day's form of Durga (what everyone is
+  // searching for that day); otherwise a devotional festival (occasions.js)
+  // takes the day, or else it's the weekday's deity and this week's katha.
+  // Non-devotional occasions (e.g. Gandhi Jayanti, Karva Chauth) no longer
+  // replace the devotional story.
   const occasion = getOccasion(DATE);
-  const slot = occasion?.genre === 'devotional'
-    ? { ...DAILY_SLOT, occasion }
+  const navratri = navratriDeity(istDate());
+  const slot = navratri ? { ...DAILY_SLOT, deity: navratri, occasion: occasion?.genre === 'devotional' ? occasion : undefined }
+    : occasion?.genre === 'devotional' ? { ...DAILY_SLOT, occasion }
     : { ...DAILY_SLOT, deity: deityOfDay(DATE) };
   // The day's look: camera moves, colour grade, captions, hook style, music.
   slot.look = styleOfDay(DATE);
+  if (slot.deity) console.log(`🙏 Today's katha: ${slot.deity.name} — ${slot.deity.katha}`);
   if (slot.occasion) console.log(`🎉 Today's occasion: ${occasion.name}`);
-  else console.log(`🙏 Today's katha: ${slot.deity.name} — ${slot.deity.katha}`);
+  // What India is searching for about today's deity/festival right now, so
+  // the title, hook and tags use viewers' own words (lib/trends.js).
+  // Hindi seeds only: an English deity name autocompletes to unrelated
+  // creators' channel names ("shivani kumari official").
+  slot.trends = await devotionalTrends([
+    slot.deity && `${slot.deity.hindi} की कथा`, slot.deity?.hindi, slot.occasion?.name,
+  ]);
+  console.log(`📈 Searches: ${slot.trends.searches.join(' | ') || 'none'}`);
+  if (slot.trends.trending.length) console.log(`📈 Trending today: ${slot.trends.trending.join(' | ')}`);
   const pendingSlots = [{ ...slot, retry: failedSlots.length > 0 }];
 
   console.log(`🎯 Selected ${pendingSlots.length} slots for today\n`);
@@ -385,7 +422,7 @@ async function run() {
 
       try {
         // Step 1: Generate text
-        const content = await generateText(groq, slot);
+        let content = await generateText(groq, slot);
         const id = `${DATE}_${slot.language}_${slot.genre}_${slug(content.title)}`;
         const existing = await db.collection('stories').doc(id).get();
         if (existing.exists && existing.data().audioUrl) {
@@ -413,9 +450,24 @@ async function run() {
         // Step 3: Generate audio
         const audio = path.join(PUB, 'audio', `${id}.mp3`);
         const subsPath = path.join(os.tmpdir(), `${id}.srt`);
-        const synthResult = (slot.genre === 'devotional' &&
+        const narrate = async () => (slot.genre === 'devotional' &&
             await synthSarvam(content.text, { out: audio, subsOut: subsPath, language: slot.language })) ||
           synth(content.text, slot, audio, subsPath);
+        let synthResult = await narrate();
+        // A devotional katha too long to fit a Short even sped up is
+        // rewritten shorter once — a 3:01 upload is filed as a regular
+        // video and gets a fraction of a Short's views. Same katha and
+        // title; only the text changes.
+        if (slot.genre === 'devotional' && !fitShort(exactDuration(audio)).fits) {
+          console.log(`  ✂️  ${Math.round(exactDuration(audio))}s is too long for a Short — rewriting it shorter`);
+          try {
+            const shorter = await generateText(groq, { ...slot, maxWords: 260 });
+            content = { ...content, text: shorter.text };
+            synthResult = await narrate();
+          } catch (e) {
+            console.warn(`  ⚠️  Shorter rewrite failed, keeping the original: ${e.message}`);
+          }
+        }
         const dur = durationSec(audio) || Math.max(60, Math.round(content.text.split(/\s+/).length / 2.5));
 
         console.log(`✅ generated ${id} (${dur}s)`);
@@ -474,10 +526,10 @@ async function run() {
             // little over the Shorts limit is sped up slightly (pitch kept) —
             // so its captions and scenes are timed on that faster clock.
             const devotional = slot.genre === 'devotional';
-            const tempo = devotional ? shortsTempo(dur) : 1;
             // Exact length (durationSec rounds to whole seconds) so the video
             // timeline lands on the audio's real end.
-            const exactDur = parseFloat(execFileSync('ffprobe', ['-v', 'quiet', '-show_entries', 'format=duration', '-of', 'csv=p=0', audio]).toString()) || dur;
+            const exactDur = exactDuration(audio) || dur;
+            const { tempo, tailSec } = devotional ? fitShort(exactDur) : { tempo: 1, tailSec: 0 };
             const videoDur = exactDur / tempo;
             if (cues && tempo !== 1) cues = cues.map((c) => ({ ...c, start: c.start / tempo, end: c.end / tempo }));
             if (cues) {
@@ -513,10 +565,10 @@ async function run() {
               // plain narration.
               const look = slot.look;
               const mixed = mixDevotionalMusic(audio, path.join(outDir, 'video-audio.mp3'),
-                { variant: look.seed, tempo, tailSec: END_TAIL_SEC });
-              const total = videoDur + END_TAIL_SEC;
+                { variant: look.seed, tempo, tailSec });
+              const total = videoDur + tailSec;
               // The last picture holds through the music's closing seconds.
-              scenes[scenes.length - 1] = { ...scenes[scenes.length - 1], duration: scenes[scenes.length - 1].duration + END_TAIL_SEC };
+              scenes[scenes.length - 1] = { ...scenes[scenes.length - 1], duration: scenes[scenes.length - 1].duration + tailSec };
               if (cues) scenes = await bakeInCaptions(scenes, toCaptionLines(cues), outDir, total, { format: 'short', look });
               const videoPath = mixed &&
                 buildStoryVideo({ scenes, audioPath: mixed, outPath: path.join(outDir, 'story.mp4'), format: 'short', look });
@@ -685,7 +737,12 @@ async function run() {
         genre: p.slot.genre, pageUrl: p.pageUrl, occasionHashtag: p.slot.occasion?.hashtag,
         hashtags: devotional ? [...new Set([...deityTags, ...GENERAL_HASHTAGS, p.slot.occasion?.hashtag].filter(Boolean))] : null,
         isShort: devotional && p.videoSec > 0 && p.videoSec <= 180,
-        tagWords: devotional ? [p.slot.deity?.name, 'bhakti', 'hindi story', 'katha', p.slot.occasion?.name].filter(Boolean) : null,
+        // Search tags come from the writer, who picked them from what people
+        // are typing into YouTube today (lib/trends.js). The raw suggestions
+        // aren't used as tags directly: some name other singers or channels,
+        // and tagging a video with those is misleading metadata.
+        tagWords: devotional ? [...new Set([...(p.content.searchTags || []),
+          p.slot.deity?.name.split(' (')[0], 'bhakti', 'hindi story', 'katha', p.slot.occasion?.name].filter(Boolean))] : null,
       };
 
       // Prefer the narrated video — it carries the audio, the carousel

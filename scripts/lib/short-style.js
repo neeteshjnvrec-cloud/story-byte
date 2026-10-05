@@ -53,19 +53,27 @@ function styleOfDay(dateStr) {
   };
 }
 
-// YouTube classifies vertical uploads of up to 3 minutes as Shorts. A
-// complete katha is written for ~2.5 minutes; one that runs a little over
-// is sped up (pitch unchanged) by at most MAX_TEMPO to stay a Short, and
-// anything longer still posts complete, just as a regular video.
+// YouTube classifies vertical uploads of up to 3 minutes as Shorts, and it
+// is a hard line: in the first week, the daily kathas that landed under it
+// got 26-243 views as Shorts, while one that came out at 3:01 (and one at
+// 3:25) was filed as a regular video and got 2-5. A complete katha is
+// written for ~2.2 minutes; one that runs over is sped up (pitch unchanged)
+// by at most MAX_TEMPO, and the music tail after the last word shrinks
+// before the video is allowed past SHORTS_MAX_SEC.
 const SHORTS_MAX_SEC = 176;
-const MAX_TEMPO = 1.12;
-// Music carries on this long after the last word, then fades.
+const MAX_TEMPO = 1.15;
 const END_TAIL_SEC = 2.5;
+const MIN_TAIL_SEC = 0.8;
 
-/** Narration speed-up (1 = none) that fits `durSec` plus the tail into a Short. */
-function shortsTempo(durSec) {
-  const room = SHORTS_MAX_SEC - END_TAIL_SEC;
-  return durSec > room ? Math.min(MAX_TEMPO, durSec / room) : 1;
+/**
+ * How to fit `durSec` of narration into a Short: { tempo, tailSec, fits }.
+ * `fits` is false when even the fastest tempo and shortest tail run over —
+ * the caller should ask for a shorter story rather than post a non-Short.
+ */
+function fitShort(durSec) {
+  const tempo = Math.min(MAX_TEMPO, Math.max(1, durSec / (SHORTS_MAX_SEC - END_TAIL_SEC)));
+  const tailSec = Math.max(MIN_TAIL_SEC, Math.min(END_TAIL_SEC, SHORTS_MAX_SEC - durSec / tempo));
+  return { tempo, tailSec, fits: durSec / tempo + tailSec <= SHORTS_MAX_SEC + 0.05 };
 }
 
-module.exports = { styleOfDay, shortsTempo, END_TAIL_SEC };
+module.exports = { styleOfDay, fitShort, SHORTS_MAX_SEC, MAX_TEMPO };

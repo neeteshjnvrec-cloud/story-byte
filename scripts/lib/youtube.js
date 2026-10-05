@@ -41,6 +41,20 @@ function buildDescription(story) {
   return lines.join('\n');
 }
 
+// YouTube rejects an upload whose tags add up to more than 500 characters
+// (a multi-word tag counts its quotes too) — keep the first ones that fit.
+function capTags(tags, limit = 450) {
+  const out = [];
+  let used = 0;
+  for (const tag of [...new Set(tags.map((t) => String(t).replace(/[<>,]/g, '').trim()).filter(Boolean))]) {
+    const cost = tag.length + (tag.includes(' ') ? 2 : 0) + 1;
+    if (used + cost > limit) continue;
+    out.push(tag);
+    used += cost;
+  }
+  return out;
+}
+
 // A Short under a minute is classified as a Short by its length and aspect
 // ratio; #shorts in the title is the conventional extra signal.
 function shortTitle(story) {
@@ -71,7 +85,7 @@ async function postStoryToYouTube(story, videoPath) {
         snippet: {
           title: shortTitle(story),
           description: buildDescription(story),
-          tags: [...(story.tagWords || []), 'storybyte', 'audio story', story.genre].filter(Boolean),
+          tags: capTags([...(story.tagWords || []), 'storybyte', 'audio story', story.genre].filter(Boolean)),
           categoryId: '24', // Entertainment
         },
         status: { privacyStatus: 'public', selfDeclaredMadeForKids: false },
