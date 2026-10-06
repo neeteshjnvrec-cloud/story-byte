@@ -28,6 +28,8 @@ const { parseSrt } = require('./lib/subtitles');
 const { toCaptionChunks, captionFont } = require('./lib/landscape-captions');
 const { renderFallbackCover } = require('./lib/fallback-cover');
 const { GENRE_THEME, theme } = require('./lib/genre-theme');
+const { artStyleFor, styleKey } = require('./lib/short-style');
+const { iconographyFor } = require('./lib/iconography');
 const { renderEpisodeThumbnail, THUMB_WIDTH, THUMB_HEIGHT } = require('./lib/episode-thumbnail');
 const { uploadEpisodeToYouTube } = require('./lib/youtube');
 const { uploadEpisodeToFacebook } = require('./lib/facebook');
@@ -550,18 +552,47 @@ const clean = (s) => String(s || '').trim().replace(/[.\s]+$/, '');
 /** The fixed look of every bible character this description mentions. */
 function looksFor(description, bible) {
   const text = description.toLowerCase();
-  return bible.characters
-    .filter((c) => text.includes(c.name.toLowerCase()) || (c.nativeName && description.includes(c.nativeName)))
-    .map((c) => `${c.name}: ${clean(c.look)}`)
-    .join('; ');
+  const own = bible.characters
+    .filter((c) => text.includes(c.name.toLowerCase()) || (c.nativeName && description.includes(c.nativeName)));
+  // Deities and epic figures the bible doesn't define get their traditional
+  // iconography (lib/iconography.js) — a Mahabharata or Hanuman Chalisa
+  // series otherwise draws Krishna or Hanuman however the model imagines.
+  const ownNames = own.map((c) => c.name.toLowerCase());
+  const traditional = iconographyFor(description, { context: `${title} ${genre}` })
+    .filter((f) => !ownNames.some((n) => f.look.toLowerCase().includes(n)));
+  return [...own.map((c) => `${c.name}: ${clean(c.look)}`), ...traditional.map((f) => f.look)].join('; ');
+}
+
+// The series' art style (see resolveStyle). 'illustration' is the look
+// every series had before styles existed; the others are the shared
+// devotional styles (lib/short-style.js), framed for 16:9.
+let seriesStyle = 'illustration';
+
+function styleText() {
+  return seriesStyle === 'illustration'
+    ? 'cinematic widescreen 16:9 illustration, no text, no captions, no letters, no logos, no words'
+    : artStyleFor(seriesStyle, { orientation: 'wide' });
+}
+
+/**
+ * Explicit EPISODE_STYLE (workflow input) > the style saved in the series
+ * bible > DEVOTIONAL_STYLE for a brand-new series (cartoon3d by default).
+ * A series that predates styles keeps 'illustration', so its look doesn't
+ * change mid-season unless asked to.
+ */
+function resolveStyle(bible) {
+  const requested = String(process.env.EPISODE_STYLE || '').trim().toLowerCase();
+  if (requested === 'illustration' || styleKey(requested)) return requested;
+  if (bible.style) return bible.style;
+  const isNew = !(bible.episodes || []).length;
+  return isNew ? (styleKey(process.env.DEVOTIONAL_STYLE) || 'cartoon3d') : 'illustration';
 }
 
 function scenePrompt(description, bible) {
   const looks = looksFor(description, bible);
   return (
     `${clean(description)}. ${looks ? `${looks}. ` : ''}` +
-    `${mood}, cinematic widescreen 16:9 illustration, consistent character design, detailed environment, ` +
-    'no text, no captions, no letters, no logos, no words.'
+    `${mood}, consistent character design, detailed environment, ${styleText()}.`
   );
 }
 
@@ -642,7 +673,7 @@ async function thumbnailArt(plan, bible, fallbackImage) {
   const prompt =
     `Dramatic cinematic key art for the ${genre} series "${title}": ${clean(plan.parts[0]).slice(0, 220)}. ` +
     `${leads}. Characters on the right half of the frame, darker empty space on the left, intense emotional ` +
-    `expressions, ${mood}, movie poster lighting, highly detailed, no text, no letters, no logos, no words.`;
+    `expressions, ${mood}, movie poster lighting, ${styleText()}.`;
   try {
     return await fetchStoryImage(prompt, hashSeed(`${title}-s${season}-${episode}-thumbnail`), {
       width: THUMB_WIDTH, height: THUMB_HEIGHT, steps: IMAGE_STEPS, hq: HQ_LANDSCAPE,
@@ -678,6 +709,9 @@ async function main() {
   console.log(`Publish: ${publish ? 'yes (public on YouTube and Facebook)' : 'no'}`);
 
   const { plan, bible, parts, text, wordCount } = await generateStory(groq);
+  seriesStyle = resolveStyle(bible);
+  bible.style = seriesStyle;
+  console.log(`Art style: ${seriesStyle}`);
 
   const audioPath = path.join(outputDirectory, 'audio.mp3');
   const subtitlesPath = path.join(outputDirectory, 'captions.srt');

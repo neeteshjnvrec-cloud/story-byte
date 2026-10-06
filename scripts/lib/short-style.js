@@ -77,7 +77,8 @@ function fitShort(durSec) {
 }
 
 // The look of the devotional art, picked by DEVOTIONAL_STYLE (a GitHub
-// Actions variable):
+// Actions variable) for the daily Shorts, and per series for the landscape
+// episodes (build-landscape-episode.js):
 //   cartoon3d (default) — a clean 3D animated-feature look, the style of the
 //     channel's best "Divine Bal Krishna … Cinematic AI Animation" reels.
 //     Image models draw this crisply and consistently; faces, hands and the
@@ -87,17 +88,31 @@ function fitShort(durSec) {
 const ART_STYLES = {
   cartoon3d: 'high-quality 3D animated feature film still, cute expressive characters with big gentle eyes, smooth ' +
     'clean shapes, crisp sharp details, vibrant saturated colours, soft global illumination and warm rim light, ' +
-    'rich detailed background, vertical composition, no text, no words',
+    'rich detailed background',
   cartoon2d: 'beautiful hand-painted 2D animation still in the style of a classic Indian devotional cartoon, clean ' +
-    'bold outlines, flat vibrant colours with soft shading, crisp and clear, lush detailed background, vertical ' +
-    'composition, no text, no words',
+    'bold outlines, flat vibrant colours with soft shading, crisp and clear, lush detailed background',
   realistic: 'photorealistic cinematic film still from a big-budget Indian mythological epic, lifelike faces and ' +
     'natural skin texture, authentic costumes and jewellery, volumetric golden light, shallow depth of field, 35mm ' +
-    'lens, vertical composition, highly detailed, no text, no words',
+    'lens, highly detailed',
 };
+const STYLE_KEYS = Object.keys(ART_STYLES);
 
-function devotionalArtStyle() {
-  return ART_STYLES[String(process.env.DEVOTIONAL_STYLE || '').trim().toLowerCase()] || ART_STYLES.cartoon3d;
+/** A valid style key from `value`, or null. */
+function styleKey(value) {
+  const key = String(value || '').trim().toLowerCase();
+  return STYLE_KEYS.includes(key) ? key : null;
 }
 
-module.exports = { styleOfDay, fitShort, devotionalArtStyle, ART_STYLES, SHORTS_MAX_SEC, MAX_TEMPO };
+/** Prompt text for `style` (falls back to cartoon3d), framed for a tall
+ *  Short or a widescreen episode. */
+function artStyleFor(style, { orientation = 'vertical' } = {}) {
+  const framing = orientation === 'wide' ? 'widescreen 16:9 composition' : 'vertical composition';
+  return `${ART_STYLES[styleKey(style) || 'cartoon3d']}, ${framing}, no text, no words`;
+}
+
+/** The daily Shorts' style, from DEVOTIONAL_STYLE. */
+function devotionalArtStyle(opts) {
+  return artStyleFor(process.env.DEVOTIONAL_STYLE, opts);
+}
+
+module.exports = { styleOfDay, fitShort, devotionalArtStyle, artStyleFor, styleKey, STYLE_KEYS, SHORTS_MAX_SEC, MAX_TEMPO };
