@@ -40,7 +40,7 @@ const { getOccasion, occasionPhrase } = require('./occasions');
 const { deityOfDay, navratriDeity, istDate, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
 const { devotionalTrends } = require('./lib/trends');
 const { iconographyFor } = require('./lib/iconography');
-const { styleOfDay, fitShort } = require('./lib/short-style');
+const { styleOfDay, fitShort, devotionalArtStyle } = require('./lib/short-style');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synth } = require('./lib/narrate');
@@ -289,6 +289,8 @@ function coverPrompt(slotOrStory, content) {
   const looks = deity ? iconographyFor(`${deity.name} ${deity.katha}`, { context: deity.katha, max: 2 }).map((f) => f.look).join('. ') : '';
   const finalSubject = deity ? `${deity.katha}. ${looks || deity.visual}`
     : occasion ? `${occasion.visual}, ${occasion.name} celebration` : subject;
+  // A devotional cover matches its video's art style (DEVOTIONAL_STYLE).
+  if (genre === 'devotional') return `${finalSubject}. ${mood}, ${devotionalArtStyle()}`;
   return `${finalSubject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
 }
 

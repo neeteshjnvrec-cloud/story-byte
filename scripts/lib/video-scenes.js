@@ -24,6 +24,7 @@ const { extractJson, callGroqJson } = require('./carousel-copy');
 const { renderFallbackCover } = require('./fallback-cover');
 const sharp = require('sharp');
 const { iconographyFor } = require('./iconography');
+const { devotionalArtStyle } = require('./short-style');
 
 // Approved reference portraits (one per figure key, e.g. hanuman.jpg) — see
 // assets/deities/README.md. Any image works; it's shrunk under the model's
@@ -92,15 +93,10 @@ async function llmSceneList({ title, text, genre, description }, count) {
   }
 }
 
-// Devotional Shorts aim for a live-action film look — a still from a
-// big-budget mythological epic — rather than "digital art", which read as
-// plastic and fake in the first real videos.
+// Devotional art style comes from DEVOTIONAL_STYLE (lib/short-style.js) —
+// a clean 3D animated look by default.
 function artStyle(genre) {
-  return genre === 'devotional'
-    ? 'photorealistic cinematic film still from a big-budget Indian mythological epic, lifelike faces and natural ' +
-      'skin texture, authentic costumes and jewellery, volumetric golden light, shallow depth of field, 35mm lens, ' +
-      'vertical composition, highly detailed, no text, no words'
-    : 'painterly storybook illustration, cinematic lighting, no text, no words';
+  return genre === 'devotional' ? devotionalArtStyle() : 'painterly storybook illustration, cinematic lighting, no text, no words';
 }
 
 // FLUX.2 renders the devotional Shorts' portrait frames natively at 9:16

@@ -76,4 +76,28 @@ function fitShort(durSec) {
   return { tempo, tailSec, fits: durSec / tempo + tailSec <= SHORTS_MAX_SEC + 0.05 };
 }
 
-module.exports = { styleOfDay, fitShort, SHORTS_MAX_SEC, MAX_TEMPO };
+// The look of the devotional art, picked by DEVOTIONAL_STYLE (a GitHub
+// Actions variable):
+//   cartoon3d (default) — a clean 3D animated-feature look, the style of the
+//     channel's best "Divine Bal Krishna … Cinematic AI Animation" reels.
+//     Image models draw this crisply and consistently; faces, hands and the
+//     blue-skinned deities hold up far better than in photoreal.
+//   cartoon2d — hand-painted 2D animation, like classic devotional cartoons.
+//   realistic — a live-action mythological epic film still.
+const ART_STYLES = {
+  cartoon3d: 'high-quality 3D animated feature film still, cute expressive characters with big gentle eyes, smooth ' +
+    'clean shapes, crisp sharp details, vibrant saturated colours, soft global illumination and warm rim light, ' +
+    'rich detailed background, vertical composition, no text, no words',
+  cartoon2d: 'beautiful hand-painted 2D animation still in the style of a classic Indian devotional cartoon, clean ' +
+    'bold outlines, flat vibrant colours with soft shading, crisp and clear, lush detailed background, vertical ' +
+    'composition, no text, no words',
+  realistic: 'photorealistic cinematic film still from a big-budget Indian mythological epic, lifelike faces and ' +
+    'natural skin texture, authentic costumes and jewellery, volumetric golden light, shallow depth of field, 35mm ' +
+    'lens, vertical composition, highly detailed, no text, no words',
+};
+
+function devotionalArtStyle() {
+  return ART_STYLES[String(process.env.DEVOTIONAL_STYLE || '').trim().toLowerCase()] || ART_STYLES.cartoon3d;
+}
+
+module.exports = { styleOfDay, fitShort, devotionalArtStyle, ART_STYLES, SHORTS_MAX_SEC, MAX_TEMPO };

@@ -17,6 +17,7 @@ const fs = require('fs');
 const path = require('path');
 const { FIGURES } = require('./lib/iconography');
 const { fetchCloudflareHQImage } = require('./lib/cloudflare-image');
+const { devotionalArtStyle } = require('./lib/short-style');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'deity-candidates');
@@ -32,10 +33,10 @@ async function main() {
   for (const key of keys) {
     const figure = FIGURES.find((f) => f.key === key);
     if (!figure) { console.warn(`Unknown key "${key}" — see lib/iconography.js`); continue; }
+    // In the same style the daily videos use (DEVOTIONAL_STYLE), so an
+    // approved portrait matches the scenes it guides.
     const prompt = `${figure.look}. A full-figure devotional portrait, front-facing, centred, calm divine expression, ` +
-      'temple sanctum background softly out of focus, photorealistic cinematic film still from a big-budget Indian ' +
-      'mythological epic, lifelike face and natural skin texture, authentic costume and jewellery, warm golden light, ' +
-      'highly detailed, no text, no words';
+      `temple sanctum background softly out of focus, ${devotionalArtStyle()}`;
     for (let n = 1; n <= count; n++) {
       try {
         // Variation between candidates comes from the model itself; a short
