@@ -20,6 +20,12 @@
       "nativeName": "द्रौपदी",
       "role": "Princess of Panchala",
       "look": "graceful, almond eyes, dark hair in a braid, elegant silk sari with red border"
+    },
+    {
+      "name": "Guardian of the Seed",
+      "nativeName": "रक्षक",
+      "role": "Keeper of the quantum seed, tests the trio’s worthiness",
+      "look": "Tall, cloaked in shifting silver fabric, eyes glowing like starlight"
     }
   ],
   "setting": "The ancient kingdom of Hastinapur, with its grand palaces and bustling courtyards, serves as the backdrop for the unfolding saga.",
@@ -37,6 +43,14 @@
       "title": "छायाओं की पुकार",
       "description": "A cloaked stranger seizes the glowing artifact, thrusting कृष्ण, अर्जुन, and द्रौपदी into a perilous chase through hidden corridors and betrayals.",
       "summary": "The blinding glare of the artifact fades, revealing a shadow‑cloaked figure emerging from the vault, its hand clutching the humming relic and murmuring a warning that the sky itself is dying. कृष्ण steps forward, his golden dhoti shimmering, and his voice steadies the trembling courtiers, while अर्जुन’s bow twitches, ready to strike. द्रौपदी watches the figure’s eyes, catching a flicker of a forgotten sigil that hints at ancient technology. As the stranger retreats, अर्जुन pursues, only to be ambushed by rogue Kaurava soldiers hidden behind marble pillars, forcing him into a desperate duel that shatters a column. द्रौपदी deciphers the sigil on the artifact, discovering it is a quantum seed capable of rewriting dharma itself, but its activation requires a lost mantra encoded in the palace’s oldest scroll. कृष्ण intervenes, using his divine insight to locate the scroll, yet a trusted palace guard betrays them, sealing the vault and trapping the trio inside a collapsing hallway. The artifact pulses wildly, threatening to overload the palace’s energy core. In the vault’s dying light, the cloaked figure activates the seed, tearing a rift in time that engulfs कृष्ण, अर्जुन, and द्रौपदी, pulling them toward a swirling vortex of distant ages. Just as the vortex threatens to consume them, a resonant voice echoes—“सत्यमेव जयते”—promising a hidden lineage that may control the seed’s power. The episode ends with the trio grasping each other's hands as the vortex snaps shut, leaving the palace trembling and the shadowy figure’s true identity still veiled, setting the stage for the next confrontation."
+    },
+    {
+      "season": "1",
+      "episode": "3",
+      "title": "Echoes of the Timeless Vault",
+      "description": "Trapped in a rift beyond time, कृष्ण, अर्जुन, and द्रौपदी must decode the quantum seed before the vortex collapses.",
+      "summary": "The vortex snaps shut and the trio tumble into a luminous cavern that pulses with ancient energy, their surroundings a blend of stone arches and floating holographic glyphs. Krishna's golden dhoti glints even in the dim light as he steadies अर्जुन and द्रौपदी, sensing that the voice “सत्यमेव जयते” was not a mere echo but a summons. They quickly realize they are inside the legendary “Kalpa‑Vault,” a repository of dharma’s forgotten scripts. As they explore, a cloaked sentinel, the Guardian of the Seed, confronts them, demanding the lost mantra before the seed can be safely accessed. अर्जुन’s doubts flare when the sentinel reveals a fragment of his own lineage, linking him to a hidden branch of the Pandavas who once guarded the seed. Meanwhile, द्रौपदी deciphers a swirling sigil on the walls, discovering that the seed’s activation requires a collective bhakti chant, forcing the trio to confront their unity and faith. Just as they begin the chant, the vault’s core destabilizes, sending shockwaves that threaten to shatter the time barrier, and the Guardian steps aside, revealing a second, even larger artifact pulsing with dark energy. कृष्ण reaches out, his eyes blazing with divine resolve, but a sudden fissure splits the floor, pulling द्रौपदी toward the abyss. The episode ends with कृष्ण and अर्जुन lunging after her as the vortex reopens, hinting that the hidden lineage may hold the key to saving all realms."
     }
-  ]
+  ],
+  "style": "cartoon3d"
 }
