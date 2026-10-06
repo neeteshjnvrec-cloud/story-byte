@@ -94,6 +94,7 @@ async function main() {
     storyId: `${id}-remake-${VARIANT}`, title: story.title, text, genre: 'devotional',
     description: story.description, cues, audioDurSec: videoDur, outDir,
     sceneCount: Math.max(8, Math.min(18, Math.round(videoDur / 9))),
+    context: `${story.title} ${story.description || ''}`,
   });
   if (!scenes) throw new Error('Scene generation failed');
   scenes.forEach((s, i) => {

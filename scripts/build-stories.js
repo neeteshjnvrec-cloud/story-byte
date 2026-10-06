@@ -39,6 +39,7 @@ const { postStoryToYouTube, commentOnYouTube } = require('./lib/youtube');
 const { getOccasion, occasionPhrase } = require('./occasions');
 const { deityOfDay, navratriDeity, istDate, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
 const { devotionalTrends } = require('./lib/trends');
+const { iconographyFor } = require('./lib/iconography');
 const { styleOfDay, fitShort } = require('./lib/short-style');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
 const { synthSarvam } = require('./lib/sarvam-tts');
@@ -283,7 +284,10 @@ function coverPrompt(slotOrStory, content) {
   const occasion = slotOrStory.occasion || content?.occasion;
   const deity = slotOrStory.deity;
   // A Navratri day has both — its own goddess is the better picture.
-  const finalSubject = deity ? `${deity.visual}, ${deity.katha}`
+  // A deity's traditional look (lib/iconography.js), so the cover shows the
+  // Hanuman or Ganesha devotees recognise, not the model's own invention.
+  const looks = deity ? iconographyFor(`${deity.name} ${deity.katha}`, { context: deity.katha, max: 2 }).map((f) => f.look).join('. ') : '';
+  const finalSubject = deity ? `${deity.katha}. ${looks || deity.visual}`
     : occasion ? `${occasion.visual}, ${occasion.name} celebration` : subject;
   return `${finalSubject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
 }
@@ -543,6 +547,8 @@ async function run() {
                   description: content.description, cues, audioDurSec: videoDur, outDir: workDir,
                   // A new picture every ~9s keeps a ~3-minute Short moving.
                   sceneCount: devotional ? Math.max(8, Math.min(18, Math.round(videoDur / 9))) : undefined,
+                  // Which katha this is — e.g. Govardhan means Krishna is drawn as a child.
+                  context: [slot.deity?.katha, slot.occasion?.name].filter(Boolean).join(' '),
                 });
               } catch (e) {
                 console.warn(`  ⚠️  Narration-synced scenes failed for ${id}, using plain backgrounds: ${e.message}`);
