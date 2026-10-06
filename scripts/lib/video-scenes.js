@@ -22,6 +22,22 @@ const { fetchSceneImage, hashSeed } = require('./scene-image');
 const { theme } = require('./genre-theme');
 const { extractJson, callGroqJson } = require('./carousel-copy');
 const { renderFallbackCover } = require('./fallback-cover');
+const sharp = require('sharp');
+const { iconographyFor } = require('./iconography');
+const { devotionalArtStyle } = require('./short-style');
+
+// Approved reference portraits (one per figure key, e.g. hanuman.jpg) — see
+// assets/deities/README.md. Any image works; it's shrunk under the model's
+// 512x512 reference limit.
+const DEITY_DIR = path.resolve(__dirname, '..', '..', 'assets', 'deities');
+const deityRefs = new Map();
+async function deityReference(key) {
+  if (!deityRefs.has(key)) {
+    const file = ['jpg', 'jpeg', 'png', 'webp'].map((ext) => path.join(DEITY_DIR, `${key}.${ext}`)).find((f) => fs.existsSync(f));
+    deityRefs.set(key, file ? await sharp(file).resize(496, 496, { fit: 'inside' }).jpeg({ quality: 92 }).toBuffer() : null);
+  }
+  return deityRefs.get(key);
+}
 
 // Same fallback-chain pattern as carousel-copy.js / build-stories.js — one
 // model deprecating outright must not silently kill this feature.
@@ -52,7 +68,15 @@ async function llmSceneList({ title, text, genre, description }, count) {
       '— concrete subject, setting and mood, specific to what actually happens in THIS story at that point (name ' +
       'a well-known deity/mythological/historical figure the story is about if there is one, e.g. Krishna, ' +
       "Ganesha, Rama — but never invent a name for an ordinary fictional character), no text or words rendered " +
-      'in the image.';
+      'in the image.' +
+      (genre === 'devotional'
+        // Names are how lib/iconography.js finds each figure's traditional
+        // look — a vague "the god" or "the child" gets drawn however the
+        // image model imagines it.
+        ? ' Name EVERY deity and figure in the frame by their standard English name — e.g. "Bal Krishna" (Krishna as ' +
+          'a child), "Mother Yashoda", "Hanuman", "Lord Shiva", "Shani Dev", "King Vikramaditya" — and keep to what the ' +
+          'traditional katha says happens.'
+        : '');
     const user = `Title: ${title}\nGenre: ${genre}\nDescription: ${description || ''}\n\nStory:\n${String(text || '').slice(0, 6000)}`;
 
     // Generous headroom over what the JSON payload itself needs — see
@@ -69,14 +93,16 @@ async function llmSceneList({ title, text, genre, description }, count) {
   }
 }
 
-// The devotional Shorts that do well on this channel (1K-41K views) are
-// hyper-real "divine" renders, not storybook paintings.
+// Devotional art style comes from DEVOTIONAL_STYLE (lib/short-style.js) —
+// a clean 3D animated look by default.
 function artStyle(genre) {
-  return genre === 'devotional'
-    ? 'divine hyper-realistic cinematic art, glowing golden aura, rich colours, 8K detail, ' +
-      'main figure centred in the frame, no text, no words'
-    : 'painterly storybook illustration, cinematic lighting, no text, no words';
+  return genre === 'devotional' ? devotionalArtStyle() : 'painterly storybook illustration, cinematic lighting, no text, no words';
 }
+
+// FLUX.2 renders the devotional Shorts' portrait frames natively at 9:16
+// (864x1536, scaled to 1080x1920 — 1.25x, not the 1.9x crop-and-blow-up of a
+// square). 864x1536 keeps each frame to ~6 of the model's 512px tiles.
+const HQ_PORTRAIT = { width: 864, height: 1536 };
 
 /**
  * Returns [{ file, duration }] — real-content scene image files (written
@@ -84,7 +110,7 @@ function artStyle(genre) {
  * `sceneCount` overrides the default pacing (~6s a scene, capped at 8) —
  * the devotional Shorts ask for more so a ~3-minute story keeps moving.
  */
-async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir, sceneCount }) {
+async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir, sceneCount, context = '' }) {
   if (!cues?.length || !audioDurSec) return null;
 
   const prompts = await llmSceneList({ title, text, genre, description }, sceneCount || sceneCountFor(audioDurSec));
@@ -98,15 +124,43 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
   fs.mkdirSync(outDir, { recursive: true });
   const t = theme(genre);
   const scenes = [];
+  // Devotional scenes: each figure the scene names gets its traditional
+  // appearance in the prompt (lib/iconography.js) and, when one has been
+  // approved, its reference portrait from assets/deities/<key>.jpg. Without
+  // an approved portrait, the first picture of the story's main figure is
+  // reused as the reference for their later scenes, so they at least stay
+  // consistent within the video.
+  let mainKey = null;
+  let mainRef = null;
   for (let i = 0; i < planned.length; i++) {
-    const prompt = `${planned[i].prompt}. ${t.mood}, ${artStyle(genre)}`;
+    const devotional = genre === 'devotional';
+    const figures = devotional ? iconographyFor(planned[i].prompt, { context: `${context} ${title}` }) : [];
+    const looks = figures.map((f) => f.look).join('. ');
+    const approved = [];
+    for (const f of figures) {
+      const ref = await deityReference(f.key);
+      if (ref) approved.push({ key: f.key, ref });
+    }
+    const refs = [];
+    let refNote = '';
+    if (approved.length) {
+      approved.slice(0, 3).forEach((a) => refs.push(a.ref));
+      refNote = approved.slice(0, 3).map((a, k) => `${figures.find((f) => f.key === a.key).look.split(':')[0]} must look exactly like reference image ${k}`).join('; ');
+    } else if (mainRef && figures.some((f) => f.key === mainKey)) {
+      refs.push(mainRef);
+      refNote = `${figures.find((f) => f.key === mainKey).look.split(':')[0]} must keep the same face, skin colour, costume and ornaments as in reference image 0`;
+    }
+    const prompt = [planned[i].prompt, looks && `Traditional iconography: ${looks}`, refNote, `${t.mood}, ${artStyle(genre)}`]
+      .filter(Boolean).join('. ');
     // A seed space distinct from the carousel's own scene art (`${storyId}-${i}`)
     // so a story's video doesn't just replay its carousel image set.
-    // Devotional Shorts are cropped to full-screen 9:16 later
-    // (lib/caption-frames.js): keep the whole square render so that crop
-    // can centre on the deity, instead of pre-cutting it to 4:5 here.
     let image = await fetchSceneImage(prompt, hashSeed(`${storyId}-video-${i}`),
-      genre === 'devotional' ? { width: 1024, height: 1024 } : undefined);
+      devotional ? { width: 1080, height: 1920, hq: { ...HQ_PORTRAIT, refs } } : undefined);
+    if (image && devotional && !mainRef && figures.length) {
+      mainKey = figures[0].key;
+      // References must be under 512x512.
+      mainRef = await sharp(image).resize(496, 496, { fit: 'inside' }).jpeg({ quality: 90 }).toBuffer();
+    }
     if (!image) {
       // Never drop a scene outright: unlike the carousel (each slide stands
       // alone), these scenes are concatenated back to back against a fixed

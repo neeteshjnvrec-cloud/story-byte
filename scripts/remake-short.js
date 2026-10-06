@@ -32,7 +32,7 @@ const { buildVideoScenes } = require('./lib/video-scenes');
 const { bakeInCaptions } = require('./lib/caption-frames');
 const { buildStoryVideo } = require('./lib/video');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
-const { styleOfDay, shortsTempo, END_TAIL_SEC } = require('./lib/short-style');
+const { styleOfDay, fitShort } = require('./lib/short-style');
 const { DEITIES, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -84,16 +84,17 @@ async function main() {
   let cues = narrated.subtitlesPath ? parseSrt(fs.readFileSync(subs, 'utf8')) : [];
   if (!cues.length) throw new Error('Narration produced no caption timings');
   const dur = parseFloat(require('child_process').execFileSync('ffprobe', ['-v', 'quiet', '-show_entries', 'format=duration', '-of', 'csv=p=0', voice]).toString()) || cues[cues.length - 1].end;
-  const tempo = shortsTempo(dur);
+  const { tempo, tailSec } = fitShort(dur);
   if (tempo !== 1) cues = cues.map((c) => ({ ...c, start: c.start / tempo, end: c.end / tempo }));
   const videoDur = dur / tempo;
-  const total = videoDur + END_TAIL_SEC;
+  const total = videoDur + tailSec;
 
   const look = styleOfDay(`${id}:remake:${VARIANT}`);
   const scenes = await buildVideoScenes({
     storyId: `${id}-remake-${VARIANT}`, title: story.title, text, genre: 'devotional',
     description: story.description, cues, audioDurSec: videoDur, outDir,
     sceneCount: Math.max(8, Math.min(18, Math.round(videoDur / 9))),
+    context: `${story.title} ${story.description || ''}`,
   });
   if (!scenes) throw new Error('Scene generation failed');
   scenes.forEach((s, i) => {
@@ -101,9 +102,9 @@ async function main() {
     fs.renameSync(s.file, file);
     s.file = file;
   });
-  scenes[scenes.length - 1].duration += END_TAIL_SEC;
+  scenes[scenes.length - 1].duration += tailSec;
 
-  const mix = mixDevotionalMusic(voice, path.join(outDir, 'mix.mp3'), { variant: look.seed, tempo, tailSec: END_TAIL_SEC });
+  const mix = mixDevotionalMusic(voice, path.join(outDir, 'mix.mp3'), { variant: look.seed, tempo, tailSec });
   if (!mix) throw new Error('Could not mix the narration');
 
   const frameDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sb-remake-frames-'));

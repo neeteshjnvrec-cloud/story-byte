@@ -53,19 +53,66 @@ function styleOfDay(dateStr) {
   };
 }
 
-// YouTube classifies vertical uploads of up to 3 minutes as Shorts. A
-// complete katha is written for ~2.5 minutes; one that runs a little over
-// is sped up (pitch unchanged) by at most MAX_TEMPO to stay a Short, and
-// anything longer still posts complete, just as a regular video.
+// YouTube classifies vertical uploads of up to 3 minutes as Shorts, and it
+// is a hard line: in the first week, the daily kathas that landed under it
+// got 26-243 views as Shorts, while one that came out at 3:01 (and one at
+// 3:25) was filed as a regular video and got 2-5. A complete katha is
+// written for ~2.2 minutes; one that runs over is sped up (pitch unchanged)
+// by at most MAX_TEMPO, and the music tail after the last word shrinks
+// before the video is allowed past SHORTS_MAX_SEC.
 const SHORTS_MAX_SEC = 176;
-const MAX_TEMPO = 1.12;
-// Music carries on this long after the last word, then fades.
+const MAX_TEMPO = 1.15;
 const END_TAIL_SEC = 2.5;
+const MIN_TAIL_SEC = 0.8;
 
-/** Narration speed-up (1 = none) that fits `durSec` plus the tail into a Short. */
-function shortsTempo(durSec) {
-  const room = SHORTS_MAX_SEC - END_TAIL_SEC;
-  return durSec > room ? Math.min(MAX_TEMPO, durSec / room) : 1;
+/**
+ * How to fit `durSec` of narration into a Short: { tempo, tailSec, fits }.
+ * `fits` is false when even the fastest tempo and shortest tail run over —
+ * the caller should ask for a shorter story rather than post a non-Short.
+ */
+function fitShort(durSec) {
+  const tempo = Math.min(MAX_TEMPO, Math.max(1, durSec / (SHORTS_MAX_SEC - END_TAIL_SEC)));
+  const tailSec = Math.max(MIN_TAIL_SEC, Math.min(END_TAIL_SEC, SHORTS_MAX_SEC - durSec / tempo));
+  return { tempo, tailSec, fits: durSec / tempo + tailSec <= SHORTS_MAX_SEC + 0.05 };
 }
 
-module.exports = { styleOfDay, shortsTempo, END_TAIL_SEC };
+// The look of the devotional art, picked by DEVOTIONAL_STYLE (a GitHub
+// Actions variable) for the daily Shorts, and per series for the landscape
+// episodes (build-landscape-episode.js):
+//   cartoon3d (default) — a clean 3D animated-feature look, the style of the
+//     channel's best "Divine Bal Krishna … Cinematic AI Animation" reels.
+//     Image models draw this crisply and consistently; faces, hands and the
+//     blue-skinned deities hold up far better than in photoreal.
+//   cartoon2d — hand-painted 2D animation, like classic devotional cartoons.
+//   realistic — a live-action mythological epic film still.
+const ART_STYLES = {
+  cartoon3d: 'high-quality 3D animated feature film still, cute expressive characters with big gentle eyes, smooth ' +
+    'clean shapes, crisp sharp details, vibrant saturated colours, soft global illumination and warm rim light, ' +
+    'rich detailed background',
+  cartoon2d: 'beautiful hand-painted 2D animation still in the style of a classic Indian devotional cartoon, clean ' +
+    'bold outlines, flat vibrant colours with soft shading, crisp and clear, lush detailed background',
+  realistic: 'photorealistic cinematic film still from a big-budget Indian mythological epic, lifelike faces and ' +
+    'natural skin texture, authentic costumes and jewellery, volumetric golden light, shallow depth of field, 35mm ' +
+    'lens, highly detailed',
+};
+const STYLE_KEYS = Object.keys(ART_STYLES);
+
+/** A valid style key from `value`, or null. */
+function styleKey(value) {
+  const key = String(value || '').trim().toLowerCase();
+  return STYLE_KEYS.includes(key) ? key : null;
+}
+
+/** Prompt text for `style` (falls back to cartoon3d), framed for a tall
+ *  Short or a widescreen episode. */
+function artStyleFor(style, { orientation = 'vertical' } = {}) {
+  const framing = orientation === 'wide' ? 'widescreen 16:9 composition' : 'vertical composition';
+  return `${ART_STYLES[styleKey(style) || 'cartoon3d']}, ${framing}, no text, no words`;
+}
+
+/** The daily Shorts' style, from DEVOTIONAL_STYLE. */
+function devotionalArtStyle(opts) {
+  return artStyleFor(process.env.DEVOTIONAL_STYLE, opts);
+}
+
+module.exports = { styleOfDay, fitShort, devotionalArtStyle, artStyleFor, styleKey, STYLE_KEYS, SHORTS_MAX_SEC, MAX_TEMPO };

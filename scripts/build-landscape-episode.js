@@ -28,6 +28,8 @@ const { parseSrt } = require('./lib/subtitles');
 const { toCaptionChunks, captionFont } = require('./lib/landscape-captions');
 const { renderFallbackCover } = require('./lib/fallback-cover');
 const { GENRE_THEME, theme } = require('./lib/genre-theme');
+const { artStyleFor, styleKey } = require('./lib/short-style');
+const { iconographyFor } = require('./lib/iconography');
 const { renderEpisodeThumbnail, THUMB_WIDTH, THUMB_HEIGHT } = require('./lib/episode-thumbnail');
 const { uploadEpisodeToYouTube } = require('./lib/youtube');
 const { uploadEpisodeToFacebook } = require('./lib/facebook');
@@ -58,7 +60,12 @@ const TARGET_WORDS = 2200;
 const PARTS = 3;
 const WORDS_PER_PART = Math.round(TARGET_WORDS / PARTS);
 // Flux-schnell's maximum — sharper, more detailed art than the default 4.
+// Used only when the FLUX.2 render below fails (e.g. the free daily
+// allocation runs out).
 const IMAGE_STEPS = 8;
+// FLUX.2 [klein] at 16:9: 1344x768 is 6 of its 512px tiles (~160 of the
+// free 10,000 neurons a day per image; ~30 scenes an episode).
+const HQ_LANDSCAPE = { width: 1344, height: 768 };
 
 function parseModels(value) {
   // Keep only models known to be available in the current test.
@@ -545,18 +552,47 @@ const clean = (s) => String(s || '').trim().replace(/[.\s]+$/, '');
 /** The fixed look of every bible character this description mentions. */
 function looksFor(description, bible) {
   const text = description.toLowerCase();
-  return bible.characters
-    .filter((c) => text.includes(c.name.toLowerCase()) || (c.nativeName && description.includes(c.nativeName)))
-    .map((c) => `${c.name}: ${clean(c.look)}`)
-    .join('; ');
+  const own = bible.characters
+    .filter((c) => text.includes(c.name.toLowerCase()) || (c.nativeName && description.includes(c.nativeName)));
+  // Deities and epic figures the bible doesn't define get their traditional
+  // iconography (lib/iconography.js) — a Mahabharata or Hanuman Chalisa
+  // series otherwise draws Krishna or Hanuman however the model imagines.
+  const ownNames = own.map((c) => c.name.toLowerCase());
+  const traditional = iconographyFor(description, { context: `${title} ${genre}` })
+    .filter((f) => !ownNames.some((n) => f.look.toLowerCase().includes(n)));
+  return [...own.map((c) => `${c.name}: ${clean(c.look)}`), ...traditional.map((f) => f.look)].join('; ');
+}
+
+// The series' art style (see resolveStyle). 'illustration' is the look
+// every series had before styles existed; the others are the shared
+// devotional styles (lib/short-style.js), framed for 16:9.
+let seriesStyle = 'illustration';
+
+function styleText() {
+  return seriesStyle === 'illustration'
+    ? 'cinematic widescreen 16:9 illustration, no text, no captions, no letters, no logos, no words'
+    : artStyleFor(seriesStyle, { orientation: 'wide' });
+}
+
+/**
+ * Explicit EPISODE_STYLE (workflow input) > the style saved in the series
+ * bible > DEVOTIONAL_STYLE for a brand-new series (cartoon3d by default).
+ * A series that predates styles keeps 'illustration', so its look doesn't
+ * change mid-season unless asked to.
+ */
+function resolveStyle(bible) {
+  const requested = String(process.env.EPISODE_STYLE || '').trim().toLowerCase();
+  if (requested === 'illustration' || styleKey(requested)) return requested;
+  if (bible.style) return bible.style;
+  const isNew = !(bible.episodes || []).length;
+  return isNew ? (styleKey(process.env.DEVOTIONAL_STYLE) || 'cartoon3d') : 'illustration';
 }
 
 function scenePrompt(description, bible) {
   const looks = looksFor(description, bible);
   return (
     `${clean(description)}. ${looks ? `${looks}. ` : ''}` +
-    `${mood}, cinematic widescreen 16:9 illustration, consistent character design, detailed environment, ` +
-    'no text, no captions, no letters, no logos, no words.'
+    `${mood}, consistent character design, detailed environment, ${styleText()}.`
   );
 }
 
@@ -637,10 +673,10 @@ async function thumbnailArt(plan, bible, fallbackImage) {
   const prompt =
     `Dramatic cinematic key art for the ${genre} series "${title}": ${clean(plan.parts[0]).slice(0, 220)}. ` +
     `${leads}. Characters on the right half of the frame, darker empty space on the left, intense emotional ` +
-    `expressions, ${mood}, movie poster lighting, highly detailed, no text, no letters, no logos, no words.`;
+    `expressions, ${mood}, movie poster lighting, ${styleText()}.`;
   try {
     return await fetchStoryImage(prompt, hashSeed(`${title}-s${season}-${episode}-thumbnail`), {
-      width: THUMB_WIDTH, height: THUMB_HEIGHT, steps: IMAGE_STEPS,
+      width: THUMB_WIDTH, height: THUMB_HEIGHT, steps: IMAGE_STEPS, hq: HQ_LANDSCAPE,
     });
   } catch (error) {
     console.warn(`Thumbnail art failed, using a scene image instead: ${error.message}`);
@@ -673,6 +709,9 @@ async function main() {
   console.log(`Publish: ${publish ? 'yes (public on YouTube and Facebook)' : 'no'}`);
 
   const { plan, bible, parts, text, wordCount } = await generateStory(groq);
+  seriesStyle = resolveStyle(bible);
+  bible.style = seriesStyle;
+  console.log(`Art style: ${seriesStyle}`);
 
   const audioPath = path.join(outputDirectory, 'audio.mp3');
   const subtitlesPath = path.join(outputDirectory, 'captions.srt');
@@ -724,7 +763,9 @@ async function main() {
     let image = await fetchSceneImage(
       scenePrompt(description, bible),
       hashSeed(`${title}-s${season}-${episode}-${sceneNumber}`),
-      { width: WIDTH, height: HEIGHT, steps: IMAGE_STEPS }
+      // Native 16:9 from FLUX.2 (lib/cloudflare-image.js), scaled 1.43x to
+      // 1920x1080 — not a 1024 square cropped to a 576px strip and blown up.
+      { width: WIDTH, height: HEIGHT, steps: IMAGE_STEPS, hq: HQ_LANDSCAPE }
     );
     if (!image) {
       // One failed image used to abort the whole ~15-minute episode.

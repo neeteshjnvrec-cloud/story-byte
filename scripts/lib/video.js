@@ -100,7 +100,10 @@ function buildShortClip({ imageFile, duration, sceneIndex, sceneElapsed, sceneDu
       `scale=2160:3840:force_original_aspect_ratio=increase:flags=lanczos,crop=2160:3840,` +
       `zoompan=z='${z}':d=${frames}:x='${x}':y='${y}':s=1080x1920:fps=${FPS}${grade},format=yuv420p`,
     '-frames:v', String(frames),
-    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p',
+    // Near-transparent quality (CRF 17, preset medium): YouTube and Facebook
+    // re-encode every upload, and a soft, starved source (the first daily
+    // videos went up at ~1.5 Mbps) only gets worse in their encoder.
+    '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p',
     clipPath,
   ], { stdio: 'pipe' });
 }

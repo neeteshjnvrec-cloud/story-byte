@@ -29,6 +29,12 @@ on:
         required: true
         default: 'science fiction romance'
         type: string
+      style:
+        description: 'Art style — "series" keeps the look this series already has (a new series uses the DEVOTIONAL_STYLE variable, else cartoon3d)'
+        required: true
+        default: 'series'
+        type: choice
+        options: [series, cartoon3d, cartoon2d, realistic, illustration]
       publish:
         description: 'Publish the finished episode publicly to YouTube and Facebook'
         required: true
@@ -76,6 +82,8 @@ jobs:
           EPISODE_LANGUAGE: ${{ inputs.language }}
           EPISODE_GENRE: ${{ inputs.genre }}
           EPISODE_PUBLISH: ${{ inputs.publish }}
+          EPISODE_STYLE: ${{ inputs.style != 'series' && inputs.style || '' }}
+          DEVOTIONAL_STYLE: ${{ vars.DEVOTIONAL_STYLE }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}

@@ -142,4 +142,36 @@ function deityOfDay(dateStr, now = new Date()) {
   return { ...deity, katha: deity.kathas[week % deity.kathas.length] };
 }
 
-module.exports = { DEITIES, GENERAL_HASHTAGS, istWeekday, deityOfDay };
+/** Today's date in India (YYYY-MM-DD) — see istWeekday. */
+function istDate(now = new Date()) {
+  return new Date(now.getTime() + 5.5 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+// Sharad Navratri 2026 (11-19 October): each day is devoted to one of the
+// nine forms of Durga (Navadurga), and that day's form is what devotees
+// search for ("मां शैलपुत्री की कथा" tops YouTube's suggestions on day 1).
+// Dates follow the 2026 panchang; refresh yearly alongside occasions.js.
+const NAVRATRI = [
+  ['2026-10-11', 'Shailputri', 'माँ शैलपुत्री', 'daughter of the mountain king Himavan, riding the bull Nandi, trident and lotus in her hands', 'how Sati was reborn as Shailputri, daughter of the Himalaya, after her sacrifice at Daksha\'s yagna'],
+  ['2026-10-12', 'Brahmacharini', 'माँ ब्रह्मचारिणी', 'barefoot ascetic goddess in white, rosary and water pot, deep in meditation in a forest', 'Parvati\'s thousands of years of tapasya as Brahmacharini to win Shiva'],
+  ['2026-10-13', 'Chandraghanta', 'माँ चंद्रघंटा', 'golden goddess riding a tiger, a half-moon shaped like a bell on her forehead, ten arms with weapons', 'how Chandraghanta\'s bell-like roar terrified the demons and calmed Shiva\'s wedding procession'],
+  ['2026-10-14', 'Kushmanda', 'माँ कूष्मांडा', 'radiant eight-armed goddess on a lion, glowing like the sun, creating the cosmos with her smile', 'how Kushmanda created the universe with her smile when there was only darkness'],
+  ['2026-10-15', 'Skandamata', 'माँ स्कंदमाता', 'mother goddess on a lion holding baby Kartikeya (Skanda) in her lap, lotus flowers', 'Skandamata, mother of Kartikeya, and how her son defeated the demon Tarakasura'],
+  ['2026-10-16', 'Katyayani', 'माँ कात्यायनी', 'fierce warrior goddess on a lion, sword raised, born in Sage Katyayan\'s ashram', 'how Katyayani was born to Sage Katyayan and slew Mahishasura'],
+  ['2026-10-17', 'Kalaratri', 'माँ कालरात्रि', 'dark fierce goddess riding a donkey, flowing hair, fiery breath, protecting her devotees', 'how Kalaratri destroyed the demon Raktabeej, whose every drop of blood spawned a new demon'],
+  ['2026-10-18', 'Mahagauri', 'माँ महागौरी', 'serene goddess in pure white riding a white bull, glowing like the moon', 'how Parvati\'s tapasya-darkened skin was washed in the Ganga by Shiva and she became radiant Mahagauri'],
+  ['2026-10-19', 'Siddhidatri', 'माँ सिद्धिदात्री', 'goddess seated on a lotus granting the eight siddhis, devotees and gods bowing before her', 'how Siddhidatri granted Shiva the eight siddhis, making him Ardhanarishvara'],
+];
+
+/** Today's Navadurga form (as a deity-of-the-day) during Navratri, else null. */
+function navratriDeity(dateIst) {
+  const day = NAVRATRI.findIndex(([date]) => date === dateIst);
+  if (day < 0) return null;
+  const [, name, hindi, visual, katha] = NAVRATRI[day];
+  return {
+    key: 'devi', name: `Maa ${name} (Navratri day ${day + 1})`, hindi, visual, katha,
+    hashtags: ['#navratri', '#jaimatadi', `#maa${name.toLowerCase()}`, '#maadurga'],
+  };
+}
+
+module.exports = { DEITIES, GENERAL_HASHTAGS, istWeekday, istDate, deityOfDay, navratriDeity };
