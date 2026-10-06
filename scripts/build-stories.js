@@ -532,11 +532,15 @@ async function run() {
             const { tempo, tailSec } = devotional ? fitShort(exactDur) : { tempo: 1, tailSec: 0 };
             const videoDur = exactDur / tempo;
             if (cues && tempo !== 1) cues = cues.map((c) => ({ ...c, start: c.start / tempo, end: c.end / tempo }));
+            // Devotional scene art and caption frames are render inputs only
+            // (~25MB a day of 1080x1920 frames) — keep them out of the
+            // public/instagram folder the daily commit carries.
+            const workDir = devotional ? fs.mkdtempSync(path.join(os.tmpdir(), 'sb-short-')) : outDir;
             if (cues) {
               try {
                 scenes = await buildVideoScenes({
                   storyId: id, title: content.title, text: content.text, genre: slot.genre,
-                  description: content.description, cues, audioDurSec: videoDur, outDir,
+                  description: content.description, cues, audioDurSec: videoDur, outDir: workDir,
                   // A new picture every ~9s keeps a ~3-minute Short moving.
                   sceneCount: devotional ? Math.max(8, Math.min(18, Math.round(videoDur / 9))) : undefined,
                 });
@@ -569,11 +573,12 @@ async function run() {
               const total = videoDur + tailSec;
               // The last picture holds through the music's closing seconds.
               scenes[scenes.length - 1] = { ...scenes[scenes.length - 1], duration: scenes[scenes.length - 1].duration + tailSec };
-              if (cues) scenes = await bakeInCaptions(scenes, toCaptionLines(cues), outDir, total, { format: 'short', look });
+              if (cues) scenes = await bakeInCaptions(scenes, toCaptionLines(cues), workDir, total, { format: 'short', look });
               const videoPath = mixed &&
                 buildStoryVideo({ scenes, audioPath: mixed, outPath: path.join(outDir, 'story.mp4'), format: 'short', look });
-              // An intermediate — don't let the daily commit carry it.
+              // Intermediates — don't let the daily commit carry them.
               if (mixed) fs.rmSync(mixed, { force: true });
+              fs.rmSync(workDir, { recursive: true, force: true });
               if (videoPath) {
                 videoUrl = `${SITE}/instagram/${media}/story.mp4`;
                 reelVideoUrl = videoUrl;

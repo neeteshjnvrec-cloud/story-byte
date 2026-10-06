@@ -22,6 +22,7 @@ const { fetchSceneImage, hashSeed } = require('./scene-image');
 const { theme } = require('./genre-theme');
 const { extractJson, callGroqJson } = require('./carousel-copy');
 const { renderFallbackCover } = require('./fallback-cover');
+const sharp = require('sharp');
 
 // Same fallback-chain pattern as carousel-copy.js / build-stories.js — one
 // model deprecating outright must not silently kill this feature.
@@ -69,14 +70,21 @@ async function llmSceneList({ title, text, genre, description }, count) {
   }
 }
 
-// The devotional Shorts that do well on this channel (1K-41K views) are
-// hyper-real "divine" renders, not storybook paintings.
+// Devotional Shorts aim for a live-action film look — a still from a
+// big-budget mythological epic — rather than "digital art", which read as
+// plastic and fake in the first real videos.
 function artStyle(genre) {
   return genre === 'devotional'
-    ? 'divine hyper-realistic cinematic art, glowing golden aura, rich colours, 8K detail, ' +
-      'main figure centred in the frame, no text, no words'
+    ? 'photorealistic cinematic film still from a big-budget Indian mythological epic, lifelike faces and natural ' +
+      'skin texture, authentic costumes and jewellery, volumetric golden light, shallow depth of field, 35mm lens, ' +
+      'vertical composition, highly detailed, no text, no words'
     : 'painterly storybook illustration, cinematic lighting, no text, no words';
 }
+
+// FLUX.2 renders the devotional Shorts' portrait frames natively at 9:16
+// (864x1536, scaled to 1080x1920 — 1.25x, not the 1.9x crop-and-blow-up of a
+// square). 864x1536 keeps each frame to ~6 of the model's 512px tiles.
+const HQ_PORTRAIT = { width: 864, height: 1536 };
 
 /**
  * Returns [{ file, duration }] — real-content scene image files (written
@@ -98,6 +106,7 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
   fs.mkdirSync(outDir, { recursive: true });
   const t = theme(genre);
   const scenes = [];
+  let reference = null;
   for (let i = 0; i < planned.length; i++) {
     const prompt = `${planned[i].prompt}. ${t.mood}, ${artStyle(genre)}`;
     // A seed space distinct from the carousel's own scene art (`${storyId}-${i}`)
@@ -105,8 +114,20 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
     // Devotional Shorts are cropped to full-screen 9:16 later
     // (lib/caption-frames.js): keep the whole square render so that crop
     // can centre on the deity, instead of pre-cutting it to 4:5 here.
-    let image = await fetchSceneImage(prompt, hashSeed(`${storyId}-video-${i}`),
-      genre === 'devotional' ? { width: 1024, height: 1024 } : undefined);
+    // After the first picture, it's handed back as a reference image so the
+    // deity keeps the same face, colouring and costume in every scene.
+    const hq = genre === 'devotional'
+      ? { ...HQ_PORTRAIT, refs: reference ? [reference] : [] }
+      : undefined;
+    const scenePromptText = reference
+      ? `${prompt}. Keep the main character's face, skin colour, costume and jewellery exactly as in reference image 0, in this new scene and composition`
+      : prompt;
+    let image = await fetchSceneImage(scenePromptText, hashSeed(`${storyId}-video-${i}`),
+      genre === 'devotional' ? { width: 1080, height: 1920, hq } : undefined);
+    if (image && genre === 'devotional' && !reference) {
+      // References must be under 512x512.
+      reference = await sharp(image).resize(496, 496, { fit: 'inside' }).jpeg({ quality: 90 }).toBuffer();
+    }
     if (!image) {
       // Never drop a scene outright: unlike the carousel (each slide stands
       // alone), these scenes are concatenated back to back against a fixed

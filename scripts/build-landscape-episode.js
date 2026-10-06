@@ -58,7 +58,12 @@ const TARGET_WORDS = 2200;
 const PARTS = 3;
 const WORDS_PER_PART = Math.round(TARGET_WORDS / PARTS);
 // Flux-schnell's maximum — sharper, more detailed art than the default 4.
+// Used only when the FLUX.2 render below fails (e.g. the free daily
+// allocation runs out).
 const IMAGE_STEPS = 8;
+// FLUX.2 [klein] at 16:9: 1344x768 is 6 of its 512px tiles (~160 of the
+// free 10,000 neurons a day per image; ~30 scenes an episode).
+const HQ_LANDSCAPE = { width: 1344, height: 768 };
 
 function parseModels(value) {
   // Keep only models known to be available in the current test.
@@ -640,7 +645,7 @@ async function thumbnailArt(plan, bible, fallbackImage) {
     `expressions, ${mood}, movie poster lighting, highly detailed, no text, no letters, no logos, no words.`;
   try {
     return await fetchStoryImage(prompt, hashSeed(`${title}-s${season}-${episode}-thumbnail`), {
-      width: THUMB_WIDTH, height: THUMB_HEIGHT, steps: IMAGE_STEPS,
+      width: THUMB_WIDTH, height: THUMB_HEIGHT, steps: IMAGE_STEPS, hq: HQ_LANDSCAPE,
     });
   } catch (error) {
     console.warn(`Thumbnail art failed, using a scene image instead: ${error.message}`);
@@ -724,7 +729,9 @@ async function main() {
     let image = await fetchSceneImage(
       scenePrompt(description, bible),
       hashSeed(`${title}-s${season}-${episode}-${sceneNumber}`),
-      { width: WIDTH, height: HEIGHT, steps: IMAGE_STEPS }
+      // Native 16:9 from FLUX.2 (lib/cloudflare-image.js), scaled 1.43x to
+      // 1920x1080 — not a 1024 square cropped to a 576px strip and blown up.
+      { width: WIDTH, height: HEIGHT, steps: IMAGE_STEPS, hq: HQ_LANDSCAPE }
     );
     if (!image) {
       // One failed image used to abort the whole ~15-minute episode.

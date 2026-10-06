@@ -6,7 +6,7 @@
  * implementation instead of three.
  */
 const sharp = require('sharp');
-const { fetchCloudflareImage } = require('./cloudflare-image');
+const { fetchCloudflareImage, fetchCloudflareHQImage } = require('./cloudflare-image');
 
 function hashSeed(s) {
   let h = 0;
@@ -109,7 +109,19 @@ async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 135
  * scene's bespoke art. Throws only if every pass fails.
  */
 async function fetchStoryImage(prompt, seed, opts = {}) {
-  const { width = 1080, height = 1350, chainRetries = 1, steps } = opts;
+  const { width = 1080, height = 1350, chainRetries = 1, steps, hq } = opts;
+  // `hq` ({ width, height, refs }) asks for the FLUX.2 model at its own
+  // native size first — same aspect as the final frame, so the result is
+  // only ever scaled up a little, never cropped. Any failure (including
+  // the free daily allocation running out) drops to the usual chain.
+  if (hq) {
+    try {
+      const buf = await fetchCloudflareHQImage(prompt, hq);
+      return await sharp(buf).resize(width, height, { fit: 'cover', kernel: 'lanczos3' }).jpeg({ quality: 95 }).toBuffer();
+    } catch (e) {
+      console.warn(`    ⚠️  HQ image failed, using the standard model: ${e.message.slice(0, 160)}`);
+    }
+  }
   let lastError;
   for (let pass = 0; pass <= chainRetries; pass++) {
     try {
