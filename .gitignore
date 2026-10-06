@@ -77,3 +77,6 @@ ios/build/google-services.json
 
 # Remake Short outputs (scripts/remake-short.js) — a run artifact, never committed
 /remakes/
+
+# Deity Portraits candidates (scripts/deity-portraits.js) — a run artifact, never committed
+/deity-candidates/

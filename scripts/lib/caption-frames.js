@@ -78,7 +78,7 @@ async function drawShortCaptionFrame(imagePath, text, look = {}) {
     </text>
   </svg>`;
   const overlay = await sharp(Buffer.from(svg)).png().toBuffer();
-  return sharp(base).composite([{ input: overlay, top: 0, left: 0 }]).jpeg({ quality: 92 }).toBuffer();
+  return sharp(base).composite([{ input: overlay, top: 0, left: 0 }]).jpeg({ quality: 96, chromaSubsampling: '4:4:4' }).toBuffer();
 }
 
 /**

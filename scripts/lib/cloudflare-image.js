@@ -71,4 +71,52 @@ async function fetchCloudflareImage(prompt, { timeoutMs = 45000, retries = 3, st
   }
 }
 
-module.exports = { fetchCloudflareImage };
+// FLUX.2 [klein] 4B: much more detailed and lifelike than flux-1-schnell,
+// renders the requested size natively (256-1920px a side) instead of a
+// 1024x1024 square that then had to be cropped and blown up ~1.9x for a
+// 9:16 Short (the soft, smeary look of the first daily videos), and can
+// take up to 4 reference images (each under 512x512) to keep a character
+// looking the same from scene to scene. ~26 neurons per 512x512 output
+// tile, so a 864x1536 portrait (6 tiles) is ~160 of the free 10,000/day.
+const HQ_MODEL = process.env.CLOUDFLARE_HQ_MODEL || '@cf/black-forest-labs/flux-2-klein-4b';
+
+/** Fetches one image from the HQ model at `width` x `height` (multiples of
+ *  16), optionally guided by `refs` (JPEG/PNG Buffers, each under 512x512).
+ *  Returns a Buffer or throws — callers fall back to fetchCloudflareImage. */
+async function fetchCloudflareHQImage(prompt, { width, height, refs = [], timeoutMs = 90000, retries = 2 } = {}) {
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+  const apiToken = process.env.CLOUDFLARE_API_TOKEN;
+  if (!accountId || !apiToken) throw new Error('CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_API_TOKEN not configured');
+  const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${HQ_MODEL}`;
+
+  for (let attempt = 0; ; attempt++) {
+    // The model only takes multipart form data, even for a bare prompt.
+    // fetch sets the multipart Content-Type (with its boundary) itself.
+    const form = new FormData();
+    form.append('prompt', prompt);
+    form.append('width', String(width));
+    form.append('height', String(height));
+    refs.slice(0, 4).forEach((buf, i) => form.append(`input_image_${i}`, new Blob([buf], { type: 'image/jpeg' }), `ref-${i}.jpg`));
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${apiToken}` }, body: form, signal: controller.signal });
+      if (res.status >= 500 && attempt < retries) { await sleep(Math.min(2000 * 2 ** attempt, 20000)); continue; }
+      const json = await res.json().catch(() => ({}));
+      // 429 here is usually the free daily allocation running out — not
+      // worth waiting on; the caller drops to the cheaper model instead.
+      if (!res.ok || !json.success || !json.result?.image) {
+        throw new Error(`HTTP ${res.status}: ${JSON.stringify(json.errors || json).slice(0, 200)}`);
+      }
+      return Buffer.from(json.result.image, 'base64');
+    } catch (e) {
+      if (e.name === 'AbortError' && attempt < retries) { await sleep(Math.min(2000 * 2 ** attempt, 20000)); continue; }
+      throw e.name === 'AbortError' ? new Error(`timed out after ${timeoutMs / 1000}s`) : e;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+}
+
+module.exports = { fetchCloudflareImage, fetchCloudflareHQImage };

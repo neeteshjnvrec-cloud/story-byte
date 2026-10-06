@@ -51,6 +51,9 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
           SARVAM_SPEAKER: ${{ vars.SARVAM_SPEAKER }}
+          # Devotional art style: cartoon3d (default), cartoon2d or realistic —
+          # set as a repository variable (Settings → Secrets and variables → Actions → Variables).
+          DEVOTIONAL_STYLE: ${{ vars.DEVOTIONAL_STYLE }}
         run: node remake-short.js
       - uses: actions/upload-artifact@v4
         with:
