@@ -26,6 +26,12 @@
       "nativeName": "रक्षक",
       "role": "Keeper of the quantum seed, tests the trio’s worthiness",
       "look": "Tall, cloaked in shifting silver fabric, eyes glowing like starlight"
+    },
+    {
+      "name": "Sage Vidura",
+      "nativeName": "विदुर",
+      "role": "A wise sage who holds the missing verse of the mantra and guides the trio through the maze",
+      "look": "Elderly, silver‑threaded beard, simple ochre robes, eyes like polished jade"
     }
   ],
   "setting": "The ancient kingdom of Hastinapur, with its grand palaces and bustling courtyards, serves as the backdrop for the unfolding saga.",
@@ -50,7 +56,14 @@
       "title": "Echoes of the Timeless Vault",
       "description": "Trapped in a rift beyond time, कृष्ण, अर्जुन, and द्रौपदी must decode the quantum seed before the vortex collapses.",
       "summary": "The vortex snaps shut and the trio tumble into a luminous cavern that pulses with ancient energy, their surroundings a blend of stone arches and floating holographic glyphs. Krishna's golden dhoti glints even in the dim light as he steadies अर्जुन and द्रौपदी, sensing that the voice “सत्यमेव जयते” was not a mere echo but a summons. They quickly realize they are inside the legendary “Kalpa‑Vault,” a repository of dharma’s forgotten scripts. As they explore, a cloaked sentinel, the Guardian of the Seed, confronts them, demanding the lost mantra before the seed can be safely accessed. अर्जुन’s doubts flare when the sentinel reveals a fragment of his own lineage, linking him to a hidden branch of the Pandavas who once guarded the seed. Meanwhile, द्रौपदी deciphers a swirling sigil on the walls, discovering that the seed’s activation requires a collective bhakti chant, forcing the trio to confront their unity and faith. Just as they begin the chant, the vault’s core destabilizes, sending shockwaves that threaten to shatter the time barrier, and the Guardian steps aside, revealing a second, even larger artifact pulsing with dark energy. कृष्ण reaches out, his eyes blazing with divine resolve, but a sudden fissure splits the floor, pulling द्रौपदी toward the abyss. The episode ends with कृष्ण and अर्जुन lunging after her as the vortex reopens, hinting that the hidden lineage may hold the key to saving all realms."
+    },
+    {
+      "season": "1",
+      "episode": "4",
+      "title": "गुह्य गर्त में संघर्ष",
+      "description": "Krishna, Arjuna, and Draupadi race against time as the abyss threatens to swallow the Kalpa‑Vault’s secrets.",
+      "summary": "Krishna's golden dhoti flickers as the vortex pulls the trio deeper, and with a flash of divine light they crash onto a luminous platform suspended over a churning void, forcing them to confront the immediate danger of falling forever. The Guardian of the Seed, रक्षक, appears cloaked in shifting silver, demanding the lost mantra while the cavern walls rearrange into a maze of holographic riddles; Arjuna's doubts resurface when a vision shows his hidden lineage battling a dark twin, and Draupadi's resolve is tested as the platform begins to crumble, threatening to cast her into the abyss. In a desperate surge, Krishna channels bhakti, chanting a mantra that steadies the platform and momentarily stabilizes the seed's energy, but a sudden tremor cracks the floor, revealing a hidden chamber and a sealed sarcophagus that pulses with the same dark energy, leaving the heroes staring at an unknown figure awakening as the episode ends."
     }
   ],
-  "style": "cartoon3d"
+  "style": "realistic"
 }
