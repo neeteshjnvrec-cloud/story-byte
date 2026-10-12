@@ -14,6 +14,12 @@
  * spelling) and look, the setting, and each episode's summary. Every
  * episode is planned and illustrated from it, so names and faces don't
  * drift from one episode to the next.
+ *
+ * Katha mode (EPISODE_KATHA set, run weekly by weekly-katha.js): instead of
+ * a serialized episode, one complete, faithful retelling of a traditional
+ * katha under the Hindi title people search for ("शिव जी की कथा: …") —
+ * long-form videos are what YouTube search ranks and what builds watch
+ * hours, which Shorts mostly don't. Standalone: no bible, no cliffhanger.
  */
 const Groq = require('groq-sdk');
 const { execFileSync } = require('child_process');
@@ -43,6 +49,14 @@ const season = String(process.env.EPISODE_SEASON || '1');
 const language = process.env.EPISODE_LANGUAGE || 'en';
 const genre = process.env.EPISODE_GENRE || 'science fiction romance';
 const publish = process.env.EPISODE_PUBLISH === 'true';
+
+// Katha mode (see the header). EPISODE_DEITY is the deity's Hindi name,
+// EPISODE_SEARCHES what people search for it on YouTube (one per line),
+// EPISODE_HASHTAGS the deity's hashtags.
+const KATHA = String(process.env.EPISODE_KATHA || '').trim();
+const KATHA_DEITY = String(process.env.EPISODE_DEITY || '').trim();
+const KATHA_SEARCHES = String(process.env.EPISODE_SEARCHES || '').split('\n').map((s) => s.trim()).filter(Boolean).slice(0, 8);
+const KATHA_HASHTAGS = String(process.env.EPISODE_HASHTAGS || '').split(/\s+/).filter((t) => t.startsWith('#'));
 
 const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.app';
 
@@ -290,6 +304,8 @@ async function bootstrapBible(groq, previous) {
 }
 
 async function loadBible(groq) {
+  // Each katha stands alone — no characters or "story so far" carried over.
+  if (KATHA) return null;
   const existing = readJson(biblePath);
   if (existing?.characters?.length) return existing;
   const previous = previousEpisodes();
@@ -315,6 +331,27 @@ function storySoFarBlock(bible) {
 // Story
 // ---------------------------------------------------------------------------
 
+function kathaPlanPrompt() {
+  const searches = KATHA_SEARCHES.length
+    ? ` People in India are searching YouTube for: ${KATHA_SEARCHES.map((q) => `"${q}"`).join(', ')} — if one of these exact ` +
+      'phrases truly describes this katha, use it in the title.'
+    : '';
+  return 'You plan a long narrated devotional video: a faithful retelling of the traditional katha ' +
+    `"${KATHA}" of ${KATHA_DEITY || 'the deity'}, as told in the Puranas / Ramayana / Mahabharata — no invented ` +
+    'characters, no modern settings. Reply with JSON only: {"title": string, "description": string, "chapters": [string, ...], ' +
+    '"parts": [string, ...], "characters": [{"name": string, "nativeName": string, "role": string, "look": string}], "setting": string}. ' +
+    `"title" is the YouTube title in ${languageName()}, at most 70 characters, starting with the deity's name and the ` +
+    'word कथा the way people search, then what happens — e.g. "शिव जी की कथा: नीलकंठ — जब महादेव ने पिया हलाहल विष".' +
+    `${searches} "description" is 1-2 enticing sentences and "chapters" exactly ${PARTS} short chapter titles, both in ` +
+    `${languageName()}. "parts" has exactly ${PARTS} English entries, in order, each a 3-5 sentence summary: part 1 opens ` +
+    'with a strong hook, the middle tells the heart of the katha with its emotional turns, the last reaches the ' +
+    'resolution and closes with the katha\'s lesson and a blessing — one complete story, never a cliffhanger. ' +
+    '"characters" are the 2-6 figures who appear: "name" in English letters, "nativeName" exactly as the story text ' +
+    'will spell it, "look" a fixed drawable English description — for gods and epic figures, their exact traditional ' +
+    'iconography (e.g. Hanuman: monkey face, red-orange skin, golden crown, mace, no wings). "setting" one English sentence. ' +
+    'Refer to characters by name in the parts.';
+}
+
 async function planEpisode(groq, bible) {
   const continuity = bible
     ? `Series bible — recurring characters. Use these EXACT names with EXACT spellings; never rename anyone:\n` +
@@ -337,7 +374,9 @@ async function planEpisode(groq, bible) {
       : '"characters" defines the 2-5 recurring characters: "name" in English letters, "nativeName" exactly as the story ' +
         'text will spell it, "look" a fixed drawable English description (age, face, hair, clothing); "setting" one English sentence. ') +
     'Refer to characters by name in the parts.';
-  const plan = await groqJson(groq, system, `Plan season ${season} episode ${episode} now.`, 5000);
+  const plan = KATHA
+    ? await groqJson(groq, kathaPlanPrompt(), `Plan the video of this katha now: ${KATHA}`, 5000)
+    : await groqJson(groq, system, `Plan season ${season} episode ${episode} now.`, 5000);
   const parts = Array.isArray(plan.parts) ? plan.parts.map((p) => String(p || '').trim()).filter(Boolean) : [];
   if (!plan.title || parts.length < PARTS) throw new Error('episode plan is missing a title or parts');
   const chapters = Array.isArray(plan.chapters) ? plan.chapters.map((c) => String(c || '').trim()).filter(Boolean) : [];
@@ -398,8 +437,16 @@ function trimToWords(text, maxWords, { keepEnding = false } = {}) {
 async function writePart(groq, plan, bible, index, storySoFar, budget) {
   const isLast = index === PARTS - 1;
   const outline = plan.parts.map((summary, i) => `Part ${i + 1}: ${summary}`).join('\n');
+  const intro = KATHA
+    ? 'You retell traditional Hindu kathas for narration — faithful to the Puranas / Ramayana / Mahabharata, told ' +
+      `vividly with devotion, emotion and dialogue. Katha: "${KATHA}". `
+    : `You write serialized audio fiction for narration. Series: "${title}", season ${season}, episode ${episode}, genre: ${genre}. `;
+  const ending = KATHA
+    ? 'This is the final part: tell the resolution fully, then close with the katha\'s lesson and one line of blessing. ' +
+      'The story must be complete — never a cliffhanger. '
+    : 'This is the final part: build to the climax and end on a cliffhanger for the next episode. ';
   const system =
-    `You write serialized audio fiction for narration. Series: "${title}", season ${season}, episode ${episode}, genre: ${genre}. ` +
+    intro +
     `Episode title: "${plan.title}".\nCharacters — use exactly these names, spelled exactly like this:\n${characterBlock(bible)}\n` +
     `${storySoFarBlock(bible)}\nFull outline of this episode:\n${outline}\n\n` +
     `Write ONLY part ${index + 1} of ${PARTS}, in ${languageName()}, about ${budget} words ` +
@@ -409,7 +456,7 @@ async function writePart(groq, plan, bible, index, storySoFar, budget) {
       ? 'Open with a strong hook. '
       : 'Continue seamlessly from exactly where the story so far stops — never repeat or summarise text that was already written. ') +
     (isLast
-      ? 'This is the final part: build to the climax and end on a cliffhanger for the next episode. '
+      ? ending
       : 'Do not wrap up or end the episode — the story continues in the next part. ') +
     'Output only the story text in complete paragraphs: no title, no part labels, no markdown, no sound-effect labels.';
   const user = storySoFar
@@ -636,7 +683,36 @@ function hashtag(value) {
   return `#${String(value).replace(/[^\p{L}\p{N}]+/gu, '')}`;
 }
 
+const WHATSAPP = String(process.env.WHATSAPP_CHANNEL_URL || '').trim();
+
+function kathaMetadata({ plan, cues, parts }) {
+  const chapters = chapterMarks(cues, parts, plan.chapters);
+  // Only the plain "<deity> की कथा(एँ)" searches become tags: the rest of
+  // the raw suggestions name other storytellers, dhams or formats, which
+  // would be misleading metadata.
+  const plain = KATHA_SEARCHES.filter((q) => /(की|के)\s+(कथा|कथाएं|कथाएँ|कहानी|कहानियां)$/.test(q));
+  const tags = [...plain, KATHA_DEITY && `${KATHA_DEITY} की कथा`, KATHA_DEITY, 'katha', 'कथा', 'bhakti',
+    'pauranik katha', 'hindi kahani', 'StoryByte'].filter(Boolean);
+  const cappedTags = [];
+  for (const tag of [...new Set(tags)]) {
+    if ([...cappedTags, tag].join(',').length > 450) break;
+    cappedTags.push(tag);
+  }
+  const description = [
+    plan.description,
+    '',
+    ...(chapters.length ? ['⏱️ अध्याय', ...chapters.map((m) => `${timestamp(m.time)} ${m.label}`), ''] : []),
+    '🙏 रोज़ एक नई कथा — हमारे Shorts देखें और चैनल सब्सक्राइब करें',
+    `📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: ${APP_LINK}`,
+    ...(WHATSAPP ? [`💬 रोज़ नई कथा WhatsApp पर: ${WHATSAPP}`] : []),
+    '',
+    [...new Set([...KATHA_HASHTAGS, '#katha', '#bhakti', '#sanatandharma', '#hindistory', '#StoryByte'])].join(' '),
+  ].join('\n');
+  return { title: plan.title.slice(0, 100), description, tags: cappedTags, chapters };
+}
+
 function buildMetadata({ plan, bible, cues, parts }) {
+  if (KATHA) return kathaMetadata({ plan, cues, parts });
   const full = `${title} | ${seasonEpisode}: ${plan.title}`;
   const videoTitle = full.length <= 100 ? full : `${title} | S${season} E${episode}: ${plan.title}`.slice(0, 100);
 
@@ -794,9 +870,9 @@ async function main() {
   console.log('Rendering thumbnail...');
   const thumbnailPath = path.join(outputDirectory, 'thumbnail.jpg');
   const art = await thumbnailArt(plan, bible, scenes[Math.floor(scenes.length / 2)].file);
-  fs.writeFileSync(thumbnailPath, await renderEpisodeThumbnail({
-    art, seriesTitle: title, season, episode, episodeTitle: plan.title, accent,
-  }));
+  fs.writeFileSync(thumbnailPath, await renderEpisodeThumbnail(KATHA
+    ? { art, seriesTitle: KATHA_DEITY ? `${KATHA_DEITY} की कथा` : title, episodeTitle: plan.title.replace(/^[^:]*:\s*/, ''), accent, badge: 'पूरी कथा' }
+    : { art, seriesTitle: title, season, episode, episodeTitle: plan.title, accent }));
 
   const metadata = buildMetadata({ plan, bible, cues: parsed, parts });
   saveBible(bible, plan);
