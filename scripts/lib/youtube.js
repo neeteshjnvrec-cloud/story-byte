@@ -32,11 +32,12 @@ function client() {
 }
 
 const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.app';
+const { teaserLines, followLines } = require('./social-extras');
 
 function buildDescription(story) {
-  const lines = [(story.description || '').trim(), ''];
+  const lines = [(story.description || '').trim(), '', ...teaserLines(story)];
   if (story.pageUrl) lines.push('▶️ Play the full story — free, fully narrated:', story.pageUrl, '');
-  lines.push(`📱 Get the app: ${APP_LINK}`, '');
+  lines.push(`📱 Get the app: ${APP_LINK}`, ...followLines(), '');
   lines.push(story.hashtags ? ['#shorts', ...story.hashtags].join(' ') : '#StoryByte #AudioStory');
   return lines.join('\n');
 }

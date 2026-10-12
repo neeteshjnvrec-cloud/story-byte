@@ -60,6 +60,7 @@ function firstSentence(text) {
 // through the story page — a viewer who already knows they want the app
 // shouldn't have to detour through a browser to find it.
 const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.app';
+const { teaserLines, followLines } = require('./social-extras');
 
 // `story.description` is expected to already be the curiosity hook produced
 // alongside the slides (lib/carousel-copy) when one was generated — this
@@ -68,13 +69,13 @@ function buildCaption(story) {
   const hook = (story.description || firstSentence(story.text) || '').trim();
   const tag = (story.genre || 'story').replace(/[^a-zA-Z0-9]/g, '');
   // A devotional Short's title already opens with its own emoji hook.
-  const lines = [story.isShort ? story.title : `🎧 ${story.title || 'A story on StoryByte'}`, '', hook, ''];
+  const lines = [story.isShort ? story.title : `🎧 ${story.title || 'A story on StoryByte'}`, '', hook, '', ...teaserLines(story)];
   if (story.pageUrl) {
     lines.push('▶️ Play the full story — free, fully narrated:', story.pageUrl, '(or tap the link in bio)');
   } else {
     lines.push('▶️ Play the full story — free, fully narrated. Link in bio.');
   }
-  lines.push('', `📱 Get the app: ${APP_LINK}`);
+  lines.push('', `📱 Get the app: ${APP_LINK}`, ...followLines());
   const hashtags = story.hashtags || ['#StoryByte', '#AudioStories', `#${tag}`, '#ShortStory', '#StoryTime'];
   if (story.occasionHashtag && !hashtags.includes(story.occasionHashtag)) hashtags.push(story.occasionHashtag);
   lines.push('', hashtags.join(' '));

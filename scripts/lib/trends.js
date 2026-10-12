@@ -67,8 +67,9 @@ async function youtubeSuggestions(seed) {
 
 // Searches for music, ringtones and status videos say what people want to
 // watch, but a narrated katha can't be one — don't steer the title at them.
-// Regional-dialect requests ("… वागडी भाषा में") aren't what a Hindi katha is.
-const NOT_A_KATHA = /गाना|गाने|सॉन्ग|song|dj|रिंगटोन|ringtone|status|स्टेटस|mp3|lyrics|लिरिक्स|karaoke|whatsapp|भाषा|bhasha/i;
+// Regional-dialect requests ("… वागडी भाषा में") aren't what a Hindi katha is,
+// and neither are aartis, bhajans or chalisas.
+const NOT_A_KATHA = /गाना|गाने|सॉन्ग|song|dj|रिंगटोन|ringtone|status|स्टेटस|mp3|lyrics|लिरिक्स|karaoke|whatsapp|भाषा|bhasha|आरती|aarti|भजन|bhajan|चालीसा|chalisa/i;
 
 /**
  * Returns { trending: [...], searches: [...] } — today's devotional trending

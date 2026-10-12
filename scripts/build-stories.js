@@ -36,8 +36,9 @@ const { REEL_MAX_SEC, clipScenes, clipAudio } = require('./lib/video-clip');
 const { postStoryCarousel, postStoryReel, commentOnInstagram } = require('./lib/instagram');
 const { postStoryToFacebook, postStoryVideo, commentOnFacebook } = require('./lib/facebook');
 const { postStoryToYouTube, commentOnYouTube } = require('./lib/youtube');
-const { getOccasion, occasionPhrase } = require('./occasions');
-const { deityOfDay, navratriDeity, istDate, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
+const { occasionPhrase } = require('./occasions');
+const { kathaOfDay, nextKatha, describeKatha, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
+const { appendSpokenTeaser, fallbackTeaser } = require('./lib/teaser');
 const { devotionalTrends } = require('./lib/trends');
 const { iconographyFor } = require('./lib/iconography');
 const { styleOfDay, fitShort, devotionalArtStyle } = require('./lib/short-style');
@@ -157,6 +158,13 @@ async function markSlotSuccess(slot) {
   }
 }
 
+/** `text` cut to at most `max` characters at a word boundary. */
+function capAtWord(text, max) {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max + 1);
+  return cut.slice(0, Math.max(cut.lastIndexOf(' '), Math.floor(max * 0.6))).trim();
+}
+
 async function generateText(groq, slot) {
   const langInstruction = slot.language === 'hi' ? 'Hindi (Devanagari).' : 'English.';
   // Compact system prompt to avoid "Request Entity Too Large" (413) errors
@@ -179,11 +187,13 @@ async function generateText(groq, slot) {
       'because the first seconds decide whether a Shorts viewer keeps watching.'
     : '';
   const socialTitleSpec = slot.genre === 'devotional'
-    ? ',"socialTitle":"Hindi curiosity hook for YouTube Shorts/Reels, max 70 chars, starting with one fitting emoji and ' +
-      'naming the deity, e.g. \\"😱 जब बाल कृष्ण के मुँह में माँ यशोदा ने देखा पूरा ब्रह्मांड\\"",' +
+    ? ',"socialTitle":"Hindi curiosity hook for YouTube Shorts/Reels, at most 60 characters: one fitting emoji, then the ' +
+      'deity\'s name first (the word people search), then the hook, e.g. \\"😱 बाल कृष्ण के मुँह में यशोदा ने देखा ब्रह्मांड\\"",' +
       '"commentQuestion":"one warm Hindi question inviting viewers to reply in the comments about this katha, max 120 chars, ' +
       'ending with 🙏 — e.g. which moment moved them, or which katha they want next",' +
-      '"searchTags":["8-12 short YouTube search tags for this katha, Hindi and Hinglish, e.g. the deity\'s name + कथा"]'
+      '"searchTags":["8-12 short YouTube search tags for this katha, Hindi and Hinglish, e.g. the deity\'s name + कथा"]' +
+      (slot.next ? `,"nextTeaser":"one Hindi line, max 90 chars, starting with कल सुनिए, that makes viewers want to come back ` +
+        `tomorrow for the next katha — ${describeKatha(slot.next).replace(/"/g, "'")} — a curiosity hook, no spoilers"` : '')
     : '';
   // Devotional: the complete katha is the ~2.5-minute Short, so it's
   // shorter than other stories — and must actually finish.
@@ -239,7 +249,8 @@ async function generateText(groq, slot) {
           description: String(d.description || `A ${slot.genre} story`).slice(0, 160),
           text: String(d.text).trim(),
           tags: Array.isArray(d.tags) ? d.tags.slice(0, 6) : [slot.genre],
-          socialTitle: d.socialTitle ? String(d.socialTitle).replace(/^["']|["']$/g, '').slice(0, 80) : null,
+          socialTitle: d.socialTitle ? capAtWord(String(d.socialTitle).replace(/^["']|["']$/g, '').trim(), 70) : null,
+          nextTeaser: d.nextTeaser ? capAtWord(String(d.nextTeaser).replace(/^["']|["']$/g, '').trim(), 120) : null,
           commentQuestion: d.commentQuestion ? String(d.commentQuestion).trim().slice(0, 200) : null,
         searchTags: Array.isArray(d.searchTags) ? d.searchTags.map((t) => String(t).trim()).filter(Boolean).slice(0, 12) : [],
         };
@@ -372,15 +383,15 @@ async function run() {
   // takes the day, or else it's the weekday's deity and this week's katha.
   // Non-devotional occasions (e.g. Gandhi Jayanti, Karva Chauth) no longer
   // replace the devotional story.
-  const occasion = getOccasion(DATE);
-  const navratri = navratriDeity(istDate());
-  const slot = navratri ? { ...DAILY_SLOT, deity: navratri, occasion: occasion?.genre === 'devotional' ? occasion : undefined }
-    : occasion?.genre === 'devotional' ? { ...DAILY_SLOT, occasion }
-    : { ...DAILY_SLOT, deity: deityOfDay(DATE) };
+  const slot = { ...DAILY_SLOT, ...kathaOfDay(DATE) };
+  const occasion = slot.occasion;
+  // Tomorrow's katha, teased at the end of today's Short (lib/teaser.js).
+  slot.next = nextKatha(DATE);
   // The day's look: camera moves, colour grade, captions, hook style, music.
   slot.look = styleOfDay(DATE);
   if (slot.deity) console.log(`🙏 Today's katha: ${slot.deity.name} — ${slot.deity.katha}`);
   if (slot.occasion) console.log(`🎉 Today's occasion: ${occasion.name}`);
+  console.log(`🔔 Tomorrow: ${describeKatha(slot.next)}`);
   // What India is searching for about today's deity/festival right now, so
   // the title, hook and tags use viewers' own words (lib/trends.js).
   // Hindi seeds only: an English deity name autocompletes to unrelated
@@ -429,6 +440,7 @@ async function run() {
       try {
         // Step 1: Generate text
         let content = await generateText(groq, slot);
+        if (slot.next && !content.nextTeaser) content.nextTeaser = fallbackTeaser(slot.next);
         const id = `${DATE}_${slot.language}_${slot.genre}_${slug(content.title)}`;
         const existing = await db.collection('stories').doc(id).get();
         if (existing.exists && existing.data().audioUrl) {
@@ -456,9 +468,10 @@ async function run() {
         // Step 3: Generate audio
         const audio = path.join(PUB, 'audio', `${id}.mp3`);
         const subsPath = path.join(os.tmpdir(), `${id}.srt`);
-        const narrate = async () => (slot.genre === 'devotional' &&
-            await synthSarvam(content.text, { out: audio, subsOut: subsPath, language: slot.language })) ||
-          synth(content.text, slot, audio, subsPath);
+        const narrateText = async (text, out, subsOut) => (slot.genre === 'devotional' &&
+            await synthSarvam(text, { out, subsOut, language: slot.language })) ||
+          synth(text, slot, out, subsOut);
+        const narrate = () => narrateText(content.text, audio, subsPath);
         let synthResult = await narrate();
         // A devotional katha too long to fit a Short even sped up is
         // rewritten shorter once — a 3:01 upload is filed as a regular
@@ -532,9 +545,22 @@ async function run() {
             // little over the Shorts limit is sped up slightly (pitch kept) —
             // so its captions and scenes are timed on that faster clock.
             const devotional = slot.genre === 'devotional';
+            // The video's narration: the katha, then (devotional) tomorrow's
+            // teaser in the same voice — unless that would push it past
+            // the Shorts limit, where the katha alone wins.
+            let narration = audio;
+            const teaserDir = devotional ? fs.mkdtempSync(path.join(os.tmpdir(), 'sb-teaser-')) : null;
+            if (devotional && cues && content.nextTeaser) {
+              const withTeaser = await appendSpokenTeaser({ audio, cues, teaser: content.nextTeaser, narrate: narrateText, workDir: teaserDir });
+              if (withTeaser && fitShort(exactDuration(withTeaser.audioPath)).fits) {
+                narration = withTeaser.audioPath;
+                cues = withTeaser.cues;
+                console.log(`  🔔 Teaser: ${content.nextTeaser}`);
+              }
+            }
             // Exact length (durationSec rounds to whole seconds) so the video
             // timeline lands on the audio's real end.
-            const exactDur = exactDuration(audio) || dur;
+            const exactDur = exactDuration(narration) || dur;
             const { tempo, tailSec } = devotional ? fitShort(exactDur) : { tempo: 1, tailSec: 0 };
             const videoDur = exactDur / tempo;
             if (cues && tempo !== 1) cues = cues.map((c) => ({ ...c, start: c.start / tempo, end: c.end / tempo }));
@@ -576,7 +602,7 @@ async function run() {
               // it fits), Instagram and Facebook. The app's own mp3 stays
               // plain narration.
               const look = slot.look;
-              const mixed = mixDevotionalMusic(audio, path.join(outDir, 'video-audio.mp3'),
+              const mixed = mixDevotionalMusic(narration, path.join(outDir, 'video-audio.mp3'),
                 { variant: look.seed, tempo, tailSec });
               const total = videoDur + tailSec;
               // The last picture holds through the music's closing seconds.
@@ -587,6 +613,7 @@ async function run() {
               // Intermediates — don't let the daily commit carry them.
               if (mixed) fs.rmSync(mixed, { force: true });
               fs.rmSync(workDir, { recursive: true, force: true });
+              fs.rmSync(teaserDir, { recursive: true, force: true });
               if (videoPath) {
                 videoUrl = `${SITE}/instagram/${media}/story.mp4`;
                 reelVideoUrl = videoUrl;
@@ -748,6 +775,7 @@ async function run() {
         title: (devotional && p.content.socialTitle) || p.content.title,
         text: p.content.text, description: p.igHook || p.content.description,
         genre: p.slot.genre, pageUrl: p.pageUrl, occasionHashtag: p.slot.occasion?.hashtag,
+        nextTeaser: devotional ? p.content.nextTeaser : null,
         hashtags: devotional ? [...new Set([...deityTags, ...GENERAL_HASHTAGS, p.slot.occasion?.hashtag].filter(Boolean))] : null,
         isShort: devotional && p.videoSec > 0 && p.videoSec <= 180,
         // Search tags come from the writer, who picked them from what people
@@ -782,7 +810,8 @@ async function run() {
       // APIs can pin a comment — pin it by hand if wanted.
       if (devotional) {
         const deityName = p.slot.deity?.hindi || p.slot.occasion?.name || 'भगवान';
-        const question = p.content.commentQuestion || `🙏 ${deityName} की कौन सी कथा आप अगली बार सुनना चाहेंगे? कमेंट में लिखिए 🙏`;
+        const question = [p.content.commentQuestion || `🙏 ${deityName} की कौन सी कथा आप अगली बार सुनना चाहेंगे? कमेंट में लिखिए 🙏`,
+          p.content.nextTeaser && `🔔 ${p.content.nextTeaser}`].filter(Boolean).join('\n\n');
         if (ytPost.posted) await commentOnYouTube(ytPost.videoId, question);
         if (fbVideo.posted && fbVideo.videoId) await commentOnFacebook(fbVideo.videoId, question);
         if (igReel.posted && igReel.mediaId) await commentOnInstagram(igReel.mediaId, question);
