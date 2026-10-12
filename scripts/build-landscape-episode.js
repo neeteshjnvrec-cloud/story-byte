@@ -39,6 +39,8 @@ const { iconographyFor } = require('./lib/iconography');
 const { renderEpisodeThumbnail, THUMB_WIDTH, THUMB_HEIGHT } = require('./lib/episode-thumbnail');
 const { uploadEpisodeToYouTube } = require('./lib/youtube');
 const { uploadEpisodeToFacebook } = require('./lib/facebook');
+const { pause, RETRY_WAITS_SEC } = require('./lib/narrate');
+const { synthSarvam } = require('./lib/sarvam-tts');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUBLIC = path.join(ROOT, 'public');
@@ -533,11 +535,31 @@ function synthesize(text, output, subtitles) {
     subtitles,
   ];
 
-  try {
+  // Microsoft's free endpoint sometimes refuses a cloud runner (HTTP 403)
+  // and accepts it a minute later; a run once died here with the whole
+  // story already written. Retry with growing waits (lib/narrate.js).
+  let lastError;
+  const once = () => {
     try {
-      shell('edge-tts', args);
-    } catch {
-      shell('python3', ['-m', 'edge_tts', ...args]);
+      try {
+        shell('edge-tts', args);
+      } catch {
+        shell('python3', ['-m', 'edge_tts', ...args]);
+      }
+      return fs.existsSync(output) && fs.statSync(output).size > 0;
+    } catch (error) {
+      lastError = error;
+      return false;
+    }
+  };
+  try {
+    let ok = once();
+    for (const wait of RETRY_WAITS_SEC) {
+      if (ok) break;
+      const reason = String(lastError?.stderr || lastError?.message || '').split('\n').filter(Boolean).pop() || 'no audio';
+      console.warn(`edge-tts failed (${reason.slice(0, 160)}); retrying in ${wait}s`);
+      pause(wait);
+      ok = once();
     }
   } finally {
     fs.rmSync(input, { force: true });
@@ -793,7 +815,15 @@ async function main() {
   const subtitlesPath = path.join(outputDirectory, 'captions.srt');
 
   console.log('Generating narration...');
-  synthesize(text, audioPath, subtitlesPath);
+  try {
+    synthesize(text, audioPath, subtitlesPath);
+  } catch (error) {
+    // Still refused after every retry: narrate with Sarvam instead, when a
+    // key is configured, rather than lose the written episode.
+    console.warn(`edge-tts gave up: ${error.message.split('\n')[0]}`);
+    const sarvam = await synthSarvam(text, { out: audioPath, subsOut: subtitlesPath, language });
+    if (!sarvam) throw error;
+  }
 
   const audioDuration = getDuration(audioPath);
   if (!audioDuration) {

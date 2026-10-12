@@ -71,6 +71,9 @@ jobs:
           POLLINATIONS_API_TOKEN: ${{ secrets.POLLINATIONS_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # Fallback narration if Microsoft's free voice keeps refusing.
+          SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
+          SARVAM_SPEAKER: ${{ vars.SARVAM_SPEAKER }}
           KATHA_DEITY: ${{ inputs.deity }}
           KATHA_INDEX: ${{ inputs.katha_index }}
           EPISODE_STYLE: ${{ inputs.style }}
@@ -101,6 +104,8 @@ jobs:
         run: |
           git config user.name "storybyte-weekly-katha"
           git config user.email "bot@storybyte.app"
+          # A failed run leaves empty files (e.g. a 0-byte audio.mp3) — never commit those.
+          find public/episodes -type f -size 0 -delete 2>/dev/null || true
           git add public/episodes/bhakti-katha 2>/dev/null || true
           git commit -m "chore: weekly long katha $(date -u +%F)" || echo "nothing to commit"
           for delay in 2 4 8 16; do
