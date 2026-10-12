@@ -1,15 +1,55 @@
 {
-  "generatedAt": "2026-10-05T10:19:30.959Z",
+  "generatedAt": "2026-10-12T10:39:58.525Z",
   "youtube": {
     "handle": "@LatestStories4u",
     "channelId": "UCV2KpSzvpHxLpDOMaj07Vhw",
     "videos": [
       {
+        "id": "OlmARSUrvMU",
+        "format": "video",
+        "title": "Navratri | Season 1 Episode Day 1: The First Dawn of Navratri",
+        "views": 12,
+        "age": "1 day ago",
+        "length": "16:01",
+        "published": "2026-10-11T08:34:48+00:00",
+        "likes": 0
+      },
+      {
+        "id": "zaQkTMPQEi8",
+        "format": "video",
+        "title": "Mahabharata  | Season 1 Episode 5: Echoes of the Forgotten Verse",
+        "views": 55,
+        "age": "2 days ago",
+        "length": "16:12",
+        "published": "2026-10-09T12:41:31+00:00",
+        "likes": 1
+      },
+      {
+        "id": "_-MZHiQTMyY",
+        "format": "video",
+        "title": "Mahabharata | Season 1 Episode 4: गुह्य गर्त में संघर्ष",
+        "views": 27,
+        "age": "3 days ago",
+        "length": "16:40",
+        "published": "2026-10-08T15:04:17+00:00",
+        "likes": 2
+      },
+      {
+        "id": "rU2Wq7xHCKs",
+        "format": "video",
+        "title": "Mahabharata  | Season 1 Episode 3: Echoes of the Timeless Vault",
+        "views": 6,
+        "age": "5 days ago",
+        "length": "17:05",
+        "published": "2026-10-06T14:38:08+00:00",
+        "likes": 0
+      },
+      {
         "id": "assQz_svY8M",
         "format": "video",
         "title": "Mahabharata | Season 1 Episode 2: छायाओं की पुकार",
-        "views": 3,
-        "age": "5 hours ago",
+        "views": 5,
+        "age": "7 days ago",
         "length": "16:40",
         "published": "2026-10-05T04:23:10+00:00",
         "likes": 0
@@ -18,38 +58,32 @@
         "id": "O1EPVVB8ypo",
         "format": "video",
         "title": "Mahabharata  | Season 1 Episode 1: अंधकार की पहली किरण",
-        "views": 30,
-        "age": "1 day ago",
-        "length": "16:21",
-        "published": "2026-10-04T05:47:49+00:00",
-        "likes": 1
+        "views": 68,
+        "age": "8 days ago",
+        "length": "16:21"
       },
       {
         "id": "jZUd9S1v4Bo",
         "format": "video",
         "title": "⚡️ शनि देव ने किया राजा विक्रमादित्य की अद्भुत परीक्षा",
-        "views": 5,
-        "age": "2 days ago",
-        "length": "3:01",
-        "published": "2026-10-03T02:35:19+00:00",
-        "likes": 0
+        "views": 8,
+        "age": "9 days ago",
+        "length": "3:01"
       },
       {
         "id": "zx6xO-izBKo",
         "format": "video",
         "title": "लक्ष्मी माता की अनुकम्पा का प्रकाश",
         "views": 2,
-        "age": "3 days ago",
-        "length": "3:25",
-        "published": "2026-10-01T17:35:30+00:00",
-        "likes": 1
+        "age": "10 days ago",
+        "length": "3:25"
       },
       {
         "id": "CNqMwnS_Syw",
         "format": "video",
         "title": "The Rainbow River Quest #trending ",
         "views": 2,
-        "age": "5 days ago",
+        "age": "12 days ago",
         "length": "3:51"
       },
       {
@@ -57,7 +91,7 @@
         "format": "video",
         "title": "Hanuman Chalisa with Lyrics | Season 1 Episode 1: The Call of the Sacred Chant",
         "views": 14,
-        "age": "6 days ago",
+        "age": "13 days ago",
         "length": "16:18"
       },
       {
@@ -65,15 +99,15 @@
         "format": "video",
         "title": "विरह की धुन",
         "views": 3,
-        "age": "6 days ago",
+        "age": "13 days ago",
         "length": "4:01"
       },
       {
         "id": "74YMcueDFNE",
         "format": "video",
         "title": "Alien Is My Girlfriend | Season 1 Episode 3: रहस्य का द्वार",
-        "views": 7,
-        "age": "7 days ago",
+        "views": 8,
+        "age": "2 weeks ago",
         "length": "16:18"
       },
       {
@@ -81,7 +115,7 @@
         "format": "video",
         "title": "भूलभुलैया का रहस्य",
         "views": 1,
-        "age": "7 days ago",
+        "age": "2 weeks ago",
         "length": "3:16"
       },
       {
@@ -89,23 +123,23 @@
         "format": "video",
         "title": "The Quiet Light in the Storm",
         "views": 1,
-        "age": "8 days ago",
+        "age": "2 weeks ago",
         "length": "3:24"
       },
       {
         "id": "yT-W0xQ0ipk",
         "format": "video",
         "title": "Alien Is My Girlfriend | Season 1 Episode 2: अलौकिक वादा",
-        "views": 11,
-        "age": "8 days ago",
+        "views": 12,
+        "age": "2 weeks ago",
         "length": "31:16"
       },
       {
         "id": "DJVt_LPFeTE",
         "format": "video",
         "title": "An Alien Is My Girlfriend | Episode 01 | Hindi Drama",
-        "views": 11,
-        "age": "9 days ago",
+        "views": 14,
+        "age": "2 weeks ago",
         "length": "5:58"
       },
       {
@@ -113,7 +147,7 @@
         "format": "video",
         "title": "Moonlit Meadow Whisper",
         "views": 4,
-        "age": "9 days ago",
+        "age": "2 weeks ago",
         "length": "4:15"
       },
       {
@@ -121,7 +155,7 @@
         "format": "video",
         "title": "परिवार की परछाइयाँ",
         "views": 2,
-        "age": "10 days ago",
+        "age": "2 weeks ago",
         "length": "3:21"
       },
       {
@@ -129,7 +163,7 @@
         "format": "video",
         "title": "सफलता की सीढ़ी: संघर्ष से सफलता तक",
         "views": 2,
-        "age": "10 days ago",
+        "age": "2 weeks ago",
         "length": "3:12"
       },
       {
@@ -137,7 +171,7 @@
         "format": "video",
         "title": "The Lantern in the Storm",
         "views": 1,
-        "age": "10 days ago",
+        "age": "2 weeks ago",
         "length": "3:36"
       },
       {
@@ -145,7 +179,7 @@
         "format": "video",
         "title": "The Clockmaker's Secret",
         "views": 7,
-        "age": "11 days ago",
+        "age": "2 weeks ago",
         "length": "5:09"
       },
       {
@@ -153,7 +187,7 @@
         "format": "video",
         "title": "The Clockmaker's Secret",
         "views": 1,
-        "age": "11 days ago",
+        "age": "2 weeks ago",
         "length": "4:25"
       },
       {
@@ -161,7 +195,7 @@
         "format": "video",
         "title": "छाया वाले कमरे की सच्चाई",
         "views": 3,
-        "age": "12 days ago",
+        "age": "2 weeks ago",
         "length": "4:35"
       },
       {
@@ -169,15 +203,15 @@
         "format": "video",
         "title": "चांदनी की कहानी",
         "views": 1,
-        "age": "13 days ago",
+        "age": "2 weeks ago",
         "length": "4:30"
       },
       {
         "id": "DPMci0gFVCE",
         "format": "video",
         "title": "अदृश्य पेंच",
-        "views": 2,
-        "age": "2 weeks ago",
+        "views": 3,
+        "age": "3 weeks ago",
         "length": "5:04"
       },
       {
@@ -185,7 +219,7 @@
         "format": "video",
         "title": "छोटा दीपक, बड़ी रौशनी",
         "views": 4,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "4:17"
       },
       {
@@ -193,7 +227,7 @@
         "format": "video",
         "title": "The Bridge of Perseverance",
         "views": 2,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "3:07"
       },
       {
@@ -201,7 +235,7 @@
         "format": "video",
         "title": "Moonlit Whisper on the Gentle Lake",
         "views": 1,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "4:56"
       },
       {
@@ -209,7 +243,7 @@
         "format": "video",
         "title": "कुंजी के बिना रहस्य",
         "views": 1,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "4:27"
       },
       {
@@ -217,130 +251,156 @@
         "format": "video",
         "title": "The Shepherd's Quiet Trust",
         "views": 2,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "3:33"
-      },
-      {
-        "id": "-AmvmH5Hmbw",
-        "format": "video",
-        "title": "गणेश जी के दो दिन बाद का सन्देश",
-        "views": 2,
-        "age": "2 weeks ago",
-        "length": "3:43"
-      },
-      {
-        "id": "_-7DZm2QYWg",
-        "format": "video",
-        "title": "गणेश चतुर्थी के बाद का सवेरा",
-        "views": 2,
-        "age": "2 weeks ago",
-        "length": "3:46"
-      },
-      {
-        "id": "6toS4nlthfM",
-        "format": "video",
-        "title": "गणपति की दिव्य प्रक्रिया",
-        "views": 4,
-        "age": "2 weeks ago",
-        "length": "4:06"
-      },
-      {
-        "id": "GD03GzZCWKw",
-        "format": "video",
-        "title": "Secrets of the Super Agers: Eric Topol’s Science-Backed Roadmap to Longevity #health #life",
-        "views": 2,
-        "age": "2 months ago",
-        "length": "10:27"
       }
     ],
     "shorts": [
       {
+        "id": "pR5ZOjeZHBc",
+        "format": "short",
+        "title": "😲 माँ ब्रह्मचारिणी की तपस्या का रहस्य: नवरात्रि का दूसरा दिन #shorts",
+        "views": 11,
+        "published": "2026-10-12T02:59:43+00:00",
+        "likes": 0
+      },
+      {
+        "id": "GAuZGZI7eZ4",
+        "format": "short",
+        "title": "Navaratri Day one #navratri #bhakti #trending #shorts",
+        "views": 286,
+        "published": "2026-10-11T11:33:18+00:00",
+        "likes": 10
+      },
+      {
+        "id": "yoFF7OZ0Ehk",
+        "format": "short",
+        "title": "🕉️ माँ शैलपुत्री की कथा – पहला नवव्रत रहस्य #shorts",
+        "views": 23,
+        "published": "2026-10-11T02:30:31+00:00",
+        "likes": 1
+      },
+      {
+        "id": "yzLSgcZCPV0",
+        "format": "short",
+        "title": "🌸 नवरात्रि की 9 अनकही कहानियां माँ दुर्गा के साथ #shorts",
+        "views": 2,
+        "published": "2026-10-10T03:02:51+00:00",
+        "likes": 0
+      },
+      {
+        "id": "sGZobdVUznw",
+        "format": "short",
+        "title": "😱 माँ दुर्गा के नौ अद्भुत नवरात्रि किस्से #shorts",
+        "views": 7,
+        "published": "2026-10-09T03:26:27+00:00",
+        "likes": 1
+      },
+      {
+        "id": "_Xyn8L-DPOQ",
+        "format": "short",
+        "title": "😲 जब भगवान विष्णु ने प्रह्लाद को बचाया: नरसिंह अवतार की कथा #shorts",
+        "views": 6,
+        "published": "2026-10-08T03:16:20+00:00",
+        "likes": 0
+      },
+      {
+        "id": "vXKhekrN3es",
+        "format": "short",
+        "title": "🤔 क्या गणपति बप्पा ने माता‑पिता को घुमा कर जीत ली दौड़? #shorts",
+        "views": 23,
+        "published": "2026-10-07T03:07:32+00:00",
+        "likes": 0
+      },
+      {
+        "id": "ZXDZ1t5srmU",
+        "format": "short",
+        "title": "Do you support me #trending #shorts",
+        "views": 200,
+        "published": "2026-10-06T07:30:34+00:00",
+        "likes": 4
+      },
+      {
+        "id": "1CX_Im4DFqY",
+        "format": "short",
+        "title": "🚀 जब हनुमान ने किया समुद्र पार, लंका की खोज #shorts #hanuman",
+        "views": 69,
+        "published": "2026-10-06T03:32:57+00:00",
+        "likes": 0
+      },
+      {
+        "id": "W8mEdx-s8Zc",
+        "format": "short",
+        "title": "New content creators #trending #shorts #newshorts",
+        "views": 33,
+        "published": "2026-10-05T11:30:30+00:00",
+        "likes": 3
+      },
+      {
         "id": "tCfurpan4vA",
         "format": "short",
         "title": "😲 जब शिव ने जटाओं में थामा गंगा का जल, बची पृथ्वी #shorts",
-        "views": 243,
-        "published": "2026-10-05T02:37:08+00:00",
-        "likes": 12
+        "views": 323
       },
       {
         "id": "VJDbmoCxtA4",
         "format": "short",
         "title": "Bala NeemKaraoli Darshan #trending #shorts #neemkarolibaba",
-        "views": 354,
-        "published": "2026-10-04T11:30:27+00:00",
-        "likes": 5
+        "views": 437
       },
       {
         "id": "hNIGyEOiDnI",
         "format": "short",
         "title": "Nature lovers #Nature #trending #shorts #viral",
-        "views": 1213,
-        "published": "2026-10-04T07:30:30+00:00",
-        "likes": 7
+        "views": 1200
       },
       {
         "id": "BfoA1wucH_k",
         "format": "short",
         "title": "😱 जब बाल कृष्ण के मुँह में माँ यशोदा ने देखा पूरा ब्रह्मांड #shorts",
-        "views": 46,
-        "published": "2026-10-04T03:05:05+00:00",
-        "likes": 0
+        "views": 48
       },
       {
         "id": "qrGrfyetg2U",
         "format": "short",
         "title": "Jake sees pr Ganga aur gle me saap #mahadev #trending #shorts",
-        "views": 278,
-        "published": "2026-10-03T11:30:22+00:00",
-        "likes": 8
+        "views": 285
       },
       {
         "id": "iNeG1EW4HSs",
         "format": "short",
         "title": "Use this audio #trending #millionviews #shorts",
-        "views": 1211,
-        "published": "2026-10-03T07:30:33+00:00",
-        "likes": 11
+        "views": 1200
       },
       {
         "id": "F-Qpm9Okxpw",
         "format": "short",
         "title": "O Maine tere hi bharose Hanuman sagar m bya daal dyi #hanuman #bhakti #trending",
-        "views": 1143,
-        "published": "2026-10-02T11:30:19+00:00",
-        "likes": 98
+        "views": 1200
       },
       {
         "id": "ZFlTPQVM8dQ",
         "format": "short",
         "title": "Long drive #comedy #shorts",
-        "views": 1145,
-        "published": "2026-10-02T07:30:22+00:00",
-        "likes": 2
+        "views": 1100
       },
       {
         "id": "LhqFDVWobqU",
         "format": "short",
         "title": "🌊 जब समुद्र मंथन में चमकी माँ लक्ष्मी, देखिए अद्भुत रहस्य #shorts",
-        "views": 26,
-        "published": "2026-10-02T02:47:18+00:00",
-        "likes": 1
+        "views": 26
       },
       {
         "id": "3TIWby74QIs",
         "format": "short",
         "title": "Maine Tere Hi Bharose Hanuman Sagar M Nya Daal dyi # #hanuman #bhakti #trending",
-        "views": 1195,
-        "published": "2026-10-01T11:30:31+00:00",
-        "likes": 146
+        "views": 1100
       },
       {
         "id": "glAyZh64HI8",
         "format": "short",
         "title": "🐘 जब माँ पार्वती ने बनाया गणेश, मिला हाथी का सिर? #shorts",
-        "views": 9,
-        "published": "2026-09-30T16:51:55+00:00",
-        "likes": 1
+        "views": 9
       },
       {
         "id": "tweif8lz7bo",
@@ -364,7 +424,7 @@
         "id": "u6Osnm3Ejek",
         "format": "short",
         "title": "किसान रामू की आस्था और सरलता",
-        "views": 7
+        "views": 9
       },
       {
         "id": "jGH-BjC9YP8",
@@ -388,7 +448,7 @@
         "id": "u_rgaLHXcm0",
         "format": "short",
         "title": "#youtubeshorts #aiart #art",
-        "views": 73
+        "views": 138
       },
       {
         "id": "f-qzEDhFDoY",
@@ -503,66 +563,6 @@
         "format": "short",
         "title": "💙 Sacred Marble Orb → Shri Khatu Shyam Ji Mandir | Magical Transformation #shorts #khatushyam",
         "views": 5500
-      },
-      {
-        "id": "buRkVb28oCE",
-        "format": "short",
-        "title": "🛕 दुनिया की सबसे सुंदर संगमरमर महादेव मूर्ति | Murti Making Process #bhakti #mahadev #shorts",
-        "views": 2100
-      },
-      {
-        "id": "y2WyzoSXmLs",
-        "format": "short",
-        "title": "💙 World's Cutest Miniature Bal Kanha Murti | 8K Cinematic #trending #krishna #bhakti",
-        "views": 1300
-      },
-      {
-        "id": "GCdCVRuSZQE",
-        "format": "short",
-        "title": "🌸 भगवान श्रीकृष्ण का मोर पंख बना दिव्य प्रेम मंदिर! #trending #krishna #radha #bhakti",
-        "views": 1000
-      },
-      {
-        "id": "4Zo3YUZK4GQ",
-        "format": "short",
-        "title": "🌄 Rudraksha to Kedarnath Temple | Hyper Realistic 8K Transformation #trending #shorts #mahadev",
-        "views": 1200
-      },
-      {
-        "id": "2SjBzlIVqEI",
-        "format": "short",
-        "title": "🏹 मिट्टी से प्रकट हुए प्रभु श्रीराम 🚩 | Shri Ram Murti Making | Realistic Clay Sculpture #bhakti",
-        "views": 1800
-      },
-      {
-        "id": "WzzNMvMVzsw",
-        "format": "short",
-        "title": "🔱 Divine Trishul to Kedarnath Temple | Hyper Realistic 8K Transformation #shorts #mahadev",
-        "views": 1700
-      },
-      {
-        "id": "6ZKpQ-O_k4o",
-        "format": "short",
-        "title": "🔥 भगवान शिव का डमरू बना विशाल आदियोगी प्रतिमा! #trending #adiyogi #mahadev #shorts",
-        "views": 1300
-      },
-      {
-        "id": "_xRlMaDmgcw",
-        "format": "short",
-        "title": "✨ दुनिया का सबसे सुंदर Marble Radha Krishna Transformation! 💙 #bhakti #radha #shorts",
-        "views": 1200
-      },
-      {
-        "id": "QyXduqF5X2k",
-        "format": "short",
-        "title": "मिट्टी से प्रकट हुई धन की देवी माँ लक्ष्मी 🪷💰 | Lakshmi Murti Making #bhakti #shorts #laxmi",
-        "views": 2300
-      },
-      {
-        "id": "69u7BGSSON0",
-        "format": "short",
-        "title": "🤍 Marble Orb to Lord Jagannath | Most Satisfying AI Transformation #bhakti #jagannath #shorts",
-        "views": 3600
       }
     ]
   },
@@ -571,10 +571,115 @@
       "id": "17841411923308355",
       "followers_count": 13,
       "follows_count": 0,
-      "media_count": 55,
+      "media_count": 62,
       "username": "cute_krishna.ai"
     },
     "media": [
+      {
+        "id": "17978637368924899",
+        "caption": "😲 माँ ब्रह्मचारिणी की तपस्या का रहस्य: नवरात्रि का दूसरा दिन\n\nक्या ब्रह्मचर्य की तपस्या ने शिव के दिल को सच में जीता?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-29c090\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maabrahmacharini #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-12T02:59:00+0000",
+        "like_count": 4,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/DeYNuy_Come/",
+        "reach": 98,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 5,
+        "views": 112
+      },
+      {
+        "id": "17961721344208039",
+        "caption": "🕉️ माँ शैलपुत्री की कथा – पहला नवव्रत रहस्य\n\nक्या होगा जब हिमालय से निकली शैलपुत्री ने त्रिशूल उठाया?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-23a7f8\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maashailputri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-11T02:29:36+0000",
+        "like_count": 7,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/DeVlka5DOtC/",
+        "reach": 114,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 8,
+        "views": 121
+      },
+      {
+        "id": "18199530370376572",
+        "caption": "🌸 नवरात्रि की 9 अनकही कहानियां माँ दुर्गा के साथ\n\nपहले दिन दुर्गा ने अंधेरे को कैसे रोशन किया?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/9-699fc0\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-10T03:02:01+0000",
+        "like_count": 2,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/DeTEdNOFTsq/",
+        "reach": 3,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 3,
+        "views": 6
+      },
+      {
+        "id": "18120779105472908",
+        "caption": "😱 माँ दुर्गा के नौ अद्भुत नवरात्रि किस्से\n\nजब बुजुर्ग ने माँ दुर्गा का वादा किया, तो क्या हुआ?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/9-e6ace5\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-09T03:25:24+0000",
+        "like_count": 2,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/DeQiXV4EpRg/",
+        "reach": 3,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 3,
+        "views": 3
+      },
+      {
+        "id": "18106515455573740",
+        "caption": "😲 जब भगवान विष्णु ने प्रह्लाद को बचाया: नरसिंह अवतार की कथा\n\nजब राजा ने स्तम्भ तोड़ते ही धरती कांप उठी, तब क्या हुआ?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-9e3b5c\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#vishnu #narayan #harinarayan #dashavatar #bhakti #sanatandharma #hindu #storybyte",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-08T03:15:32+0000",
+        "like_count": 2,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/DeN8cYEiQ7p/",
+        "reach": 7,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 3,
+        "views": 9
+      },
+      {
+        "id": "18221671993356167",
+        "caption": "🤔 क्या गणपति बप्पा ने माता‑पिता को घुमा कर जीत ली दौड़?\n\nक्या गणेश ने माता‑पिता को घुमा कर दुनिया की दौड़ जीती?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-66c111\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#ganpatibappamorya #ganesha #ganpati #vighnaharta #bhakti #sanatandharma #hindu #storybyte",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-07T03:06:42+0000",
+        "like_count": 1,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/DeLWobijqsH/",
+        "reach": 2,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 2
+      },
+      {
+        "id": "18095453876647651",
+        "caption": "🚀 जब हनुमान ने किया समुद्र पार, लंका की खोज\n\nक्या हनुमान की अडिग शक्ति समुद्र पार कर लंका तक पहुँच पाएगी?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-57110e\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#hanuman #jaishreeram #bajrangbali #hanumanji #bhakti #sanatandharma #hindu #storybyte",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-06T03:32:21+0000",
+        "like_count": 9,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/DeI0v7vjaCn/",
+        "reach": 105,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 10,
+        "views": 124
+      },
       {
         "id": "18128760721700224",
         "caption": "😲 जब शिव ने जटाओं में थामा गंगा का जल, बची पृथ्वी\n\nजब शिव ने गंगा को अपने जटाओं में थामा, तब क्या हुआ?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-e424e6\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#mahadev #harharmahadev #shiva #bholenath #bhakti #sanatandharma #hindu #storybyte",
@@ -584,11 +689,11 @@
         "like_count": 1,
         "comments_count": 1,
         "permalink": "https://www.instagram.com/reel/DeGJkTDCoXw/",
-        "reach": 3,
+        "reach": 7,
         "saved": 0,
         "shares": 0,
         "total_interactions": 2,
-        "views": 5
+        "views": 10
       },
       {
         "id": "18180585712426494",
@@ -1079,11 +1184,11 @@
         "like_count": 22,
         "comments_count": 0,
         "permalink": "https://www.instagram.com/reel/DY7il7DoqVf/",
-        "reach": 257,
+        "reach": 258,
         "saved": 3,
         "shares": 2,
         "total_interactions": 27,
-        "views": 339
+        "views": 341
       },
       {
         "id": "18137386099531415",
@@ -1406,11 +1511,121 @@
   "facebook": {
     "page": {
       "name": "Littlekrishna.ai",
-      "followers_count": 4215,
-      "fan_count": 4215,
+      "followers_count": 4212,
+      "fan_count": 4212,
       "id": "1036212629585326"
     },
     "posts": [
+      {
+        "id": "1036212629585326_122115880497332133",
+        "message": "😲 माँ ब्रह्मचारिणी की तपस्या का रहस्य: नवरात्रि का दूसरा दिन\n\nक्या ब्रह्मचर्य की तपस्या ने शिव के दिल को सच में जीता?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-29c090\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maabrahmacharini #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-12T02:59:57+0000",
+        "permalink_url": "https://www.facebook.com/reel/29857831683803610/",
+        "status_type": "added_video",
+        "reactions": 8,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115804585332133",
+        "message": "A mystic night awakens hidden destinies as the festival begins.\n\n📺 Navratri — Season 1, Episode Day 1\n\n⏱️ Chapters\n0:00 प्रभात की पुकार\n5:44 रहस्यमयी यात्रा\n11:37 अंतिम संकल्प\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Navratri #Season1 #S1EDay 1 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-11T08:41:25+0000",
+        "permalink_url": "https://www.facebook.com/reel/906684215711311/",
+        "status_type": "added_video",
+        "reactions": 1,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115781857332133",
+        "message": "🕉️ माँ शैलपुत्री की कथा – पहला नवव्रत रहस्य\n\nक्या होगा जब हिमालय से निकली शैलपुत्री ने त्रिशूल उठाया?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-23a7f8\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maashailputri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-11T02:30:40+0000",
+        "permalink_url": "https://www.facebook.com/reel/1780650266516536/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115681915332133",
+        "message": "🌸 नवरात्रि की 9 अनकही कहानियां माँ दुर्गा के साथ\n\nपहले दिन दुर्गा ने अंधेरे को कैसे रोशन किया?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/9-699fc0\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-10T03:03:51+0000",
+        "permalink_url": "https://www.facebook.com/reel/994662493648409/",
+        "status_type": "added_video",
+        "reactions": 1,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115613431332133",
+        "message": "In the heart of the Kalpa‑Vault, a sealed sage awakens and the trio must confront a darkness that threatens to rewrite dharma itself.\n\n📺 Mahabharata  — Season 1, Episode 5\n\n⏪ Previously: Krishna, Arjuna, and Draupadi race against time as the abyss threatens to swallow the Kalpa‑Vault’s secrets.\n\n⏱️ Chapters\n0:00 सुरंग का रहस्य\n5:58 विदुर का ज्ञान\n11:48 अंधकार की ज्वाला\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Mahabharata #Season1 #S1E5 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-09T12:45:18+0000",
+        "permalink_url": "https://www.facebook.com/reel/38807003095610341/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115568221332133",
+        "message": "😱 माँ दुर्गा के नौ अद्भुत नवरात्रि किस्से\n\nजब बुजुर्ग ने माँ दुर्गा का वादा किया, तो क्या हुआ?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/9-e6ace5\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-09T03:26:16+0000",
+        "permalink_url": "https://www.facebook.com/reel/1121226580595630/",
+        "status_type": "added_video",
+        "reactions": 1,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115509481332133",
+        "message": "Krishna, Arjuna, and Draupadi race against time as the abyss threatens to swallow the Kalpa‑Vault’s secrets.\n\n📺 Mahabharata — Season 1, Episode 4\n\n⏪ Previously: Trapped in a rift beyond time, कृष्ण, अर्जुन, and द्रौपदी must decode the quantum seed before the vortex collapses.\n\n⏱️ Chapters\n0:00 अधोगति का गर्त\n6:04 संकल्प का प्रकाश\n11:42 विरह का संकल्प\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Mahabharata #Season1 #S1E4 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-08T15:10:30+0000",
+        "permalink_url": "https://www.facebook.com/reel/2348002876027663/",
+        "status_type": "added_video",
+        "reactions": 1,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115447933332133",
+        "message": "😲 जब भगवान विष्णु ने प्रह्लाद को बचाया: नरसिंह अवतार की कथा\n\nजब राजा ने स्तम्भ तोड़ते ही धरती कांप उठी, तब क्या हुआ?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-9e3b5c\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#vishnu #narayan #harinarayan #dashavatar #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-10-08T03:16:30+0000",
+        "permalink_url": "https://www.facebook.com/reel/1159975103360466/",
+        "status_type": "added_video",
+        "reactions": 3,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115337227332133",
+        "message": "🤔 क्या गणपति बप्पा ने माता‑पिता को घुमा कर जीत ली दौड़?\n\nक्या गणेश ने माता‑पिता को घुमा कर दुनिया की दौड़ जीती?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-66c111\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#ganpatibappamorya #ganesha #ganpati #vighnaharta #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-10-07T03:07:52+0000",
+        "permalink_url": "https://www.facebook.com/reel/1777689383552128/",
+        "status_type": "added_video",
+        "reactions": 11,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115284925332133",
+        "message": "Trapped in a rift beyond time, कृष्ण, अर्जुन, and द्रौपदी must decode the quantum seed before the vortex collapses.\n\n📺 Mahabharata  — Season 1, Episode 3\n\n⏪ Previously: A cloaked stranger seizes the glowing artifact, thrusting कृष्ण, अर्जुन, and द्रौपदी into a perilous chase through hidden corridors and betrayals.\n\n⏱️ Chapters\n0:00 रहस्यमयी समय‑भ्रम\n6:14 विरासत की खोज\n12:02 धर्म का द्वंद्व\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Mahabharata #Season1 #S1E3 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-06T14:42:12+0000",
+        "permalink_url": "https://www.facebook.com/reel/1324056786361731/",
+        "status_type": "added_video",
+        "reactions": 1,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115234039332133",
+        "message": "🚀 जब हनुमान ने किया समुद्र पार, लंका की खोज\n\nक्या हनुमान की अडिग शक्ति समुद्र पार कर लंका तक पहुँच पाएगी?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-57110e\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#hanuman #jaishreeram #bajrangbali #hanumanji #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-10-06T03:33:34+0000",
+        "permalink_url": "https://www.facebook.com/reel/4942858065961048/",
+        "status_type": "added_video",
+        "reactions": 1,
+        "comments": 1,
+        "shares": 0
+      },
       {
         "id": "1036212629585326_122115134685332133",
         "message": "A cloaked stranger seizes the glowing artifact, thrusting कृष्ण, अर्जुन, and द्रौपदी into a perilous chase through hidden corridors and betrayals.\n\n📺 Mahabharata — Season 1, Episode 2\n\n⏪ Previously: An ominous omen sparks the first clash of destiny in Hastinapur.\n\n⏱️ Chapters\n0:00 छाया का उदय\n5:45 विचलित ध्वज\n11:36 धर्म की ज्वाला\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Mahabharata #Season1 #S1E2 #AudioStory #StoryByte #HindiStory",
@@ -2201,6 +2416,87 @@
     ],
     "videos": [
       {
+        "id": "29857831683803610",
+        "description": "😲 माँ ब्रह्मचारिणी की तपस्या का रहस्य: नवरात्रि का दूसरा दिन\n\nक्या ब्रह्मचर्य की तपस्या ने शिव के दिल को सच में जीता?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-29c090\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maabrahmacharini #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-12T02:59:04+0000",
+        "length": 127.366,
+        "permalink_url": "/reel/29857831683803610/"
+      },
+      {
+        "id": "906684215711311",
+        "title": "Navratri | Season 1 Episode Day 1: The First Dawn of Navratri",
+        "description": "A mystic night awakens hidden destinies as the festival begins.\n\n📺 Navratri — Season 1, Episode Day 1\n\n⏱️ Chapters\n0:00 प्रभात की पुकार\n5:44 रहस्यमयी यात्रा\n11:37 अंतिम संकल्प\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Navratri #Season1 #S1EDay 1 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-11T08:33:57+0000",
+        "length": 960.624,
+        "permalink_url": "/reel/906684215711311/"
+      },
+      {
+        "id": "1780650266516536",
+        "description": "🕉️ माँ शैलपुत्री की कथा – पहला नवव्रत रहस्य\n\nक्या होगा जब हिमालय से निकली शैलपुत्री ने त्रिशूल उठाया?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-23a7f8\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maashailputri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-11T02:29:42+0000",
+        "length": 110.833,
+        "permalink_url": "/reel/1780650266516536/"
+      },
+      {
+        "id": "994662493648409",
+        "description": "🌸 नवरात्रि की 9 अनकही कहानियां माँ दुर्गा के साथ\n\nपहले दिन दुर्गा ने अंधेरे को कैसे रोशन किया?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/9-699fc0\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-10T03:02:08+0000",
+        "length": 143.666,
+        "permalink_url": "/reel/994662493648409/"
+      },
+      {
+        "id": "38807003095610341",
+        "title": "Mahabharata  | Season 1 Episode 5: Echoes of the Forgotten Verse",
+        "description": "In the heart of the Kalpa‑Vault, a sealed sage awakens and the trio must confront a darkness that threatens to rewrite dharma itself.\n\n📺 Mahabharata  — Season 1, Episode 5\n\n⏪ Previously: Krishna, Arjuna, and Draupadi race against time as the abyss threatens to swallow the Kalpa‑Vault’s secrets.\n\n⏱️ Chapters\n0:00 सुरंग का रहस्य\n5:58 विदुर का ज्ञान\n11:48 अंधकार की ज्वाला\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Mahabharata #Season1 #S1E5 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-09T12:40:39+0000",
+        "length": 971.064,
+        "permalink_url": "/reel/38807003095610341/"
+      },
+      {
+        "id": "1121226580595630",
+        "description": "😱 माँ दुर्गा के नौ अद्भुत नवरात्रि किस्से\n\nजब बुजुर्ग ने माँ दुर्गा का वादा किया, तो क्या हुआ?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/9-e6ace5\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-09T03:25:29+0000",
+        "length": 124.2,
+        "permalink_url": "/reel/1121226580595630/"
+      },
+      {
+        "id": "2348002876027663",
+        "title": "Mahabharata | Season 1 Episode 4: गुह्य गर्त में संघर्ष",
+        "description": "Krishna, Arjuna, and Draupadi race against time as the abyss threatens to swallow the Kalpa‑Vault’s secrets.\n\n📺 Mahabharata — Season 1, Episode 4\n\n⏪ Previously: Trapped in a rift beyond time, कृष्ण, अर्जुन, and द्रौपदी must decode the quantum seed before the vortex collapses.\n\n⏱️ Chapters\n0:00 अधोगति का गर्त\n6:04 संकल्प का प्रकाश\n11:42 विरह का संकल्प\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Mahabharata #Season1 #S1E4 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-08T15:03:27+0000",
+        "length": 999.792,
+        "permalink_url": "/reel/2348002876027663/"
+      },
+      {
+        "id": "1159975103360466",
+        "description": "😲 जब भगवान विष्णु ने प्रह्लाद को बचाया: नरसिंह अवतार की कथा\n\nजब राजा ने स्तम्भ तोड़ते ही धरती कांप उठी, तब क्या हुआ?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-9e3b5c\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#vishnu #narayan #harinarayan #dashavatar #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-10-08T03:15:37+0000",
+        "length": 123.271,
+        "permalink_url": "/reel/1159975103360466/"
+      },
+      {
+        "id": "1777689383552128",
+        "description": "🤔 क्या गणपति बप्पा ने माता‑पिता को घुमा कर जीत ली दौड़?\n\nक्या गणेश ने माता‑पिता को घुमा कर दुनिया की दौड़ जीती?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-66c111\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#ganpatibappamorya #ganesha #ganpati #vighnaharta #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-10-07T03:06:47+0000",
+        "length": 126.933,
+        "permalink_url": "/reel/1777689383552128/"
+      },
+      {
+        "id": "1324056786361731",
+        "title": "Mahabharata  | Season 1 Episode 3: Echoes of the Timeless Vault",
+        "description": "Trapped in a rift beyond time, कृष्ण, अर्जुन, and द्रौपदी must decode the quantum seed before the vortex collapses.\n\n📺 Mahabharata  — Season 1, Episode 3\n\n⏪ Previously: A cloaked stranger seizes the glowing artifact, thrusting कृष्ण, अर्जुन, and द्रौपदी into a perilous chase through hidden corridors and betrayals.\n\n⏱️ Chapters\n0:00 रहस्यमयी समय‑भ्रम\n6:14 विरासत की खोज\n12:02 धर्म का द्वंद्व\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Mahabharata #Season1 #S1E3 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-06T14:36:30+0000",
+        "length": 1024.333,
+        "permalink_url": "/reel/1324056786361731/"
+      },
+      {
+        "id": "4942858065961048",
+        "description": "🚀 जब हनुमान ने किया समुद्र पार, लंका की खोज\n\nक्या हनुमान की अडिग शक्ति समुद्र पार कर लंका तक पहुँच पाएगी?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-57110e\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#hanuman #jaishreeram #bajrangbali #hanumanji #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-10-06T03:32:27+0000",
+        "length": 162.823,
+        "permalink_url": "/reel/4942858065961048/"
+      },
+      {
         "id": "1590685459193643",
         "title": "Mahabharata | Season 1 Episode 2: छायाओं की पुकार",
         "description": "A cloaked stranger seizes the glowing artifact, thrusting कृष्ण, अर्जुन, and द्रौपदी into a perilous chase through hidden corridors and betrayals.\n\n📺 Mahabharata — Season 1, Episode 2\n\n⏪ Previously: An ominous omen sparks the first clash of destiny in Hastinapur.\n\n⏱️ Chapters\n0:00 छाया का उदय\n5:45 विचलित ध्वज\n11:36 धर्म की ज्वाला\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Mahabharata #Season1 #S1E2 #AudioStory #StoryByte #HindiStory",
@@ -2512,14 +2808,6 @@
         "created_time": "2026-09-13T11:35:58+0000",
         "length": 203.832,
         "permalink_url": "/reel/1447032903950576/"
-      },
-      {
-        "id": "1808340560528045",
-        "created_time": "2026-09-13T07:33:51+0000",
-        "length": 20,
-        "permalink_url": "/122114621211332133/videos/1808340560528045",
-        "total_video_views": 0,
-        "total_video_avg_time_watched": 0
       },
       {
         "id": "1496859265521891",
@@ -5121,6 +5409,139 @@
         "duration": 149,
         "plays": 1,
         "likes": 1,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "2026-10-06_hi_devotional_हनुमान-की-लंका-यात्रा-समुद्र-पार-करने-की",
+        "title": "हनुमान की लंका यात्रा: समुद्र पार करने की कथा",
+        "socialTitle": "🚀 जब हनुमान ने किया समुद्र पार, लंका की खोज",
+        "deity": "hanuman",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-06",
+        "duration": 160,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "2026-10-07_hi_devotional_गणपति-बप्पा-की-कथा-माता-पिता-को-घुमा-कर-",
+        "title": "गणपति बप्पा की कथा: माता‑पिता को घुमा कर जीत",
+        "socialTitle": "🤔 क्या गणपति बप्पा ने माता‑पिता को घुमा कर जीत ली दौड़?",
+        "deity": "ganesh",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-07",
+        "duration": 125,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "2026-10-08_hi_devotional_नरसिंह-अवतार-प्रह्लाद-की-रक्षा-की-अद्भुत",
+        "title": "नरसिंह अवतार: प्रह्लाद की रक्षा की अद्भुत कथा",
+        "socialTitle": "😲 जब भगवान विष्णु ने प्रह्लाद को बचाया: नरसिंह अवतार की कथा",
+        "deity": "vishnu",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-08",
+        "duration": 121,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "2026-10-09_hi_devotional_नवरात्रि-के-9-दिल-छू-लेने-वाले-किस्से",
+        "title": "नवरात्रि के 9 दिल छू लेने वाले किस्से",
+        "socialTitle": "😱 माँ दुर्गा के नौ अद्भुत नवरात्रि किस्से",
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Navratri",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-09",
+        "duration": 122,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "2026-10-10_hi_devotional_नवरात्रि-की-9-कहानियाँ-दुर्गा-के-साथ-जीव",
+        "title": "नवरात्रि की 9 कहानियाँ: दुर्गा के साथ जीवन का पाठ",
+        "socialTitle": "🌸 नवरात्रि की 9 अनकही कहानियां माँ दुर्गा के साथ",
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Navratri",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-10",
+        "duration": 141,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "2026-10-11_hi_devotional_मां-शैलपुत्री-की-कथा-प्रथम-नववर्ष-का-रहस",
+        "title": "मां शैलपुत्री की कथा – प्रथम नववर्ष का रहस्य",
+        "socialTitle": "🕉️ माँ शैलपुत्री की कथा – पहला नवव्रत रहस्य",
+        "deity": "devi",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Navratri",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-11",
+        "duration": 108,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "2026-10-12_hi_devotional_माँ-ब्रह्मचारिणी-की-कथा-द्वितीय-नवरात्रि",
+        "title": "माँ ब्रह्मचारिणी की कथा - द्वितीय नवरात्रि",
+        "socialTitle": "😲 माँ ब्रह्मचारिणी की तपस्या का रहस्य: नवरात्रि का दूसरा दिन",
+        "deity": "devi",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Navratri",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-12",
+        "duration": 125,
+        "plays": 0,
+        "likes": 0,
         "shares": 0,
         "rating": 0,
         "ratingCount": 0

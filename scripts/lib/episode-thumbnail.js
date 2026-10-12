@@ -11,7 +11,7 @@ const W = 1280;
 const H = 720;
 const FONT = "'Noto Sans Devanagari', 'Lohit Devanagari', 'DejaVu Sans', sans-serif";
 
-async function renderEpisodeThumbnail({ art, seriesTitle, season = '1', episode, episodeTitle, accent = '#ffd54f' }) {
+async function renderEpisodeThumbnail({ art, seriesTitle, season = '1', episode, episodeTitle, accent = '#ffd54f', badge: badgeText }) {
   const base = await sharp(art).resize(W, H, { fit: 'cover', position: 'attention' }).toBuffer();
 
   const titleLines = wrapLines(String(seriesTitle || '').toUpperCase(), 16, 3);
@@ -19,7 +19,7 @@ async function renderEpisodeThumbnail({ art, seriesTitle, season = '1', episode,
   const titleLh = Math.round(titleSize * 1.08);
   const subLines = episodeTitle ? wrapLines(episodeTitle, 34, 2) : [];
   const badgeY = 64;
-  const badge = `SEASON ${season} · EP ${episode}`;
+  const badge = badgeText || `SEASON ${season} · EP ${episode}`;
   const badgeW = 60 + badge.length * 25;
   const titleY = badgeY + 76 + 24 + titleSize * 0.8;
   const subY = titleY + (titleLines.length - 1) * titleLh + 72;

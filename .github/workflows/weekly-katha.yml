@@ -1,0 +1,116 @@
+name: Weekly Long Katha
+
+# A ~15-minute 16:9 devotional katha every Sunday morning (IST), titled the
+# way people search ("शिव जी की कथा: …") and published to YouTube and
+# Facebook. Long videos are what YouTube search ranks and what earns watch
+# hours; the daily Shorts bring the views. See scripts/weekly-katha.js.
+on:
+  schedule:
+    # Sunday 09:53 IST (04:23 UTC), off the busy top of the hour.
+    - cron: '23 4 * * 0'
+  workflow_dispatch:
+    inputs:
+      deity:
+        description: 'Deity (blank = this week''s rotation)'
+        required: false
+        default: ''
+        type: choice
+        options: ['', krishna, shiva, hanuman, ganesh, vishnu, devi, shani]
+      katha_index:
+        description: 'Which of that deity''s kathas, 0-7 (blank = this week''s)'
+        required: false
+        default: ''
+        type: string
+      style:
+        description: 'Art style (blank = the DEVOTIONAL_STYLE variable, else cartoon3d)'
+        required: false
+        default: ''
+        type: choice
+        options: ['', cartoon3d, cartoon2d, realistic, illustration]
+      publish:
+        description: 'Publish to YouTube and Facebook'
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-katha
+  cancel-in-progress: false
+
+jobs:
+  katha:
+    runs-on: ubuntu-latest
+    # About 30-40 minutes end to end on a standard runner.
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install rendering tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install edge-tts uv
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-lohit-deva fonts-dejavu-core
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Install pipeline dependencies
+        working-directory: scripts
+        run: npm install
+      - name: Render and publish this week's katha
+        working-directory: scripts
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
+          POLLINATIONS_API_TOKEN: ${{ secrets.POLLINATIONS_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # Fallback narration if Microsoft's free voice keeps refusing.
+          SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
+          SARVAM_SPEAKER: ${{ vars.SARVAM_SPEAKER }}
+          KATHA_DEITY: ${{ inputs.deity }}
+          KATHA_INDEX: ${{ inputs.katha_index }}
+          EPISODE_STYLE: ${{ inputs.style }}
+          # A scheduled run has no inputs — publish then too.
+          EPISODE_PUBLISH: ${{ github.event_name == 'schedule' || inputs.publish }}
+          DEVOTIONAL_STYLE: ${{ vars.DEVOTIONAL_STYLE }}
+          WHATSAPP_CHANNEL_URL: ${{ vars.WHATSAPP_CHANNEL_URL }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+        run: node weekly-katha.js
+      # The mp4 is over GitHub's file limit and YouTube/Facebook keep their
+      # own copies; it's downloadable from the run page for a day.
+      - name: Keep the rendered video for a day
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-katha
+          path: public/episodes/bhakti-katha/**/*.mp4
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: ignore
+      - name: Save the katha's text, art and thumbnail
+        if: always()
+        run: |
+          git config user.name "storybyte-weekly-katha"
+          git config user.email "bot@storybyte.app"
+          # A failed run leaves empty files (e.g. a 0-byte audio.mp3) — never commit those.
+          find public/episodes -type f -size 0 -delete 2>/dev/null || true
+          git add public/episodes/bhakti-katha 2>/dev/null || true
+          git commit -m "chore: weekly long katha $(date -u +%F)" || echo "nothing to commit"
+          for delay in 2 4 8 16; do
+            git pull --rebase --autostash || true
+            git push && exit 0
+            sleep "$delay"
+          done
+          exit 1

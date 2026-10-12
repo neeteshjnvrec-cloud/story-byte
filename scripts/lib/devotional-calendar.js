@@ -174,4 +174,34 @@ function navratriDeity(dateIst) {
   };
 }
 
-module.exports = { DEITIES, GENERAL_HASHTAGS, istWeekday, istDate, deityOfDay, navratriDeity };
+/**
+ * What a day's devotional story is about: during Navratri that day's form
+ * of Durga (plus any devotional festival); otherwise a devotional festival
+ * (occasions.js) takes the day; else the weekday's deity and that week's
+ * katha. `date` is the run's YYYY-MM-DD and `now` its instant — tomorrow's
+ * is (date + 1 day, now + 24h), which is what tomorrow's run will pick.
+ */
+function kathaOfDay(date, now = new Date()) {
+  const { getOccasion } = require('../occasions');
+  const occasion = getOccasion(date);
+  const devotional = occasion?.genre === 'devotional' ? occasion : undefined;
+  const navratri = navratriDeity(istDate(now));
+  if (navratri) return { deity: navratri, occasion: devotional };
+  if (devotional) return { occasion: devotional };
+  return { deity: deityOfDay(date, now) };
+}
+
+/** Tomorrow's katha, as tomorrow's daily run will choose it. */
+function nextKatha(date, now = new Date()) {
+  const next = new Date(`${date}T00:00:00Z`);
+  next.setUTCDate(next.getUTCDate() + 1);
+  return kathaOfDay(next.toISOString().slice(0, 10), new Date(now.getTime() + 86400e3));
+}
+
+/** One line describing a katha slot, for prompts. */
+function describeKatha({ deity, occasion }) {
+  if (deity) return `${deity.name} (${deity.hindi}): ${deity.katha}`;
+  return occasion ? `the festival ${occasion.name}` : '';
+}
+
+module.exports = { DEITIES, GENERAL_HASHTAGS, istWeekday, istDate, deityOfDay, navratriDeity, kathaOfDay, nextKatha, describeKatha };
