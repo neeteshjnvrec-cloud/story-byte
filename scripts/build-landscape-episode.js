@@ -41,7 +41,7 @@ const { uploadEpisodeToYouTube } = require('./lib/youtube');
 const { uploadEpisodeToFacebook } = require('./lib/facebook');
 const { pause, RETRY_WAITS_SEC } = require('./lib/narrate');
 const { synthSarvam } = require('./lib/sarvam-tts');
-const { synthGoogle } = require('./lib/google-tts');
+const { synthBackup } = require('./lib/backup-voice');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUBLIC = path.join(ROOT, 'public');
@@ -820,10 +820,10 @@ async function main() {
     synthesize(text, audioPath, subtitlesPath);
   } catch (error) {
     // Still refused after every retry: narrate with Sarvam (if a key is
-    // set) or Google Cloud TTS instead, rather than lose the written episode.
+    // set) or the backup voices instead, rather than lose the written episode.
     console.warn(`edge-tts gave up: ${error.message.split('\n')[0]}`);
     const backup = await synthSarvam(text, { out: audioPath, subsOut: subtitlesPath, language }) ||
-      await synthGoogle(text, { out: audioPath, subsOut: subtitlesPath, edgeVoice: voice });
+      await synthBackup(text, { out: audioPath, subsOut: subtitlesPath, edgeVoice: voice, long: true });
     if (!backup) throw error;
   }
 

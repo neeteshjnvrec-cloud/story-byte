@@ -24,6 +24,38 @@ const os = require('os');
 const path = require('path');
 const { chunkText, srtTime, duration } = require('./sarvam-tts');
 
+/**
+ * Speaks each chunk to a file with `speakTo(chunk, file)`, joins them into
+ * `out` (mp3) and writes `subsOut` with one cue per word, each chunk's
+ * words spread over its measured duration by length. Returns total seconds.
+ */
+async function narrateChunks({ chunks, dir, out, subsOut, ext, speakTo }) {
+  const files = [];
+  const cues = [];
+  let t = 0;
+  for (let i = 0; i < chunks.length; i++) {
+    const file = path.join(dir, `chunk-${i}.${ext}`);
+    await speakTo(chunks[i], file);
+    const d = duration(file);
+    if (!d) throw new Error(`chunk ${i + 1} returned no audio`);
+    const words = chunks[i].split(' ');
+    const weight = words.reduce((sum, w) => sum + w.length + 1, 0);
+    let at = t;
+    for (const word of words) {
+      const span = d * ((word.length + 1) / weight);
+      cues.push({ start: at, end: at + span, text: word });
+      at += span;
+    }
+    t += d;
+    files.push(file);
+  }
+  const list = path.join(dir, 'list.txt');
+  fs.writeFileSync(list, files.map((f) => `file '${f}'`).join('\n'));
+  execFileSync('ffmpeg', ['-y', '-f', 'concat', '-safe', '0', '-i', list, '-c:a', 'libmp3lame', '-b:a', '128k', '-ar', '44100', out], { stdio: 'pipe' });
+  if (subsOut) fs.writeFileSync(subsOut, cues.map((c, i) => `${i + 1}\n${srtTime(c.start)} --> ${srtTime(c.end)}\n${c.text}\n`).join('\n'));
+  return t;
+}
+
 // Edge voices that are male, so the backup keeps the narrator's gender.
 const MALE = /Madhur|Guy|Davis|Andrew|Brian|Christopher|Eric|Roger|Steffan|Ryan|Thomas|Prabhat|Alvaro|Jorge|Henri|Conrad|Killian|Keita|Diego|Antonio|Hamed|Arnav|Kunal/i;
 // Explicit voices where Google's default for the language isn't the best one.
@@ -82,29 +114,7 @@ async function synthGoogle(text, { out, subsOut, edgeVoice }) {
     const voice = voiceFor(edgeVoice);
     dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sb-gtts-'));
     const chunks = chunkText(text);
-    const files = [];
-    const cues = [];
-    let t = 0;
-    for (let i = 0; i < chunks.length; i++) {
-      const file = path.join(dir, `chunk-${i}.mp3`);
-      fs.writeFileSync(file, await speak(chunks[i], voice, token));
-      const d = duration(file);
-      if (!d) throw new Error(`chunk ${i + 1} returned no audio`);
-      const words = chunks[i].split(' ');
-      const weight = words.reduce((sum, w) => sum + w.length + 1, 0);
-      let at = t;
-      for (const word of words) {
-        const span = d * ((word.length + 1) / weight);
-        cues.push({ start: at, end: at + span, text: word });
-        at += span;
-      }
-      t += d;
-      files.push(file);
-    }
-    const list = path.join(dir, 'list.txt');
-    fs.writeFileSync(list, files.map((f) => `file '${f}'`).join('\n'));
-    execFileSync('ffmpeg', ['-y', '-f', 'concat', '-safe', '0', '-i', list, '-c:a', 'libmp3lame', '-b:a', '128k', '-ar', '44100', out], { stdio: 'pipe' });
-    if (subsOut) fs.writeFileSync(subsOut, cues.map((c, i) => `${i + 1}\n${srtTime(c.start)} --> ${srtTime(c.end)}\n${c.text}\n`).join('\n'));
+    const t = await narrateChunks({ chunks, dir, out, subsOut, ext: 'mp3', speakTo: async (chunk, file) => fs.writeFileSync(file, await speak(chunk, voice, token)) });
     console.log(`  🎙️  Narrated with Google ${voice.name || `${voice.languageCode} ${voice.ssmlGender}`} (backup voice; ${chunks.length} chunks, ${Math.round(t)}s)`);
     return { subtitlesPath: subsOut && fs.existsSync(subsOut) ? subsOut : null };
   } catch (e) {
@@ -117,4 +127,4 @@ async function synthGoogle(text, { out, subsOut, edgeVoice }) {
   }
 }
 
-module.exports = { synthGoogle, voiceFor };
+module.exports = { synthGoogle, voiceFor, narrateChunks, MALE };

@@ -75,6 +75,8 @@ jobs:
           # when a key is set, else Google Cloud TTS with the project's
           # service account (scripts/lib/google-tts.js).
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # Free backup voice when Microsoft's edge-tts refuses (scripts/lib/gemini-tts.js).
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
           SARVAM_SPEAKER: ${{ vars.SARVAM_SPEAKER }}
           KATHA_DEITY: ${{ inputs.deity }}

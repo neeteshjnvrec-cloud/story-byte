@@ -23,12 +23,12 @@ const path = require('path');
 const ENDPOINT = 'https://api.sarvam.ai/text-to-speech';
 const CHUNK_CHARS = 450;
 
-function chunkText(text) {
+function chunkText(text, maxChars = CHUNK_CHARS) {
   const sentences = String(text).replace(/\s+/g, ' ').trim().split(/(?<=[।॥.!?])\s+/).filter(Boolean);
   const chunks = [];
   let cur = '';
   for (const sentence of sentences) {
-    if (cur && (cur + ' ' + sentence).length > CHUNK_CHARS) {
+    if (cur && (cur + ' ' + sentence).length > maxChars) {
       chunks.push(cur);
       cur = sentence;
     } else {

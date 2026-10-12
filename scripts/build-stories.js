@@ -45,7 +45,7 @@ const { styleOfDay, fitShort, devotionalArtStyle } = require('./lib/short-style'
 const { mixDevotionalMusic } = require('./lib/devotional-music');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synth } = require('./lib/narrate');
-const { synthGoogle } = require('./lib/google-tts');
+const { synthBackup } = require('./lib/backup-voice');
 const { mediaKey } = require('./lib/media-key');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -470,8 +470,8 @@ async function run() {
         const audio = path.join(PUB, 'audio', `${id}.mp3`);
         const subsPath = path.join(os.tmpdir(), `${id}.srt`);
         // Sarvam (premium, if a key is set) > Microsoft's free edge-tts voice
-        // (with retries) > Google Cloud TTS, the backup for when Microsoft
-        // refuses for hours (lib/google-tts.js).
+        // (with retries) > the backup voices, Gemini then Google Cloud TTS,
+        // for when Microsoft refuses for hours (lib/backup-voice.js).
         const narrateText = async (text, out, subsOut) => {
           if (slot.genre === 'devotional') {
             const premium = await synthSarvam(text, { out, subsOut, language: slot.language });
@@ -480,8 +480,8 @@ async function run() {
           try {
             return synth(text, slot, out, subsOut);
           } catch (e) {
-            console.warn(`  ⚠️  ${e.message.split('\n')[0].slice(0, 160)} — trying the Google backup voice`);
-            const backup = await synthGoogle(text, { out, subsOut, edgeVoice: slot.voice });
+            console.warn(`  ⚠️  ${e.message.split('\n')[0].slice(0, 160)} — trying the backup voices`);
+            const backup = await synthBackup(text, { out, subsOut, edgeVoice: slot.voice });
             if (backup) return backup;
             throw e;
           }
