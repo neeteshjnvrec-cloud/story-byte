@@ -115,4 +115,4 @@ async function synthSarvam(text, { out, subsOut, language = 'hi' }) {
   }
 }
 
-module.exports = { synthSarvam, chunkText };
+module.exports = { synthSarvam, chunkText, srtTime, duration };

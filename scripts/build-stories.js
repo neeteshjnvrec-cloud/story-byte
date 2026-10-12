@@ -45,6 +45,7 @@ const { styleOfDay, fitShort, devotionalArtStyle } = require('./lib/short-style'
 const { mixDevotionalMusic } = require('./lib/devotional-music');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synth } = require('./lib/narrate');
+const { synthGoogle } = require('./lib/google-tts');
 const { mediaKey } = require('./lib/media-key');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -468,9 +469,23 @@ async function run() {
         // Step 3: Generate audio
         const audio = path.join(PUB, 'audio', `${id}.mp3`);
         const subsPath = path.join(os.tmpdir(), `${id}.srt`);
-        const narrateText = async (text, out, subsOut) => (slot.genre === 'devotional' &&
-            await synthSarvam(text, { out, subsOut, language: slot.language })) ||
-          synth(text, slot, out, subsOut);
+        // Sarvam (premium, if a key is set) > Microsoft's free edge-tts voice
+        // (with retries) > Google Cloud TTS, the backup for when Microsoft
+        // refuses for hours (lib/google-tts.js).
+        const narrateText = async (text, out, subsOut) => {
+          if (slot.genre === 'devotional') {
+            const premium = await synthSarvam(text, { out, subsOut, language: slot.language });
+            if (premium) return premium;
+          }
+          try {
+            return synth(text, slot, out, subsOut);
+          } catch (e) {
+            console.warn(`  ⚠️  ${e.message.split('\n')[0].slice(0, 160)} — trying the Google backup voice`);
+            const backup = await synthGoogle(text, { out, subsOut, edgeVoice: slot.voice });
+            if (backup) return backup;
+            throw e;
+          }
+        };
         const narrate = () => narrateText(content.text, audio, subsPath);
         let synthResult = await narrate();
         // A devotional katha too long to fit a Short even sped up is

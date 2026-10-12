@@ -25,6 +25,7 @@ const { execFileSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { synthGoogle } = require('./lib/google-tts');
 const { notifyAndPushUser, notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { fetchStoryImage } = require('./lib/scene-image');
@@ -273,7 +274,14 @@ async function main() {
       // English voice, which mangles the pronunciation.
       const voice = VOICES[story.language] || VOICES.en;
       const subsPath = path.join(os.tmpdir(), `${storyId}.srt`);
-      const synthResult = synth(story.text, voice, audioPath, subsPath);
+      let synthResult;
+      try {
+        synthResult = synth(story.text, voice, audioPath, subsPath);
+      } catch (e) {
+        // Microsoft's free voice refused: Google Cloud TTS backup (lib/google-tts.js).
+        synthResult = await synthGoogle(story.text, { out: audioPath, subsOut: subsPath, edgeVoice: voice });
+        if (!synthResult) throw e;
+      }
       const dur = durationSec(audioPath) || Math.max(30, Math.round((story.text || '').split(/\s+/).length / 2.5));
       console.log(`    ✅ Audio: ${Math.round(fs.statSync(audioPath).size / 1024)}KB, ${dur}s`);
 

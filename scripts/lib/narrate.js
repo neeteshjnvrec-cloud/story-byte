@@ -17,6 +17,12 @@ const RETRY_WAITS_SEC = [20, 60, 120];
 function pause(sec) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, sec * 1000);
 }
+
+// Set once edge-tts has failed through every retry in this run: later
+// calls (a shorter rewrite, the teaser) fail fast to the backup voice
+// instead of waiting through the retries again.
+let edgeDown = false;
+
 // `subsOut`, when given, asks edge-tts for a word-timed .srt alongside the
 // mp3 (drives narration-synced captions/scene timing in the video — see
 // lib/video-scenes.js and lib/subtitles.js). Best-effort only: if a
@@ -24,6 +30,7 @@ function pause(sec) {
 // build without the flag), we retry without it rather than let an
 // enhancement break audio synthesis, which every story needs regardless.
 function synth(text, slot, out, subsOut) {
+  if (edgeDown) throw new Error('edge-tts unavailable in this run (refused earlier)');
   const txt = path.join(os.tmpdir(), `sb-${Date.now()}.txt`);
   fs.writeFileSync(txt, text, 'utf8');
   const baseArgs = ['--voice', slot.voice, '--file', txt, '--write-media', out];
@@ -42,7 +49,7 @@ function synth(text, slot, out, subsOut) {
 
   const once = () => (subsOut && attempt([...baseArgs, '--write-subtitles', subsOut])) || attempt(baseArgs);
   let ok = once();
-  for (const wait of RETRY_WAITS_SEC) {
+  for (const wait of ok ? [] : RETRY_WAITS_SEC) {
     if (ok) break;
     const why = String(err?.stderr || err?.message || '').split('\n').filter(Boolean).pop() || 'no audio';
     console.warn(`  ⚠️  edge-tts failed (${why.slice(0, 140)}); retrying in ${wait}s`);
@@ -51,7 +58,10 @@ function synth(text, slot, out, subsOut) {
   }
 
   try { fs.unlinkSync(txt); } catch (e) {}
-  if (!ok) throw new Error('edge-tts failed: ' + (err && err.message));
+  if (!ok) {
+    edgeDown = true;
+    throw new Error('edge-tts failed: ' + (err && err.message));
+  }
   return { subtitlesPath: subsOut && fs.existsSync(subsOut) ? subsOut : null };
 }
 

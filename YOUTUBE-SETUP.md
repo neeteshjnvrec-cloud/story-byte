@@ -115,3 +115,28 @@ Fix: update all three secrets together from the same client — the
 Client ID and Client Secret from Google Cloud Console's Credentials
 page for that client, and a refresh token minted by running
 `youtube-auth.js` with those exact same two values.
+
+## 🎙️ Backup voice (Google Cloud Text-to-Speech)
+
+Narration normally uses Microsoft's free edge-tts voice. That service is
+unofficial, and sometimes refuses every request for hours (`403 Invalid
+response status`). When it does, the daily Short, community stories and
+the 15-minute videos switch to Google Cloud Text-to-Speech after a few
+retries (`scripts/lib/google-tts.js`): Google's Hindi Neural2 voices, female
+or male to match the usual narrator.
+
+It uses the `FIREBASE_SERVICE_ACCOUNT` secret the workflows already have,
+so there's no new key to add. One-time setup:
+
+1. Open [console.cloud.google.com](https://console.cloud.google.com) and pick
+   the Firebase project (`storybyte-76716`) at the top.
+2. **APIs & Services → Library → "Cloud Text-to-Speech API" → Enable.**
+3. If Google asks for a billing account, link one. The API requires it even
+   for free use, but the first **1 million Neural2 characters each month
+   are free**. A daily Short is about 1,700 characters and a 15-minute
+   episode about 13,000, so normal use stays at ₹0.
+   (Optional: **Billing → Budgets & alerts** → a ₹100 budget emails you
+   long before any real cost.)
+
+Until this is done, an edge-tts outage still fails the run, and the log
+says `Google backup narration failed … enable the Cloud Text-to-Speech API`.

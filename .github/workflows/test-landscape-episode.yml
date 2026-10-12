@@ -76,7 +76,10 @@ jobs:
           POLLINATIONS_API_TOKEN: ${{ secrets.POLLINATIONS_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          # Fallback narration if Microsoft's free voice keeps refusing.
+          # Backup narration if Microsoft's free voice keeps refusing: Sarvam
+          # when a key is set, else Google Cloud TTS with the project's
+          # service account (scripts/lib/google-tts.js).
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
           SARVAM_SPEAKER: ${{ vars.SARVAM_SPEAKER }}
           EPISODE_TITLE: ${{ inputs.title }}
