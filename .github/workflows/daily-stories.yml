@@ -50,6 +50,8 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # Free backup voice when Microsoft's edge-tts refuses (scripts/lib/gemini-tts.js).
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FIREBASE_PROJECT_ID: storybyte-76716
           # Optional — free pollinations.ai "seed" tier registration lifts
           # the anonymous 1-request/15s image pace to 1-request/5s. Left
