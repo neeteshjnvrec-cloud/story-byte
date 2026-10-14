@@ -18,13 +18,31 @@ const HEIGHT = 1080;
 const CANVAS = 3;
 const ZOOM = 0.12;
 
+// A scene this long or longer is shown as two shots of the same picture: a
+// wide shot, then a cut to a close-up of one part of it, so the view
+// changes about every 10s instead of one slow zoom over 20-30s.
+const SPLIT_MIN_SEC = 12;
+// Where the close-ups frame, cycled: left third, right third, centre. All
+// sit a little above the middle, where faces usually are.
+const FOCUS = [{ fx: 0.2, fy: 0.3 }, { fx: 0.8, fy: 0.3 }, { fx: 0.5, fy: 0.35 }];
+const CLOSE_FROM = 1.3;
+const CLOSE_TO = 1.42;
+
 /**
  * Four camera moves, cycled per scene: push in, drift right, pull out, drift
  * left. Each spans the WHOLE clip — a fixed rate (the previous 0.03/s)
  * reached its cap after ~5s and left a 30-45s scene frozen for the rest.
+ * A close-up shot slowly pushes in on its focus point instead.
  */
-function motion(index, frames) {
+function motion(index, frames, closeUp = null) {
   const p = `(on/${Math.max(1, frames - 1)})`;
+  if (closeUp) {
+    return {
+      z: `${CLOSE_FROM}+${(CLOSE_TO - CLOSE_FROM).toFixed(2)}*${p}`,
+      x: `(iw-iw/zoom)*${closeUp.fx}`,
+      y: `(ih-ih/zoom)*${closeUp.fy}`,
+    };
+  }
   const centre = { x: 'iw/2-(iw/zoom/2)', y: 'ih/2-(ih/zoom/2)' };
   switch (index % 4) {
     case 0: return { z: `1+${ZOOM}*${p}`, ...centre };
@@ -42,8 +60,8 @@ function motion(index, frames) {
  * time (over 20 minutes on its own for a 30-minute episode, and a second
  * generation of compression loss).
  */
-async function renderClip({ imageFile, frames, index, output, assFile }) {
-  const { z, x, y } = motion(index, frames);
+async function renderClip({ imageFile, frames, index, output, assFile, closeUp }) {
+  const { z, x, y } = motion(index, frames, closeUp);
   const w = WIDTH * CANVAS;
   const h = HEIGHT * CANVAS;
   // Cover-crop to 16:9 before zooming: a plain scale stretches any source
@@ -95,26 +113,38 @@ async function renderLandscapeVideo({ scenes, audioPath, outPath, captions = [],
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'storybyte-landscape-'));
   const listFile = path.join(tempDir, 'clips.txt');
   try {
-    // Frame boundaries come from the running total, so per-scene rounding
+    // Each scene becomes one shot, or a wide shot plus a close-up when it's
+    // long enough (SPLIT_MIN_SEC); the wide shot takes ~55% of the time.
+    const shots = [];
+    scenes.forEach((scene, index) => {
+      if (scene.duration >= SPLIT_MIN_SEC) {
+        const wide = scene.duration * 0.55;
+        shots.push({ scene, index, duration: wide });
+        shots.push({ scene, index, duration: scene.duration - wide, closeUp: FOCUS[index % FOCUS.length] });
+      } else {
+        shots.push({ scene, index, duration: scene.duration });
+      }
+    });
+    // Frame boundaries come from the running total, so per-shot rounding
     // never accumulates into the picture drifting from the narration.
     let elapsed = 0;
-    const clips = scenes.map((scene, index) => {
+    const clips = shots.map((shot, n) => {
       const start = elapsed;
-      elapsed += scene.duration;
+      elapsed += shot.duration;
       const frames = Math.max(1, Math.round(elapsed * FPS) - Math.round(start * FPS));
       const t0 = Math.round(start * FPS) / FPS;
-      return { scene, index, frames, t0, t1: t0 + frames / FPS, output: path.join(tempDir, `clip-${index}.mp4`) };
+      return { ...shot, n, frames, t0, t1: t0 + frames / FPS, output: path.join(tempDir, `clip-${n}.mp4`) };
     });
 
     await pool(clips, CONCURRENCY, async (clip) => {
       const lines = clipCaptions(captions, clip.t0, clip.t1);
       let assFile = null;
       if (lines.length) {
-        assFile = path.join(tempDir, `clip-${clip.index}.ass`);
+        assFile = path.join(tempDir, `clip-${clip.n}.ass`);
         fs.writeFileSync(assFile, buildAss(lines, { width: WIDTH, height: HEIGHT, font }), 'utf8');
       }
-      await renderClip({ imageFile: clip.scene.file, frames: clip.frames, index: clip.index, output: clip.output, assFile });
-      console.log(`  Rendered scene ${clip.index + 1}/${clips.length}`);
+      await renderClip({ imageFile: clip.scene.file, frames: clip.frames, index: clip.index, output: clip.output, assFile, closeUp: clip.closeUp });
+      console.log(`  Rendered shot ${clip.n + 1}/${clips.length} (scene ${clip.index + 1}${clip.closeUp ? ', close-up' : ''})`);
     });
 
     fs.writeFileSync(listFile, clips.map((c) => `file '${path.resolve(c.output)}'`).join('\n'));

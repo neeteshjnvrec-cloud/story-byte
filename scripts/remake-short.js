@@ -33,6 +33,7 @@ const { bakeInCaptions } = require('./lib/caption-frames');
 const { buildStoryVideo } = require('./lib/video');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
 const { styleOfDay, fitShort } = require('./lib/short-style');
+const { withCloseUps, shortSceneCount } = require('./lib/close-ups');
 const { DEITIES, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -93,7 +94,7 @@ async function main() {
   const scenes = await buildVideoScenes({
     storyId: `${id}-remake-${VARIANT}`, title: story.title, text, genre: 'devotional',
     description: story.description, cues, audioDurSec: videoDur, outDir,
-    sceneCount: Math.max(8, Math.min(18, Math.round(videoDur / 9))),
+    sceneCount: shortSceneCount(videoDur),
     context: `${story.title} ${story.description || ''}`,
   });
   if (!scenes) throw new Error('Scene generation failed');
@@ -108,9 +109,11 @@ async function main() {
   if (!mix) throw new Error('Could not mix the narration');
 
   const frameDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sb-remake-frames-'));
-  const captioned = await bakeInCaptions(scenes, toCaptionLines(cues), frameDir, total, { format: 'short', look });
+  // Each picture as a wide shot, then a close-up of part of it.
+  const shots = await withCloseUps(scenes, { outDir: frameDir });
+  const captioned = await bakeInCaptions(shots, toCaptionLines(cues), frameDir, total, { format: 'short', look });
   buildStoryVideo({ scenes: captioned, audioPath: mix, outPath: path.join(outDir, 'short.mp4'), format: 'short', look });
-  buildStoryVideo({ scenes, audioPath: mix, outPath: path.join(outDir, 'short-clean.mp4'), format: 'short', look });
+  buildStoryVideo({ scenes: shots, audioPath: mix, outPath: path.join(outDir, 'short-clean.mp4'), format: 'short', look });
   fs.rmSync(frameDir, { recursive: true, force: true });
 
   const hashtags = [...new Set(['#shorts', ...(deity?.hashtags || []), ...GENERAL_HASHTAGS])];

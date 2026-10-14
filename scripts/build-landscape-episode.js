@@ -842,8 +842,13 @@ async function main() {
   const parsed = parseSrt(fs.readFileSync(subtitlesPath, 'utf8'));
   const cues = parsed.length ? parsed : [{ start: 0, end: audioDuration, text: '' }];
 
-  // About one scene every 30 seconds — ~30 for a 15-minute episode.
-  const sceneCount = Math.max(12, Math.min(32, Math.round(audioDuration / 30)));
+  // A new picture about every 20 seconds (~42 for a 14-minute episode; one
+  // every 30s felt static), and the renderer cuts each one into a wide shot
+  // and a close-up (lib/video-landscape.js), so the view changes every ~10s.
+  // ~42 FLUX.2 images is ~6,700 of the free 10,000 daily neurons, which
+  // leaves room for the daily Short. EPISODE_SCENE_SECONDS tunes it.
+  const sceneSeconds = Math.max(10, Number(process.env.EPISODE_SCENE_SECONDS) || 20);
+  const sceneCount = Math.max(12, Math.min(48, Math.round(audioDuration / sceneSeconds)));
   const segments = segmentCues(cues, sceneCount, audioDuration);
 
   let sceneDescriptions = null;
