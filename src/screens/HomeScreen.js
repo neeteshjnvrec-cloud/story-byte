@@ -10,6 +10,9 @@ import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Hero, RailCard } from '../components/story/StoryCard';
 import { ContinueCard } from '../components/story/ContinueCard';
+import { CoinChip } from '../components/coins/CoinChip';
+import { CheckInCard } from '../components/coins/CheckInCard';
+import { useWallet } from '../context/WalletContext';
 import { storyPlays } from '../utils/storyMetrics';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
 import { FilterModal } from '../components/FilterModal';
@@ -34,6 +37,7 @@ export const HomeScreen = () => {
   const { theme, tokens } = useTheme();
   const { playStory, setNextStory } = useAudioPlayer();
   const { setLastPlayTab } = useAppContext();
+  const { canPlay } = useWallet();
   const [stories, setStories] = useState([]);
   const [progress, setProgress] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,6 +99,8 @@ export const HomeScreen = () => {
 
   const openStory = (s) => navigation.navigate('StoryDetail', { storyId: s.id, story: s });
   const play = async (s) => {
+    // A locked paid episode opens its page, where it can be unlocked.
+    if (!canPlay(s)) return openStory(s);
     setLastPlayTab('home');
     setNextStory(() => {
       const idx = stories.findIndex((st) => st.id === s.id);
@@ -125,6 +131,7 @@ export const HomeScreen = () => {
       <View style={s.header}>
         <AppText variant="displayM"><AppText variant="displayM" color="accent">Story</AppText>Byte</AppText>
         <View style={s.headerIcons}>
+          <CoinChip />
           <Pressable onPress={() => navigation.navigate('Browse')} hitSlop={8}><Icon name="search" /></Pressable>
           <HeaderNotificationButton size={22} color={theme.text} />
           <Pressable onPress={() => navigation.navigate('Settings')} hitSlop={8}><Icon name="gear" /></Pressable>
@@ -171,6 +178,8 @@ export const HomeScreen = () => {
           contentContainerStyle={{ paddingBottom: 150 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.accent} />}
         >
+          <CheckInCard />
+
           {progress.length ? (
             <View style={s.continueSection}>
               <AppText variant="h3" style={[s.sectionTitle, { paddingHorizontal: 16 }]}>Continue listening</AppText>
