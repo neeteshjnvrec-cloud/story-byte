@@ -934,16 +934,15 @@ async function main() {
       title: metadata.title, description: plan.description, youtubeUrl: published.youtube?.url,
       thumbnailPath, campaign: APP_CAMPAIGN,
     });
-    // Also into the app, as a paid episode listeners unlock with coins. Never
+    // Also into the app, as its text plus the YouTube link (no files). Never
     // fails the run: YouTube and Facebook already have it.
     try {
       published.app = await publishEpisodeToApp({
-        root: ROOT, seriesTitle: title, season, episode,
+        seriesTitle: title, season, episode,
         title: KATHA ? plan.title : metadata.title,
-        description: plan.description,
+        description: plan.description, text,
         genre: /devot|bhakti|katha|mytholog|spiritual/i.test(genre) ? 'devotional' : String(genre).split(/[,\s]+/)[0].toLowerCase(),
-        language, durationSec: audioDuration, audioPath,
-        coverSource: scenes[Math.floor(scenes.length / 2)].file,
+        language, durationSec: audioDuration,
         youtubeUrl: published.youtube?.url,
       });
     } catch (error) {

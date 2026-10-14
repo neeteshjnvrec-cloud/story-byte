@@ -80,3 +80,12 @@ ios/build/google-services.json
 
 # Deity Portraits candidates (scripts/deity-portraits.js) — a run artifact, never committed
 /deity-candidates/
+
+# Posting media: Instagram/Facebook fetch these from Hosting during the run
+# that makes them, then keep their own copies. Never needed again.
+/public/instagram/
+# Episode audio and scene art: only used to render the video, which YouTube
+# and Facebook keep. The app gets the episode's text and YouTube link.
+/public/episodes/**/scene-*.jpg
+/public/episodes/**/audio.mp3
+/public/episodes/**/cover.jpg
