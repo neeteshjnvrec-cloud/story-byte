@@ -288,43 +288,45 @@ function readLongVideos(pubDir) {
 
 // --- video player ------------------------------------------------------------
 //
-// YouTube's embedded player (IFrame API), under a StoryByte loading screen
-// (logo, spinner, the video's own picture blurred behind) until YouTube says
-// the player is ready, instead of a black box. Used by the video pages
-// page (video.html) and by watch.html, the page the app's video screen loads.
+// YouTube's embedded player (IFrame API). Until YouTube says the player is
+// ready, the video's own thumbnail shows with a small spinner, instead of a
+// black box. Used by the video page (video.html) and by watch.html, the page
+// the app's story details screen loads.
 
 const PLAYER_CSS = `
-    .player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #120c08; border-radius: 16px; overflow: hidden; }
+    .player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 16px; overflow: hidden; }
     .player iframe, .player #yt-player { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-    .loader { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-      background: #120c08 center / cover no-repeat; color: #fff; transition: opacity .35s ease; }
-    .loader::before { content: ""; position: absolute; inset: 0; background: inherit; filter: blur(14px) brightness(.45); transform: scale(1.15); }
-    .loader > * { position: relative; }
-    .mark { position: relative; width: 64px; height: 64px; display: grid; place-items: center; }
-    .mark b { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font: 800 26px/1 system-ui, sans-serif; color: #fff;
-      background: linear-gradient(135deg, #B5613A, #E0913A); box-shadow: 0 6px 24px rgba(224, 145, 58, .45); }
-    .mark i { position: absolute; inset: 0; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .18); border-top-color: #E0913A; animation: spin .9s linear infinite; }
-    .loader small { font: 600 14px/1.3 system-ui, "Noto Sans Devanagari", sans-serif; letter-spacing: .3px; opacity: .9; }
+    .loader { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center;
+      background: #000 center / cover no-repeat; transition: opacity .35s ease; }
+    .loader::before { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, .18); }
+    .spin { position: relative; width: 44px; height: 44px; border-radius: 50%;
+      border: 4px solid rgba(255, 255, 255, .35); border-top-color: #fff; animation: spin .9s linear infinite; }
     .player.ready .loader { opacity: 0; pointer-events: none; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @media (prefers-reduced-motion: reduce) { .mark i { animation-duration: 3s; } }
+    @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 3s; } }
 `;
 
-const loaderMarkup = (thumb) => `<div class="loader"${thumb ? ` style="background-image:url('${esc(thumb)}')"` : ''}>
-        <span class="mark"><i></i><b>S</b></span>
-        <small>StoryByte · कथा लोड हो रही है…</small>
-      </div>`;
+const LOADER_MARKUP = '<div class="loader"><i class="spin"></i></div>';
 
-// startPlayer(box): builds the YouTube player inside `box` (.player with
-// data-id, data-autoplay) and fades the loader out once it's ready, or after
+// startPlayer(box): shows the video's thumbnail in the loader (the sharp
+// maxresdefault when YouTube made one, else hqdefault, which always exists),
+// builds the YouTube player inside `box` (.player with data-id,
+// data-autoplay) and fades the loader out once the player is ready, or after
 // 10 s whatever happens, so a slow network never leaves it covering the video.
 const PLAYER_SCRIPT = `
     function startPlayer(box) {
+      var id = box.dataset.id, loader = box.querySelector('.loader');
+      var thumb = function (name) { return 'https://i.ytimg.com/vi/' + id + '/' + name + '.jpg'; };
+      loader.style.backgroundImage = "url('" + thumb('hqdefault') + "')";
+      var hd = new Image();
+      // A missing maxresdefault comes back as a 120px placeholder.
+      hd.onload = function () { if (hd.naturalWidth > 120) loader.style.backgroundImage = "url('" + hd.src + "')"; };
+      hd.src = thumb('maxresdefault');
       var done = function () { box.classList.add('ready'); };
       setTimeout(done, 10000);
       var make = function () {
         new YT.Player('yt-player', {
-          videoId: box.dataset.id, host: 'https://www.youtube.com',
+          videoId: id, host: 'https://www.youtube.com',
           playerVars: { autoplay: box.dataset.autoplay === '1' ? 1 : 0, playsinline: 1, rel: 0, origin: location.origin },
           events: { onReady: function (e) { if (box.dataset.autoplay === '1') e.target.playVideo(); setTimeout(done, 200); }, onError: done }
         });
@@ -397,7 +399,7 @@ ${BASE_CSS}${PLAYER_CSS}
     </header>
 
     <div class="player" data-autoplay="0">
-      ${loaderMarkup('')}
+      ${LOADER_MARKUP}
       <div id="yt-player"></div>
     </div>
 
@@ -433,7 +435,6 @@ ${BASE_CSS}${PLAYER_CSS}
 
     if (id.length === 11) {
       box.dataset.id = id;
-      box.querySelector('.loader').style.backgroundImage = "url('https://i.ytimg.com/vi/" + id + "/mqdefault.jpg')";
       $('on-youtube').href = 'https://youtu.be/' + id;
       startPlayer(box);
     }
@@ -497,14 +498,14 @@ function renderWatchPage() {
   <link rel="preconnect" href="https://www.youtube.com">
   <link rel="preconnect" href="https://i.ytimg.com">
   <style>
-    html, body { margin: 0; height: 100%; background: #120c08; overflow: hidden; }
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
 ${PLAYER_CSS}
     .player { position: fixed; inset: 0; aspect-ratio: auto; border-radius: 0; }
   </style>
 </head>
 <body>
   <div class="player" data-autoplay="1">
-    ${loaderMarkup('')}
+    ${LOADER_MARKUP}
     <div id="yt-player"></div>
   </div>
   <script>${PLAYER_SCRIPT}
@@ -512,7 +513,6 @@ ${PLAYER_CSS}
     var box = document.querySelector('.player');
     if (id.length === 11) {
       box.dataset.id = id;
-      box.querySelector('.loader').style.backgroundImage = "url('https://i.ytimg.com/vi/" + id + "/mqdefault.jpg')";
       startPlayer(box);
     }
   </script>
