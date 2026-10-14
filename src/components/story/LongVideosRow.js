@@ -1,9 +1,10 @@
 // Home's "Long stories" row: the full-length episodes and weekly kathas,
 // which live on YouTube. The list is the website's long-videos.json (links
 // and text only, rebuilt on every site deploy by scripts/lib/site-index.js);
-// tapping a card opens the video in YouTube.
+// tapping a card plays the video in the app (screens/VideoScreen.js).
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Pressable, Image, StyleSheet, Linking } from 'react-native';
+import { View, ScrollView, Pressable, Image, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../ui/AppText';
 import { Icon } from '../ui/Icon';
@@ -15,14 +16,15 @@ const minutes = (sec) => (sec > 0 ? `${Math.round(sec / 60)} min` : '');
 
 function VideoCard({ video }) {
   const { theme } = useTheme() || { theme: {} };
+  const navigation = useNavigation();
   // maxresdefault is the sharpest but isn't made for every video; mqdefault always is.
   const [thumb, setThumb] = useState(video.thumbnailHd || video.thumbnail);
   return (
     <Pressable
-      onPress={() => Linking.openURL(video.youtubeUrl).catch(() => {})}
+      onPress={() => navigation.navigate('Video', { video })}
       style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}
       accessibilityRole="button"
-      accessibilityLabel={`${video.title}, watch on YouTube`}
+      accessibilityLabel={`${video.title}, play video`}
     >
       <View>
         <Image
@@ -70,7 +72,7 @@ export function LongVideosRow({ titleStyle }) {
     <View style={styles.section}>
       <View style={styles.head}>
         <AppText variant="h3" style={titleStyle}>Long stories</AppText>
-        <AppText variant="caption" color="textSecondary" style={{ marginBottom: 12 }}>Full episodes · opens YouTube</AppText>
+        <AppText variant="caption" color="textSecondary" style={{ marginBottom: 12 }}>Full episodes · video</AppText>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {videos.map((v) => <VideoCard key={v.id} video={v} />)}
