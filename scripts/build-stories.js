@@ -35,6 +35,7 @@ const { bakeInCaptions } = require('./lib/caption-frames');
 const { REEL_MAX_SEC, clipScenes, clipAudio } = require('./lib/video-clip');
 const { postStoryCarousel, postStoryReel, commentOnInstagram } = require('./lib/instagram');
 const { postStoryToFacebook, postStoryVideo, commentOnFacebook } = require('./lib/facebook');
+const { postStoryToTelegram } = require('./lib/telegram');
 const { postStoryToYouTube, commentOnYouTube } = require('./lib/youtube');
 const { occasionPhrase } = require('./occasions');
 const { kathaOfDay, nextKatha, describeKatha, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
@@ -827,6 +828,8 @@ async function run() {
       // need the Firebase Hosting deploy above to have happened first.
       const ytVideo = p.shortPath || (p.videoUrl && path.join(PUB, 'instagram', mediaKey(p.id), 'story.mp4'));
       const ytPost = ytVideo ? await postStoryToYouTube(socialStory, ytVideo) : { posted: false };
+      // The Telegram channel (lib/telegram.js; skips until it's set up).
+      await postStoryToTelegram(socialStory, { videoPath: ytVideo, coverPath: path.join(PUB, 'covers', `${p.id}.jpg`) });
 
       // A question as the first comment on each Short, to start the replies
       // Shorts/Reels ranking weighs heavily. Each needs its own permission

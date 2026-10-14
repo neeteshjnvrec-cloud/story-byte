@@ -39,6 +39,7 @@ const { iconographyFor } = require('./lib/iconography');
 const { renderEpisodeThumbnail, THUMB_WIDTH, THUMB_HEIGHT } = require('./lib/episode-thumbnail');
 const { uploadEpisodeToYouTube } = require('./lib/youtube');
 const { uploadEpisodeToFacebook } = require('./lib/facebook');
+const { postEpisodeToTelegram } = require('./lib/telegram');
 const { pause, RETRY_WAITS_SEC } = require('./lib/narrate');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synthBackup } = require('./lib/backup-voice');
@@ -928,6 +929,10 @@ async function main() {
     published.facebook = await uploadEpisodeToFacebook({
       videoPath, thumbnailPath, title: metadata.title,
       description: metadata.description.split(APP_LINK).join(appLink('facebook', APP_CAMPAIGN)),
+    });
+    published.telegram = await postEpisodeToTelegram({
+      title: metadata.title, description: plan.description, youtubeUrl: published.youtube?.url,
+      thumbnailPath, campaign: APP_CAMPAIGN,
     });
     // Also into the app, as a paid episode listeners unlock with coins. Never
     // fails the run: YouTube and Facebook already have it.

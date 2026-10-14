@@ -85,6 +85,9 @@ jobs:
           EPISODE_PRICE_COINS: ${{ vars.EPISODE_PRICE_COINS }}
           # Free backup voice when Microsoft's edge-tts refuses (scripts/lib/gemini-tts.js).
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Optional: post to a Telegram channel (CHANNEL-IDENTITY.md → Telegram).
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL: ${{ vars.TELEGRAM_CHANNEL }}
           SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
           SARVAM_SPEAKER: ${{ vars.SARVAM_SPEAKER }}
           EPISODE_TITLE: ${{ inputs.title }}

@@ -21,6 +21,9 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "predeploy": [
+      "node \"$PROJECT_DIR/scripts/build-site-index.js\""
     ]
   },
   "emulators": {
