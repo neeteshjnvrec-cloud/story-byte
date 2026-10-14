@@ -105,6 +105,10 @@ export const StoryDetailScreen = () => {
   const { canPlay, unlock, balance, premiumAudioUrl } = useWallet();
   const [unlocking, setUnlocking] = useState(false);
   const [story, setStory] = useState(initialStory || null);
+  // Whether this story has its Firestore record. A video from the website's
+  // list (before scripts/sync-video-stories.js has run) doesn't, and likes,
+  // ratings, comments and share counts can't be saved without one.
+  const [inDb, setInDb] = useState(!isVideoStory(initialStory));
   const [loading, setLoading] = useState(!initialStory);
   const [commentVisible, setCommentVisible] = useState(false);
   const { width: screenWidth } = useWindowDimensions();
@@ -125,6 +129,7 @@ export const StoryDetailScreen = () => {
     (async () => {
       try {
         const full = await apiService.getStory(storyId);
+        if (full) setInDb(true);
         if (full) {
           setStory(full);
           // Publish the fresh aggregates to the shared store so the feed picks
@@ -180,7 +185,7 @@ export const StoryDetailScreen = () => {
   // recordShare in AppContext.)
   const handleShare = async () => {
     const { shared } = await shareStory(story);
-    if (shared) recordShare(story);
+    if (shared && inDb) recordShare(story);
   };
 
   const handleUnlock = () => {
@@ -283,14 +288,14 @@ export const StoryDetailScreen = () => {
             </View>
           ) : null}
         </Pressable>
-        <Pressable hitSlop={10} onPress={() => setCommentVisible(true)} style={styles.headBtn}>
+        {!inDb ? <View style={styles.headBtn} /> : <Pressable hitSlop={10} onPress={() => setCommentVisible(true)} style={styles.headBtn}>
           <Icon name="chat" />
           {story?.commentsCount > 0 ? (
             <View style={[styles.headBadge, { backgroundColor: theme.accent }]}>
               <AppText variant="micro" color="onAccent" style={{ paddingHorizontal: 4 }}>{story.commentsCount}</AppText>
             </View>
           ) : null}
-        </Pressable>
+        </Pressable>}
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 140 }} showsVerticalScrollIndicator={false}>
         {videoId
@@ -336,12 +341,14 @@ export const StoryDetailScreen = () => {
           {/* Heart = like, bookmark = save — matching the community feed. The
               heart used to toggle favorites here, so a like made on the feed
               looked like it had been lost when you opened the story. */}
-          <Pressable onPress={handleLike} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Icon name={liked ? 'heart-fill' : 'heart'} color={liked ? theme.error : theme.text} />
-            {likesCount > 0 ? (
-              <AppText variant="micro" color="textSecondary" style={styles.iconBtnCount}>{fmtPlays(likesCount)}</AppText>
-            ) : null}
-          </Pressable>
+          {inDb ? (
+            <Pressable onPress={handleLike} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Icon name={liked ? 'heart-fill' : 'heart'} color={liked ? theme.error : theme.text} />
+              {likesCount > 0 ? (
+                <AppText variant="micro" color="textSecondary" style={styles.iconBtnCount}>{fmtPlays(likesCount)}</AppText>
+              ) : null}
+            </Pressable>
+          ) : null}
           <Pressable onPress={handleFavorite} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <Icon name={saved ? 'bookmark-fill' : 'bookmark'} color={saved ? theme.accent : theme.text} />
           </Pressable>
@@ -368,6 +375,7 @@ export const StoryDetailScreen = () => {
           </View>
         ) : null}
 
+        {inDb ? (
         <View style={styles.section}>
           <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2 }}>
             {myRating > 0 ? 'YOUR RATING' : 'RATE THIS STORY'}
@@ -383,6 +391,7 @@ export const StoryDetailScreen = () => {
             ))}
           </View>
         </View>
+        ) : null}
 
         {/* ---- Transcript with chapters ---- (a video's description is already shown above) */}
         {(story.text || (story.description && !videoId)) && (
@@ -436,7 +445,7 @@ export const StoryDetailScreen = () => {
           </View>
         )}
       </ScrollView>
-      {story && (
+      {story && inDb && (
         <CommentSheet
           story={story}
           visible={commentVisible}

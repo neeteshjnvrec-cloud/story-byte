@@ -18,7 +18,9 @@
  *      story's socialTitle the same way scripts/analyze-social.js does.
  *
  * Idempotent; counters (plays, likes, ratings…) are only set when a video
- * story is first created. Needs FIREBASE_SERVICE_ACCOUNT.
+ * story is first created. Credentials: FIREBASE_SERVICE_ACCOUNT, or a local
+ * functions/firebase-service-account.json (git-ignored), as for
+ * build-story-pages.js.
  *
  * Usage: node scripts/sync-video-stories.js [--dry-run]
  */
@@ -108,16 +110,19 @@ function shortsFromReport(stories) {
   return out;
 }
 
+const LOCAL_KEY = path.join(ROOT, 'functions/firebase-service-account.json');
+
 async function main() {
   const videos = longVideoStories();
   console.log(`📺 ${videos.length} long videos`);
-  if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+  const fromEnv = !!process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (!fromEnv && !fs.existsSync(LOCAL_KEY)) {
     if (DRY) videos.forEach((v) => console.log(`  ${v.id}  ${v.data.title}  (${v.data.text.length} chars of text)`));
-    console.log('No FIREBASE_SERVICE_ACCOUNT; nothing written.');
+    console.log('No FIREBASE_SERVICE_ACCOUNT or functions/firebase-service-account.json; nothing written.');
     return;
   }
-  const saPath = path.join(os.tmpdir(), 'sb-video-sa.json');
-  fs.writeFileSync(saPath, process.env.FIREBASE_SERVICE_ACCOUNT);
+  const saPath = fromEnv ? path.join(os.tmpdir(), 'sb-video-sa.json') : LOCAL_KEY;
+  if (fromEnv) fs.writeFileSync(saPath, process.env.FIREBASE_SERVICE_ACCOUNT);
   try {
     const admin = require('firebase-admin');
     if (!admin.apps.length) admin.initializeApp({ credential: admin.credential.cert(require(saPath)) });
@@ -146,7 +151,7 @@ async function main() {
     }
     console.log(`✅ ${videos.length} video stories ${DRY ? 'checked' : 'synced'}; ${matches.length} Shorts ${DRY ? 'matched' : 'attached'} to their stories`);
   } finally {
-    fs.rmSync(saPath, { force: true });
+    if (fromEnv) fs.rmSync(saPath, { force: true });
   }
 }
 
