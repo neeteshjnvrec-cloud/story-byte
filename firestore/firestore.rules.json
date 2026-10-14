@@ -95,6 +95,163 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
+    // ---------------------------------------------------------------------
+    // Coins. There is no server (Spark plan), so every coin movement is
+    // checked here, against the server clock and server-written data:
+    //   - welcome bonus: a new wallet starts at exactly 10 coins
+    //   - daily check-in: once per IST day, 5 coins, 25 on every 7th day of
+    //     a streak; the streak only grows when yesterday was checked in
+    //   - finishing a story: 2 coins, once per story, at most 5 a day
+    //   - invites: the invitee gets 20 and the inviter 30, once per invitee,
+    //     within 7 days of the invitee's wallet, at most 20 per inviter
+    //   - unlocking a long episode: its server-set price, once
+    // The balance can never go below 0, and the wallet can't be deleted (or
+    // re-created for another welcome bonus).
+    // ---------------------------------------------------------------------
+    function istDay() { return int((request.time.toMillis() + 19800000) / 86400000); }
+    function walletPath(uid) { return /databases/$(database)/documents/wallets/$(uid); }
+    function storyDoc(storyId) { return get(/databases/$(database)/documents/stories/$(storyId)).data; }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function nowBalance() { return request.resource.data.balance; }
+    function wasBalance() { return resource.data.balance; }
+
+    function isPaidEpisode(storyId) {
+      return exists(/databases/$(database)/documents/stories/$(storyId))
+        && storyDoc(storyId).get('isLongEpisode', false) == true
+        && storyDoc(storyId).get('isCommunityStory', false) != true
+        && storyDoc(storyId).get('priceCoins', 0) is int
+        && storyDoc(storyId).get('priceCoins', 0) > 0;
+    }
+
+    function validNewWallet(uid) {
+      let w = request.resource.data;
+      return w.keys().hasOnly(['balance', 'streak', 'lastCheckInDay', 'finishDay', 'finishCount', 'inviteCode',
+                               'invitedBy', 'inviteCount', 'createdAt', 'lastUnlock', 'lastFinish'])
+        && w.balance == 10 && w.streak == 0 && w.lastCheckInDay == 0
+        && w.finishDay == 0 && w.finishCount == 0 && w.inviteCount == 0
+        && w.invitedBy == null && w.lastUnlock == null && w.lastFinish == null
+        && w.createdAt == request.time
+        && w.inviteCode is string && w.inviteCode.matches('^[A-Z0-9]{6,10}$')
+        && getAfter(/databases/$(database)/documents/inviteCodes/$(w.inviteCode)).data.uid == uid;
+    }
+
+    function isCheckIn() {
+      let d = istDay();
+      let w = request.resource.data;
+      return changed().hasOnly(['balance', 'streak', 'lastCheckInDay'])
+        && w.lastCheckInDay == d && resource.data.lastCheckInDay < d
+        && w.streak == (resource.data.lastCheckInDay == d - 1 ? resource.data.streak + 1 : 1)
+        && nowBalance() == wasBalance() + (w.streak % 7 == 0 ? 25 : 5);
+    }
+
+    function isUnlock(uid) {
+      let sid = request.resource.data.lastUnlock;
+      return changed().hasOnly(['balance', 'lastUnlock'])
+        && sid is string && isPaidEpisode(sid)
+        && !exists(/databases/$(database)/documents/wallets/$(uid)/unlocks/$(sid))
+        && existsAfter(/databases/$(database)/documents/wallets/$(uid)/unlocks/$(sid))
+        && nowBalance() == wasBalance() - storyDoc(sid).priceCoins
+        && nowBalance() >= 0;
+    }
+
+    function isFinishReward(uid) {
+      let d = istDay();
+      let w = request.resource.data;
+      let sid = w.lastFinish;
+      return changed().hasOnly(['balance', 'finishDay', 'finishCount', 'lastFinish'])
+        && sid is string
+        && exists(/databases/$(database)/documents/stories/$(sid))
+        && !exists(/databases/$(database)/documents/wallets/$(uid)/finished/$(sid))
+        && existsAfter(/databases/$(database)/documents/wallets/$(uid)/finished/$(sid))
+        && get(/databases/$(database)/documents/users/$(uid)/progress/$(sid)).data.get('progress', 0) >= 0.95
+        && w.finishDay == d
+        && w.finishCount == (resource.data.finishDay == d ? resource.data.finishCount + 1 : 1)
+        && w.finishCount <= 5
+        && nowBalance() == wasBalance() + 2;
+    }
+
+    function isRedeemInvite(uid) {
+      let inviter = request.resource.data.invitedBy;
+      return changed().hasOnly(['balance', 'invitedBy'])
+        && resource.data.invitedBy == null
+        && inviter is string && inviter != uid
+        && request.time < resource.data.createdAt + duration.value(7, 'd')
+        && exists(walletPath(inviter))
+        && getAfter(walletPath(inviter)).data.inviteCount == get(walletPath(inviter)).data.inviteCount + 1
+        && nowBalance() == wasBalance() + 20;
+    }
+
+    // The inviter's side of an invite, written by the invitee in the same
+    // batch as their own redemption.
+    function isInviterCredit(walletUid) {
+      return changed().hasOnly(['balance', 'inviteCount'])
+        && request.resource.data.inviteCount == resource.data.inviteCount + 1
+        && request.resource.data.inviteCount <= 20
+        && nowBalance() == wasBalance() + 30
+        && get(walletPath(request.auth.uid)).data.invitedBy == null
+        && getAfter(walletPath(request.auth.uid)).data.invitedBy == walletUid;
+    }
+
+    match /wallets/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && validNewWallet(uid);
+      allow update: if isSignedIn() && (
+        (isOwner(uid) && (isCheckIn() || isUnlock(uid) || isFinishReward(uid) || isRedeemInvite(uid)))
+        || (!isOwner(uid) && isInviterCredit(uid))
+      );
+      allow delete: if false;
+
+      match /unlocks/{storyId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['price', 'at'])
+          && request.resource.data.at == request.time
+          && isPaidEpisode(storyId)
+          && request.resource.data.price == storyDoc(storyId).priceCoins
+          && getAfter(walletPath(uid)).data.lastUnlock == storyId;
+        allow update, delete: if false;
+      }
+
+      match /finished/{storyId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['at'])
+          && request.resource.data.at == request.time
+          && getAfter(walletPath(uid)).data.lastFinish == storyId;
+        allow update, delete: if false;
+      }
+
+      // Coin history shown in the app. Display only: balances never read it.
+      match /ledger/{entryId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['type', 'amount', 'at', 'storyId', 'title'])
+          && request.resource.data.type in ['welcome', 'checkin', 'finish', 'invite', 'invited', 'unlock']
+          && request.resource.data.amount is int
+          && request.resource.data.at == request.time;
+        allow update, delete: if false;
+      }
+    }
+
+    // Short invite codes -> the inviter's uid. A code is claimed once and
+    // never changes hands.
+    match /inviteCodes/{code} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && code.matches('^[A-Z0-9]{6,10}$')
+        && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Where a paid episode's audio lives: readable only once unlocked.
+    // Written by the pipeline (Admin SDK).
+    match /premium_audio/{storyId} {
+      allow read: if isSignedIn()
+        && exists(/databases/$(database)/documents/wallets/$(request.auth.uid)/unlocks/$(storyId));
+      allow write: if false;
+    }
+
     // Admin-only collections (written by the pipeline via the Admin SDK).
     match /user_activity/{docId}   { allow read, write: if false; }
     match /generation_logs/{docId} { allow read, write: if false; }
