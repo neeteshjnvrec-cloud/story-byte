@@ -12,6 +12,11 @@ import { Share } from 'react-native';
 export const PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=com.storybyte.app';
 
+// The store link tagged as shared from the app, so Play Console
+// (Store listing acquisition → UTM) counts installs that sharing brings.
+export const sharedAppLink = (campaign) =>
+  `${PLAY_STORE_URL}&referrer=${encodeURIComponent(`utm_source=app&utm_medium=share&utm_campaign=${campaign}`)}`;
+
 export async function shareStory(story) {
   if (!story) return { shared: false };
 
@@ -27,7 +32,7 @@ export async function shareStory(story) {
   // `pageUrl` is absent for stories published before pages existed and for any
   // story still `under_review`, so fall back to the store link — a share that
   // points at the app still beats one with no link at all.
-  const link = story.pageUrl || PLAY_STORE_URL;
+  const link = story.pageUrl || sharedAppLink('story_share');
 
   const parts = [author ? `"${title}" — by ${author}` : `"${title}"`];
   if (description) parts.push(description);

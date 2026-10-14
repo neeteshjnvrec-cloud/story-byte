@@ -39,9 +39,11 @@ const { iconographyFor } = require('./lib/iconography');
 const { renderEpisodeThumbnail, THUMB_WIDTH, THUMB_HEIGHT } = require('./lib/episode-thumbnail');
 const { uploadEpisodeToYouTube } = require('./lib/youtube');
 const { uploadEpisodeToFacebook } = require('./lib/facebook');
+const { postEpisodeToTelegram } = require('./lib/telegram');
 const { pause, RETRY_WAITS_SEC } = require('./lib/narrate');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synthBackup } = require('./lib/backup-voice');
+const { publishEpisodeToApp } = require('./lib/publish-episode-to-app');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUBLIC = path.join(ROOT, 'public');
@@ -61,7 +63,10 @@ const KATHA_DEITY = String(process.env.EPISODE_DEITY || '').trim();
 const KATHA_SEARCHES = String(process.env.EPISODE_SEARCHES || '').split('\n').map((s) => s.trim()).filter(Boolean).slice(0, 8);
 const KATHA_HASHTAGS = String(process.env.EPISODE_HASHTAGS || '').split(/\s+/).filter((t) => t.startsWith('#'));
 
-const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.app';
+const { appLink } = require('./lib/app-link');
+// Tagged for YouTube; the Facebook upload swaps in its own (see publish below).
+const APP_CAMPAIGN = KATHA ? 'weekly_katha' : 'long_episode';
+const APP_LINK = appLink('youtube', APP_CAMPAIGN);
 
 const voice = language === 'hi'
   ? 'hi-IN-SwaraNeural'
@@ -922,8 +927,29 @@ async function main() {
       tags: metadata.tags, language, privacy: 'public',
     });
     published.facebook = await uploadEpisodeToFacebook({
-      videoPath, thumbnailPath, title: metadata.title, description: metadata.description,
+      videoPath, thumbnailPath, title: metadata.title,
+      description: metadata.description.split(APP_LINK).join(appLink('facebook', APP_CAMPAIGN)),
     });
+    published.telegram = await postEpisodeToTelegram({
+      title: metadata.title, description: plan.description, youtubeUrl: published.youtube?.url,
+      thumbnailPath, campaign: APP_CAMPAIGN,
+    });
+    // Also into the app, as a paid episode listeners unlock with coins. Never
+    // fails the run: YouTube and Facebook already have it.
+    try {
+      published.app = await publishEpisodeToApp({
+        root: ROOT, seriesTitle: title, season, episode,
+        title: KATHA ? plan.title : metadata.title,
+        description: plan.description,
+        genre: /devot|bhakti|katha|mytholog|spiritual/i.test(genre) ? 'devotional' : String(genre).split(/[,\s]+/)[0].toLowerCase(),
+        language, durationSec: audioDuration, audioPath,
+        coverSource: scenes[Math.floor(scenes.length / 2)].file,
+        youtubeUrl: published.youtube?.url,
+      });
+    } catch (error) {
+      published.app = { error: error.message };
+      console.warn(`Adding the episode to the app failed: ${error.message}`);
+    }
   }
 
   fs.writeFileSync(

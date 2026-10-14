@@ -1,0 +1,36 @@
+name: Deploy Firestore Rules
+
+# Publishes firestore/firestore.rules.json (including the coin rules) to the
+# live database. Run it by hand after the rules change, before releasing an
+# app version that depends on them. The rules' own tests:
+# firestore/tests/coins.rules.test.mjs.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Test the coin rules in the emulator first
+        working-directory: firestore/tests
+        run: |
+          npm install --no-save --no-audit --no-fund @firebase/rules-unit-testing@4 firebase@11 firebase-tools@14
+          npx firebase emulators:exec --only firestore --project demo-coins "node --test coins.rules.test.mjs"
+      - name: Deploy the rules
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx --yes firebase-tools deploy --only firestore:rules --project storybyte-76716 --non-interactive
+          rm -f "$RUNNER_TEMP/sa.json"

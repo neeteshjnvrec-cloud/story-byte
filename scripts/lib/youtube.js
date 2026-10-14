@@ -31,7 +31,8 @@ function client() {
   return google.youtube({ version: 'v3', auth: oauth2Client });
 }
 
-const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.app';
+const { appLink } = require('./app-link');
+const APP_LINK = appLink('youtube', 'daily_short');
 const { teaserLines, followLines } = require('./social-extras');
 
 function buildDescription(story) {

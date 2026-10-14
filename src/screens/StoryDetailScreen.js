@@ -5,6 +5,8 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer } from '../context/AudioContext';
 import { useAppContext } from '../context/AppContext';
+import { useWallet } from '../context/WalletContext';
+import { isPaidStory } from '../services/wallet';
 import { useTheme } from '../hooks/useTheme';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
@@ -98,6 +100,8 @@ export const StoryDetailScreen = () => {
     toggleFavorite, user, getStoryMetrics, toggleLike, recordShare,
     rateStory: rateStoryInContext, receiveStoryDocs, downloads, downloadingIds, toggleDownload,
   } = useAppContext();
+  const { canPlay, unlock, balance, premiumAudioUrl } = useWallet();
+  const [unlocking, setUnlocking] = useState(false);
   const [story, setStory] = useState(initialStory || null);
   const [loading, setLoading] = useState(!initialStory);
   const [commentVisible, setCommentVisible] = useState(false);
@@ -136,6 +140,19 @@ export const StoryDetailScreen = () => {
     }
   }, [story]);
 
+  // A paid long episode: its audio comes from premium_audio once unlocked,
+  // which also lets it be downloaded like any other story.
+  const paid = isPaidStory(story);
+  const locked = paid && !canPlay(story);
+  useEffect(() => {
+    if (!paid || locked || story?.audioUrl) return;
+    let active = true;
+    premiumAudioUrl(story.id).then((url) => {
+      if (active && url) setStory((s) => (s && s.id === story.id ? { ...s, audioUrl: url } : s));
+    });
+    return () => { active = false; };
+  }, [paid, locked, story?.id, story?.audioUrl, premiumAudioUrl]);
+
   const isHere = story && currentStory?.id === story.id;
   // Same numbers as the community feed — one shared store behind both.
   // `rating` is the community average; `myRating` is this user's own score.
@@ -149,8 +166,42 @@ export const StoryDetailScreen = () => {
     if (shared) recordShare(story);
   };
 
+  const handleUnlock = () => {
+    const price = Number(story.priceCoins) || 0;
+    if (balance < price) {
+      return Alert.alert(
+        'Not enough coins',
+        `This episode costs ${price} coins and you have ${balance}. Earn ${price - balance} more with the daily check-in, by finishing stories, or by inviting friends.`,
+        [{ text: 'Not now', style: 'cancel' }, { text: 'Earn coins', onPress: () => navigation.navigate('Coins') }],
+      );
+    }
+    Alert.alert('Unlock this episode?', `"${story.title}" for ${price} coins. You'll have ${balance - price} left, and it stays unlocked for good.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: `Unlock (${price} 🪙)`,
+        onPress: async () => {
+          setUnlocking(true);
+          try {
+            await unlock(story);
+            const url = await premiumAudioUrl(story.id);
+            const opened = url ? { ...story, audioUrl: url } : story;
+            setStory(opened);
+            if (url) await playStory(opened);
+          } catch (e) {
+            if (e?.code === 'not-enough-coins') {
+              Alert.alert('Not enough coins', `You need ${e.needed} more coins for this episode.`);
+            } else {
+              Alert.alert('Couldn’t unlock', 'Please check your connection and try again. No coins were taken.');
+            }
+          } finally { setUnlocking(false); }
+        },
+      },
+    ]);
+  };
+
   const handlePlay = async () => {
     if (!story) return;
+    if (locked) return handleUnlock();
     if (!isHere) await playStory(story); else await playPause();
   };
   const handleLike = async () => {
@@ -167,6 +218,7 @@ export const StoryDetailScreen = () => {
   };
 
   const handleDownload = async () => {
+    if (locked) return handleUnlock();
     if (!story?.audioUrl) return Alert.alert('No audio', 'This story has no audio available yet.');
     try {
       const result = await toggleDownload(story);
@@ -246,9 +298,10 @@ export const StoryDetailScreen = () => {
 
         <View style={styles.actions}>
           <Button
-            title={isHere && isPlaying ? 'Pause' : 'Play'}
-            leftIcon={isHere && isPlaying ? 'pause' : 'play'}
+            title={locked ? `Unlock for ${story.priceCoins} coins` : isHere && isPlaying ? 'Pause' : 'Play'}
+            leftIcon={locked ? 'lock' : isHere && isPlaying ? 'pause' : 'play'}
             onPress={handlePlay}
+            loading={unlocking}
             style={{ flex: 1 }}
           />
           {/* Heart = like, bookmark = save — matching the community feed. The

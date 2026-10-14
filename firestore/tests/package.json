@@ -1,0 +1,8 @@
+{
+  "name": "storybyte-firestore-rules-tests",
+  "private": true,
+  "description": "Emulator tests for firestore/firestore.rules.json (see coins.rules.test.mjs).",
+  "scripts": {
+    "test": "firebase emulators:exec --only firestore --project demo-coins \"node --test coins.rules.test.mjs\""
+  }
+}
