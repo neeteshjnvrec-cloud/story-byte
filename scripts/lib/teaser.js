@@ -15,6 +15,20 @@ const { parseSrt } = require('./subtitles');
 
 const GAP_SEC = 0.6;
 
+// Said (and captioned) after the teaser, so Shorts viewers, who almost never
+// open the description, hear where the full kathas live. Written the way
+// it's searched on Play, so the caption shows the exact word to type.
+const APP_CTA = 'ऐसी सारी कथाएँ ऑडियो में, मुफ़्त — Play Store पर खोजें StoryByte';
+
+/**
+ * What to say after the katha, longest first: the teaser plus the app line,
+ * then the teaser alone. The caller keeps the first that still fits a Short.
+ */
+function endingCandidates(teaser) {
+  const withApp = teaser ? `${teaser.replace(/[\s।.!?]+$/u, '')}। ${APP_CTA}` : APP_CTA;
+  return [...new Set([withApp, teaser].filter(Boolean))];
+}
+
 /** The teaser line when the writer didn't supply one. */
 function fallbackTeaser(next) {
   const who = next?.deity?.hindi || next?.occasion?.name;
@@ -39,7 +53,7 @@ const exactDuration = (file) => {
 async function appendSpokenTeaser({ audio, cues, teaser, narrate, workDir }) {
   if (!teaser) return null;
   try {
-    const spoken = teaser.replace(/[\p{Extended_Pictographic}️]/gu, '').trim();
+    const spoken = teaser.replace(/[\p{Extended_Pictographic}️]/gu, '').replace(/\s+([।,!?])/g, '$1').trim();
     const teaserAudio = path.join(workDir, 'teaser.mp3');
     const teaserSubs = path.join(workDir, 'teaser.srt');
     const result = await narrate(spoken, teaserAudio, teaserSubs);
@@ -63,4 +77,4 @@ async function appendSpokenTeaser({ audio, cues, teaser, narrate, workDir }) {
   }
 }
 
-module.exports = { appendSpokenTeaser, fallbackTeaser, GAP_SEC };
+module.exports = { appendSpokenTeaser, fallbackTeaser, endingCandidates, APP_CTA, GAP_SEC };

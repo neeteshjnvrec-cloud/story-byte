@@ -38,7 +38,7 @@ const { postStoryToFacebook, postStoryVideo, commentOnFacebook } = require('./li
 const { postStoryToYouTube, commentOnYouTube } = require('./lib/youtube');
 const { occasionPhrase } = require('./occasions');
 const { kathaOfDay, nextKatha, describeKatha, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
-const { appendSpokenTeaser, fallbackTeaser } = require('./lib/teaser');
+const { appendSpokenTeaser, fallbackTeaser, endingCandidates } = require('./lib/teaser');
 const { withCloseUps, shortSceneCount } = require('./lib/close-ups');
 const { devotionalTrends } = require('./lib/trends');
 const { iconographyFor } = require('./lib/iconography');
@@ -562,16 +562,20 @@ async function run() {
             // so its captions and scenes are timed on that faster clock.
             const devotional = slot.genre === 'devotional';
             // The video's narration: the katha, then (devotional) tomorrow's
-            // teaser in the same voice — unless that would push it past
-            // the Shorts limit, where the katha alone wins.
+            // teaser and where to find the app, in the same voice. If that
+            // would push it past the Shorts limit, the teaser alone, and
+            // failing that the katha alone.
             let narration = audio;
             const teaserDir = devotional ? fs.mkdtempSync(path.join(os.tmpdir(), 'sb-teaser-')) : null;
-            if (devotional && cues && content.nextTeaser) {
-              const withTeaser = await appendSpokenTeaser({ audio, cues, teaser: content.nextTeaser, narrate: narrateText, workDir: teaserDir });
-              if (withTeaser && fitShort(exactDuration(withTeaser.audioPath)).fits) {
-                narration = withTeaser.audioPath;
-                cues = withTeaser.cues;
-                console.log(`  🔔 Teaser: ${content.nextTeaser}`);
+            if (devotional && cues) {
+              for (const ending of endingCandidates(content.nextTeaser)) {
+                const withTeaser = await appendSpokenTeaser({ audio, cues, teaser: ending, narrate: narrateText, workDir: teaserDir });
+                if (withTeaser && fitShort(exactDuration(withTeaser.audioPath)).fits) {
+                  narration = withTeaser.audioPath;
+                  cues = withTeaser.cues;
+                  console.log(`  🔔 Ending: ${ending}`);
+                  break;
+                }
               }
             }
             // Exact length (durationSec rounds to whole seconds) so the video

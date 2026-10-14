@@ -7,6 +7,7 @@ import { db } from '../services/firebase';
 import { useAppContext } from './AppContext';
 import { useWallet } from './WalletContext';
 import { isPaidStory } from '../services/wallet';
+import { noteStoryFinished } from '../utils/askForRating';
 
 const AudioContext = createContext();
 
@@ -155,6 +156,8 @@ export const AudioProvider = ({ children }) => {
       } else {
         // Listened to the end: 2 coins (once per story, a few a day).
         if (currentStoryRef.current) coinsRef.current.rewardFinish(currentStoryRef.current);
+        // After a few finished stories, Google's in-app rating popup.
+        noteStoryFinished();
         setIsPlaying(false);
         cleanupPlayer();
         // Clear currentStory so clicking play again restarts from beginning

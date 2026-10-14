@@ -30,7 +30,8 @@ async function fbCall(method, path, params) {
   return json;
 }
 
-const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.app';
+const { appLink } = require('./app-link');
+const APP_LINK = appLink('facebook', 'daily_short');
 const { teaserLines, followLines } = require('./social-extras');
 
 // Facebook Page posts support a real clickable link (unlike Instagram

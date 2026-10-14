@@ -10,7 +10,7 @@ import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { PLAY_STORE_URL } from '../utils/shareStory';
+import { sharedAppLink } from '../utils/shareStory';
 import {
   CHECKIN_COINS, STREAK_BONUS_COINS, FINISH_COINS, FINISHES_PER_DAY, INVITEE_COINS, INVITER_COINS,
   INVITE_WINDOW_DAYS, hasCheckedInToday, nextStreak, finishesLeftToday, canRedeemInvite,
@@ -52,7 +52,7 @@ export function CoinsScreen() {
   };
 
   const shareCode = () => Share.share({
-    message: `🙏 StoryByte पर रोज़ नई कथा सुनिए! मेरा invite code ${wallet?.inviteCode} डालें और ${INVITEE_COINS} coins पाएं: ${PLAY_STORE_URL}`,
+    message: `🙏 StoryByte पर रोज़ नई कथा सुनिए! मेरा invite code ${wallet?.inviteCode} डालें और ${INVITEE_COINS} coins पाएं: ${sharedAppLink('invite')}`,
   }).catch(() => {});
 
   const redeem = async () => {

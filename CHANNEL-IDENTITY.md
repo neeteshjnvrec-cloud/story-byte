@@ -118,3 +118,18 @@ Channels.
   Thanks once eligible; the WhatsApp Channel as your own audience; later,
   festival-season sponsorships from puja-samagri and devotional brands. Pitch
   them with your monthly views and audience profile from Analytics.
+
+## Getting viewers into the app
+
+- **Every Short ends by naming the app.** After tomorrow's teaser, the
+  narrator says "ऐसी सारी कथाएँ ऑडियो में, मुफ़्त — Play Store पर खोजें
+  StoryByte", captioned like the rest. If that would make the Short too long,
+  only the teaser is said.
+- **Every app link is tagged with where it was posted** (`scripts/lib/app-link.js`):
+  YouTube, Facebook and Instagram Shorts, the long videos, the story pages,
+  and shares and invites from inside the app. See which ones bring installs
+  in Play Console → **Statistics → Store listing acquisition**, filtered to
+  UTM source / campaign.
+- **The app asks for a rating** with Google's in-app popup after the 3rd
+  finished story (again at the 10th and 25th if it didn't show). Google
+  decides when the popup appears, so it never nags.

@@ -37,7 +37,8 @@ const { withCloseUps, shortSceneCount } = require('./lib/close-ups');
 const { DEITIES, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
 
 const ROOT = path.resolve(__dirname, '..');
-const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.app';
+const { appLink } = require('./lib/app-link');
+const APP_LINK = appLink('youtube', 'remake_short');
 const VARIANT = process.env.REMAKE_VARIANT || new Date().toISOString().slice(0, 10);
 
 function db() {

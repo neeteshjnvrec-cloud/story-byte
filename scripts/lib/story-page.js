@@ -25,7 +25,7 @@ const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
 // Where "Get the app" goes. The app is live on Play; there is no iOS listing yet,
 // so both platforms land here.
 const PLAY_STORE_URL = process.env.PLAY_STORE_URL
-  || 'https://play.google.com/store/apps/details?id=com.storybyte.app';
+  || require('./app-link').appLink('storybyte_web', 'story_page', 'web');
 
 // A profile picture is a base64 data URI on the user doc, so it inflates the page
 // by its full length. Past this, fall back to the initial-letter circle rather
