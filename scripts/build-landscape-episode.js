@@ -909,11 +909,6 @@ async function main() {
     throw new Error('Landscape video rendering failed');
   }
 
-  // The app's cover: one scene picture, kept as cover.jpg. The scene-*.jpg
-  // files themselves aren't committed or deployed (.gitignore, firebase.json).
-  const coverPath = path.join(outputDirectory, 'cover.jpg');
-  fs.copyFileSync(scenes[Math.floor(scenes.length / 2)].file, coverPath);
-
   console.log('Rendering thumbnail...');
   const thumbnailPath = path.join(outputDirectory, 'thumbnail.jpg');
   const art = await thumbnailArt(plan, bible, scenes[Math.floor(scenes.length / 2)].file);
@@ -939,16 +934,15 @@ async function main() {
       title: metadata.title, description: plan.description, youtubeUrl: published.youtube?.url,
       thumbnailPath, campaign: APP_CAMPAIGN,
     });
-    // Also into the app, free, linking to the audio already in public/episodes.
-    // Never fails the run: YouTube and Facebook already have it.
+    // Also into the app, as its text plus the YouTube link (no files). Never
+    // fails the run: YouTube and Facebook already have it.
     try {
       published.app = await publishEpisodeToApp({
-        root: ROOT, seriesTitle: title, season, episode,
+        seriesTitle: title, season, episode,
         title: KATHA ? plan.title : metadata.title,
-        description: plan.description,
+        description: plan.description, text,
         genre: /devot|bhakti|katha|mytholog|spiritual/i.test(genre) ? 'devotional' : String(genre).split(/[,\s]+/)[0].toLowerCase(),
-        language, durationSec: audioDuration, audioPath,
-        coverSource: coverPath,
+        language, durationSec: audioDuration,
         youtubeUrl: published.youtube?.url,
       });
     } catch (error) {

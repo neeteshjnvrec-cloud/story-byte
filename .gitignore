@@ -84,6 +84,8 @@ ios/build/google-services.json
 # Posting media: Instagram/Facebook fetch these from Hosting during the run
 # that makes them, then keep their own copies. Never needed again.
 /public/instagram/
-# Episode scene art: only used to render the video (which YouTube keeps);
-# the app's cover is the episode's cover.jpg.
+# Episode audio and scene art: only used to render the video, which YouTube
+# and Facebook keep. The app gets the episode's text and YouTube link.
 /public/episodes/**/scene-*.jpg
+/public/episodes/**/audio.mp3
+/public/episodes/**/cover.jpg

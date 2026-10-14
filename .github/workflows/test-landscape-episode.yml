@@ -80,7 +80,7 @@ jobs:
           # when a key is set, else Google Cloud TTS with the project's
           # service account (scripts/lib/google-tts.js).
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          # Each published episode also goes into the app, free, by link; "false" turns that off.
+          # "true" also puts each published episode in the app, as its text + YouTube link.
           EPISODES_IN_APP: ${{ vars.EPISODES_IN_APP }}
           # Free backup voice when Microsoft's edge-tts refuses (scripts/lib/gemini-tts.js).
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

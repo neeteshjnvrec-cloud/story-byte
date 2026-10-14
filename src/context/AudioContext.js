@@ -8,6 +8,7 @@ import { useAppContext } from './AppContext';
 import { useWallet } from './WalletContext';
 import { isPaidStory } from '../services/wallet';
 import { noteStoryFinished } from '../utils/askForRating';
+import { isVideoOnly, openOnYouTube } from '../utils/youtube';
 
 const AudioContext = createContext();
 
@@ -181,6 +182,11 @@ export const AudioProvider = ({ children }) => {
   // Play a story with optional starting page
   const playStory = useCallback(async (story, startPage = 0) => {
     try {
+      // A long episode with no audio: watch it on YouTube.
+      if (isVideoOnly(story) && !downloads?.[story.id]?.path) {
+        openOnYouTube(story);
+        return;
+      }
       // A paid long episode plays only once unlocked: its audio URL lives in
       // premium_audio, which the rules let only unlocked listeners read.
       if (isPaidStory(story) && !story.audioUrl && !downloads?.[story.id]?.path) {
