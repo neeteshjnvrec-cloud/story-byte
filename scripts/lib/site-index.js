@@ -70,8 +70,7 @@ function renderSitemap(pages, site = SITE) {
 function renderRobots(site = SITE) {
   return [
     'User-agent: *',
-    // Paid episodes' audio (lib/publish-episode-to-app.js).
-    'Disallow: /premium/',
+    'Allow: /',
     '',
     `Sitemap: ${site.replace(/\/$/, '')}/sitemap.xml`,
     '',
@@ -87,7 +86,7 @@ const card = (p, site) => `
         </span>
       </a>`;
 
-function renderHome(pages, site = SITE, previousVerification = '') {
+function renderHome(pages, site = SITE, previousVerification = '', videos = []) {
   site = site.replace(/\/$/, '');
   const play = appLink('storybyte_web', 'home', 'web');
   const kathas = pages.filter((p) => p.devotional && p.lang === 'hi');
@@ -158,6 +157,16 @@ function renderHome(pages, site = SITE, previousVerification = '') {
     .card-desc { color: var(--muted); font-size: 14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .feature .card-title { font-size: 22px; }
     .feature .card-desc { font-size: 16px; -webkit-line-clamp: 5; }
+    .videos { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
+    .video { flex: 0 0 min(80%, 300px); scroll-snap-align: start; }
+    @media (min-width: 760px) {
+      .videos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; }
+    }
+    .video .thumb { position: relative; }
+    .video img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #000; }
+    .yt { position: absolute; left: 8px; bottom: 8px; background: #e62117; color: #fff; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+    .len { position: absolute; right: 8px; bottom: 8px; background: rgba(0,0,0,.75); color: #fff; font-size: 12px; padding: 1px 6px; border-radius: 4px; }
+    .section-note { color: var(--muted); margin: -8px 0 14px; }
     .get-app { margin-top: 40px; padding: 24px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; text-align: center; }
     footer { margin-top: 32px; color: var(--muted); font-size: 14px; text-align: center; }
   </style>
@@ -184,6 +193,22 @@ ${today ? `
         <span class="btn btn-small" style="align-self:flex-start">▶ अभी सुनें</span>
       </span>
     </a>` : ''}
+${videos.length ? `
+    <h2>पूरी कथाएँ — YouTube पर</h2>
+    <p class="section-note">लंबी कथाएँ और धारावाहिक, पूरे विस्तार से।</p>
+    <div class="videos">${videos.slice(0, 20).map((v) => `
+      <a class="card video" href="${esc(v.youtubeUrl)}" rel="noopener">
+        <span class="thumb">
+          <img src="${esc(v.thumbnail)}" alt="" loading="lazy" width="320" height="180">
+          <span class="yt">▶ YouTube</span>
+          ${v.durationSec > 0 ? `<span class="len">${Math.round(v.durationSec / 60)} मिनट</span>` : ''}
+        </span>
+        <span class="card-body">
+          <span class="card-title">${esc(v.title)}</span>
+          ${v.description ? `<span class="card-desc">${esc(v.description)}</span>` : ''}
+        </span>
+      </a>`).join('')}
+    </div>` : ''}
 ${rest.length ? `
     <h2>सभी कथाएँ</h2>
     <div class="grid">${rest.map((p) => card(p, site)).join('')}
@@ -206,15 +231,73 @@ ${others.length ? `
 `;
 }
 
-/** Writes index.html, sitemap.xml and robots.txt into `pubDir`. */
+const srtEnd = (file) => {
+  try {
+    const times = fs.readFileSync(file, 'utf8').match(/--> (\d+):(\d+):(\d+)[,.](\d+)/g) || [];
+    const m = times.length && times[times.length - 1].match(/(\d+):(\d+):(\d+)/);
+    return m ? Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]) : 0;
+  } catch {
+    return 0;
+  }
+};
+
+/**
+ * Every long episode published on YouTube, newest first, from each
+ * episode's story.json: links and text only. The app's "Long stories" row
+ * reads this as long-videos.json (src/components/story/LongVideosRow.js).
+ */
+function readLongVideos(pubDir) {
+  const root = path.join(pubDir, 'episodes');
+  if (!fs.existsSync(root)) return [];
+  const out = [];
+  for (const series of fs.readdirSync(root)) {
+    const seriesDir = path.join(root, series);
+    if (!fs.statSync(seriesDir).isDirectory()) continue;
+    for (const season of fs.readdirSync(seriesDir).filter((d) => d.startsWith('season-'))) {
+      const seasonDir = path.join(seriesDir, season);
+      if (!fs.statSync(seasonDir).isDirectory()) continue;
+      for (const ep of fs.readdirSync(seasonDir).filter((d) => d.startsWith('episode-'))) {
+        const dir = path.join(seasonDir, ep);
+        let story;
+        try {
+          story = JSON.parse(fs.readFileSync(path.join(dir, 'story.json'), 'utf8'));
+        } catch {
+          continue;
+        }
+        const yt = story.published?.youtube;
+        const id = (String(yt?.url || '').match(/youtu\.be\/([\w-]{11})/) || [])[1] || yt?.videoId;
+        if (!yt?.posted || !id) continue;
+        out.push({
+          id,
+          youtubeUrl: `https://youtu.be/${id}`,
+          thumbnail: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
+          thumbnailHd: `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+          title: String(story.metadata?.title || story.generatedTitle || '').replace(/\s+/g, ' ').trim(),
+          seriesTitle: String(story.seriesTitle || '').trim(),
+          season: String(story.season ?? ''),
+          episode: String(story.episode ?? ''),
+          description: story.description || '',
+          language: story.language || '',
+          durationSec: srtEnd(path.join(dir, 'captions.srt')),
+          publishedAt: story.renderedAt || null,
+        });
+      }
+    }
+  }
+  return out.sort((a, b) => String(b.publishedAt).localeCompare(String(a.publishedAt)));
+}
+
+/** Writes index.html, sitemap.xml, robots.txt and long-videos.json into `pubDir`. */
 function writeSiteIndex(pubDir, site = SITE) {
   const pages = readPages(pubDir);
   const home = path.join(pubDir, 'index.html');
   const previous = fs.existsSync(home) ? meta(fs.readFileSync(home, 'utf8'), 'google-site-verification') : '';
-  fs.writeFileSync(home, renderHome(pages, site, previous));
+  const videos = readLongVideos(pubDir);
+  fs.writeFileSync(home, renderHome(pages, site, previous, videos));
   fs.writeFileSync(path.join(pubDir, 'sitemap.xml'), renderSitemap(pages, site));
   fs.writeFileSync(path.join(pubDir, 'robots.txt'), renderRobots(site));
-  return { pages: pages.length };
+  fs.writeFileSync(path.join(pubDir, 'long-videos.json'), `${JSON.stringify({ updatedAt: new Date().toISOString(), videos }, null, 1)}\n`);
+  return { pages: pages.length, videos: videos.length };
 }
 
-module.exports = { readPages, publishedAt, renderHome, renderSitemap, renderRobots, writeSiteIndex };
+module.exports = { readPages, readLongVideos, publishedAt, renderHome, renderSitemap, renderRobots, writeSiteIndex };

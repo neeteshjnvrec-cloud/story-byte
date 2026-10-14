@@ -10,6 +10,7 @@ import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Hero, RailCard } from '../components/story/StoryCard';
 import { ContinueCard } from '../components/story/ContinueCard';
+import { LongVideosRow } from '../components/story/LongVideosRow';
 import { CoinChip } from '../components/coins/CoinChip';
 import { CheckInCard } from '../components/coins/CheckInCard';
 import { useWallet } from '../context/WalletContext';
@@ -200,6 +201,8 @@ export const HomeScreen = () => {
           {hero ? (
             <Hero story={hero} onPress={() => openStory(hero)} onPlay={() => play(hero)} />
           ) : null}
+
+          <LongVideosRow titleStyle={s.sectionTitle} />
 
           {popular.length > 1 ? (
             <View style={s.section}>

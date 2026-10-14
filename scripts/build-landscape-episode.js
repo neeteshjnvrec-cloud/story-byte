@@ -43,7 +43,6 @@ const { postEpisodeToTelegram } = require('./lib/telegram');
 const { pause, RETRY_WAITS_SEC } = require('./lib/narrate');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synthBackup } = require('./lib/backup-voice');
-const { publishEpisodeToApp } = require('./lib/publish-episode-to-app');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUBLIC = path.join(ROOT, 'public');
@@ -934,21 +933,6 @@ async function main() {
       title: metadata.title, description: plan.description, youtubeUrl: published.youtube?.url,
       thumbnailPath, campaign: APP_CAMPAIGN,
     });
-    // Also into the app, as its text plus the YouTube link (no files). Never
-    // fails the run: YouTube and Facebook already have it.
-    try {
-      published.app = await publishEpisodeToApp({
-        seriesTitle: title, season, episode,
-        title: KATHA ? plan.title : metadata.title,
-        description: plan.description, text,
-        genre: /devot|bhakti|katha|mytholog|spiritual/i.test(genre) ? 'devotional' : String(genre).split(/[,\s]+/)[0].toLowerCase(),
-        language, durationSec: audioDuration,
-        youtubeUrl: published.youtube?.url,
-      });
-    } catch (error) {
-      published.app = { error: error.message };
-      console.warn(`Adding the episode to the app failed: ${error.message}`);
-    }
   }
 
   fs.writeFileSync(

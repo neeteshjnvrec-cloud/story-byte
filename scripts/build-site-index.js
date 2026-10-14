@@ -11,8 +11,8 @@ const path = require('path');
 
 try {
   const { writeSiteIndex } = require('./lib/site-index');
-  const { pages } = writeSiteIndex(path.resolve(__dirname, '..', 'public'));
-  console.log(`🗺️  Home page + sitemap: ${pages} story pages`);
+  const { pages, videos } = writeSiteIndex(path.resolve(__dirname, '..', 'public'));
+  console.log(`🗺️  Home page + sitemap: ${pages} story pages; long-videos.json: ${videos} videos`);
 } catch (e) {
   console.warn(`⚠️  Home page / sitemap not rebuilt: ${e.message}`);
 }
