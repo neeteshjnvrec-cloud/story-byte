@@ -934,8 +934,8 @@ async function main() {
       title: metadata.title, description: plan.description, youtubeUrl: published.youtube?.url,
       thumbnailPath, campaign: APP_CAMPAIGN,
     });
-    // Also into the app, as a paid episode listeners unlock with coins. Never
-    // fails the run: YouTube and Facebook already have it.
+    // Also into the app, free, linking to the audio already in public/episodes.
+    // Never fails the run: YouTube and Facebook already have it.
     try {
       published.app = await publishEpisodeToApp({
         root: ROOT, seriesTitle: title, season, episode,

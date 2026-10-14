@@ -20,7 +20,8 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "episodes/**/*.mp4"
     ],
     "predeploy": [
       "node \"$PROJECT_DIR/scripts/build-site-index.js\""

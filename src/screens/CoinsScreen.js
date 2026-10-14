@@ -81,7 +81,7 @@ export function CoinsScreen() {
         <View style={[styles.balanceCard, { backgroundColor: theme.accent }]}>
           <AppText variant="caption" style={{ color: theme.onAccent, opacity: 0.85 }}>Your coins</AppText>
           <AppText variant="displayL" style={{ color: theme.onAccent }}>🪙 {balance}</AppText>
-          <AppText variant="caption" style={{ color: theme.onAccent, opacity: 0.85 }}>Use them to unlock full-length episodes</AppText>
+          <AppText variant="caption" style={{ color: theme.onAccent, opacity: 0.85 }}>Keep your streak going — rewards coming soon</AppText>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
