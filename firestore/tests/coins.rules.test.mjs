@@ -150,6 +150,35 @@ test('invites: invitee +20 and inviter +30, once, within 7 days', async () => {
   await assertFails(b2.commit());
 });
 
+test("invites: the friend adds the inviter's +30 history entry, only while redeeming", async () => {
+  await seedWallet('inviter', { balance: 0, inviteCode: 'INVITE' });
+  await seedWallet('newbie', { balance: 10 });
+  await seedWallet('other', { balance: 10 });
+  const f = db('newbie');
+  const entry = (id = 'invite_newbie', data = {}) => doc(f, 'wallets', 'inviter', 'ledger', id);
+  const redeem = (id, data) => {
+    const b = writeBatch(f);
+    b.update(doc(f, 'wallets', 'newbie'), { balance: 30, invitedBy: 'inviter' });
+    b.update(doc(f, 'wallets', 'inviter'), { balance: increment(30), inviteCount: increment(1) });
+    b.set(entry(id), { type: 'invite', amount: 30, at: serverTimestamp(), ...data });
+    return b.commit();
+  };
+  // Not on its own, not for more coins, not under another id, not with extra fields.
+  await assertFails(setDoc(entry(), { type: 'invite', amount: 30, at: serverTimestamp() }));
+  await assertFails(redeem('invite_newbie', { amount: 300 }));
+  await assertFails(redeem('invite_someone', {}));
+  await assertFails(redeem('invite_newbie', { title: 'x' }));
+  await assertSucceeds(redeem('invite_newbie', {}));
+  // Once: the friend has now been invited, and the entry can't be rewritten.
+  await assertFails(setDoc(entry(), { type: 'invite', amount: 30, at: serverTimestamp() }));
+  // Another user can't write into the inviter's history either.
+  await assertFails(setDoc(doc(db('other'), 'wallets', 'inviter', 'ledger', 'invite_other'), { type: 'invite', amount: 30, at: serverTimestamp() }));
+  // The inviter can read it.
+  let got;
+  await env.withSecurityRulesDisabled(async (ctx) => { got = (await getDoc(doc(ctx.firestore(), 'wallets', 'inviter', 'ledger', 'invite_newbie'))).data(); });
+  assert.strictEqual(got.amount, 30);
+});
+
 test('history entries and invite codes', async () => {
   const f = db('alice');
   await assertSucceeds(addDoc(collection(f, 'wallets', 'alice', 'ledger'), { type: 'checkin', amount: 5, at: serverTimestamp() }));

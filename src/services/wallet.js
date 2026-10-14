@@ -13,7 +13,7 @@
 
 import {
   collection, doc, getDoc, getDocs, onSnapshot, runTransaction, writeBatch,
-  serverTimestamp, increment, query, orderBy, limit as fbLimit, setDoc,
+  serverTimestamp, increment, query, orderBy, limit as fbLimit, setDoc, where,
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -111,8 +111,26 @@ export async function getUnlockedIds(uid) {
 }
 
 export async function getHistory(uid, max = 30) {
+  await addMissingInviteEntries(uid).catch(() => {});
   const snap = await getDocs(query(collection(db, 'wallets', uid, 'ledger'), orderBy('at', 'desc'), fbLimit(max)));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+/**
+ * Invite credits with no history entry: before a friend's redemption also
+ * wrote the inviter's "Friend joined with your code" entry, the +30 arrived
+ * with nothing in the inviter's history. One entry per invite the wallet
+ * counts but the history doesn't; fixed ids, so two loads can't double them.
+ */
+async function addMissingInviteEntries(uid) {
+  const w = (await getDoc(walletRef(uid))).data();
+  const invites = w?.inviteCount || 0;
+  if (!invites) return;
+  const ledger = collection(db, 'wallets', uid, 'ledger');
+  const have = (await getDocs(query(ledger, where('type', '==', 'invite')))).size;
+  for (let n = have + 1; n <= invites; n++) {
+    await setDoc(doc(ledger, `invite_earlier_${n}`), { type: 'invite', amount: INVITER_COINS, at: serverTimestamp() });
+  }
 }
 
 /** Today's check-in. Returns { coins, streak }, or null if already done today. */
@@ -209,14 +227,27 @@ export async function redeemInvite(uid, rawCode) {
   if (!mine) throw new Error('Your coin wallet isn’t ready yet. Try again in a moment.');
   if (mine.invitedBy) throw new Error('You’ve already used an invite code.');
   if (!canRedeemInvite(mine)) throw new Error(`Invite codes can only be used in your first ${INVITE_WINDOW_DAYS} days.`);
-  const batch = writeBatch(db);
-  batch.update(walletRef(uid), { balance: increment(INVITEE_COINS), invitedBy: inviter });
-  batch.update(walletRef(inviter), { balance: increment(INVITER_COINS), inviteCount: increment(1) });
-  batch.set(ledgerEntry(uid), { type: 'invited', amount: INVITEE_COINS, at: serverTimestamp() });
+  const redeem = (withInviterEntry) => {
+    const batch = writeBatch(db);
+    batch.update(walletRef(uid), { balance: increment(INVITEE_COINS), invitedBy: inviter });
+    batch.update(walletRef(inviter), { balance: increment(INVITER_COINS), inviteCount: increment(1) });
+    batch.set(ledgerEntry(uid), { type: 'invited', amount: INVITEE_COINS, at: serverTimestamp() });
+    // The inviter's history: "Friend joined with your code +30".
+    if (withInviterEntry) {
+      batch.set(doc(db, 'wallets', inviter, 'ledger', `invite_${uid}`), { type: 'invite', amount: INVITER_COINS, at: serverTimestamp() });
+    }
+    return batch.commit();
+  };
   try {
-    await batch.commit();
+    await redeem(true);
   } catch (e) {
-    throw new Error('This invite code can’t be used any more (each friend can invite up to 20 people).');
+    // Rules from before the inviter's entry was allowed: redeem without it
+    // (the inviter's app adds it from their invite count, above).
+    try {
+      await redeem(false);
+    } catch (e2) {
+      throw new Error('This invite code can’t be used any more (each friend can invite up to 20 people).');
+    }
   }
   return INVITEE_COINS;
 }

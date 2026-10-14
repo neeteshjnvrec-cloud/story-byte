@@ -224,11 +224,22 @@ service cloud.firestore {
       // Coin history shown in the app. Display only: balances never read it.
       match /ledger/{entryId} {
         allow read: if isOwner(uid);
-        allow create: if isOwner(uid)
+        allow create: if (isOwner(uid)
           && request.resource.data.keys().hasOnly(['type', 'amount', 'at', 'storyId', 'title'])
           && request.resource.data.type in ['welcome', 'checkin', 'finish', 'invite', 'invited', 'unlock']
           && request.resource.data.amount is int
-          && request.resource.data.at == request.time;
+          && request.resource.data.at == request.time)
+          // The inviter's "Friend joined with your code +30", written by the
+          // friend in the same batch as their redemption: one per friend (the
+          // id is theirs), only while redeeming this inviter's code.
+          || (isSignedIn() && !isOwner(uid)
+          && entryId == 'invite_' + request.auth.uid
+          && request.resource.data.keys().hasOnly(['type', 'amount', 'at'])
+          && request.resource.data.type == 'invite'
+          && request.resource.data.amount == 30
+          && request.resource.data.at == request.time
+          && get(walletPath(request.auth.uid)).data.invitedBy == null
+          && getAfter(walletPath(request.auth.uid)).data.invitedBy == uid);
         allow update, delete: if false;
       }
     }
