@@ -80,6 +80,9 @@ jobs:
           # when a key is set, else Google Cloud TTS with the project's
           # service account (scripts/lib/google-tts.js).
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # "true" adds each published episode to the app as a paid (coins) episode.
+          EPISODES_IN_APP: ${{ vars.EPISODES_IN_APP }}
+          EPISODE_PRICE_COINS: ${{ vars.EPISODE_PRICE_COINS }}
           # Free backup voice when Microsoft's edge-tts refuses (scripts/lib/gemini-tts.js).
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
@@ -123,6 +126,9 @@ jobs:
           # A failed run leaves empty files (e.g. a 0-byte audio.mp3) — never commit those.
           find public/episodes -type f -size 0 -delete 2>/dev/null || true
           git add public/episodes 2>/dev/null || true
+          # The episode's app cover and its paid audio (scripts/lib/publish-episode-to-app.js):
+          # committed so the daily Hosting deploy keeps serving them.
+          git add public/premium public/covers 2>/dev/null || true
           git commit -m "test: render landscape S${{ inputs.season }}E${{ inputs.episode }}" || echo "nothing to commit"
           for delay in 2 4 8 16; do
             git pull --rebase --autostash || true

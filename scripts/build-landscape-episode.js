@@ -42,6 +42,7 @@ const { uploadEpisodeToFacebook } = require('./lib/facebook');
 const { pause, RETRY_WAITS_SEC } = require('./lib/narrate');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synthBackup } = require('./lib/backup-voice');
+const { publishEpisodeToApp } = require('./lib/publish-episode-to-app');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUBLIC = path.join(ROOT, 'public');
@@ -924,6 +925,22 @@ async function main() {
     published.facebook = await uploadEpisodeToFacebook({
       videoPath, thumbnailPath, title: metadata.title, description: metadata.description,
     });
+    // Also into the app, as a paid episode listeners unlock with coins. Never
+    // fails the run: YouTube and Facebook already have it.
+    try {
+      published.app = await publishEpisodeToApp({
+        root: ROOT, seriesTitle: title, season, episode,
+        title: KATHA ? plan.title : metadata.title,
+        description: plan.description,
+        genre: /devot|bhakti|katha|mytholog|spiritual/i.test(genre) ? 'devotional' : String(genre).split(/[,\s]+/)[0].toLowerCase(),
+        language, durationSec: audioDuration, audioPath,
+        coverSource: scenes[Math.floor(scenes.length / 2)].file,
+        youtubeUrl: published.youtube?.url,
+      });
+    } catch (error) {
+      published.app = { error: error.message };
+      console.warn(`Adding the episode to the app failed: ${error.message}`);
+    }
   }
 
   fs.writeFileSync(
