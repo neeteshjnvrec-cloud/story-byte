@@ -103,6 +103,8 @@ jobs:
         run: |
           node build-stories.js
           node build-story-pages.js
+          # Long YouTube videos as app stories, and older Shorts onto their stories.
+          node sync-video-stories.js
 
       # always(): assets already written to public/ must reach the repo even if
       # the generate step failed partway. A Hosting deploy serves only what a

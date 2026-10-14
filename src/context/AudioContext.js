@@ -1,6 +1,6 @@
 // Audio Context for Story Byte — full-featured player
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -8,6 +8,7 @@ import { useAppContext } from './AppContext';
 import { useWallet } from './WalletContext';
 import { isPaidStory } from '../services/wallet';
 import { noteStoryFinished } from '../utils/askForRating';
+import { isVideoStory } from '../utils/videoStory';
 
 const AudioContext = createContext();
 
@@ -181,6 +182,12 @@ export const AudioProvider = ({ children }) => {
   // Play a story with optional starting page
   const playStory = useCallback(async (story, startPage = 0) => {
     try {
+      // A video story has no audio. Screens open its page instead; anything
+      // that still lands here goes to YouTube rather than failing.
+      if (isVideoStory(story)) {
+        if (story.youtubeUrl) Linking.openURL(story.youtubeUrl).catch(() => {});
+        return;
+      }
       // A paid long episode plays only once unlocked: its audio URL lives in
       // premium_audio, which the rules let only unlocked listeners read.
       if (isPaidStory(story) && !story.audioUrl && !downloads?.[story.id]?.path) {

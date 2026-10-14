@@ -8,6 +8,7 @@ import apiService from '../services/api';
 import { loginWithEmail as authServiceLogin, signupWithEmail as authServiceSignup, signOutUser, sendResetEmail } from '../services/auth';
 import { dispatchAudioWorkflow } from '../utils/communityAudioGen';
 import { storyPlays } from '../utils/storyMetrics';
+import { mergeNewestFirst } from '../utils/videoStory';
 import { notificationService } from '../services/notificationService';
 import * as FileSystem from 'expo-file-system/legacy';
 
@@ -615,8 +616,16 @@ export const AppContextProvider = ({ children }) => {
   // Stable identity: CommunityScreen keeps this in an effect dependency array,
   // and a fresh function each render tore down and re-created its Firestore
   // onSnapshot listener on every provider render.
+  // Long YouTube videos as stories, mixed into the Community feed by date.
+  // Kept so the live listener's updates (stories only) keep them in.
+  const videoStoriesRef = useRef([]);
   const fetchCommunityStories = useCallback(async () => {
-    const stories = await apiService.getCommunityStories();
+    const [docs, videos] = await Promise.all([
+      apiService.getCommunityStories(),
+      apiService.getVideoStories().catch(() => videoStoriesRef.current),
+    ]);
+    videoStoriesRef.current = videos;
+    const stories = mergeNewestFirst(docs, videos);
     setCommunityStories(stories);
     receiveStoryDocs(stories);
     return stories;
@@ -626,7 +635,8 @@ export const AppContextProvider = ({ children }) => {
   // the list and the metric store update together — the screen used to hold
   // these in local state, which is why a like made on the feed was invisible
   // everywhere else.
-  const receiveCommunityStories = useCallback((stories) => {
+  const receiveCommunityStories = useCallback((docs) => {
+    const stories = mergeNewestFirst(docs, videoStoriesRef.current);
     setCommunityStories(stories);
     receiveStoryDocs(stories);
   }, [receiveStoryDocs]);

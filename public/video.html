@@ -114,11 +114,16 @@
     function startPlayer(box) {
       var id = box.dataset.id, loader = box.querySelector('.loader');
       var thumb = function (name) { return 'https://i.ytimg.com/vi/' + id + '/' + name + '.jpg'; };
-      loader.style.backgroundImage = "url('" + thumb('hqdefault') + "')";
-      var hd = new Image();
-      // A missing maxresdefault comes back as a 120px placeholder.
-      hd.onload = function () { if (hd.naturalWidth > 120) loader.style.backgroundImage = "url('" + hd.src + "')"; };
-      hd.src = thumb('maxresdefault');
+      if (box.dataset.poster) {
+        // Our own art (a Short's story cover): YouTube's Short thumbnails are letterboxed.
+        loader.style.backgroundImage = "url('" + box.dataset.poster + "')";
+      } else {
+        loader.style.backgroundImage = "url('" + thumb('hqdefault') + "')";
+        var hd = new Image();
+        // A missing maxresdefault comes back as a 120px placeholder.
+        hd.onload = function () { if (hd.naturalWidth > 120) loader.style.backgroundImage = "url('" + hd.src + "')"; };
+        hd.src = thumb('maxresdefault');
+      }
       var done = function () { box.classList.add('ready'); };
       setTimeout(done, 10000);
       var make = function () {

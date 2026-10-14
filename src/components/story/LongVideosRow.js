@@ -1,11 +1,13 @@
 // Home's "Long stories" row: the full-length episodes and weekly kathas,
-// which live on YouTube. The list is the website's long-videos.json (links
-// and text only, rebuilt on every site deploy by scripts/lib/site-index.js);
-// tapping a card opens it on the story details screen, which plays it in
-// YouTube's player (screens/StoryDetailScreen.js).
+// which live on YouTube. They're video stories in Firestore
+// (scripts/sync-video-stories.js), so their page has likes, comments and
+// the rest; until the first sync, the website's long-videos.json stands in.
+// Tapping a card opens its story page, which plays it in YouTube's player
+// (screens/StoryDetailScreen.js).
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Pressable, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import apiService from '../../services/api';
 import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../ui/AppText';
 import { Icon } from '../ui/Icon';
@@ -15,7 +17,7 @@ const CARD_WIDTH = 240;
 
 const minutes = (sec) => (sec > 0 ? `${Math.round(sec / 60)} min` : '');
 
-/** A video as a story the details screen can show (no audio, no Firestore doc). */
+/** A long-videos.json entry as a story (the fallback before the first sync). */
 const asStory = (v) => ({
   id: `yt_${v.id}`,
   storyId: `yt_${v.id}`,
@@ -35,10 +37,11 @@ function VideoCard({ video }) {
   const { theme } = useTheme() || { theme: {} };
   const navigation = useNavigation();
   // maxresdefault is the sharpest but isn't made for every video; mqdefault always is.
-  const [thumb, setThumb] = useState(video.thumbnailHd || video.thumbnail);
+  const fallbackThumb = `https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`;
+  const [thumb, setThumb] = useState(video.coverImage || fallbackThumb);
   return (
     <Pressable
-      onPress={() => { const story = asStory(video); navigation.navigate('StoryDetail', { storyId: story.id, story }); }}
+      onPress={() => navigation.navigate('StoryDetail', { storyId: video.id, story: video })}
       style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}
       accessibilityRole="button"
       accessibilityLabel={`${video.title}, play video`}
@@ -46,7 +49,7 @@ function VideoCard({ video }) {
       <View>
         <Image
           source={{ uri: thumb }}
-          onError={() => { if (thumb !== video.thumbnail) setThumb(video.thumbnail); }}
+          onError={() => { if (thumb !== fallbackThumb) setThumb(fallbackThumb); }}
           style={styles.thumb}
           resizeMode="cover"
         />
@@ -54,9 +57,9 @@ function VideoCard({ video }) {
           <Icon name="play" size={12} color="#fff" />
           <AppText variant="micro" style={{ color: '#fff' }}>YouTube</AppText>
         </View>
-        {minutes(video.durationSec) ? (
+        {minutes(video.duration) ? (
           <View style={styles.duration}>
-            <AppText variant="micro" style={{ color: '#fff' }}>{minutes(video.durationSec)}</AppText>
+            <AppText variant="micro" style={{ color: '#fff' }}>{minutes(video.duration)}</AppText>
           </View>
         ) : null}
       </View>
@@ -77,10 +80,14 @@ export function LongVideosRow({ titleStyle }) {
 
   useEffect(() => {
     let alive = true;
-    fetch(LIST_URL)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (alive && Array.isArray(data?.videos)) setVideos(data.videos.slice(0, 20)); })
-      .catch(() => {});
+    (async () => {
+      let list = await apiService.getVideoStories(20).catch(() => []);
+      if (!list.length) {
+        const data = await fetch(LIST_URL).then((res) => (res.ok ? res.json() : null)).catch(() => null);
+        list = Array.isArray(data?.videos) ? data.videos.slice(0, 20).map(asStory) : [];
+      }
+      if (alive) setVideos(list);
+    })();
     return () => { alive = false; };
   }, []);
 

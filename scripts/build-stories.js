@@ -828,6 +828,11 @@ async function run() {
       // need the Firebase Hosting deploy above to have happened first.
       const ytVideo = p.shortPath || (p.videoUrl && path.join(PUB, 'instagram', mediaKey(p.id), 'story.mp4'));
       const ytPost = ytVideo ? await postStoryToYouTube(socialStory, ytVideo) : { posted: false };
+      // The story's page in the app plays its Short too (StoryDetailScreen).
+      if (ytPost.posted && ytPost.videoId) {
+        await db.collection('stories').doc(p.id).update({ youtubeId: ytPost.videoId, youtubeKind: 'short' })
+          .catch((e) => console.warn(`  ⚠️  Short id not saved on ${p.id}: ${e.message}`));
+      }
       // The Telegram channel (lib/telegram.js; skips until it's set up).
       await postStoryToTelegram(socialStory, { videoPath: ytVideo, coverPath: path.join(PUB, 'covers', `${p.id}.jpg`) });
 

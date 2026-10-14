@@ -308,8 +308,9 @@ const PLAYER_CSS = `
 
 const LOADER_MARKUP = '<div class="loader"><i class="spin"></i></div>';
 
-// startPlayer(box): shows the video's thumbnail in the loader (the sharp
-// maxresdefault when YouTube made one, else hqdefault, which always exists),
+// startPlayer(box): shows a thumbnail in the loader (data-poster if given,
+// else the sharp maxresdefault when YouTube made one, else hqdefault, which
+// always exists),
 // builds the YouTube player inside `box` (.player with data-id,
 // data-autoplay) and fades the loader out once the player is ready, or after
 // 10 s whatever happens, so a slow network never leaves it covering the video.
@@ -317,11 +318,16 @@ const PLAYER_SCRIPT = `
     function startPlayer(box) {
       var id = box.dataset.id, loader = box.querySelector('.loader');
       var thumb = function (name) { return 'https://i.ytimg.com/vi/' + id + '/' + name + '.jpg'; };
-      loader.style.backgroundImage = "url('" + thumb('hqdefault') + "')";
-      var hd = new Image();
-      // A missing maxresdefault comes back as a 120px placeholder.
-      hd.onload = function () { if (hd.naturalWidth > 120) loader.style.backgroundImage = "url('" + hd.src + "')"; };
-      hd.src = thumb('maxresdefault');
+      if (box.dataset.poster) {
+        // Our own art (a Short's story cover): YouTube's Short thumbnails are letterboxed.
+        loader.style.backgroundImage = "url('" + box.dataset.poster + "')";
+      } else {
+        loader.style.backgroundImage = "url('" + thumb('hqdefault') + "')";
+        var hd = new Image();
+        // A missing maxresdefault comes back as a 120px placeholder.
+        hd.onload = function () { if (hd.naturalWidth > 120) loader.style.backgroundImage = "url('" + hd.src + "')"; };
+        hd.src = thumb('maxresdefault');
+      }
       var done = function () { box.classList.add('ready'); };
       setTimeout(done, 10000);
       var make = function () {
@@ -483,7 +489,8 @@ ${BASE_CSS}${PLAYER_CSS}
 /**
  * watch.html: just the player, full screen, for the app's story details
  * screen (src/components/story/YouTubePlayer.js loads /watch?v=<id>).
- * Autoplays, since the listener tapped the video to get here.
+ * Autoplays, since the listener tapped the video to get here, unless
+ * &autoplay=0; &poster= sets the thumbnail shown until the player is ready.
  */
 function renderWatchPage() {
   return `<!doctype html>
@@ -509,8 +516,14 @@ ${PLAYER_CSS}
     <div id="yt-player"></div>
   </div>
   <script>${PLAYER_SCRIPT}
-    var id = (new URLSearchParams(location.search).get('v') || '').replace(/[^\\w-]/g, '').slice(0, 11);
+    var params = new URLSearchParams(location.search);
+    var id = (params.get('v') || '').replace(/[^\\w-]/g, '').slice(0, 11);
     var box = document.querySelector('.player');
+    // ?autoplay=0 waits for a tap (a Short on a story's page); ?poster= is the
+    // thumbnail to show meanwhile, only from our own site.
+    var poster = params.get('poster') || '';
+    if (poster.indexOf(location.origin + '/') === 0) box.dataset.poster = poster.replace(/'/g, '%27');
+    if (params.get('autoplay') === '0') box.dataset.autoplay = '0';
     if (id.length === 11) {
       box.dataset.id = id;
       startPlayer(box);

@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer } from '../context/AudioContext';
+import { isVideoStory } from '../utils/videoStory';
 import { useTheme } from '../hooks/useTheme';
 import apiService from '../services/api';
 import { AppText } from '../components/ui/AppText';
@@ -184,6 +185,7 @@ export const SearchScreen = () => {
   };
 
   const handlePlayStory = async (story) => {
+    if (isVideoStory(story)) return handleStoryPress(story);
     await playStory(story);
     navigation.navigate('Home');
     // Small delay so the Home tab activates before navigating to detail

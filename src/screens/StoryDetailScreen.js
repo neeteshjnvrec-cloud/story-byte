@@ -13,6 +13,7 @@ import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
 import { Cover } from '../components/story/Cover';
 import { YouTubePlayer } from '../components/story/YouTubePlayer';
+import { isVideoStory, shortIdOf } from '../utils/videoStory';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import { CommentSheet } from '../components/comments/CommentSheet';
 import { shareStory } from '../utils/shareStory';
@@ -107,10 +108,13 @@ export const StoryDetailScreen = () => {
   const [loading, setLoading] = useState(!initialStory);
   const [commentVisible, setCommentVisible] = useState(false);
   const { width: screenWidth } = useWindowDimensions();
-  // A long story (Home's "Long stories" row): a YouTube video with no audio
-  // and no Firestore doc. It plays here in YouTube's player, and the
-  // audio-only parts (Play, likes, saving, download, rating, comments) are left out.
-  const videoId = story?.youtubeId || null;
+  // A long video story (scripts/sync-video-stories.js): no audio, so it
+  // plays here in YouTube's player in place of the cover, and Play and
+  // download give way to "Open in YouTube". Likes, saving, rating, comments
+  // and shares work as on any story.
+  const videoId = isVideoStory(story) ? story.youtubeId : null;
+  // A daily story whose Short is on YouTube: the Short plays on its page too.
+  const shortId = shortIdOf(story);
 
   // Chapter state
   const [chapters, setChapters] = useState(null);
@@ -118,7 +122,6 @@ export const StoryDetailScreen = () => {
   const chapterScrollViewRef = useRef(null);
 
   useEffect(() => {
-    if (initialStory?.youtubeId) { setLoading(false); return; }
     (async () => {
       try {
         const full = await apiService.getStory(storyId);
@@ -135,7 +138,7 @@ export const StoryDetailScreen = () => {
 
   // A story playing in the background would talk over the video.
   useEffect(() => {
-    if (initialStory?.youtubeId && isPlaying) playPause();
+    if (isVideoStory(initialStory) && isPlaying) playPause();
     // Only on opening the video.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -177,7 +180,7 @@ export const StoryDetailScreen = () => {
   // recordShare in AppContext.)
   const handleShare = async () => {
     const { shared } = await shareStory(story);
-    if (shared && !videoId) recordShare(story);
+    if (shared) recordShare(story);
   };
 
   const handleUnlock = () => {
@@ -280,14 +283,14 @@ export const StoryDetailScreen = () => {
             </View>
           ) : null}
         </Pressable>
-        {videoId ? <View style={styles.headBtn} /> : <Pressable hitSlop={10} onPress={() => setCommentVisible(true)} style={styles.headBtn}>
+        <Pressable hitSlop={10} onPress={() => setCommentVisible(true)} style={styles.headBtn}>
           <Icon name="chat" />
           {story?.commentsCount > 0 ? (
             <View style={[styles.headBadge, { backgroundColor: theme.accent }]}>
               <AppText variant="micro" color="onAccent" style={{ paddingHorizontal: 4 }}>{story.commentsCount}</AppText>
             </View>
           ) : null}
-        </Pressable>}
+        </Pressable>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 140 }} showsVerticalScrollIndicator={false}>
         {videoId
@@ -312,8 +315,8 @@ export const StoryDetailScreen = () => {
 
         <AppText variant="bodyL" color="textSecondary" style={{ marginTop: 12, lineHeight: 25 }}>{story.description}</AppText>
 
-        {videoId ? (
-          <View style={styles.actions}>
+        <View style={styles.actions}>
+          {videoId ? (
             <Button
               title="Open in YouTube"
               variant="ghost"
@@ -321,16 +324,15 @@ export const StoryDetailScreen = () => {
               onPress={() => Linking.openURL(story.youtubeUrl || `https://youtu.be/${videoId}`).catch(() => {})}
               style={{ flex: 1 }}
             />
-          </View>
-        ) : (
-        <View style={styles.actions}>
-          <Button
-            title={locked ? `Unlock for ${story.priceCoins} coins` : isHere && isPlaying ? 'Pause' : 'Play'}
-            leftIcon={locked ? 'lock' : isHere && isPlaying ? 'pause' : 'play'}
-            onPress={handlePlay}
-            loading={unlocking}
-            style={{ flex: 1 }}
-          />
+          ) : (
+            <Button
+              title={locked ? `Unlock for ${story.priceCoins} coins` : isHere && isPlaying ? 'Pause' : 'Play'}
+              leftIcon={locked ? 'lock' : isHere && isPlaying ? 'pause' : 'play'}
+              onPress={handlePlay}
+              loading={unlocking}
+              style={{ flex: 1 }}
+            />
+          )}
           {/* Heart = like, bookmark = save — matching the community feed. The
               heart used to toggle favorites here, so a like made on the feed
               looked like it had been lost when you opened the story. */}
@@ -343,14 +345,29 @@ export const StoryDetailScreen = () => {
           <Pressable onPress={handleFavorite} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <Icon name={saved ? 'bookmark-fill' : 'bookmark'} color={saved ? theme.accent : theme.text} />
           </Pressable>
-          <Pressable onPress={handleDownload} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Icon name={downloads[story?.id]?.path ? 'check-circle' : 'download'} />
-            {downloadingIds.has(story?.id) && <ActivityIndicator size={14} color={theme.accent} style={{ position: 'absolute' }} />}
-          </Pressable>
+          {videoId ? null : (
+            <Pressable onPress={handleDownload} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Icon name={downloads[story?.id]?.path ? 'check-circle' : 'download'} />
+              {downloadingIds.has(story?.id) && <ActivityIndicator size={14} color={theme.accent} style={{ position: 'absolute' }} />}
+            </Pressable>
+          )}
         </View>
-        )}
 
-        {videoId ? null : (
+        {shortId ? (
+          <View style={styles.section}>
+            <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 12 }}>WATCH THE SHORT</AppText>
+            <YouTubePlayer
+              videoId={shortId}
+              vertical
+              width={Math.min(screenWidth - 40, 280)}
+              radius={18}
+              poster={story.coverImage}
+              autoplay={false}
+              style={{ alignSelf: 'center' }}
+            />
+          </View>
+        ) : null}
+
         <View style={styles.section}>
           <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2 }}>
             {myRating > 0 ? 'YOUR RATING' : 'RATE THIS STORY'}
@@ -366,7 +383,6 @@ export const StoryDetailScreen = () => {
             ))}
           </View>
         </View>
-        )}
 
         {/* ---- Transcript with chapters ---- (a video's description is already shown above) */}
         {(story.text || (story.description && !videoId)) && (
@@ -420,7 +436,7 @@ export const StoryDetailScreen = () => {
           </View>
         )}
       </ScrollView>
-      {story && !videoId && (
+      {story && (
         <CommentSheet
           story={story}
           visible={commentVisible}

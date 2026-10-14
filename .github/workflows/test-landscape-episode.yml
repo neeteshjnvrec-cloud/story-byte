@@ -138,7 +138,7 @@ jobs:
       # site deploy rebuilds long-videos.json from the episodes' story.json.
       # Runs after the push above pulled in main, so it never deploys an
       # older copy of the site.
-      - name: Update the website (app's Long stories list)
+      - name: Update the website and the app's video stories
         if: success() && inputs.publish
         continue-on-error: true
         env:
@@ -148,3 +148,5 @@ jobs:
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
           GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx --yes firebase-tools deploy --only hosting --project storybyte-76716 --non-interactive
           rm -f "$RUNNER_TEMP/sa.json"
+          # The new episode as an app story too (likes, comments, Community feed).
+          node scripts/sync-video-stories.js

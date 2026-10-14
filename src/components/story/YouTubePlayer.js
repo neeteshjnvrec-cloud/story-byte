@@ -12,11 +12,11 @@ const PLAYER_BG = '#000';
 
 // Shown while the watch page itself loads: the same thumbnail and spinner
 // the page then shows until YouTube's player is ready.
-function PlayerLoading({ videoId }) {
+function PlayerLoading({ videoId, poster }) {
   return (
     <View style={[StyleSheet.absoluteFill, styles.loading]}>
       <Image
-        source={{ uri: `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg` }}
+        source={{ uri: poster || `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg` }}
         style={StyleSheet.absoluteFill}
         resizeMode="cover"
       />
@@ -25,14 +25,26 @@ function PlayerLoading({ videoId }) {
   );
 }
 
-export function YouTubePlayer({ videoId, width, radius = 0, style }) {
+/**
+ * vertical: a Short (9:16) instead of a 16:9 video.
+ * poster: the thumbnail until the video is ready (our own story cover for a
+ *   Short, since YouTube's Short thumbnails are letterboxed); YouTube's
+ *   thumbnail otherwise.
+ * autoplay: start playing as soon as it's ready (off for a Short on a story
+ *   page, where the story's audio may be playing).
+ */
+export function YouTubePlayer({ videoId, width, radius = 0, style, vertical = false, poster, autoplay = true }) {
+  const height = Math.round(vertical ? (width * 16) / 9 : (width * 9) / 16);
+  const params = [`v=${encodeURIComponent(videoId)}`];
+  if (!autoplay) params.push('autoplay=0');
+  if (poster) params.push(`poster=${encodeURIComponent(poster)}`);
   return (
-    <View style={[{ width, height: Math.round((width * 9) / 16), borderRadius: radius, overflow: 'hidden', backgroundColor: PLAYER_BG }, style]}>
+    <View style={[{ width, height, borderRadius: radius, overflow: 'hidden', backgroundColor: PLAYER_BG }, style]}>
       <WebView
-        source={{ uri: `${PLAYER_PAGE}?v=${encodeURIComponent(videoId)}` }}
+        source={{ uri: `${PLAYER_PAGE}?${params.join('&')}` }}
         style={{ flex: 1, backgroundColor: PLAYER_BG }}
         startInLoadingState
-        renderLoading={() => <PlayerLoading videoId={videoId} />}
+        renderLoading={() => <PlayerLoading videoId={videoId} poster={poster} />}
         allowsFullscreenVideo
         allowsInlineMediaPlayback
         mediaPlaybackRequiresUserAction={false}

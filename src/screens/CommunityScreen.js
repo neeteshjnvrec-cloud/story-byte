@@ -40,6 +40,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAudioPlayer } from '../context/AudioContext';
 import { Image } from 'expo-image';
 import { collection, query, where, onSnapshot, orderBy, limit as fbLimit } from 'firebase/firestore';
+import { isVideoStory } from '../utils/videoStory';
 import { db } from '../services/firebase';
 
 // Relative time formatter
@@ -169,6 +170,8 @@ export function CommunityScreen() {
   };
 
   const handlePlay = async (story) => {
+    // A video story plays on its page.
+    if (isVideoStory(story)) return navigation.navigate('StoryDetail', { storyId: story.id || story.storyId, story });
     setLastPlayTab('community');
     // Provide the autoplay next-story callback: find this story's index in the
     // feed and return the next one (wrapping is fine — unlikely in a 50-item

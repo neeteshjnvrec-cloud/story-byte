@@ -140,8 +140,22 @@ class ApiService {
     const d = await getDoc(ref);
     if (!d.exists()) return null;
     const data = d.data();
-    if (data.status && data.status !== 'published') return null;
+    // 'video': a long YouTube video as a story (scripts/sync-video-stories.js).
+    if (data.status && data.status !== 'published' && data.status !== 'video') return null;
     return { id: d.id, ...data };
+  }
+
+  // Long YouTube videos as stories, newest first (status 'video', which
+  // keeps them out of older app versions' feeds — see sync-video-stories.js).
+  async getVideoStories(max = 30) {
+    const q = query(
+      collection(db, 'stories'),
+      where('status', '==', 'video'),
+      orderBy('createdAt', 'desc'),
+      fbLimit(max)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   }
 
   // Returns { categories: [{ name, count, totalPlays }] } aggregated from the

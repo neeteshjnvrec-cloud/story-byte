@@ -14,6 +14,7 @@ import { LongVideosRow } from '../components/story/LongVideosRow';
 import { CoinChip } from '../components/coins/CoinChip';
 import { CheckInCard } from '../components/coins/CheckInCard';
 import { useWallet } from '../context/WalletContext';
+import { isVideoStory } from '../utils/videoStory';
 import { storyPlays } from '../utils/storyMetrics';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
 import { FilterModal } from '../components/FilterModal';
@@ -100,8 +101,9 @@ export const HomeScreen = () => {
 
   const openStory = (s) => navigation.navigate('StoryDetail', { storyId: s.id, story: s });
   const play = async (s) => {
-    // A locked paid episode opens its page, where it can be unlocked.
-    if (!canPlay(s)) return openStory(s);
+    // A locked paid episode opens its page, where it can be unlocked; a video
+    // story opens its page, which plays it.
+    if (!canPlay(s) || isVideoStory(s)) return openStory(s);
     setLastPlayTab('home');
     setNextStory(() => {
       const idx = stories.findIndex((st) => st.id === s.id);
