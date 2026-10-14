@@ -2,7 +2,6 @@
 import React, { useState, useRef } from 'react';
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -20,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
-import { KeyboardAvoider, KeyboardAwareScroll } from '../components/ui/KeyboardAvoider';
+import { KeyboardAwareScroll } from '../components/ui/KeyboardAvoider';
 import { GENRES } from '../constants/genres';
 import { LANGUAGES } from '../types/story';
 
@@ -37,7 +36,9 @@ const LANGUAGE_LABELS = {
 export function CreateStoryScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const { theme } = useTheme();
+  const { theme, tokens } = useTheme();
+  // Inputs in the app's own font (TextInput otherwise uses Roboto on Android).
+  const inputFont = { fontFamily: tokens.type.body.fontFamily };
   const { generateStory, publishCommunityStory, isGenerating, userStats } = useAppContext();
 
   const [title, setTitle] = useState('');
@@ -135,7 +136,10 @@ export function CreateStoryScreen() {
   };
 
   return (
-    <KeyboardAvoider style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
+    // Only the scroll view handles the keyboard: wrapping it in a keyboard-
+    // avoiding view as well moved everything twice on Android (a big gap
+    // above the keyboard and a jumping form).
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => navigation.goBack()} hitSlop={8}>
@@ -151,24 +155,22 @@ export function CreateStoryScreen() {
         ref={scrollRef}
         style={styles.scrollView}
         contentContainerStyle={styles.content}
+        bottomOffset={32}
+        showsVerticalScrollIndicator={false}
       >
         {!isPreview ? (
           <>
             {/* Hero Section */}
             <View style={styles.heroSection}>
-              <Text style={[styles.title, { color: theme.text }]}>
-                ✨ Create Your Story
-              </Text>
-              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-                Let AI bring your imagination to life
-              </Text>
+              <AppText variant="h1" style={styles.title}>✨ Create Your Story</AppText>
+              <AppText variant="body" color="textSecondary">Let AI bring your imagination to life</AppText>
             </View>
 
             {/* Title Input */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.text }]}>Title <Text style={[styles.optional, { color: theme.textTertiary }]}>(optional)</Text></Text>
+              <AppText variant="label" style={styles.label}>Title <AppText variant="caption" color="textTertiary">(optional)</AppText></AppText>
               <TextInput
-                style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+                style={[styles.input, inputFont, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
                 placeholder="Give your story a name..."
                 placeholderTextColor={theme.textSecondary}
                 value={title}
@@ -178,16 +180,16 @@ export function CreateStoryScreen() {
 
             {/* Genre — inline list opens below button */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.text }]}>Genre</Text>
+              <AppText variant="label" style={styles.label}>Genre</AppText>
               <TouchableOpacity
                 style={[styles.input, { backgroundColor: theme.surface, borderColor: theme.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
-                onPress={() => setGenrePickerVisible(!genrePickerVisible)}
+                onPress={() => { setGenrePickerVisible(!genrePickerVisible); setLanguagePickerVisible(false); }}
               >
-                <Text style={{ color: theme.text }}>{GENRES.find((g) => g.id === selectedGenre)?.label || selectedGenre}</Text>
+                <AppText variant="body">{GENRES.find((g) => g.id === selectedGenre)?.label || selectedGenre}</AppText>
                 <Ionicons name={genrePickerVisible ? 'chevron-up' : 'chevron-down'} size={20} color={theme.textSecondary} />
               </TouchableOpacity>
               {genrePickerVisible && (
-                <View style={{ backgroundColor: theme.surface, borderColor: theme.border, borderRadius: 12, marginTop: 6, maxHeight: 260, padding: 10, borderWidth: 1.5, width: '100%' }}>
+                <View style={[styles.dropdown, { backgroundColor: theme.surface, borderColor: theme.border }]}>
                   {GENRES.map((item) => (
                     <TouchableOpacity
                       key={item.id}
@@ -195,7 +197,7 @@ export function CreateStoryScreen() {
                       onPress={() => { setSelectedGenre(item.id); setGenrePickerVisible(false); }}
                     >
                       <Ionicons name={item.icon} size={18} color={selectedGenre === item.id ? theme.accent : theme.text} />
-                      <Text style={{ color: selectedGenre === item.id ? theme.accent : theme.text, fontWeight: selectedGenre === item.id ? '600' : '400' }}>{item.label}</Text>
+                      <AppText variant={selectedGenre === item.id ? 'label' : 'body'} color={selectedGenre === item.id ? 'accent' : 'text'}>{item.label}</AppText>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -205,24 +207,26 @@ export function CreateStoryScreen() {
             {/* Language Selection — dropdown because 15 options is too many for a
                 scrollable button grid. The label doubles as the picker trigger. */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.text }]}>Language</Text>
+              <AppText variant="label" style={styles.label}>Language</AppText>
               <TouchableOpacity
                 style={[styles.input, { backgroundColor: theme.surface, borderColor: theme.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
-                onPress={() => setLanguagePickerVisible(!languagePickerVisible)}
+                onPress={() => { setLanguagePickerVisible(!languagePickerVisible); setGenrePickerVisible(false); }}
               >
-                <Text style={{ color: theme.text }}>{LANGUAGE_LABELS[selectedLanguage] || selectedLanguage.toUpperCase()}</Text>
+                <AppText variant="body">{LANGUAGE_LABELS[selectedLanguage] || selectedLanguage.toUpperCase()}</AppText>
                 <Ionicons name={languagePickerVisible ? 'chevron-up' : 'chevron-down'} size={20} color={theme.textSecondary} />
               </TouchableOpacity>
               {languagePickerVisible && (
-                <View style={{ backgroundColor: theme.surface, borderColor: theme.border, borderRadius: 12, marginTop: 6, maxHeight: 280, padding: 10, borderWidth: 1.5, width: '100%' }}>
-                  <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
+                <View style={[styles.dropdown, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                  {/* nestedScrollEnabled: without it Android won't scroll a list
+                      inside the page's own scroll view. */}
+                  <ScrollView style={{ maxHeight: 260 }} nestedScrollEnabled keyboardShouldPersistTaps="handled">
                     {LANGUAGES.map((item) => (
                       <TouchableOpacity
                         key={item}
                         style={{ paddingVertical: 9, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.divider || theme.border }}
                         onPress={() => { setSelectedLanguage(item); setLanguagePickerVisible(false); setSearchQuery(''); }}
                       >
-                        <Text style={{ color: selectedLanguage === item ? theme.accent : theme.text, fontWeight: selectedLanguage === item ? '600' : '400', fontSize: 15 }}>{LANGUAGE_LABELS[item] || item.toUpperCase()}</Text>
+                        <AppText variant={selectedLanguage === item ? 'label' : 'body'} color={selectedLanguage === item ? 'accent' : 'text'}>{LANGUAGE_LABELS[item] || item.toUpperCase()}</AppText>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
@@ -232,9 +236,9 @@ export function CreateStoryScreen() {
 
             {/* Prompt Input */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: theme.text }]}>Your Story Idea</Text>
+              <AppText variant="label" style={styles.label}>Your Story Idea</AppText>
               <TextInput
-                style={[styles.textArea, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+                style={[styles.textArea, inputFont, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
                 placeholder="Describe your story idea... (e.g., A detective finds a watch that stops time for 10 seconds)"
                 placeholderTextColor={theme.textSecondary}
                 value={prompt}
@@ -247,15 +251,10 @@ export function CreateStoryScreen() {
 
             {/* Generate Button */}
             <TouchableOpacity
-              style={[styles.generateButton, { 
-                backgroundColor: theme.primary, 
-                opacity: isGenerating ? 0.7 : 1,
+              style={[styles.generateButton, styles.raised, {
+                backgroundColor: theme.primary,
                 shadowColor: theme.primary,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-                elevation: 8,
-              }]}
+              }, isGenerating && styles.busy]}
               onPress={handleGenerate}
               disabled={isGenerating}
             >
@@ -264,7 +263,7 @@ export function CreateStoryScreen() {
               ) : (
                 <>
                   <Ionicons name="sparkles" size={22} color={theme.onAccent} />
-                  <Text style={[styles.generateButtonText, { color: theme.onAccent }]}>Generate with AI</Text>
+                  <AppText variant="label" color="onAccent" style={styles.buttonLabel}>Generate with AI</AppText>
                 </>
               )}
             </TouchableOpacity>
@@ -273,9 +272,7 @@ export function CreateStoryScreen() {
           <>
             {/* Preview Header */}
             <View style={styles.previewHeader}>
-              <Text style={[styles.previewTitle, { color: theme.text }]}>
-                📖 Your Story
-              </Text>
+              <AppText variant="h2">📖 Your Story</AppText>
               <Pressable onPress={() => setIsPreview(false)} style={styles.closeButton}>
                 <Icon name="close" size={20} color={theme.textSecondary} />
               </Pressable>
@@ -283,17 +280,11 @@ export function CreateStoryScreen() {
 
             {/* Story Card */}
             <View style={[styles.storyCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <Text style={[styles.storyTitle, { color: theme.text }]}>
-                {generatedStory?.title || 'Untitled Story'}
-              </Text>
+              <AppText variant="h2" style={styles.storyTitle}>{generatedStory?.title || 'Untitled Story'}</AppText>
               <View style={[styles.genreTag, { backgroundColor: theme.primary + '20' }]}>
-                <Text style={[styles.genreTagText, { color: theme.primary }]}>
-                  {generatedStory?.genre || 'Story'}
-                </Text>
+                <AppText variant="caption" color="primary" style={{ fontWeight: '600' }}>{generatedStory?.genre || 'Story'}</AppText>
               </View>
-              <Text style={[styles.storyText, { color: theme.text }]}>
-                {generatedStory?.text}
-              </Text>
+              <AppText variant="bodyL" style={styles.storyText}>{generatedStory?.text}</AppText>
             </View>
 
             {/* Action Buttons */}
@@ -307,19 +298,14 @@ export function CreateStoryScreen() {
                 onPress={() => setIsPreview(false)}
               >
                 <Icon name="create" size={20} color={theme.primary} />
-                <Text style={[styles.buttonText, { color: theme.primary }]}>Edit Story</Text>
+                <AppText variant="label" color="primary" style={styles.buttonLabel}>Edit Story</AppText>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.publishButton, {
+                style={[styles.publishButton, styles.raised, {
                   backgroundColor: theme.primary,
-                  opacity: isPublishing ? 0.7 : 1,
                   shadowColor: theme.primary,
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 8,
-                }]}
+                }, isPublishing && styles.busy]}
                 onPress={handlePublish}
                 disabled={isPublishing}
               >
@@ -328,7 +314,7 @@ export function CreateStoryScreen() {
                 ) : (
                   <>
                     <Icon name="share-social" size={20} color={theme.onAccent} />
-                    <Text style={[styles.buttonText, { color: theme.onAccent }]}>Publish</Text>
+                    <AppText variant="label" color="onAccent" style={styles.buttonLabel}>Publish</AppText>
                   </>
                 )}
               </TouchableOpacity>
@@ -336,7 +322,7 @@ export function CreateStoryScreen() {
           </>
         )}
       </KeyboardAwareScroll>
-    </KeyboardAvoider>
+    </View>
   );
 }
 
@@ -358,16 +344,15 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 18,
-    paddingBottom: 40,
+    // Room for the mini player above the tab bar (as on the other tabs).
+    paddingBottom: 140,
   },
   heroSection: {
     marginBottom: 24,
     paddingTop: 8,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   subtitle: {
     fontSize: 14,
@@ -376,9 +361,24 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
     marginBottom: 8,
+  },
+  dropdown: {
+    borderRadius: 12, marginTop: 6, paddingHorizontal: 12, paddingVertical: 4, borderWidth: 1.5, width: '100%',
+  },
+  raised: {
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  busy: {
+    opacity: 0.7,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  buttonLabel: {
+    fontSize: 16,
   },
   optional: {
     fontWeight: '400',
@@ -497,8 +497,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   storyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
     marginBottom: 12,
   },
   genreTag: {
@@ -513,8 +511,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   storyText: {
-    fontSize: 15,
-    lineHeight: 24,
+    lineHeight: 26,
   },
   actionButtons: {
     flexDirection: 'row',
