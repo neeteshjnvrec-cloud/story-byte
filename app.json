@@ -6,14 +6,8 @@
     "scheme": "storybyte",
     "version": "2.0.0",
     "orientation": "portrait",
-    "main": "App.js",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#667eea"
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -72,7 +66,18 @@
           "cameraPermission": "StoryByte uses the camera so you can take a profile picture."
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-audio",
+      "expo-sharing",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#667eea",
+          "imageWidth": 200
+        }
+      ]
     ],
     "extra": {
       "firebase": {
