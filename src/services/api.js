@@ -617,7 +617,7 @@ class ApiService {
     const cacheKey = `userStats_${this.uid}`;
     return this.getCached(cacheKey, async () => {
       const [favorites, progSnap] = await Promise.all([
-        this.getFavorites(),
+        this.getFavoriteIds(),
         getDocs(collection(db, 'users', this.uid, 'progress')),
       ]);
       let minutes = 0, finished = 0;
