@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- YouTube's embedded player needs to know which site embeds it; the app
+       loads this page (src/screens/VideoScreen.js) so the player gets our
+       address instead of none. -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex">
+  <title>StoryByte player</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #000; }
+    iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; }
+  </style>
+</head>
+<body>
+  <script>
+    var id = (new URLSearchParams(location.search).get('v') || '').replace(/[^\w-]/g, '').slice(0, 11);
+    if (id.length === 11) {
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube.com/embed/' + id +
+        '?autoplay=1&playsinline=1&rel=0&origin=' + encodeURIComponent(location.origin);
+      f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      f.allowFullscreen = true;
+      f.referrerPolicy = 'strict-origin-when-cross-origin';
+      f.title = 'YouTube video player';
+      document.body.appendChild(f);
+    }
+  </script>
+</body>
+</html>
