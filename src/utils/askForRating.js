@@ -5,7 +5,7 @@
 // (expo-store-review), which lets them rate without leaving the app. Google
 // decides whether it actually shows and never says whether they rated, so
 // after every later story we ask ourselves, with a button that opens the
-// Play Store page. Once they tap "Rate" or "Already rated", we stop.
+// Play Store page. Once they tap "Rate now", we stop.
 import { Alert, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -45,12 +45,11 @@ async function googlePopup() {
 
 function askInApp() {
   Alert.alert(
-    '⭐ StoryByte को रेटिंग दें',
-    'आपकी रेटिंग से और लोग ये कथाएँ सुन पाएँगे। सिर्फ़ 5 सेकंड लगेंगे 🙏',
+    '⭐ Rate StoryByte',
+    'Your rating helps more people find these stories. It only takes 5 seconds 🙏',
     [
-      { text: 'बाद में', style: 'cancel' },
-      { text: 'दे दी है ✓', onPress: markRated },
-      { text: '⭐ रेटिंग दें', onPress: openPlayStore },
+      { text: 'Later', style: 'cancel' },
+      { text: 'Rate now', onPress: openPlayStore },
     ],
   );
 }

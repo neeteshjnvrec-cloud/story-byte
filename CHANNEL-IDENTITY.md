@@ -132,6 +132,6 @@ Channels.
   UTM source / campaign.
 - **The app asks for a rating after every finished story** until the
   listener rates: Google's in-app popup after the first, then a short prompt
-  ("⭐ रेटिंग दें" opens the Play Store page, "दे दी है ✓" or rating stops
-  it, "बाद में" asks again next time). Google never tells the app whether
-  someone rated in its popup, which is why the "already rated" button exists.
+  ("Rate now" opens the Play Store page and stops the prompts; "Later" asks
+  again next time). Google never tells the app whether someone rated, so
+  tapping "Rate now" is what stops it.
