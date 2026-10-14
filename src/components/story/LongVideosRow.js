@@ -1,7 +1,8 @@
 // Home's "Long stories" row: the full-length episodes and weekly kathas,
 // which live on YouTube. The list is the website's long-videos.json (links
 // and text only, rebuilt on every site deploy by scripts/lib/site-index.js);
-// tapping a card plays the video in the app (screens/VideoScreen.js).
+// tapping a card opens it on the story details screen, which plays it in
+// YouTube's player (screens/StoryDetailScreen.js).
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Pressable, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -14,6 +15,22 @@ const CARD_WIDTH = 240;
 
 const minutes = (sec) => (sec > 0 ? `${Math.round(sec / 60)} min` : '');
 
+/** A video as a story the details screen can show (no audio, no Firestore doc). */
+const asStory = (v) => ({
+  id: `yt_${v.id}`,
+  storyId: `yt_${v.id}`,
+  youtubeId: v.id,
+  youtubeUrl: v.youtubeUrl,
+  title: v.title,
+  description: v.description || '',
+  genre: v.seriesTitle || 'Long story',
+  language: v.language || '',
+  duration: v.durationSec || 0,
+  coverImage: v.thumbnailHd || v.thumbnail,
+  // Shares link to the website's video page.
+  pageUrl: `https://storybyte-76716.web.app/video?v=${encodeURIComponent(v.id)}`,
+});
+
 function VideoCard({ video }) {
   const { theme } = useTheme() || { theme: {} };
   const navigation = useNavigation();
@@ -21,7 +38,7 @@ function VideoCard({ video }) {
   const [thumb, setThumb] = useState(video.thumbnailHd || video.thumbnail);
   return (
     <Pressable
-      onPress={() => navigation.navigate('Video', { video })}
+      onPress={() => { const story = asStory(video); navigation.navigate('StoryDetail', { storyId: story.id, story }); }}
       style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}
       accessibilityRole="button"
       accessibilityLabel={`${video.title}, play video`}

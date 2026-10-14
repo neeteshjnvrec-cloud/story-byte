@@ -30,7 +30,6 @@ import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { NotificationsScreen } from './src/screens/NotificationsScreen';
 import { CoinsScreen } from './src/screens/CoinsScreen';
-import { VideoScreen } from './src/screens/VideoScreen';
 import { FloatingAudioPlayer } from './src/components/FloatingAudioPlayer';
 import { notificationService } from './src/services/notificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -113,7 +112,6 @@ function MainStack({ isNewUser, navigationRef, ready }) {
         <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Coins" component={CoinsScreen} />
-        <Stack.Screen name="Video" component={VideoScreen} />
         {isNewUser ? (
           <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         ) : null}

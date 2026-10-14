@@ -1,6 +1,6 @@
 // Story Detail — warm design: cover, meta, play/resume, favorite, transcript.
 import React, { useState, useEffect, useRef } from 'react';
-import { View, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator, Linking, useWindowDimensions } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer } from '../context/AudioContext';
@@ -12,6 +12,7 @@ import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
 import { Cover } from '../components/story/Cover';
+import { YouTubePlayer } from '../components/story/YouTubePlayer';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import { CommentSheet } from '../components/comments/CommentSheet';
 import { shareStory } from '../utils/shareStory';
@@ -105,6 +106,11 @@ export const StoryDetailScreen = () => {
   const [story, setStory] = useState(initialStory || null);
   const [loading, setLoading] = useState(!initialStory);
   const [commentVisible, setCommentVisible] = useState(false);
+  const { width: screenWidth } = useWindowDimensions();
+  // A long story (Home's "Long stories" row): a YouTube video with no audio
+  // and no Firestore doc. It plays here in YouTube's player, and the
+  // audio-only parts (Play, likes, saving, download, rating, comments) are left out.
+  const videoId = story?.youtubeId || null;
 
   // Chapter state
   const [chapters, setChapters] = useState(null);
@@ -112,6 +118,7 @@ export const StoryDetailScreen = () => {
   const chapterScrollViewRef = useRef(null);
 
   useEffect(() => {
+    if (initialStory?.youtubeId) { setLoading(false); return; }
     (async () => {
       try {
         const full = await apiService.getStory(storyId);
@@ -125,6 +132,13 @@ export const StoryDetailScreen = () => {
       finally { setLoading(false); }
     })();
   }, [storyId, receiveStoryDocs]);
+
+  // A story playing in the background would talk over the video.
+  useEffect(() => {
+    if (initialStory?.youtubeId && isPlaying) playPause();
+    // Only on opening the video.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Parse chapters when story text is available
   useEffect(() => {
@@ -163,7 +177,7 @@ export const StoryDetailScreen = () => {
   // recordShare in AppContext.)
   const handleShare = async () => {
     const { shared } = await shareStory(story);
-    if (shared) recordShare(story);
+    if (shared && !videoId) recordShare(story);
   };
 
   const handleUnlock = () => {
@@ -266,17 +280,19 @@ export const StoryDetailScreen = () => {
             </View>
           ) : null}
         </Pressable>
-        <Pressable hitSlop={10} onPress={() => setCommentVisible(true)} style={styles.headBtn}>
+        {videoId ? <View style={styles.headBtn} /> : <Pressable hitSlop={10} onPress={() => setCommentVisible(true)} style={styles.headBtn}>
           <Icon name="chat" />
           {story?.commentsCount > 0 ? (
             <View style={[styles.headBadge, { backgroundColor: theme.accent }]}>
               <AppText variant="micro" color="onAccent" style={{ paddingHorizontal: 4 }}>{story.commentsCount}</AppText>
             </View>
           ) : null}
-        </Pressable>
+        </Pressable>}
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 140 }} showsVerticalScrollIndicator={false}>
-        <Cover story={story} style={styles.cover} radius={22} />
+        {videoId
+          ? <YouTubePlayer videoId={videoId} width={screenWidth - 40} radius={22} style={{ marginBottom: 14 }} />
+          : <Cover story={story} style={styles.cover} radius={22} />}
         <AppText variant="h1" style={{ marginTop: 4 }}>{story.title}</AppText>
 
         {/* Zero-valued metrics are omitted rather than shown as "0" — same rule
@@ -296,6 +312,17 @@ export const StoryDetailScreen = () => {
 
         <AppText variant="bodyL" color="textSecondary" style={{ marginTop: 12, lineHeight: 25 }}>{story.description}</AppText>
 
+        {videoId ? (
+          <View style={styles.actions}>
+            <Button
+              title="Open in YouTube"
+              variant="ghost"
+              leftIcon="play"
+              onPress={() => Linking.openURL(story.youtubeUrl || `https://youtu.be/${videoId}`).catch(() => {})}
+              style={{ flex: 1 }}
+            />
+          </View>
+        ) : (
         <View style={styles.actions}>
           <Button
             title={locked ? `Unlock for ${story.priceCoins} coins` : isHere && isPlaying ? 'Pause' : 'Play'}
@@ -321,7 +348,9 @@ export const StoryDetailScreen = () => {
             {downloadingIds.has(story?.id) && <ActivityIndicator size={14} color={theme.accent} style={{ position: 'absolute' }} />}
           </Pressable>
         </View>
+        )}
 
+        {videoId ? null : (
         <View style={styles.section}>
           <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2 }}>
             {myRating > 0 ? 'YOUR RATING' : 'RATE THIS STORY'}
@@ -337,9 +366,10 @@ export const StoryDetailScreen = () => {
             ))}
           </View>
         </View>
+        )}
 
-        {/* ---- Transcript with chapters ---- */}
-        {(story.text || story.description) && (
+        {/* ---- Transcript with chapters ---- (a video's description is already shown above) */}
+        {(story.text || (story.description && !videoId)) && (
           <View style={styles.section}>
             <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 12 }}>TRANSCRIPT</AppText>
 
@@ -390,7 +420,7 @@ export const StoryDetailScreen = () => {
           </View>
         )}
       </ScrollView>
-      {story && (
+      {story && !videoId && (
         <CommentSheet
           story={story}
           visible={commentVisible}

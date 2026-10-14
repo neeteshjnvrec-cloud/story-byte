@@ -480,9 +480,9 @@ ${BASE_CSS}${PLAYER_CSS}
 }
 
 /**
- * watch.html: just the player, full screen, for the app's video screen
- * (src/screens/VideoScreen.js loads /watch?v=<id>). Autoplays, since the
- * listener tapped the video to get here.
+ * watch.html: just the player, full screen, for the app's story details
+ * screen (src/components/story/YouTubePlayer.js loads /watch?v=<id>).
+ * Autoplays, since the listener tapped the video to get here.
  */
 function renderWatchPage() {
   return `<!doctype html>
