@@ -1,33 +1,68 @@
-// Ask for a Play Store rating once someone has clearly enjoyed the app.
+// Ask for a Play Store rating after every finished story, until the
+// listener rates.
 //
-// Uses Google's in-app review popup (expo-store-review): the listener rates
-// without leaving the app. Google decides whether the popup actually shows
-// and limits how often, so asking can never nag; we still only ask at a few
-// milestones of finished stories, when the listener is most likely happy.
+// After the first finished story: Google's in-app review popup
+// (expo-store-review), which lets them rate without leaving the app. Google
+// decides whether it actually shows and never says whether they rated, so
+// after every later story we ask ourselves, with a button that opens the
+// Play Store page. Once they tap "Rate" or "Already rated", we stop.
+import { Alert, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const FINISHED_KEY = 'storybyte-finished-stories';
-// Ask after the 3rd finished story; if Google didn't show it or they
-// skipped it, try again later.
-const ASK_AT = [3, 10, 25];
+const RATED_KEY = 'storybyte-rated';
 // A moment after the story ends, so it doesn't land on top of the coin toast.
 const DELAY_MS = 2500;
+const PACKAGE = 'com.storybyte.app';
 
 let StoreReview = null;
 try {
   StoreReview = require('expo-store-review');
 } catch (e) {
-  // Not in this build: just never ask.
+  // Not in this build: the Play Store button still works.
+}
+
+const markRated = () => AsyncStorage.setItem(RATED_KEY, 'true').catch(() => {});
+
+async function openPlayStore() {
+  markRated();
+  try {
+    await Linking.openURL(`market://details?id=${PACKAGE}&showAllReviews=true`);
+  } catch (e) {
+    Linking.openURL(`https://play.google.com/store/apps/details?id=${PACKAGE}&showAllReviews=true`).catch(() => {});
+  }
+}
+
+async function googlePopup() {
+  try {
+    if (!StoreReview || !(await StoreReview.isAvailableAsync()) || !(await StoreReview.hasAction())) return false;
+    await StoreReview.requestReview();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function askInApp() {
+  Alert.alert(
+    '⭐ StoryByte को रेटिंग दें',
+    'आपकी रेटिंग से और लोग ये कथाएँ सुन पाएँगे। सिर्फ़ 5 सेकंड लगेंगे 🙏',
+    [
+      { text: 'बाद में', style: 'cancel' },
+      { text: 'दे दी है ✓', onPress: markRated },
+      { text: '⭐ रेटिंग दें', onPress: openPlayStore },
+    ],
+  );
 }
 
 export async function noteStoryFinished() {
   try {
+    if (await AsyncStorage.getItem(RATED_KEY) === 'true') return;
     const finished = Number(await AsyncStorage.getItem(FINISHED_KEY) || 0) + 1;
     await AsyncStorage.setItem(FINISHED_KEY, String(finished));
-    if (!ASK_AT.includes(finished) || !StoreReview) return;
-    if (!(await StoreReview.isAvailableAsync()) || !(await StoreReview.hasAction())) return;
-    setTimeout(() => {
-      StoreReview.requestReview().catch(() => {});
+    setTimeout(async () => {
+      if (finished === 1 && await googlePopup()) return;
+      askInApp();
     }, DELAY_MS);
   } catch (e) {
     // A rating prompt must never get in the way of listening.

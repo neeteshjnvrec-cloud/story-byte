@@ -130,6 +130,8 @@ Channels.
   and shares and invites from inside the app. See which ones bring installs
   in Play Console → **Statistics → Store listing acquisition**, filtered to
   UTM source / campaign.
-- **The app asks for a rating** with Google's in-app popup after the 3rd
-  finished story (again at the 10th and 25th if it didn't show). Google
-  decides when the popup appears, so it never nags.
+- **The app asks for a rating after every finished story** until the
+  listener rates: Google's in-app popup after the first, then a short prompt
+  ("⭐ रेटिंग दें" opens the Play Store page, "दे दी है ✓" or rating stops
+  it, "बाद में" asks again next time). Google never tells the app whether
+  someone rated in its popup, which is why the "already rated" button exists.
