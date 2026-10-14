@@ -17,7 +17,7 @@ const STORAGE_LAST_TAB = 'storybyte-last-play-tab';
 const STORAGE_WIFI_ONLY = 'storybyte-wifi-only';
 const STORAGE_DOWNLOADS = 'storybyte-downloads';
 // Community feed stories per page.
-const COMMUNITY_PAGE = 20;
+const COMMUNITY_PAGE = 5;
 
 const AppContext = createContext();
 
@@ -619,7 +619,7 @@ export const AppContextProvider = ({ children }) => {
   // and a fresh function each render tore down and re-created its Firestore
   // onSnapshot listener on every provider render.
   // The Community feed (daily, community and video stories, newest first),
-  // 20 at a time: the first page here, the next ones from loadMoreCommunity
+  // 5 at a time: the first page here, the next ones from loadMoreCommunity
   // as the list nears its end.
   const communityPage = useRef({ cursor: null, busy: false });
   const [communityHasMore, setCommunityHasMore] = useState(false);

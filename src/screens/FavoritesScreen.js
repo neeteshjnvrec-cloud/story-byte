@@ -18,7 +18,7 @@ import { Icon } from '../components/ui/Icon';
 import { CompactRow } from '../components/story/StoryCard';
 
 // Saved stories / history entries per page; more load as you scroll.
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 15;
 
 const SEGMENTS = [
   { key: 'favorites', label: 'Favorites' },

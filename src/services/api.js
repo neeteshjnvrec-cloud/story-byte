@@ -138,14 +138,14 @@ class ApiService {
   }
 
   // One page of the catalogue (daily, community and video stories), newest
-  // first, filtered by Firestore — for Browse, which loads more as you
-  // scroll instead of 200 stories per filter tap.
+  // first, filtered by Firestore — for Browse (15 a page) and Community (5),
+  // which load more as you scroll.
   //
   // Filters one field server-side (vertical, else genre, else language: each
   // has a status+field+createdAt index; see firestore-indexes.json) and hands
   // the others back for the screen to apply. Pass the returned `cursor` to get
   // the next page; `hasMore` is false at the end.
-  async getStoriesPage({ genre, language, vertical, cursor = null, pageSize = 20 } = {}) {
+  async getStoriesPage({ genre, language, vertical, cursor = null, pageSize = 15 } = {}) {
     const constraints = [where('status', 'in', ['published', 'video'])];
     if (vertical) constraints.push(where('verticalId', '==', vertical));
     else if (genre) constraints.push(where('genre', '==', genre));
@@ -478,7 +478,7 @@ class ApiService {
   }
 
   // One page of the history for Library, with a cursor for the next.
-  async getUserProgressPage({ cursor = null, pageSize = 20 } = {}) {
+  async getUserProgressPage({ cursor = null, pageSize = 15 } = {}) {
     if (!this.uid) return { items: [], cursor: null, hasMore: false };
     const c = [orderBy('lastUpdated', 'desc')];
     if (cursor) c.push(startAfter(cursor));

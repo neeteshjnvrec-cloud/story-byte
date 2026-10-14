@@ -86,7 +86,7 @@ export function CommunityScreen() {
       collection(db, 'stories'),
       where('status', 'in', ['published', 'video']),
       orderBy('createdAt', 'desc'),
-      fbLimit(20)
+      fbLimit(5)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -434,7 +434,7 @@ export function CommunityScreen() {
           // like/rating/play state does, which is precisely when rows must repaint.
           extraData={getStoryMetrics}
           renderItem={renderItem}
-          // The next 20 as the end comes into view.
+          // The next 5 as the end comes into view.
           onEndReached={() => { if (communityHasMore) loadMoreCommunity(); }}
           onEndReachedThreshold={0.6}
           ListFooterComponent={communityHasMore && published.length ? (

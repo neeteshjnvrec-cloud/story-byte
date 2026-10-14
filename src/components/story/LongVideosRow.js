@@ -81,10 +81,10 @@ export function LongVideosRow({ titleStyle }) {
   useEffect(() => {
     let alive = true;
     (async () => {
-      let list = await apiService.getVideoStories(20).catch(() => []);
+      let list = await apiService.getVideoStories(5).catch(() => []);
       if (!list.length) {
         const data = await fetch(LIST_URL).then((res) => (res.ok ? res.json() : null)).catch(() => null);
-        list = Array.isArray(data?.videos) ? data.videos.slice(0, 20).map(asStory) : [];
+        list = Array.isArray(data?.videos) ? data.videos.slice(0, 5).map(asStory) : [];
       }
       if (alive) setVideos(list);
     })();

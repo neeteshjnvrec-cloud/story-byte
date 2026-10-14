@@ -27,7 +27,7 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 const unfinished = (prog) => (prog || []).filter((p) => {
   const pct = (typeof p.progress === 'number' && isFinite(p.progress)) ? p.progress : 0;
   return pct > 0.01 && pct < 0.98 && p.title;
-}).slice(0, 10);
+}).slice(0, 5);
 
 async function apiSafe(fn, fallback) {
   try { return await fn(); } catch (e) { console.warn('Home load:', e?.message); return fallback; }
@@ -61,7 +61,7 @@ export const HomeScreen = () => {
       }
       const [res, prog] = await Promise.all([
         apiService.getStories({ ...params, community: 'all' }),
-        apiService.getUserProgress({ max: 20 }),
+        apiService.getUserProgress({ max: 10 }),
       ]);
       setStories(res.stories || []);
       setProgress(unfinished(prog));
@@ -80,7 +80,7 @@ export const HomeScreen = () => {
   // Continue listening row refreshes whenever Home comes back into view.
   useFocusEffect(useCallback(() => {
     let active = true;
-    apiSafe(() => apiService.getUserProgress({ max: 20 }), null).then((prog) => {
+    apiSafe(() => apiService.getUserProgress({ max: 10 }), null).then((prog) => {
       if (active && prog) setProgress(unfinished(prog));
     });
     return () => { active = false; };
@@ -121,7 +121,7 @@ export const HomeScreen = () => {
   const popular = [...stories]
     .filter((s) => storyPlays(s) > 0)
     .sort((a, b) => storyPlays(b) - storyPlays(a))
-    .slice(0, 10);
+    .slice(0, 5);
   const rails = genres.length
     ? genres.map((g) => ({ title: cap(g), items: stories.filter((s) => s.genre === g) }))
     : (stories.length ? [{ title: 'Latest stories', items: stories }] : []);

@@ -47,7 +47,7 @@ import { GENRES } from '../constants/genres';
 // Genre chips
 const GENRE_CHIPS = GENRES;
 // Stories per page while browsing (and matches per step while searching).
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 15;
 
 export const SearchScreen = () => {
   const navigation = useNavigation();
