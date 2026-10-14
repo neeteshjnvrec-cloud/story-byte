@@ -35,10 +35,11 @@ const { bakeInCaptions } = require('./lib/caption-frames');
 const { REEL_MAX_SEC, clipScenes, clipAudio } = require('./lib/video-clip');
 const { postStoryCarousel, postStoryReel, commentOnInstagram } = require('./lib/instagram');
 const { postStoryToFacebook, postStoryVideo, commentOnFacebook } = require('./lib/facebook');
+const { postStoryToTelegram } = require('./lib/telegram');
 const { postStoryToYouTube, commentOnYouTube } = require('./lib/youtube');
 const { occasionPhrase } = require('./occasions');
 const { kathaOfDay, nextKatha, describeKatha, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
-const { appendSpokenTeaser, fallbackTeaser } = require('./lib/teaser');
+const { appendSpokenTeaser, fallbackTeaser, endingCandidates } = require('./lib/teaser');
 const { withCloseUps, shortSceneCount } = require('./lib/close-ups');
 const { devotionalTrends } = require('./lib/trends');
 const { iconographyFor } = require('./lib/iconography');
@@ -562,16 +563,20 @@ async function run() {
             // so its captions and scenes are timed on that faster clock.
             const devotional = slot.genre === 'devotional';
             // The video's narration: the katha, then (devotional) tomorrow's
-            // teaser in the same voice — unless that would push it past
-            // the Shorts limit, where the katha alone wins.
+            // teaser and where to find the app, in the same voice. If that
+            // would push it past the Shorts limit, the teaser alone, and
+            // failing that the katha alone.
             let narration = audio;
             const teaserDir = devotional ? fs.mkdtempSync(path.join(os.tmpdir(), 'sb-teaser-')) : null;
-            if (devotional && cues && content.nextTeaser) {
-              const withTeaser = await appendSpokenTeaser({ audio, cues, teaser: content.nextTeaser, narrate: narrateText, workDir: teaserDir });
-              if (withTeaser && fitShort(exactDuration(withTeaser.audioPath)).fits) {
-                narration = withTeaser.audioPath;
-                cues = withTeaser.cues;
-                console.log(`  🔔 Teaser: ${content.nextTeaser}`);
+            if (devotional && cues) {
+              for (const ending of endingCandidates(content.nextTeaser)) {
+                const withTeaser = await appendSpokenTeaser({ audio, cues, teaser: ending, narrate: narrateText, workDir: teaserDir });
+                if (withTeaser && fitShort(exactDuration(withTeaser.audioPath)).fits) {
+                  narration = withTeaser.audioPath;
+                  cues = withTeaser.cues;
+                  console.log(`  🔔 Ending: ${ending}`);
+                  break;
+                }
               }
             }
             // Exact length (durationSec rounds to whole seconds) so the video
@@ -823,6 +828,13 @@ async function run() {
       // need the Firebase Hosting deploy above to have happened first.
       const ytVideo = p.shortPath || (p.videoUrl && path.join(PUB, 'instagram', mediaKey(p.id), 'story.mp4'));
       const ytPost = ytVideo ? await postStoryToYouTube(socialStory, ytVideo) : { posted: false };
+      // The story's page in the app plays its Short too (StoryDetailScreen).
+      if (ytPost.posted && ytPost.videoId) {
+        await db.collection('stories').doc(p.id).update({ youtubeId: ytPost.videoId, youtubeKind: 'short' })
+          .catch((e) => console.warn(`  ⚠️  Short id not saved on ${p.id}: ${e.message}`));
+      }
+      // The Telegram channel (lib/telegram.js; skips until it's set up).
+      await postStoryToTelegram(socialStory, { videoPath: ytVideo, coverPath: path.join(PUB, 'covers', `${p.id}.jpg`) });
 
       // A question as the first comment on each Short, to start the replies
       // Shorts/Reels ranking weighs heavily. Each needs its own permission

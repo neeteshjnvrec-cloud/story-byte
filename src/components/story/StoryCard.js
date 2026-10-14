@@ -7,6 +7,29 @@ import { AppText } from '../ui/AppText';
 import { Icon } from '../ui/Icon';
 import { Cover } from './Cover';
 import { fmtMin, fmtPlays, storyPlays } from '../../utils/storyMetrics';
+import { useWallet } from '../../context/WalletContext';
+import { isPaidStory } from '../../services/wallet';
+import { isVideoStory } from '../../utils/videoStory';
+
+// "🔒 10" on a paid episode not yet unlocked, "✓ Unlocked" once it is;
+// "▶ Video" on a YouTube video story (it plays on its page, not as audio).
+function PriceBadge({ story, style }) {
+  const { canPlay } = useWallet();
+  if (isVideoStory(story)) {
+    return (
+      <View style={[styles.price, styles.video, style]}>
+        <AppText variant="micro" style={{ color: '#fff' }}>▶ Video</AppText>
+      </View>
+    );
+  }
+  if (!isPaidStory(story)) return null;
+  const open = canPlay(story);
+  return (
+    <View style={[styles.price, style]}>
+      <AppText variant="micro" style={{ color: '#fff' }}>{open ? '✓ Unlocked' : `🔒 ${story.priceCoins}`}</AppText>
+    </View>
+  );
+}
 
 // Re-exported: screens have imported these from here since before the helpers
 // moved out to utils/storyMetrics, and both are used right here.
@@ -38,6 +61,7 @@ export function RailCard({ story, width = 138, onPress, onPlay }) {
   return (
     <Pressable onPress={onPress} style={{ width }} accessibilityRole="button" accessibilityLabel={story.title}>
       <Cover story={story} style={{ height: width }} radius={16}>
+        <PriceBadge story={story} style={styles.railPrice} />
         {onPlay ? <PlayFab size={34} solid onPress={onPlay} style={styles.railFab} /> : null}
       </Cover>
       <AppText variant="h3" numberOfLines={2} style={{ marginTop: 8 }}>{story.title}</AppText>
@@ -79,6 +103,7 @@ export function Hero({ story, badge = "Today's pick", onPress, onPlay }) {
           <AppText variant="micro" color="onAccent" style={{ textTransform: 'uppercase' }}>{badge}</AppText>
         </View>
       ) : null}
+      <PriceBadge story={story} style={styles.heroPrice} />
       {onPlay ? <PlayFab size={46} onPress={onPlay} style={styles.heroFab} /> : null}
       <View style={styles.heroMeta}>
         <AppText variant="h1" color="text" style={{ color: '#fff' }} numberOfLines={2}>{story.title}</AppText>
@@ -99,6 +124,10 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 10, elevation: 6,
   },
   railFab: { position: 'absolute', right: 8, bottom: 8 },
+  price: { position: 'absolute', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: 'rgba(0,0,0,0.62)' },
+  video: { backgroundColor: '#E62117' },
+  railPrice: { top: 8, left: 8 },
+  heroPrice: { top: 12, right: 12 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 10, paddingHorizontal: 20 },
   rowCover: { width: 48, height: 48 },
   hero: {

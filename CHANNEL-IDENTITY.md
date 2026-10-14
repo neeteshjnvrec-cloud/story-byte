@@ -118,3 +118,63 @@ Channels.
   Thanks once eligible; the WhatsApp Channel as your own audience; later,
   festival-season sponsorships from puja-samagri and devotional brands. Pitch
   them with your monthly views and audience profile from Analytics.
+
+## Getting viewers into the app
+
+- **Every Short ends by naming the app.** After tomorrow's teaser, the
+  narrator says "ऐसी सारी कथाएँ ऑडियो में, मुफ़्त — Play Store पर खोजें
+  StoryByte", captioned like the rest. If that would make the Short too long,
+  only the teaser is said.
+- **Every app link is tagged with where it was posted** (`scripts/lib/app-link.js`):
+  YouTube, Facebook and Instagram Shorts, the long videos, the story pages,
+  and shares and invites from inside the app. See which ones bring installs
+  in Play Console → **Statistics → Store listing acquisition**, filtered to
+  UTM source / campaign.
+- **The app asks for a rating after every finished story** until the
+  listener rates: Google's in-app popup after the first, then a short prompt
+  ("Rate now" opens the Play Store page and stops the prompts; "Later" asks
+  again next time). Google never tells the app whether someone rated, so
+  tapping "Rate now" is what stops it.
+
+## Google search (the website)
+
+Every story has its own page on `https://storybyte-76716.web.app/s/…`, with
+the audio and the full katha text. Before each site deploy,
+`scripts/build-site-index.js` rebuilds:
+
+- **the home page**: today's katha, all kathas and a download button;
+- **`sitemap.xml`**: every story page, so Google can find them;
+- **`robots.txt`**: points crawlers at the sitemap.
+
+One-time setup, free:
+
+1. Open **[Google Search Console](https://search.google.com/search-console)** → **Add property** → **URL prefix** → `https://storybyte-76716.web.app/`.
+2. Choose **HTML tag** and copy just the code inside `content="…"`.
+   GitHub → this repository → **Settings → Secrets and variables → Actions →
+   Variables** → New: `GOOGLE_SITE_VERIFICATION` = that code.
+3. After the next daily run (or run **Daily Stories** by hand), press
+   **Verify** in Search Console.
+4. **Sitemaps** → enter `sitemap.xml` → **Submit**.
+
+Search traffic builds over weeks. Search Console shows which searches bring
+people ("हनुमान जी की कथा" and so on).
+
+## Telegram channel
+
+Every day's katha video goes to a Telegram channel with its title, the
+teaser and links to the story page and the app. Each Sunday's long katha
+goes there as its thumbnail with the YouTube link.
+
+1. Telegram → **New Channel** → name it like the YouTube channel, make it
+   **Public**, and pick a link, e.g. `t.me/roz_ek_katha`.
+2. Open **@BotFather** → `/newbot` → choose a name and username → copy the
+   **token** it gives you.
+3. Your channel → **Administrators** → **Add Admin** → search for your bot →
+   allow **Post Messages**.
+4. GitHub → this repository → **Settings → Secrets and variables → Actions**:
+   - **Secrets** → New: `TELEGRAM_BOT_TOKEN` = the token.
+   - **Variables** → New: `TELEGRAM_CHANNEL` = `@` plus the channel's link
+     name, e.g. `@roz_ek_katha`.
+
+From the next run, posting is automatic. Share the channel link in your
+YouTube channel description and WhatsApp to get the first members.

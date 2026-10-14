@@ -59,7 +59,8 @@ function firstSentence(text) {
 // so this is plain text for anyone reading the caption rather than tapping
 // through the story page — a viewer who already knows they want the app
 // shouldn't have to detour through a browser to find it.
-const APP_LINK = 'https://play.google.com/store/apps/details?id=com.storybyte.app';
+const { appLink } = require('./app-link');
+const APP_LINK = appLink('instagram', 'daily_short');
 const { teaserLines, followLines } = require('./social-extras');
 
 // `story.description` is expected to already be the curiosity hook produced

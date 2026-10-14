@@ -19,6 +19,7 @@ import {
   where,
   orderBy,
   limit as fbLimit,
+  startAfter,
   increment,
   runTransaction,
   writeBatch,
@@ -26,6 +27,7 @@ import {
   addDoc,
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
+import { mergeNewestFirst } from '../utils/videoStory';
 import Groq from 'groq-sdk';
 
 // Consecutive-day listening streak from a set of 'YYYY-MM-DD' strings.
@@ -105,6 +107,12 @@ class ApiService {
 
     const snap = await getDocs(q);
     let stories = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // Long YouTube videos as stories (status 'video') belong to the curated
+    // library too, so Home's rails, Browse and every filter include them.
+    if (community !== true) {
+      const videos = await this.getVideoStories(Number(limit)).catch(() => []);
+      stories = mergeNewestFirst(stories, videos).slice(0, Number(limit));
+    }
 
     if (genre && genre !== 'All') {
       stories = stories.filter((s) => s.genre === genre);
@@ -129,6 +137,42 @@ class ApiService {
     return { stories };
   }
 
+  // One page of the catalogue (daily, community and video stories), newest
+  // first, filtered by Firestore — for Browse (15 a page) and Community (5),
+  // which load more as you scroll.
+  //
+  // Filters one field server-side (vertical, else genre, else language: each
+  // has a status+field+createdAt index; see firestore-indexes.json) and hands
+  // the others back for the screen to apply. Pass the returned `cursor` to get
+  // the next page; `hasMore` is false at the end.
+  async getStoriesPage({ genre, language, vertical, cursor = null, pageSize = 15 } = {}) {
+    const constraints = [where('status', 'in', ['published', 'video'])];
+    if (vertical) constraints.push(where('verticalId', '==', vertical));
+    else if (genre) constraints.push(where('genre', '==', genre));
+    else if (language) constraints.push(where('language', '==', String(language).toLowerCase()));
+    constraints.push(orderBy('createdAt', 'desc'));
+    if (cursor) constraints.push(startAfter(cursor));
+    constraints.push(fbLimit(pageSize));
+    const snap = await getDocs(query(collection(db, 'stories'), ...constraints));
+    return {
+      stories: snap.docs.map((d) => ({ id: d.id, ...d.data() })),
+      cursor: snap.docs[snap.docs.length - 1] || cursor,
+      hasMore: snap.docs.length === pageSize,
+    };
+  }
+
+  // Text search needs the whole catalogue (Firestore has no full-text
+  // search). Kept for five minutes, so typing a second search, or changing
+  // it, doesn't download everything again.
+  async getSearchCatalog() {
+    const fresh = this._catalog && Date.now() - this._catalog.at < 5 * 60 * 1000;
+    if (!fresh) {
+      const { stories } = await this.getStories({ limit: 200, community: 'all' });
+      this._catalog = { at: Date.now(), stories };
+    }
+    return this._catalog.stories;
+  }
+
   // Returns the story object directly (StoryDetailScreen sets it as-is).
   //
   // Non-published stories read as missing. `under_review` means the narration and
@@ -140,8 +184,22 @@ class ApiService {
     const d = await getDoc(ref);
     if (!d.exists()) return null;
     const data = d.data();
-    if (data.status && data.status !== 'published') return null;
+    // 'video': a long YouTube video as a story (scripts/sync-video-stories.js).
+    if (data.status && data.status !== 'published' && data.status !== 'video') return null;
     return { id: d.id, ...data };
+  }
+
+  // Long YouTube videos as stories, newest first (status 'video', which
+  // keeps them out of older app versions' feeds — see sync-video-stories.js).
+  async getVideoStories(max = 30) {
+    const q = query(
+      collection(db, 'stories'),
+      where('status', '==', 'video'),
+      orderBy('createdAt', 'desc'),
+      fbLimit(max)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   }
 
   // Returns { categories: [{ name, count, totalPlays }] } aggregated from the
@@ -149,7 +207,7 @@ class ApiService {
   async getCategories() {
     const q = query(
       collection(db, 'stories'),
-      where('status', '==', 'published'),
+      where('status', 'in', ['published', 'video']),
       where('isCommunityStory', '==', false)
     );
     const snap = await getDocs(q);
@@ -332,27 +390,36 @@ class ApiService {
 
   // --- Favorites (users/{uid}/favorites/{storyId}) -------------------------
 
-  // Returns an array of { storyId, id, ...meta }.
-  // Returns favorited stories with full data. Self-healing: any favorite whose
-  // story no longer exists is dropped and its orphan doc deleted, so the count
-  // and Library list stay accurate even after stories are removed.
-  async getFavorites() {
+  // The saved stories' ids, newest first: one read, however many there are.
+  // Enough for the saved state everywhere; Library loads the stories
+  // themselves a page at a time with getFavoriteStories.
+  async getFavoriteIds() {
     if (!this.uid) return [];
     const snap = await getDocs(collection(db, 'users', this.uid, 'favorites'));
-    const results = await Promise.all(snap.docs.map(async (d) => {
+    return snap.docs
+      .map((d) => ({ id: d.id, storyId: d.id, addedAt: d.data().addedAt || null }))
+      .sort((a, b) => (b.addedAt?.toMillis?.() || 0) - (a.addedAt?.toMillis?.() || 0));
+  }
+
+  // Full stories for some saved ids (one Library page). Self-healing: a
+  // favorite whose story no longer exists is dropped and its doc deleted.
+  async getFavoriteStories(ids) {
+    if (!this.uid || !ids?.length) return [];
+    const results = await Promise.all(ids.map(async (id) => {
       // Read the doc directly rather than through getStory, which also returns
       // null for a story that exists but isn't published. Only a genuinely
       // missing story should have its favorite deleted — otherwise a story
       // temporarily flipped back to under_review/failed would silently destroy
       // every user's bookmark of it.
-      const storySnap = await getDoc(doc(db, 'stories', d.id));
+      const storySnap = await getDoc(doc(db, 'stories', id));
       if (!storySnap.exists()) {
-        try { await deleteDoc(doc(db, 'users', this.uid, 'favorites', d.id)); } catch (e) {}
+        try { await deleteDoc(doc(db, 'users', this.uid, 'favorites', id)); } catch (e) {}
         return null;
       }
       const story = storySnap.data();
-      if (story.status && story.status !== 'published') return null; // hidden, but keep the bookmark
-      return { ...story, id: d.id, storyId: d.id, favoritedAt: d.data().addedAt };
+      // hidden, but keep the bookmark ('video': a long YouTube video story)
+      if (story.status && story.status !== 'published' && story.status !== 'video') return null;
+      return { ...story, id, storyId: id };
     }));
     return results.filter(Boolean);
   }
@@ -377,15 +444,54 @@ class ApiService {
     return d.exists();
   }
 
+  // A video story's watch position (StoryDetailScreen, from the YouTube
+  // player's events), in the same shape AudioContext saves for audio, so
+  // History, Continue listening and Profile's minutes count it too.
+  async saveVideoProgress(story, currentTime, duration) {
+    if (!this.uid || !story?.id) return;
+    const dur = duration || story.duration || 0;
+    await setDoc(doc(db, 'users', this.uid, 'progress', story.id), {
+      storyId: story.id,
+      title: story.title || '',
+      coverImage: story.coverImage || null,
+      genre: story.genre || null,
+      language: story.language || null,
+      duration: dur,
+      currentTime: currentTime || 0,
+      progress: dur ? Math.min((currentTime || 0) / dur, 1) : 0,
+      lastUpdated: serverTimestamp(),
+    }, { merge: true });
+  }
+
   // --- Progress (users/{uid}/progress/{storyId}) ----------------------------
 
   // Returns a map of { storyId: progressDoc } for all stories the user has
   // listened to, with the story title/cover joined in for the profile UI.
-  async getUserProgress() {
+  // Your listening (and watching) history, most recent first, each entry
+  // merged with its story. `max` keeps it to the most recent few (Home's
+  // Continue listening, Profile), so the reads don't grow with the history.
+  async getUserProgress({ max } = {}) {
     if (!this.uid) return [];
-    const snap = await getDocs(collection(db, 'users', this.uid, 'progress'));
-    const progressDocs = snap.docs.map((d) => ({ storyId: d.id, ...d.data() }));
+    const ref = collection(db, 'users', this.uid, 'progress');
+    const snap = await getDocs(max ? query(ref, orderBy('lastUpdated', 'desc'), fbLimit(max)) : ref);
+    return this._withStories(snap.docs.map((d) => ({ storyId: d.id, ...d.data() })));
+  }
 
+  // One page of the history for Library, with a cursor for the next.
+  async getUserProgressPage({ cursor = null, pageSize = 15 } = {}) {
+    if (!this.uid) return { items: [], cursor: null, hasMore: false };
+    const c = [orderBy('lastUpdated', 'desc')];
+    if (cursor) c.push(startAfter(cursor));
+    c.push(fbLimit(pageSize));
+    const snap = await getDocs(query(collection(db, 'users', this.uid, 'progress'), ...c));
+    return {
+      items: await this._withStories(snap.docs.map((d) => ({ storyId: d.id, ...d.data() }))),
+      cursor: snap.docs[snap.docs.length - 1] || cursor,
+      hasMore: snap.docs.length === pageSize,
+    };
+  }
+
+  async _withStories(progressDocs) {
     // Enrich with full story data (title, coverImage, genre, duration, plays,
     // audioUrl, description, etc.) so RailCard renders correctly and playStory
     // has everything it needs.
@@ -435,6 +541,18 @@ class ApiService {
       pagesCompleted: data.pagesCompleted || 0,
       lastUpdated: data.lastUpdated
     };
+  }
+
+  // Drops a story from "Continue listening" (deletes its saved position).
+  async removeProgress(storyId) {
+    if (!this.uid) return { success: false, reason: 'unauthenticated' };
+    try {
+      await deleteDoc(doc(db, 'users', this.uid, 'progress', storyId));
+      return { success: true };
+    } catch (error) {
+      console.warn('removeProgress:', error?.message);
+      return { success: false };
+    }
   }
 
   // Saves the user's playback position for a story.
@@ -499,7 +617,7 @@ class ApiService {
     const cacheKey = `userStats_${this.uid}`;
     return this.getCached(cacheKey, async () => {
       const [favorites, progSnap] = await Promise.all([
-        this.getFavorites(),
+        this.getFavoriteIds(),
         getDocs(collection(db, 'users', this.uid, 'progress')),
       ]);
       let minutes = 0, finished = 0;
@@ -797,46 +915,6 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
     } catch (error) {
       console.error('Error publishing community story:', error);
       throw error;
-    }
-  }
-
-  async getCommunityStories() {
-    try {
-      // Wait for index to be ready (index building can take 1-2 minutes)
-      const MAX_RETRIES = 3;
-      const DELAY_MS = 2000;
-      
-      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        try {
-          const q = query(
-            collection(db, 'stories'),
-            // under_review stories are invisible to everyone, including their
-            // own author — the pipeline flips them to 'published' once audio,
-            // cover and doc are all wired.
-            //
-            // No isCommunityStory filter: the Community feed shows both
-            // user-submitted stories and the AI daily library, merged by
-            // recency — Home stays the one curated to isCommunityStory === false.
-            where('status', '==', 'published'),
-            orderBy('createdAt', 'desc'),
-            fbLimit(50)
-          );
-          
-          const snapshot = await getDocs(q);
-          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } catch (error) {
-          if (error.code === 'failed-precondition' && attempt < MAX_RETRIES - 1) {
-            // Index is building, wait and retry
-            console.log(`⏳ Index building, retrying in ${DELAY_MS/1000}s... (attempt ${attempt + 1}/${MAX_RETRIES})`);
-            await new Promise(resolve => setTimeout(resolve, DELAY_MS));
-            continue;
-          }
-          throw error;
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching community stories:', error);
-      return [];
     }
   }
 

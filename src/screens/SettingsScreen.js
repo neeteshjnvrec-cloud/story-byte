@@ -16,6 +16,7 @@ import { useAppContext } from '../context/AppContext';
 import apiService from '../services/api';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
+import { openPlayStore } from '../utils/askForRating';
 
 // Inline pill toggle
 const Toggle = ({ value, onValueChange, theme }) => (
@@ -247,6 +248,18 @@ export const SettingsScreen = () => {
             label="Kids mode"
             right={mode === 'kids' ? <Icon name="check" size={16} color={theme.accent} /> : chevron}
             onPress={() => setMode(mode === 'kids' ? 'normal' : 'kids')}
+            isLast
+          />
+        </Group>
+
+        {/* FEEDBACK */}
+        <Group theme={theme} label="FEEDBACK">
+          <Row
+            theme={theme}
+            icon="star-outline"
+            label="Rate StoryByte"
+            right={chevron}
+            onPress={openPlayStore}
             isLast
           />
         </Group>

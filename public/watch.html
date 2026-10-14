@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- YouTube's embedded player needs to know which site embeds it. -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex">
+  <title>StoryByte player</title>
+  <link rel="preconnect" href="https://www.youtube.com">
+  <link rel="preconnect" href="https://i.ytimg.com">
+  <style>
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+
+    .player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 16px; overflow: hidden; }
+    .player iframe, .player #yt-player { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .loader { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center;
+      background: #000 center / cover no-repeat; transition: opacity .35s ease; }
+    .loader::before { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, .18); }
+    .spin { position: relative; width: 44px; height: 44px; border-radius: 50%;
+      border: 4px solid rgba(255, 255, 255, .35); border-top-color: #fff; animation: spin .9s linear infinite; }
+    .player.ready .loader { opacity: 0; pointer-events: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 3s; } }
+
+    .player { position: fixed; inset: 0; aspect-ratio: auto; border-radius: 0; }
+  </style>
+</head>
+<body>
+  <div class="player" data-autoplay="1">
+    <div class="loader"><i class="spin"></i></div>
+    <div id="yt-player"></div>
+  </div>
+  <script>
+    function startPlayer(box) {
+      var id = box.dataset.id, loader = box.querySelector('.loader');
+      var thumb = function (name) { return 'https://i.ytimg.com/vi/' + id + '/' + name + '.jpg'; };
+      if (box.dataset.poster) {
+        // Our own art (a Short's story cover): YouTube's Short thumbnails are letterboxed.
+        loader.style.backgroundImage = "url('" + box.dataset.poster + "')";
+      } else {
+        loader.style.backgroundImage = "url('" + thumb('hqdefault') + "')";
+        var hd = new Image();
+        // A missing maxresdefault comes back as a 120px placeholder.
+        hd.onload = function () { if (hd.naturalWidth > 120) loader.style.backgroundImage = "url('" + hd.src + "')"; };
+        hd.src = thumb('maxresdefault');
+      }
+      var done = function () { box.classList.add('ready'); };
+      setTimeout(done, 10000);
+      // Inside the app (react-native-webview), tell it what the viewer
+      // watches: { type: play | progress | pause | ended, currentTime,
+      // duration }, so it can count the play and keep their place.
+      var tick = null;
+      var post = function (player, type) {
+        if (!window.ReactNativeWebView) return;
+        try {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: type, currentTime: player.getCurrentTime() || 0, duration: player.getDuration() || 0
+          }));
+        } catch (err) {}
+      };
+      var report = function (player, state) {
+        if (state === 1) {
+          post(player, 'play');
+          clearInterval(tick);
+          tick = setInterval(function () { post(player, 'progress'); }, 15000);
+        } else if (state === 2 || state === 0) {
+          clearInterval(tick);
+          post(player, state === 0 ? 'ended' : 'pause');
+        }
+      };
+      var make = function () {
+        new YT.Player('yt-player', {
+          videoId: id, host: 'https://www.youtube.com',
+          playerVars: { autoplay: box.dataset.autoplay === '1' ? 1 : 0, playsinline: 1, rel: 0, origin: location.origin },
+          events: {
+            onReady: function (e) { if (box.dataset.autoplay === '1') e.target.playVideo(); setTimeout(done, 200); },
+            onError: done,
+            onStateChange: function (e) { report(e.target, e.data); }
+          }
+        });
+      };
+      if (window.YT && YT.Player) return make();
+      window.onYouTubeIframeAPIReady = make;
+      var s = document.createElement('script');
+      s.src = 'https://www.youtube.com/iframe_api';
+      s.onerror = done;
+      document.head.appendChild(s);
+    }
+
+    var params = new URLSearchParams(location.search);
+    var id = (params.get('v') || '').replace(/[^\w-]/g, '').slice(0, 11);
+    var box = document.querySelector('.player');
+    // ?autoplay=0 waits for a tap (a Short on a story's page); ?poster= is the
+    // thumbnail to show meanwhile, only from our own site.
+    var poster = params.get('poster') || '';
+    if (poster.indexOf(location.origin + '/') === 0) box.dataset.poster = poster.replace(/'/g, '%27');
+    if (params.get('autoplay') === '0') box.dataset.autoplay = '0';
+    if (id.length === 11) {
+      box.dataset.id = id;
+      startPlayer(box);
+    }
+  </script>
+</body>
+</html>

@@ -8,6 +8,7 @@ import apiService from '../services/api';
 import { loginWithEmail as authServiceLogin, signupWithEmail as authServiceSignup, signOutUser, sendResetEmail } from '../services/auth';
 import { dispatchAudioWorkflow } from '../utils/communityAudioGen';
 import { storyPlays } from '../utils/storyMetrics';
+import { mergeNewestFirst } from '../utils/videoStory';
 import { notificationService } from '../services/notificationService';
 import * as FileSystem from 'expo-file-system/legacy';
 
@@ -15,6 +16,8 @@ const STORAGE_AUTOPLAY = 'storybyte-autoplay-next';
 const STORAGE_LAST_TAB = 'storybyte-last-play-tab';
 const STORAGE_WIFI_ONLY = 'storybyte-wifi-only';
 const STORAGE_DOWNLOADS = 'storybyte-downloads';
+// Community feed stories per page.
+const COMMUNITY_PAGE = 5;
 
 const AppContext = createContext();
 
@@ -80,14 +83,14 @@ export const AppContextProvider = ({ children }) => {
         const [profile, stats, favoritesData] = await Promise.all([
           apiService.getUserProfile(),
           apiService.getUserStats(),
-          apiService.getFavorites()
+          apiService.getFavoriteIds()
         ]);
         setUserStats(profile);
         setFavorites(favoritesData);
         cacheRef.current = { profile, timestamp: now };
       } else {
         // Cache is fresh — still fetch favorites (it's not included in profile cache)
-        const favoritesData = await apiService.getFavorites();
+        const favoritesData = await apiService.getFavoriteIds();
         setUserStats(cached.profile);
         setFavorites(favoritesData);
       }
@@ -352,7 +355,7 @@ export const AppContextProvider = ({ children }) => {
 
     setFavorites((prev) => (wasFavorite
       ? prev.filter(f => f.id !== id)
-      : [...prev, { ...story, id }]));
+      : [{ id, storyId: id, addedAt: null }, ...prev]));
 
     try {
       if (wasFavorite) await apiService.removeFavorite(id);
@@ -360,7 +363,7 @@ export const AppContextProvider = ({ children }) => {
     } catch (error) {
       console.error('Error toggling favorite:', error);
       setFavorites((prev) => (wasFavorite
-        ? [...prev, { ...story, id }]
+        ? [{ id, storyId: id, addedAt: null }, ...prev]
         : prev.filter(f => f.id !== id)));
       throw error;
     }
@@ -615,20 +618,46 @@ export const AppContextProvider = ({ children }) => {
   // Stable identity: CommunityScreen keeps this in an effect dependency array,
   // and a fresh function each render tore down and re-created its Firestore
   // onSnapshot listener on every provider render.
+  // The Community feed (daily, community and video stories, newest first),
+  // 5 at a time: the first page here, the next ones from loadMoreCommunity
+  // as the list nears its end.
+  const communityPage = useRef({ cursor: null, busy: false });
+  const [communityHasMore, setCommunityHasMore] = useState(false);
   const fetchCommunityStories = useCallback(async () => {
-    const stories = await apiService.getCommunityStories();
-    setCommunityStories(stories);
-    receiveStoryDocs(stories);
-    return stories;
+    const res = await apiService.getStoriesPage({ pageSize: COMMUNITY_PAGE });
+    communityPage.current = { cursor: res.cursor, busy: false };
+    setCommunityHasMore(res.hasMore);
+    setCommunityStories(res.stories);
+    receiveStoryDocs(res.stories);
+    return res.stories;
+  }, [receiveStoryDocs]);
+
+  const loadMoreCommunity = useCallback(async () => {
+    const pageState = communityPage.current;
+    if (pageState.busy || !pageState.cursor) return;
+    pageState.busy = true;
+    try {
+      const res = await apiService.getStoriesPage({ cursor: pageState.cursor, pageSize: COMMUNITY_PAGE });
+      pageState.cursor = res.cursor;
+      setCommunityHasMore(res.hasMore);
+      setCommunityStories((prev) => mergeNewestFirst(prev, res.stories));
+      receiveStoryDocs(res.stories);
+    } catch (e) {
+      console.warn('Community next page:', e?.message);
+    } finally {
+      pageState.busy = false;
+    }
   }, [receiveStoryDocs]);
 
   // Realtime story docs arriving from CommunityScreen's listener. Kept here so
   // the list and the metric store update together — the screen used to hold
   // these in local state, which is why a like made on the feed was invisible
   // everywhere else.
-  const receiveCommunityStories = useCallback((stories) => {
-    setCommunityStories(stories);
-    receiveStoryDocs(stories);
+  // The live listener covers the newest page only; older pages already loaded
+  // stay, and the listener's copies (fresher counts) win.
+  const receiveCommunityStories = useCallback((docs) => {
+    setCommunityStories((prev) => mergeNewestFirst(docs, prev));
+    receiveStoryDocs(docs);
   }, [receiveStoryDocs]);
 
   const value = useMemo(() => ({
@@ -648,6 +677,8 @@ export const AppContextProvider = ({ children }) => {
     generateStory,
     publishCommunityStory,
     fetchCommunityStories,
+    loadMoreCommunity,
+    communityHasMore,
     // Shared metrics
     receiveStoryDocs,
     receiveCommunityStories,
@@ -671,7 +702,7 @@ export const AppContextProvider = ({ children }) => {
     user, loading, userStats, favorites, communityStories, isGenerating,
     autoplayNext, lastPlayTab, wifiOnly,
     toggleFavorite, isInFavorites, updateUserProfile, fetchCommunityStories,
-    receiveStoryDocs, receiveCommunityStories, getStoryMetrics, toggleLike,
+    loadMoreCommunity, communityHasMore, receiveStoryDocs, receiveCommunityStories, getStoryMetrics, toggleLike,
     rateStory, recordPlay, recordShare, setAutoplayNext, setLastPlayTab, downloads, downloadingIds, toggleDownload,
   ]);
 

@@ -25,7 +25,7 @@ const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
 // Where "Get the app" goes. The app is live on Play; there is no iOS listing yet,
 // so both platforms land here.
 const PLAY_STORE_URL = process.env.PLAY_STORE_URL
-  || 'https://play.google.com/store/apps/details?id=com.storybyte.app';
+  || require('./app-link').appLink('storybyte_web', 'story_page', 'web');
 
 // A profile picture is a base64 data URI on the user doc, so it inflates the page
 // by its full length. Past this, fall back to the initial-letter circle rather
@@ -243,6 +243,7 @@ function renderStoryPage(story, opts = {}) {
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -321,13 +322,11 @@ function renderStoryPage(story, opts = {}) {
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="${esc(playUrl)}">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="${esc(site)}/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="${esc(playUrl)}">${isHindi ? 'ऐप डाउनलोड करें' : 'Get the app'}</a>
     </div>
 
     <img class="cover" src="${esc(cover)}" alt="Cover art for ${esc(title)}" width="768" height="768">
@@ -345,7 +344,7 @@ function renderStoryPage(story, opts = {}) {
     ${chips.length ? `<div class="chips">${chips.map((c) => `<span class="${c.cls}">${esc(c.label)}</span>`).join('')}</div>` : ''}
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">${isHindi ? 'सुनें' : 'Listen'}</div>
       <audio controls preload="metadata" src="${esc(audio)}">
         Your browser can't play audio. <a href="${esc(audio)}">Download the recording</a>.
       </audio>
@@ -354,17 +353,23 @@ function renderStoryPage(story, opts = {}) {
     ${story.description ? `<p class="lead">${esc(story.description)}</p>` : ''}
 
     ${story.text ? `<div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">${isHindi ? 'कथा' : 'Story'}</div>
       <div class="transcript-body">
 ${paragraphs(story.text)}
       </div>
     </div>` : ''}
 
-    <div class="get-app">
+    ${isHindi ? `<div class="get-app">
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="${esc(playUrl)}">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="${esc(site)}/">और कथाएँ पढ़ें और सुनें →</a></p>
+    </div>` : `<div class="get-app">
       <h2>Listen to more on StoryByte</h2>
       <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
       <a class="btn" href="${esc(playUrl)}">Get the StoryByte app</a>
-    </div>
+      <p><a href="${esc(site)}/">More stories →</a></p>
+    </div>`}
 
     <div class="footer">
       <p>© 2025 StoryByte · <a href="${esc(site)}/privacy.html">Privacy</a></p>

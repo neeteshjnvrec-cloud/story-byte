@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://storybyte-76716.web.app/sitemap.xml

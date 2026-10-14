@@ -40,6 +40,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAudioPlayer } from '../context/AudioContext';
 import { Image } from 'expo-image';
 import { collection, query, where, onSnapshot, orderBy, limit as fbLimit } from 'firebase/firestore';
+import { isVideoStory } from '../utils/videoStory';
 import { db } from '../services/firebase';
 
 // Relative time formatter
@@ -60,7 +61,7 @@ export function CommunityScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const {
-    user, communityStories, fetchCommunityStories, receiveCommunityStories,
+    user, communityStories, fetchCommunityStories, receiveCommunityStories, loadMoreCommunity, communityHasMore,
     toggleFavorite, getStoryMetrics, toggleLike, rateStory, recordShare, setLastPlayTab,
   } = useAppContext();
   const { playStory, setNextStory } = useAudioPlayer();
@@ -79,12 +80,13 @@ export function CommunityScreen() {
       if (!cancelled) { setError(e.message || 'Failed to load stories'); setLoading(false); }
     });
 
-    // Real-time listener — show ALL published stories (daily + community)
+    // Real-time listener on the newest page — daily, community and video
+    // stories. Older pages load as the list nears its end (loadMoreCommunity).
     const q = query(
       collection(db, 'stories'),
-      where('status', '==', 'published'),
+      where('status', 'in', ['published', 'video']),
       orderBy('createdAt', 'desc'),
-      fbLimit(50)
+      fbLimit(5)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -169,6 +171,8 @@ export function CommunityScreen() {
   };
 
   const handlePlay = async (story) => {
+    // A video story plays on its page.
+    if (isVideoStory(story)) return navigation.navigate('StoryDetail', { storyId: story.id || story.storyId, story });
     setLastPlayTab('community');
     // Provide the autoplay next-story callback: find this story's index in the
     // feed and return the next one (wrapping is fine — unlikely in a 50-item
@@ -430,6 +434,12 @@ export function CommunityScreen() {
           // like/rating/play state does, which is precisely when rows must repaint.
           extraData={getStoryMetrics}
           renderItem={renderItem}
+          // The next 5 as the end comes into view.
+          onEndReached={() => { if (communityHasMore) loadMoreCommunity(); }}
+          onEndReachedThreshold={0.6}
+          ListFooterComponent={communityHasMore && published.length ? (
+            <ActivityIndicator color={theme.accent} style={{ marginVertical: 20 }} />
+          ) : null}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Icon name="people" size={48} color={theme.textTertiary} />

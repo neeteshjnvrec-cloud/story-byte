@@ -1,5 +1,5 @@
 // Library Screen for Story Byte — Favorites / Downloads / History.
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   ScrollView,
@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   StyleSheet
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../hooks/useTheme';
@@ -16,6 +16,9 @@ import { useAudioPlayer } from '../context/AudioContext';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { CompactRow } from '../components/story/StoryCard';
+
+// Saved stories / history entries per page; more load as you scroll.
+const PAGE_SIZE = 15;
 
 const SEGMENTS = [
   { key: 'favorites', label: 'Favorites' },
@@ -34,42 +37,107 @@ export const FavoritesScreen = () => {
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState('favorites');
   const [error, setError] = useState(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  // Saved: how many of the (newest-first) saved ids are loaded. History: the
+  // cursor for its next page.
+  const favPage = useRef({ loaded: 0, busy: false, request: 0 });
+  const histPage = useRef({ cursor: null, hasMore: false, busy: false });
+  const [historyHasMore, setHistoryHasMore] = useState(false);
 
+  // The saved list changes when a story is saved or unsaved anywhere: start
+  // its pages over. History reloads its first page each time Library opens,
+  // so what you just played is there.
+  const favoriteIds = favorites.map((f) => f.storyId || f.id);
+  const favoriteKey = favoriteIds.join(',');
   useEffect(() => {
     loadFavorites();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favoriteKey]);
+  useFocusEffect(useCallback(() => {
     loadHistory();
-  }, [favorites]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []));
 
   const loadFavorites = async () => {
+    const request = ++favPage.current.request;
+    favPage.current.busy = true;
     try {
       setLoading(true);
       setError(null);
-      const favoriteStoryIds = favorites.map(f => f.storyId || f.id);
-      const favoriteStories = await Promise.all(
-        favoriteStoryIds.map(id => apiService.getStory(id))
-      );
-      setStories(favoriteStories.filter(Boolean));
+      const first = await apiService.getFavoriteStories(favoriteIds.slice(0, PAGE_SIZE));
+      if (request !== favPage.current.request) return;
+      favPage.current.loaded = Math.min(PAGE_SIZE, favoriteIds.length);
+      setStories(first);
     } catch (error) {
       console.error('Error loading favorites:', error);
       setError('Failed to load favorites. Please try again.');
     } finally {
-      setLoading(false);
+      if (request === favPage.current.request) {
+        favPage.current.busy = false;
+        setLoading(false);
+      }
     }
   };
 
   const loadHistory = async () => {
     try {
       setError(null);
-      const progress = await apiService.getUserProgress();
-      setHistory(progress || []);
+      const res = await apiService.getUserProgressPage({ pageSize: PAGE_SIZE });
+      histPage.current = { cursor: res.cursor, hasMore: res.hasMore, busy: false };
+      setHistoryHasMore(res.hasMore);
+      setHistory(res.items || []);
     } catch (error) {
       console.error('Error loading history:', error);
     }
   };
 
+  const favoritesHaveMore = favPage.current.loaded < favoriteIds.length;
+
+  // The next page of whichever list is showing.
+  const loadMore = async () => {
+    if (active === 'favorites') {
+      const pageState = favPage.current;
+      if (pageState.busy || pageState.loaded >= favoriteIds.length) return;
+      const request = pageState.request;
+      pageState.busy = true;
+      setLoadingMore(true);
+      try {
+        const next = await apiService.getFavoriteStories(favoriteIds.slice(pageState.loaded, pageState.loaded + PAGE_SIZE));
+        if (request !== pageState.request) return;
+        pageState.loaded = Math.min(pageState.loaded + PAGE_SIZE, favoriteIds.length);
+        setStories((prev) => [...prev, ...next.filter((n) => !prev.some((p) => p.id === n.id))]);
+      } finally {
+        if (request === pageState.request) pageState.busy = false;
+        setLoadingMore(false);
+      }
+    } else if (active === 'history') {
+      const pageState = histPage.current;
+      if (pageState.busy || !pageState.hasMore) return;
+      pageState.busy = true;
+      setLoadingMore(true);
+      try {
+        const res = await apiService.getUserProgressPage({ cursor: pageState.cursor, pageSize: PAGE_SIZE });
+        pageState.cursor = res.cursor;
+        pageState.hasMore = res.hasMore;
+        setHistoryHasMore(res.hasMore);
+        setHistory((prev) => [...prev, ...res.items.filter((n) => !prev.some((p) => p.storyId === n.storyId))]);
+      } catch (e) {
+        console.warn('History next page:', e?.message);
+      } finally {
+        pageState.busy = false;
+        setLoadingMore(false);
+      }
+    }
+  };
+
+  const onScroll = ({ nativeEvent: { layoutMeasurement, contentOffset, contentSize } }) => {
+    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 600) loadMore();
+  };
+
   const handleRetry = () => {
     setError(null);
     loadFavorites();
+    loadHistory();
   };
 
   const openStory = (story) => {
@@ -174,6 +242,8 @@ export const FavoritesScreen = () => {
         style={styles.scrollView}
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={200}
       >
         <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
           <AppText variant="displayM">Library</AppText>
@@ -224,6 +294,9 @@ export const FavoritesScreen = () => {
           ) : (
             renderHistory()
           )}
+          {loadingMore && ((active === 'favorites' && favoritesHaveMore) || (active === 'history' && historyHasMore)) ? (
+            <ActivityIndicator color={theme.accent} style={{ marginVertical: 20 }} />
+          ) : null}
         </View>
       </ScrollView>
     </View>

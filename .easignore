@@ -1,0 +1,73 @@
+# What EAS Build uploads for the app. When this file exists, EAS uses it
+# instead of .gitignore, so the .gitignore entries are repeated first.
+#
+# The app is App.js + src/ + assets/ and the config files next to them
+# (app.json, eas.json, package.json, package-lock.json, .npmrc,
+# babel.config.js, metro.config.js, google-services.json). Everything else
+# here is the website, the content pipeline or docs, none of which go into
+# the app.
+
+# --- from .gitignore ---------------------------------------------------------
+node_modules/
+coverage/
+build/
+dist/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.firebase/
+*-debug.log
+firebase-service-account.json
+google-credentials.json
+.expo/
+web-build/
+expo-env.d.ts
+ios/
+android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+.metro-health-check*
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+npm-debug*
+yarn-debug*
+yarn-error*
+
+# --- not part of the app -----------------------------------------------------
+# The website: story audio, covers, pages, episode text (~210 MB).
+/public/
+# The daily/weekly content pipeline and its reports.
+/scripts/
+/reports/
+# Firebase backend: rules, rule tests, functions, hosting config.
+/firestore/
+/functions/
+/firebase.json
+/.firebaserc
+/storage.rules
+# Design files, docs and notes.
+/design/
+/docs/
+/images/
+/storybyte-design-system.html
+/*.md
+/LICENSE
+# Old backups and one-off test scripts.
+/*.bak-*
+/test-bundle.js
+/test_models.js
+# Repo tooling.
+/.github/
+/.claude/
+/.git/

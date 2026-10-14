@@ -1,9 +1,14 @@
 // Audio Context for Story Byte — full-featured player
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
+import { Alert, Linking } from 'react-native';
 import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAppContext } from './AppContext';
+import { useWallet } from './WalletContext';
+import { isPaidStory } from '../services/wallet';
+import { noteStoryFinished } from '../utils/askForRating';
+import { isVideoStory } from '../utils/videoStory';
 
 const AudioContext = createContext();
 
@@ -37,6 +42,11 @@ export const AudioProvider = ({ children }) => {
   // rebuilt when the setting changes — always reads the current value.
   const autoplayNextRef = useRef(autoplayNext);
   useEffect(() => { autoplayNextRef.current = autoplayNext; }, [autoplayNext]);
+  // Coins: paid episodes' audio and the finish reward. Through a ref so the
+  // playback callbacks below always reach the current wallet.
+  const coins = useWallet();
+  const coinsRef = useRef(coins);
+  useEffect(() => { coinsRef.current = coins; }, [coins]);
 
   useEffect(() => {
     setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
@@ -145,6 +155,10 @@ export const AudioProvider = ({ children }) => {
       if (currentPage < totalPages - 1) {
         setCurrentPage((p) => p + 1);
       } else {
+        // Listened to the end: 2 coins (once per story, a few a day).
+        if (currentStoryRef.current) coinsRef.current.rewardFinish(currentStoryRef.current);
+        // After a few finished stories, Google's in-app rating popup.
+        noteStoryFinished();
         setIsPlaying(false);
         cleanupPlayer();
         // Clear currentStory so clicking play again restarts from beginning
@@ -168,6 +182,22 @@ export const AudioProvider = ({ children }) => {
   // Play a story with optional starting page
   const playStory = useCallback(async (story, startPage = 0) => {
     try {
+      // A video story has no audio. Screens open its page instead; anything
+      // that still lands here goes to YouTube rather than failing.
+      if (isVideoStory(story)) {
+        if (story.youtubeUrl) Linking.openURL(story.youtubeUrl).catch(() => {});
+        return;
+      }
+      // A paid long episode plays only once unlocked: its audio URL lives in
+      // premium_audio, which the rules let only unlocked listeners read.
+      if (isPaidStory(story) && !story.audioUrl && !downloads?.[story.id]?.path) {
+        const url = await coinsRef.current.premiumAudioUrl(story.id);
+        if (!url) {
+          Alert.alert('🔒 Locked episode', `Open "${story.title}" to unlock it for ${story.priceCoins} coins.`);
+          return;
+        }
+        story = { ...story, audioUrl: url };
+      }
       // Save current story's progress before switching
       console.log('[AudioContext] playStory: switching from', currentStoryRef.current?.id, 'to', story.id);
       if (playerRef.current && currentStoryRef.current) {

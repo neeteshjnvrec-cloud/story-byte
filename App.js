@@ -17,6 +17,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { AppContextProvider, useAppContext } from './src/context/AppContext';
 import { AudioProvider } from './src/context/AudioContext';
+import { WalletProvider } from './src/context/WalletContext';
 import { ThemeProvider } from './src/hooks/useTheme';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { StoryDetailScreen } from './src/screens/StoryDetailScreen';
@@ -28,6 +29,7 @@ import { EditProfileScreen } from './src/screens/EditProfileScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { NotificationsScreen } from './src/screens/NotificationsScreen';
+import { CoinsScreen } from './src/screens/CoinsScreen';
 import { FloatingAudioPlayer } from './src/components/FloatingAudioPlayer';
 import { notificationService } from './src/services/notificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -63,15 +65,20 @@ function AuthStack() {
 function MainStack({ isNewUser, navigationRef, ready }) {
   const { userStats } = useAppContext();
 
-  // Check if mandatory profile fields are filled
+  // Whether mandatory profile fields are missing. Only known once the profile
+  // has loaded: treating "not loaded yet" as incomplete opened Edit Profile on
+  // every launch, because the screens are ready before the profile arrives.
   const needsProfile = React.useMemo(() => {
-    if (!userStats) return true; // no data yet = needs profile
+    if (!userStats) return false;
     return !userStats.fullName || !userStats.gender || !userStats.favoriteGenre;
   }, [userStats]);
 
-  // Auto-open EditProfile when profile is incomplete
+  // Auto-open EditProfile when the profile is incomplete — once per launch,
+  // so saving one field (still incomplete) doesn't open it again.
+  const askedForProfile = React.useRef(false);
   React.useEffect(() => {
-    if (needsProfile && ready && navigationRef.current) {
+    if (needsProfile && ready && navigationRef.current && !askedForProfile.current) {
+      askedForProfile.current = true;
       navigationRef.current.navigate('EditProfile');
     }
   }, [needsProfile, ready]);
@@ -109,6 +116,7 @@ function MainStack({ isNewUser, navigationRef, ready }) {
         <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Coins" component={CoinsScreen} />
         {isNewUser ? (
           <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         ) : null}
@@ -169,12 +177,17 @@ export default function App() {
           <SafeAreaProvider>
             <ThemeProvider>
               <AppContextProvider>
-                <AudioProvider>
-                  <NavigationContainer ref={navigationRef} onReady={() => setReady(true)}>
-                    <StatusBar style="auto" />
-                    <Root navigationRef={navigationRef} ready={ready} />
-                  </NavigationContainer>
-                </AudioProvider>
+                {/* Coins sit between the app state (which knows the signed-in
+                    user) and the player (which plays paid episodes and pays
+                    the finish reward). */}
+                <WalletProvider>
+                  <AudioProvider>
+                    <NavigationContainer ref={navigationRef} onReady={() => setReady(true)}>
+                      <StatusBar style="auto" />
+                      <Root navigationRef={navigationRef} ready={ready} />
+                    </NavigationContainer>
+                  </AudioProvider>
+                </WalletProvider>
               </AppContextProvider>
             </ThemeProvider>
           </SafeAreaProvider>
