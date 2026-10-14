@@ -89,3 +89,7 @@ ios/build/google-services.json
 /public/episodes/**/scene-*.jpg
 /public/episodes/**/audio.mp3
 /public/episodes/**/cover.jpg
+/test_models.js
+/test_bundle.js
+test_models.js
+test_bundle.js
