@@ -65,15 +65,20 @@ function AuthStack() {
 function MainStack({ isNewUser, navigationRef, ready }) {
   const { userStats } = useAppContext();
 
-  // Check if mandatory profile fields are filled
+  // Whether mandatory profile fields are missing. Only known once the profile
+  // has loaded: treating "not loaded yet" as incomplete opened Edit Profile on
+  // every launch, because the screens are ready before the profile arrives.
   const needsProfile = React.useMemo(() => {
-    if (!userStats) return true; // no data yet = needs profile
+    if (!userStats) return false;
     return !userStats.fullName || !userStats.gender || !userStats.favoriteGenre;
   }, [userStats]);
 
-  // Auto-open EditProfile when profile is incomplete
+  // Auto-open EditProfile when the profile is incomplete — once per launch,
+  // so saving one field (still incomplete) doesn't open it again.
+  const askedForProfile = React.useRef(false);
   React.useEffect(() => {
-    if (needsProfile && ready && navigationRef.current) {
+    if (needsProfile && ready && navigationRef.current && !askedForProfile.current) {
+      askedForProfile.current = true;
       navigationRef.current.navigate('EditProfile');
     }
   }, [needsProfile, ready]);
