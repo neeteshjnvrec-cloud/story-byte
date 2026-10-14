@@ -27,10 +27,10 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund @firebase/rules-unit-testing@4 firebase@11 firebase-tools@14
           npx firebase emulators:exec --only firestore --project demo-coins "node --test coins.rules.test.mjs"
-      - name: Deploy the rules
+      - name: Deploy the rules and indexes
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
-          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx --yes firebase-tools deploy --only firestore:rules --project storybyte-76716 --non-interactive
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx --yes firebase-tools deploy --only firestore:rules,firestore:indexes --project storybyte-76716 --non-interactive
           rm -f "$RUNNER_TEMP/sa.json"

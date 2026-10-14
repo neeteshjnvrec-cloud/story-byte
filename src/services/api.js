@@ -19,6 +19,7 @@ import {
   where,
   orderBy,
   limit as fbLimit,
+  startAfter,
   increment,
   runTransaction,
   writeBatch,
@@ -134,6 +135,42 @@ class ApiService {
     }
 
     return { stories };
+  }
+
+  // One page of the catalogue (daily, community and video stories), newest
+  // first, filtered by Firestore — for Browse, which loads more as you
+  // scroll instead of 200 stories per filter tap.
+  //
+  // Filters one field server-side (vertical, else genre, else language: each
+  // has a status+field+createdAt index; see firestore-indexes.json) and hands
+  // the others back for the screen to apply. Pass the returned `cursor` to get
+  // the next page; `hasMore` is false at the end.
+  async getStoriesPage({ genre, language, vertical, cursor = null, pageSize = 20 } = {}) {
+    const constraints = [where('status', 'in', ['published', 'video'])];
+    if (vertical) constraints.push(where('verticalId', '==', vertical));
+    else if (genre) constraints.push(where('genre', '==', genre));
+    else if (language) constraints.push(where('language', '==', String(language).toLowerCase()));
+    constraints.push(orderBy('createdAt', 'desc'));
+    if (cursor) constraints.push(startAfter(cursor));
+    constraints.push(fbLimit(pageSize));
+    const snap = await getDocs(query(collection(db, 'stories'), ...constraints));
+    return {
+      stories: snap.docs.map((d) => ({ id: d.id, ...d.data() })),
+      cursor: snap.docs[snap.docs.length - 1] || cursor,
+      hasMore: snap.docs.length === pageSize,
+    };
+  }
+
+  // Text search needs the whole catalogue (Firestore has no full-text
+  // search). Kept for five minutes, so typing a second search, or changing
+  // it, doesn't download everything again.
+  async getSearchCatalog() {
+    const fresh = this._catalog && Date.now() - this._catalog.at < 5 * 60 * 1000;
+    if (!fresh) {
+      const { stories } = await this.getStories({ limit: 200, community: 'all' });
+      this._catalog = { at: Date.now(), stories };
+    }
+    return this._catalog.stories;
   }
 
   // Returns the story object directly (StoryDetailScreen sets it as-is).

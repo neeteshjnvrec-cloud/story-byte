@@ -1,5 +1,5 @@
 // Browse Screen for Story Byte
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   ScrollView,
@@ -46,6 +46,8 @@ import { GENRES } from '../constants/genres';
 
 // Genre chips
 const GENRE_CHIPS = GENRES;
+// Stories per page while browsing (and matches per step while searching).
+const PAGE_SIZE = 20;
 
 export const SearchScreen = () => {
   const navigation = useNavigation();
@@ -59,6 +61,14 @@ export const SearchScreen = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [filter, setFilter] = useState('all');
   const [selectedGenre, setSelectedGenre] = useState(null);
+  // Browsing (genre, language, vertical) loads PAGE_SIZE stories at a time
+  // from Firestore and more as you scroll; a text search filters the cached
+  // catalogue and shows PAGE_SIZE more matches as you scroll.
+  const [mode, setMode] = useState('browse');
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const page = useRef({ filters: null, cursor: null, busy: false, request: 0 });
 
   // Debounce search input (300ms)
   useEffect(() => {
@@ -82,12 +92,15 @@ export const SearchScreen = () => {
       setLoading(true);
       setHasSearched(true);
       setSelectedGenre(null);
+      setMode('search');
+      setHasMore(false);
+      setVisibleCount(PAGE_SIZE);
+      page.current.request += 1;
       Keyboard.dismiss();
 
-      // Get every published story — daily and community — and filter client-side
-      // (Firestore can't do full-text search).
-      const response = await apiService.getStories({ limit: 200, community: 'all' });
-      const allStories = response.stories || [];
+      // Every published story, daily, community and video, kept for a few
+      // minutes, filtered here (Firestore can't do full-text search).
+      const allStories = await apiService.getSearchCatalog();
 
       const lowerQuery = searchQuery.toLowerCase();
       const matched = allStories.filter((s) => {
@@ -107,77 +120,92 @@ export const SearchScreen = () => {
     }
   }, []);
 
-  const handleGenrePress = async (genre) => {
+  // First page for a set of filters ({ genre, language, vertical }), replacing
+  // what's shown. A later tap wins over an earlier one still loading.
+  const browse = async (filters) => {
+    const request = ++page.current.request;
+    page.current = { ...page.current, filters, cursor: null, busy: true };
+    setMode('browse');
+    setHasSearched(true);
+    setLoading(true);
+    try {
+      const res = await apiService.getStoriesPage({ ...filters, pageSize: PAGE_SIZE });
+      if (request !== page.current.request) return;
+      page.current.cursor = res.cursor;
+      setResults(res.stories);
+      setHasMore(res.hasMore);
+    } catch (error) {
+      // An index still building (e.g. right after deploying a new one): the
+      // old way, one bigger load filtered on the phone.
+      console.warn('Browse page:', error?.message);
+      if (request !== page.current.request) return;
+      const response = await apiService.getStories({ ...filters, limit: 200, community: 'all' }).catch(() => ({ stories: [] }));
+      setResults(response.stories || []);
+      setHasMore(false);
+    } finally {
+      if (request === page.current.request) {
+        page.current.busy = false;
+        setLoading(false);
+      }
+    }
+  };
+
+  // The next page while browsing; the next PAGE_SIZE matches while searching.
+  const loadMore = async () => {
+    if (mode === 'search') {
+      setVisibleCount((n) => n + PAGE_SIZE);
+      return;
+    }
+    if (!hasMore || page.current.busy) return;
+    const request = page.current.request;
+    page.current.busy = true;
+    setLoadingMore(true);
+    try {
+      const res = await apiService.getStoriesPage({ ...page.current.filters, cursor: page.current.cursor, pageSize: PAGE_SIZE });
+      if (request !== page.current.request) return;
+      page.current.cursor = res.cursor;
+      setResults((prev) => [...prev, ...res.stories.filter((s) => !prev.some((p) => p.id === s.id))]);
+      setHasMore(res.hasMore);
+    } catch (error) {
+      console.warn('Browse next page:', error?.message);
+      setHasMore(false);
+    } finally {
+      if (request === page.current.request) page.current.busy = false;
+      setLoadingMore(false);
+    }
+  };
+
+  const onScroll = ({ nativeEvent: { layoutMeasurement, contentOffset, contentSize } }) => {
+    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 600) loadMore();
+  };
+
+  const handleGenrePress = (genre) => {
     setQuery('');
     setSelectedGenre(genre.id);
-    try {
-      setLoading(true);
-      setHasSearched(true);
-      const response = await apiService.getStories({ genre: genre.id, limit: 200, community: 'all' });
-      setResults(response.stories || []);
-    } catch (error) {
-      console.error('Genre search error:', error);
-    } finally {
-      setLoading(false);
-    }
+    browse({ genre: genre.id });
   };
 
-  // Filter chips. Language ones use the existing getStories({ language }) filter;
-  // duration ones filter the loaded set client-side via displayResults.
-  const handleFilterPress = async (id) => {
+  // Filter chips: language ones narrow what's loaded (and the next pages);
+  // duration ones filter the loaded stories via displayResults.
+  const handleFilterPress = (id) => {
     setFilter(id);
     if (id === 'en' || id === 'hi') {
-      try {
-        setLoading(true);
-        setHasSearched(true);
-        const response = await apiService.getStories({ language: id, limit: 200, community: 'all' });
-        setResults(response.stories || []);
-      } catch (error) {
-        console.error('Language filter error:', error);
-      } finally {
-        setLoading(false);
-      }
+      browse(selectedGenre ? { genre: selectedGenre } : { language: id });
     } else if (id === 'all') {
-      // Reset genre filter and load all stories
+      // Back to the verticals and genres.
       setSelectedGenre(null);
       setHasSearched(false);
-      try {
-        setLoading(true);
-        const response = await apiService.getStories({ limit: 200, community: 'all' });
-        setResults(response.stories || []);
-      } catch (error) {
-        console.error('All filter error:', error);
-      } finally {
-        setLoading(false);
-      }
+      page.current.request += 1;
+      setResults([]);
+      setHasMore(false);
     } else if ((id === 'short' || id === 'long') && !hasSearched) {
-      // Nothing loaded yet — pull the catalog so the duration filter has data.
-      try {
-        setLoading(true);
-        setHasSearched(true);
-        const response = await apiService.getStories({ limit: 200, community: 'all' });
-        setResults(response.stories || []);
-      } catch (error) {
-        console.error('Duration filter error:', error);
-      } finally {
-        setLoading(false);
-      }
+      browse({});
     }
   };
 
-  const handleVerticalPress = async (v) => {
-    setLoading(true);
-    setHasSearched(true);
+  const handleVerticalPress = (v) => {
     setSelectedGenre(null);
-    try {
-      const response = await apiService.getStories({ vertical: v.key, limit: 200, community: 'all' });
-      setResults(response.stories || []);
-    } catch (error) {
-      console.error('Vertical filter error:', error);
-      setResults([]);
-    } finally {
-      setLoading(false);
-    }
+    browse({ vertical: v.key });
   };
 
   const handleStoryPress = (story) => {
@@ -205,9 +233,20 @@ export const SearchScreen = () => {
   });
 
   const showResults = hasSearched || debouncedQuery.trim().length > 0;
+  const shown = mode === 'search' ? displayResults.slice(0, visibleCount) : displayResults;
+  const moreToShow = mode === 'search' ? displayResults.length > visibleCount : hasMore;
+
+  // A duration chip can leave a loaded page nearly empty (most stories are
+  // in between): keep fetching pages until there's a screenful or no more.
+  useEffect(() => {
+    if (mode === 'browse' && !loading && !loadingMore && hasMore && displayResults.length < PAGE_SIZE / 2) loadMore();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, loading, loadingMore, hasMore, displayResults.length]);
 
   return (
     <KeyboardAwareScroll
+      onScroll={onScroll}
+      scrollEventThrottle={200}
       style={[styles.container, { backgroundColor: theme.background }]}
       contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
     >
@@ -321,10 +360,10 @@ export const SearchScreen = () => {
         {!loading && showResults && (
           <View style={styles.section}>
             <AppText variant="h2" style={styles.sectionTitle}>
-              {displayResults.length > 0 ? `${displayResults.length} results` : 'No stories found'}
+              {displayResults.length > 0 ? `${displayResults.length}${moreToShow ? '+' : ''} results` : 'No stories found'}
             </AppText>
 
-            {displayResults.map((story) => (
+            {shown.map((story) => (
               <CompactRow
                 key={story.id}
                 story={story}
@@ -342,6 +381,8 @@ export const SearchScreen = () => {
                 }
               />
             ))}
+
+            {loadingMore ? <ActivityIndicator color={theme.accent} style={{ marginVertical: 20 }} /> : null}
 
             {displayResults.length === 0 && (
               <AppText variant="body" color="textSecondary" style={styles.emptyText}>
