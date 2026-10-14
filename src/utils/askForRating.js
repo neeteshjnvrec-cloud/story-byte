@@ -24,7 +24,8 @@ try {
 
 const markRated = () => AsyncStorage.setItem(RATED_KEY, 'true').catch(() => {});
 
-async function openPlayStore() {
+// Also the Settings screen's "Rate StoryByte" row.
+export async function openPlayStore() {
   markRated();
   try {
     await Linking.openURL(`market://details?id=${PACKAGE}&showAllReviews=true`);
