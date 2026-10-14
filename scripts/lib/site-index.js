@@ -2,9 +2,10 @@
  * The website's front door for search engines: a real home page listing
  * every story page, a sitemap, and robots.txt.
  *
- * Also a page per long YouTube episode (/v/<id>, played on our site under a
- * StoryByte loading screen), watch.html (the app's player), and
- * long-videos.json (the app's Long stories row).
+ * Also video.html, one page that plays any long YouTube episode on our site
+ * (/video?v=<id>, under a StoryByte loading screen), watch.html (the app's
+ * player), and long-videos.json (the list both read, and the app's Long
+ * stories row).
  *
  * Built from the story pages already in public/s/ (lib/story-page.js), so
  * whatever wrote those pages, this picks them up. Runs before every hosting
@@ -67,7 +68,7 @@ function renderSitemap(pages, site = SITE, videos = []) {
   const urls = [
     `  <url><loc>${home}/</loc>${pages[0] ? `<lastmod>${day(pages[0].date)}</lastmod>` : ''}</url>`,
     ...pages.map((p) => `  <url><loc>${esc(`${home}/s/${p.slug}`)}</loc><lastmod>${day(p.date)}</lastmod></url>`),
-    ...videos.map((v) => `  <url><loc>${esc(`${home}/v/${v.id}`)}</loc>${v.publishedAt ? `<lastmod>${String(v.publishedAt).slice(0, 10)}</lastmod>` : ''}</url>`),
+    ...videos.map((v) => `  <url><loc>${esc(`${home}/video?v=${v.id}`)}</loc>${v.publishedAt ? `<lastmod>${String(v.publishedAt).slice(0, 10)}</lastmod>` : ''}</url>`),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
 }
@@ -290,7 +291,7 @@ function readLongVideos(pubDir) {
 // YouTube's embedded player (IFrame API), under a StoryByte loading screen
 // (logo, spinner, the video's own picture blurred behind) until YouTube says
 // the player is ready, instead of a black box. Used by the video pages
-// (/v/<id>) and by watch.html, the page the app's video screen loads.
+// page (video.html) and by watch.html, the page the app's video screen loads.
 
 const PLAYER_CSS = `
     .player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #120c08; border-radius: 16px; overflow: hidden; }
@@ -337,16 +338,11 @@ const PLAYER_SCRIPT = `
     }
 `;
 
-const isoDuration = (sec) => {
-  const s = Math.max(0, Math.round(sec || 0));
-  return `PT${Math.floor(s / 3600) ? `${Math.floor(s / 3600)}H` : ''}${Math.floor((s % 3600) / 60)}M${s % 60}S`;
-};
-
 const minutesHi = (sec) => (sec > 0 ? `${Math.round(sec / 60)} मिनट` : '');
 
-/** One video's card (home page, "more episodes"), linking to its page. */
+/** One video's card on the home page, linking to the video page. */
 const videoCard = (v, site) => `
-      <a class="card video" href="${esc(`${site}/v/${v.id}`)}">
+      <a class="card video" href="${esc(`${site}/video?v=${v.id}`)}">
         <span class="thumb">
           <img src="${esc(v.thumbnail)}" alt="" loading="lazy" width="320" height="180">
           <span class="yt">▶ देखें</span>
@@ -358,56 +354,39 @@ const videoCard = (v, site) => `
         </span>
       </a>`;
 
-/** A long episode's own page on our site: the video, its details, more episodes, the app. */
-function renderVideoPage(v, videos, site = SITE) {
+/**
+ * video.html: one page for every long video, /video?v=<id>. It starts the
+ * player from the address straight away, then fills in the title, details
+ * and more episodes from long-videos.json, so new episodes need nothing
+ * extra.
+ */
+function renderVideoWrapper(site = SITE) {
   site = site.replace(/\/$/, '');
   const play = appLink('storybyte_web', 'video_page', 'web');
-  const url = `${site}/v/${v.id}`;
-  const image = `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`;
-  const sameSeries = videos.filter((o) => o.id !== v.id && o.seriesTitle === v.seriesTitle);
-  const more = [...sameSeries, ...videos.filter((o) => o.id !== v.id && o.seriesTitle !== v.seriesTitle)].slice(0, 9);
-  const meta = [v.seriesTitle, v.episode && `भाग ${v.episode}`, minutesHi(v.durationSec)].filter(Boolean);
-  const ld = {
-    '@context': 'https://schema.org',
-    '@type': 'VideoObject',
-    name: v.title,
-    description: v.description || v.title,
-    thumbnailUrl: [image],
-    ...(v.publishedAt ? { uploadDate: v.publishedAt } : {}),
-    ...(v.durationSec > 0 ? { duration: isoDuration(v.durationSec) } : {}),
-    embedUrl: `https://www.youtube.com/embed/${v.id}`,
-    url,
-    inLanguage: v.language || 'hi',
-  };
   return `<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>${esc(v.title)} · StoryByte</title>
-  <meta name="description" content="${esc(v.description || v.title)}">
-  <link rel="canonical" href="${esc(url)}">
+  <title>पूरी कथा · StoryByte</title>
+  <meta name="description" content="StoryByte की पूरी कथाएँ — लंबी कथाएँ और धारावाहिक, वीडियो में।">
   <meta property="og:site_name" content="StoryByte">
-  <meta property="og:type" content="video.other">
-  <meta property="og:title" content="${esc(v.title)}">
-  <meta property="og:description" content="${esc(v.description || '')}">
-  <meta property="og:url" content="${esc(url)}">
-  <meta property="og:image" content="${esc(image)}">
+  <meta property="og:title" content="पूरी कथाएँ · StoryByte">
+  <meta property="og:description" content="लंबी कथाएँ और धारावाहिक, पूरे विस्तार से — StoryByte पर।">
   <meta property="og:locale" content="hi_IN">
-  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://www.youtube.com">
   <link rel="preconnect" href="https://i.ytimg.com">
-  <script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>
   <style>
 ${BASE_CSS}${PLAYER_CSS}
     .video-head { margin: 18px 0 6px; }
-    .video-head h1 { font-size: clamp(22px, 4.5vw, 30px); line-height: 1.3; margin: 0 0 8px; }
+    .video-head h1 { font-size: clamp(22px, 4.5vw, 30px); line-height: 1.3; margin: 0 0 8px; min-height: 1.3em; }
     .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
     .chip { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; font-size: 14px; color: var(--muted); }
     .desc { color: var(--muted); font-size: 17px; margin: 0 0 16px; }
     .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
     .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+    [hidden] { display: none !important; }
   </style>
 </head>
 <body>
@@ -417,24 +396,25 @@ ${BASE_CSS}${PLAYER_CSS}
       <a class="btn btn-small" href="${esc(play)}">ऐप डाउनलोड करें</a>
     </header>
 
-    <div class="player" data-id="${esc(v.id)}" data-autoplay="0">
-      ${loaderMarkup(v.thumbnail)}
+    <div class="player" data-autoplay="0">
+      ${loaderMarkup('')}
       <div id="yt-player"></div>
     </div>
 
     <section class="video-head">
-      <h1>${esc(v.title)}</h1>
-      ${meta.length ? `<div class="chips">${meta.map((m) => `<span class="chip">${esc(m)}</span>`).join('')}</div>` : ''}
-      ${v.description ? `<p class="desc">${esc(v.description)}</p>` : ''}
+      <h1 id="title"></h1>
+      <div class="chips" id="chips" hidden></div>
+      <p class="desc" id="desc" hidden></p>
       <div class="actions">
         <a class="btn" href="${esc(play)}">📱 ऐसी सारी कथाएँ — StoryByte ऐप</a>
-        <a class="btn btn-ghost btn-small" href="${esc(v.youtubeUrl)}" rel="noopener">YouTube पर देखें</a>
+        <a class="btn btn-ghost btn-small" id="on-youtube" href="https://www.youtube.com/@LatestStories4u" rel="noopener">YouTube पर देखें</a>
       </div>
     </section>
-${more.length ? `
-    <h2>${sameSeries.length ? 'अगली कथाएँ' : 'और पूरी कथाएँ'}</h2>
-    <div class="videos">${more.map((o) => videoCard(o, site)).join('')}
-    </div>` : ''}
+
+    <section id="more-section" hidden>
+      <h2 id="more-title">और पूरी कथाएँ</h2>
+      <div class="videos" id="more"></div>
+    </section>
 
     <section class="get-app">
       <h2 style="margin-top:0">हर सुबह नई कथा, सीधे आपके फ़ोन पर</h2>
@@ -445,7 +425,54 @@ ${more.length ? `
     <footer>© StoryByte · <a href="${esc(site)}/">सभी कथाएँ</a> · <a href="${esc(site)}/privacy.html">Privacy</a></footer>
   </div>
   <script>${PLAYER_SCRIPT}
-    startPlayer(document.querySelector('.player'));
+    var id = (new URLSearchParams(location.search).get('v') || '').replace(/[^\\w-]/g, '').slice(0, 11);
+    var box = document.querySelector('.player');
+    var $ = function (sel) { return document.getElementById(sel); };
+    var el = function (tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text) n.textContent = text; return n; };
+    var minutes = function (sec) { return sec > 0 ? Math.round(sec / 60) + ' मिनट' : ''; };
+
+    if (id.length === 11) {
+      box.dataset.id = id;
+      box.querySelector('.loader').style.backgroundImage = "url('https://i.ytimg.com/vi/" + id + "/mqdefault.jpg')";
+      $('on-youtube').href = 'https://youtu.be/' + id;
+      startPlayer(box);
+    }
+
+    // A card for "more episodes", built as elements (never HTML from data).
+    function card(v) {
+      var a = el('a', 'card video'); a.href = '/video?v=' + encodeURIComponent(v.id);
+      var thumb = el('span', 'thumb');
+      var img = el('img'); img.src = v.thumbnail; img.alt = ''; img.loading = 'lazy'; img.width = 320; img.height = 180;
+      thumb.appendChild(img); thumb.appendChild(el('span', 'yt', '▶ देखें'));
+      if (v.durationSec > 0) thumb.appendChild(el('span', 'len', minutes(v.durationSec)));
+      var body = el('span', 'card-body');
+      body.appendChild(el('span', 'card-title', v.title));
+      if (v.description) body.appendChild(el('span', 'card-desc', v.description));
+      a.appendChild(thumb); a.appendChild(body);
+      return a;
+    }
+
+    fetch('/long-videos.json').then(function (r) { return r.json(); }).then(function (data) {
+      var all = (data && data.videos) || [];
+      var v = all.filter(function (x) { return x.id === id; })[0];
+      if (!v) {
+        $('title').textContent = id ? 'यह वीडियो नहीं मिला' : 'पूरी कथाएँ';
+        if (!id && all[0]) { location.replace('/video?v=' + encodeURIComponent(all[0].id)); return; }
+      } else {
+        document.title = v.title + ' · StoryByte';
+        $('title').textContent = v.title;
+        var part = /^\\d+$/.test(v.episode) ? 'भाग ' + v.episode : v.episode;
+        var chips = [v.seriesTitle, part, minutes(v.durationSec)].filter(Boolean);
+        chips.forEach(function (c) { $('chips').appendChild(el('span', 'chip', c)); });
+        $('chips').hidden = !chips.length;
+        if (v.description) { $('desc').textContent = v.description; $('desc').hidden = false; }
+      }
+      var same = all.filter(function (x) { return x.id !== id && v && x.seriesTitle === v.seriesTitle; });
+      var more = same.concat(all.filter(function (x) { return x.id !== id && same.indexOf(x) < 0; })).slice(0, 9);
+      more.forEach(function (x) { $('more').appendChild(card(x)); });
+      $('more-title').textContent = same.length ? 'अगली कथाएँ' : 'और पूरी कथाएँ';
+      $('more-section').hidden = !more.length;
+    }).catch(function () {});
   </script>
 </body>
 </html>
@@ -502,17 +529,14 @@ function writeSiteIndex(pubDir, site = SITE) {
   const videos = readLongVideos(pubDir);
   fs.writeFileSync(home, renderHome(pages, site, previous, videos));
   fs.writeFileSync(path.join(pubDir, 'sitemap.xml'), renderSitemap(pages, site, videos));
-  // A page per long video (/v/<id>), and the app's player page. Pages for
-  // videos no longer listed are removed.
-  const vDir = path.join(pubDir, 'v');
-  fs.mkdirSync(vDir, { recursive: true });
-  const keep = new Set(videos.map((v) => `${v.id}.html`));
-  for (const f of fs.readdirSync(vDir)) if (f.endsWith('.html') && !keep.has(f)) fs.rmSync(path.join(vDir, f));
-  for (const v of videos) fs.writeFileSync(path.join(vDir, `${v.id}.html`), renderVideoPage(v, videos, site));
+  // One page for every long video (/video?v=<id>) and the app's player page.
+  fs.writeFileSync(path.join(pubDir, 'video.html'), renderVideoWrapper(site));
   fs.writeFileSync(path.join(pubDir, 'watch.html'), renderWatchPage());
+  // Per-video pages from before the single video page.
+  fs.rmSync(path.join(pubDir, 'v'), { recursive: true, force: true });
   fs.writeFileSync(path.join(pubDir, 'robots.txt'), renderRobots(site));
   fs.writeFileSync(path.join(pubDir, 'long-videos.json'), `${JSON.stringify({ updatedAt: new Date().toISOString(), videos }, null, 1)}\n`);
   return { pages: pages.length, videos: videos.length };
 }
 
-module.exports = { readPages, readLongVideos, publishedAt, renderHome, renderSitemap, renderRobots, renderVideoPage, renderWatchPage, writeSiteIndex };
+module.exports = { readPages, readLongVideos, publishedAt, renderHome, renderSitemap, renderRobots, renderVideoWrapper, renderWatchPage, writeSiteIndex };
