@@ -126,11 +126,37 @@
       }
       var done = function () { box.classList.add('ready'); };
       setTimeout(done, 10000);
+      // Inside the app (react-native-webview), tell it what the viewer
+      // watches: { type: play | progress | pause | ended, currentTime,
+      // duration }, so it can count the play and keep their place.
+      var tick = null;
+      var post = function (player, type) {
+        if (!window.ReactNativeWebView) return;
+        try {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: type, currentTime: player.getCurrentTime() || 0, duration: player.getDuration() || 0
+          }));
+        } catch (err) {}
+      };
+      var report = function (player, state) {
+        if (state === 1) {
+          post(player, 'play');
+          clearInterval(tick);
+          tick = setInterval(function () { post(player, 'progress'); }, 15000);
+        } else if (state === 2 || state === 0) {
+          clearInterval(tick);
+          post(player, state === 0 ? 'ended' : 'pause');
+        }
+      };
       var make = function () {
         new YT.Player('yt-player', {
           videoId: id, host: 'https://www.youtube.com',
           playerVars: { autoplay: box.dataset.autoplay === '1' ? 1 : 0, playsinline: 1, rel: 0, origin: location.origin },
-          events: { onReady: function (e) { if (box.dataset.autoplay === '1') e.target.playVideo(); setTimeout(done, 200); }, onError: done }
+          events: {
+            onReady: function (e) { if (box.dataset.autoplay === '1') e.target.playVideo(); setTimeout(done, 200); },
+            onError: done,
+            onStateChange: function (e) { report(e.target, e.data); }
+          }
         });
       };
       if (window.YT && YT.Player) return make();

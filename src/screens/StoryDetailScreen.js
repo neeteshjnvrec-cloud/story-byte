@@ -99,7 +99,7 @@ export const StoryDetailScreen = () => {
   const { theme = {} } = useTheme();
   const { playStory, playPause, isPlaying, currentStory } = useAudioPlayer();
   const {
-    toggleFavorite, user, getStoryMetrics, toggleLike, recordShare,
+    toggleFavorite, user, getStoryMetrics, toggleLike, recordShare, recordPlay,
     rateStory: rateStoryInContext, receiveStoryDocs, downloads, downloadingIds, toggleDownload,
   } = useAppContext();
   const { canPlay, unlock, balance, premiumAudioUrl } = useWallet();
@@ -140,6 +140,19 @@ export const StoryDetailScreen = () => {
       finally { setLoading(false); }
     })();
   }, [storyId, receiveStoryDocs]);
+
+  // Watching a video story counts like listening: one play per visit, and
+  // its place saved for History, Continue listening and Profile's minutes.
+  const countedPlay = useRef(false);
+  const onVideoEvent = (e) => {
+    if (!inDb || !user || !story) return;
+    if (e.type === 'play' && !countedPlay.current) {
+      countedPlay.current = true;
+      recordPlay(story);
+    }
+    const at = e.type === 'ended' ? e.duration : e.currentTime;
+    apiService.saveVideoProgress(story, at, e.duration).catch(() => {});
+  };
 
   // A story playing in the background would talk over the video.
   useEffect(() => {
@@ -299,7 +312,7 @@ export const StoryDetailScreen = () => {
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 140 }} showsVerticalScrollIndicator={false}>
         {videoId
-          ? <YouTubePlayer videoId={videoId} width={screenWidth - 40} radius={22} style={{ marginBottom: 14 }} />
+          ? <YouTubePlayer videoId={videoId} width={screenWidth - 40} radius={22} style={{ marginBottom: 14 }} onEvent={onVideoEvent} />
           : <Cover story={story} style={styles.cover} radius={22} />}
         <AppText variant="h1" style={{ marginTop: 4 }}>{story.title}</AppText>
 

@@ -9,10 +9,19 @@ import { Cover } from './Cover';
 import { fmtMin, fmtPlays, storyPlays } from '../../utils/storyMetrics';
 import { useWallet } from '../../context/WalletContext';
 import { isPaidStory } from '../../services/wallet';
+import { isVideoStory } from '../../utils/videoStory';
 
-// "🔒 10" on a paid episode not yet unlocked, "✓ Unlocked" once it is.
+// "🔒 10" on a paid episode not yet unlocked, "✓ Unlocked" once it is;
+// "▶ Video" on a YouTube video story (it plays on its page, not as audio).
 function PriceBadge({ story, style }) {
   const { canPlay } = useWallet();
+  if (isVideoStory(story)) {
+    return (
+      <View style={[styles.price, styles.video, style]}>
+        <AppText variant="micro" style={{ color: '#fff' }}>▶ Video</AppText>
+      </View>
+    );
+  }
   if (!isPaidStory(story)) return null;
   const open = canPlay(story);
   return (
@@ -116,6 +125,7 @@ const styles = StyleSheet.create({
   },
   railFab: { position: 'absolute', right: 8, bottom: 8 },
   price: { position: 'absolute', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: 'rgba(0,0,0,0.62)' },
+  video: { backgroundColor: '#E62117' },
   railPrice: { top: 8, left: 8 },
   heroPrice: { top: 12, right: 12 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 10, paddingHorizontal: 20 },

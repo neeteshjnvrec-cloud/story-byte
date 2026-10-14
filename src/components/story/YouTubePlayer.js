@@ -32,8 +32,10 @@ function PlayerLoading({ videoId, poster }) {
  *   thumbnail otherwise.
  * autoplay: start playing as soon as it's ready (off for a Short on a story
  *   page, where the story's audio may be playing).
+ * onEvent: ({ type: play | progress | pause | ended, currentTime, duration })
+ *   from the player, about every 15 s while it plays.
  */
-export function YouTubePlayer({ videoId, width, radius = 0, style, vertical = false, poster, autoplay = true }) {
+export function YouTubePlayer({ videoId, width, radius = 0, style, vertical = false, poster, autoplay = true, onEvent }) {
   const height = Math.round(vertical ? (width * 16) / 9 : (width * 9) / 16);
   const params = [`v=${encodeURIComponent(videoId)}`];
   if (!autoplay) params.push('autoplay=0');
@@ -50,6 +52,10 @@ export function YouTubePlayer({ videoId, width, radius = 0, style, vertical = fa
         mediaPlaybackRequiresUserAction={false}
         javaScriptEnabled
         domStorageEnabled
+        onMessage={(e) => {
+          if (!onEvent) return;
+          try { onEvent(JSON.parse(e.nativeEvent.data)); } catch (err) { /* not ours */ }
+        }}
         // Links out of the player (YouTube logo, "more videos") open the
         // YouTube app instead of taking over the screen.
         onShouldStartLoadWithRequest={(req) => {

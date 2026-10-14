@@ -26,6 +26,7 @@ import {
   addDoc,
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
+import { mergeNewestFirst } from '../utils/videoStory';
 import Groq from 'groq-sdk';
 
 // Consecutive-day listening streak from a set of 'YYYY-MM-DD' strings.
@@ -105,6 +106,12 @@ class ApiService {
 
     const snap = await getDocs(q);
     let stories = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // Long YouTube videos as stories (status 'video') belong to the curated
+    // library too, so Home's rails, Browse and every filter include them.
+    if (community !== true) {
+      const videos = await this.getVideoStories(Number(limit)).catch(() => []);
+      stories = mergeNewestFirst(stories, videos).slice(0, Number(limit));
+    }
 
     if (genre && genre !== 'All') {
       stories = stories.filter((s) => s.genre === genre);
@@ -163,7 +170,7 @@ class ApiService {
   async getCategories() {
     const q = query(
       collection(db, 'stories'),
-      where('status', '==', 'published'),
+      where('status', 'in', ['published', 'video']),
       where('isCommunityStory', '==', false)
     );
     const snap = await getDocs(q);
@@ -365,7 +372,8 @@ class ApiService {
         return null;
       }
       const story = storySnap.data();
-      if (story.status && story.status !== 'published') return null; // hidden, but keep the bookmark
+      // hidden, but keep the bookmark ('video': a long YouTube video story)
+      if (story.status && story.status !== 'published' && story.status !== 'video') return null;
       return { ...story, id: d.id, storyId: d.id, favoritedAt: d.data().addedAt };
     }));
     return results.filter(Boolean);
@@ -389,6 +397,25 @@ class ApiService {
     if (!this.uid) return false;
     const d = await getDoc(doc(db, 'users', this.uid, 'favorites', storyId));
     return d.exists();
+  }
+
+  // A video story's watch position (StoryDetailScreen, from the YouTube
+  // player's events), in the same shape AudioContext saves for audio, so
+  // History, Continue listening and Profile's minutes count it too.
+  async saveVideoProgress(story, currentTime, duration) {
+    if (!this.uid || !story?.id) return;
+    const dur = duration || story.duration || 0;
+    await setDoc(doc(db, 'users', this.uid, 'progress', story.id), {
+      storyId: story.id,
+      title: story.title || '',
+      coverImage: story.coverImage || null,
+      genre: story.genre || null,
+      language: story.language || null,
+      duration: dur,
+      currentTime: currentTime || 0,
+      progress: dur ? Math.min((currentTime || 0) / dur, 1) : 0,
+      lastUpdated: serverTimestamp(),
+    }, { merge: true });
   }
 
   // --- Progress (users/{uid}/progress/{storyId}) ----------------------------
