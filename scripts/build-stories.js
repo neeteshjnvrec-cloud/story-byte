@@ -39,6 +39,7 @@ const { postStoryToYouTube, commentOnYouTube } = require('./lib/youtube');
 const { occasionPhrase } = require('./occasions');
 const { kathaOfDay, nextKatha, describeKatha, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
 const { appendSpokenTeaser, fallbackTeaser } = require('./lib/teaser');
+const { withCloseUps, shortSceneCount } = require('./lib/close-ups');
 const { devotionalTrends } = require('./lib/trends');
 const { iconographyFor } = require('./lib/iconography');
 const { styleOfDay, fitShort, devotionalArtStyle } = require('./lib/short-style');
@@ -588,8 +589,9 @@ async function run() {
                 scenes = await buildVideoScenes({
                   storyId: id, title: content.title, text: content.text, genre: slot.genre,
                   description: content.description, cues, audioDurSec: videoDur, outDir: workDir,
-                  // A new picture every ~9s keeps a ~3-minute Short moving.
-                  sceneCount: devotional ? Math.max(8, Math.min(18, Math.round(videoDur / 9))) : undefined,
+                  // A new picture about every 8s, each also cut into a
+                  // close-up below, so the view changes every ~4s.
+                  sceneCount: devotional ? shortSceneCount(videoDur) : undefined,
                   // Which katha this is — e.g. Govardhan means Krishna is drawn as a child.
                   context: [slot.deity?.katha, slot.occasion?.name].filter(Boolean).join(' '),
                 });
@@ -622,6 +624,9 @@ async function run() {
               const total = videoDur + tailSec;
               // The last picture holds through the music's closing seconds.
               scenes[scenes.length - 1] = { ...scenes[scenes.length - 1], duration: scenes[scenes.length - 1].duration + tailSec };
+              // Each picture as a wide shot, then a close-up of part of it
+              // (lib/close-ups.js), before the captions are drawn on.
+              scenes = await withCloseUps(scenes, { outDir: workDir });
               if (cues) scenes = await bakeInCaptions(scenes, toCaptionLines(cues), workDir, total, { format: 'short', look });
               const videoPath = mixed &&
                 buildStoryVideo({ scenes, audioPath: mixed, outPath: path.join(outDir, 'story.mp4'), format: 'short', look });
