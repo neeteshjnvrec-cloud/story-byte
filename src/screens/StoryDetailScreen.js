@@ -15,7 +15,6 @@ import { Cover } from '../components/story/Cover';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import { CommentSheet } from '../components/comments/CommentSheet';
 import { shareStory } from '../utils/shareStory';
-import { isVideoOnly, openOnYouTube } from '../utils/youtube';
 import apiService from '../services/api';
 
 // ---------------------------------------------------------------------------
@@ -202,7 +201,6 @@ export const StoryDetailScreen = () => {
 
   const handlePlay = async () => {
     if (!story) return;
-    if (isVideoOnly(story)) return openOnYouTube(story);
     if (locked) return handleUnlock();
     if (!isHere) await playStory(story); else await playPause();
   };
@@ -247,9 +245,6 @@ export const StoryDetailScreen = () => {
   if (!story) {
     return <View style={[styles.center, { backgroundColor: theme.background }]}><AppText color="textSecondary">Story not found</AppText></View>;
   }
-
-  // A long episode with no audio of its own: its button opens YouTube.
-  const videoOnly = isVideoOnly(story);
 
   // Determine which text to show
   const activeBody = chapters
@@ -303,8 +298,8 @@ export const StoryDetailScreen = () => {
 
         <View style={styles.actions}>
           <Button
-            title={videoOnly ? 'Watch on YouTube' : locked ? `Unlock for ${story.priceCoins} coins` : isHere && isPlaying ? 'Pause' : 'Play'}
-            leftIcon={locked && !videoOnly ? 'lock' : isHere && isPlaying ? 'pause' : 'play'}
+            title={locked ? `Unlock for ${story.priceCoins} coins` : isHere && isPlaying ? 'Pause' : 'Play'}
+            leftIcon={locked ? 'lock' : isHere && isPlaying ? 'pause' : 'play'}
             onPress={handlePlay}
             loading={unlocking}
             style={{ flex: 1 }}
@@ -321,12 +316,10 @@ export const StoryDetailScreen = () => {
           <Pressable onPress={handleFavorite} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <Icon name={saved ? 'bookmark-fill' : 'bookmark'} color={saved ? theme.accent : theme.text} />
           </Pressable>
-          {videoOnly ? null : (
-            <Pressable onPress={handleDownload} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
-              <Icon name={downloads[story?.id]?.path ? 'check-circle' : 'download'} />
-              {downloadingIds.has(story?.id) && <ActivityIndicator size={14} color={theme.accent} style={{ position: 'absolute' }} />}
-            </Pressable>
-          )}
+          <Pressable onPress={handleDownload} style={[styles.iconBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Icon name={downloads[story?.id]?.path ? 'check-circle' : 'download'} />
+            {downloadingIds.has(story?.id) && <ActivityIndicator size={14} color={theme.accent} style={{ position: 'absolute' }} />}
+          </Pressable>
         </View>
 
         <View style={styles.section}>

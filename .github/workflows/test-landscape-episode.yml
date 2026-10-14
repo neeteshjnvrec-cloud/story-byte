@@ -80,8 +80,6 @@ jobs:
           # when a key is set, else Google Cloud TTS with the project's
           # service account (scripts/lib/google-tts.js).
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          # "true" also puts each published episode in the app, as its text + YouTube link.
-          EPISODES_IN_APP: ${{ vars.EPISODES_IN_APP }}
           # Free backup voice when Microsoft's edge-tts refuses (scripts/lib/gemini-tts.js).
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           # Optional: post to a Telegram channel (CHANNEL-IDENTITY.md → Telegram).
@@ -135,3 +133,18 @@ jobs:
             sleep "$delay"
           done
           exit 1
+
+      # Puts the new episode in the app's "Long stories" row right away: the
+      # site deploy rebuilds long-videos.json from the episodes' story.json.
+      # Runs after the push above pulled in main, so it never deploys an
+      # older copy of the site.
+      - name: Update the website (app's Long stories list)
+        if: success() && inputs.publish
+        continue-on-error: true
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          [ -n "$FIREBASE_SERVICE_ACCOUNT" ] || { echo "No FIREBASE_SERVICE_ACCOUNT; skipping"; exit 0; }
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx --yes firebase-tools deploy --only hosting --project storybyte-76716 --non-interactive
+          rm -f "$RUNNER_TEMP/sa.json"

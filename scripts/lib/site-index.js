@@ -70,8 +70,7 @@ function renderSitemap(pages, site = SITE) {
 function renderRobots(site = SITE) {
   return [
     'User-agent: *',
-    // Paid episodes' audio (lib/publish-episode-to-app.js).
-    'Disallow: /premium/',
+    'Allow: /',
     '',
     `Sitemap: ${site.replace(/\/$/, '')}/sitemap.xml`,
     '',
@@ -206,7 +205,63 @@ ${others.length ? `
 `;
 }
 
-/** Writes index.html, sitemap.xml and robots.txt into `pubDir`. */
+const srtEnd = (file) => {
+  try {
+    const times = fs.readFileSync(file, 'utf8').match(/--> (\d+):(\d+):(\d+)[,.](\d+)/g) || [];
+    const m = times.length && times[times.length - 1].match(/(\d+):(\d+):(\d+)/);
+    return m ? Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]) : 0;
+  } catch {
+    return 0;
+  }
+};
+
+/**
+ * Every long episode published on YouTube, newest first, from each
+ * episode's story.json: links and text only. The app's "Long stories" row
+ * reads this as long-videos.json (src/components/story/LongVideosRow.js).
+ */
+function readLongVideos(pubDir) {
+  const root = path.join(pubDir, 'episodes');
+  if (!fs.existsSync(root)) return [];
+  const out = [];
+  for (const series of fs.readdirSync(root)) {
+    const seriesDir = path.join(root, series);
+    if (!fs.statSync(seriesDir).isDirectory()) continue;
+    for (const season of fs.readdirSync(seriesDir).filter((d) => d.startsWith('season-'))) {
+      const seasonDir = path.join(seriesDir, season);
+      if (!fs.statSync(seasonDir).isDirectory()) continue;
+      for (const ep of fs.readdirSync(seasonDir).filter((d) => d.startsWith('episode-'))) {
+        const dir = path.join(seasonDir, ep);
+        let story;
+        try {
+          story = JSON.parse(fs.readFileSync(path.join(dir, 'story.json'), 'utf8'));
+        } catch {
+          continue;
+        }
+        const yt = story.published?.youtube;
+        const id = (String(yt?.url || '').match(/youtu\.be\/([\w-]{11})/) || [])[1] || yt?.videoId;
+        if (!yt?.posted || !id) continue;
+        out.push({
+          id,
+          youtubeUrl: `https://youtu.be/${id}`,
+          thumbnail: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
+          thumbnailHd: `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+          title: String(story.metadata?.title || story.generatedTitle || '').replace(/\s+/g, ' ').trim(),
+          seriesTitle: String(story.seriesTitle || '').trim(),
+          season: String(story.season ?? ''),
+          episode: String(story.episode ?? ''),
+          description: story.description || '',
+          language: story.language || '',
+          durationSec: srtEnd(path.join(dir, 'captions.srt')),
+          publishedAt: story.renderedAt || null,
+        });
+      }
+    }
+  }
+  return out.sort((a, b) => String(b.publishedAt).localeCompare(String(a.publishedAt)));
+}
+
+/** Writes index.html, sitemap.xml, robots.txt and long-videos.json into `pubDir`. */
 function writeSiteIndex(pubDir, site = SITE) {
   const pages = readPages(pubDir);
   const home = path.join(pubDir, 'index.html');
@@ -214,7 +269,9 @@ function writeSiteIndex(pubDir, site = SITE) {
   fs.writeFileSync(home, renderHome(pages, site, previous));
   fs.writeFileSync(path.join(pubDir, 'sitemap.xml'), renderSitemap(pages, site));
   fs.writeFileSync(path.join(pubDir, 'robots.txt'), renderRobots(site));
-  return { pages: pages.length };
+  const videos = readLongVideos(pubDir);
+  fs.writeFileSync(path.join(pubDir, 'long-videos.json'), `${JSON.stringify({ updatedAt: new Date().toISOString(), videos }, null, 1)}\n`);
+  return { pages: pages.length, videos: videos.length };
 }
 
-module.exports = { readPages, publishedAt, renderHome, renderSitemap, renderRobots, writeSiteIndex };
+module.exports = { readPages, readLongVideos, publishedAt, renderHome, renderSitemap, renderRobots, writeSiteIndex };
