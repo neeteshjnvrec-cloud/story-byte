@@ -390,28 +390,36 @@ class ApiService {
 
   // --- Favorites (users/{uid}/favorites/{storyId}) -------------------------
 
-  // Returns an array of { storyId, id, ...meta }.
-  // Returns favorited stories with full data. Self-healing: any favorite whose
-  // story no longer exists is dropped and its orphan doc deleted, so the count
-  // and Library list stay accurate even after stories are removed.
-  async getFavorites() {
+  // The saved stories' ids, newest first: one read, however many there are.
+  // Enough for the saved state everywhere; Library loads the stories
+  // themselves a page at a time with getFavoriteStories.
+  async getFavoriteIds() {
     if (!this.uid) return [];
     const snap = await getDocs(collection(db, 'users', this.uid, 'favorites'));
-    const results = await Promise.all(snap.docs.map(async (d) => {
+    return snap.docs
+      .map((d) => ({ id: d.id, storyId: d.id, addedAt: d.data().addedAt || null }))
+      .sort((a, b) => (b.addedAt?.toMillis?.() || 0) - (a.addedAt?.toMillis?.() || 0));
+  }
+
+  // Full stories for some saved ids (one Library page). Self-healing: a
+  // favorite whose story no longer exists is dropped and its doc deleted.
+  async getFavoriteStories(ids) {
+    if (!this.uid || !ids?.length) return [];
+    const results = await Promise.all(ids.map(async (id) => {
       // Read the doc directly rather than through getStory, which also returns
       // null for a story that exists but isn't published. Only a genuinely
       // missing story should have its favorite deleted — otherwise a story
       // temporarily flipped back to under_review/failed would silently destroy
       // every user's bookmark of it.
-      const storySnap = await getDoc(doc(db, 'stories', d.id));
+      const storySnap = await getDoc(doc(db, 'stories', id));
       if (!storySnap.exists()) {
-        try { await deleteDoc(doc(db, 'users', this.uid, 'favorites', d.id)); } catch (e) {}
+        try { await deleteDoc(doc(db, 'users', this.uid, 'favorites', id)); } catch (e) {}
         return null;
       }
       const story = storySnap.data();
       // hidden, but keep the bookmark ('video': a long YouTube video story)
       if (story.status && story.status !== 'published' && story.status !== 'video') return null;
-      return { ...story, id: d.id, storyId: d.id, favoritedAt: d.data().addedAt };
+      return { ...story, id, storyId: id };
     }));
     return results.filter(Boolean);
   }
@@ -459,11 +467,31 @@ class ApiService {
 
   // Returns a map of { storyId: progressDoc } for all stories the user has
   // listened to, with the story title/cover joined in for the profile UI.
-  async getUserProgress() {
+  // Your listening (and watching) history, most recent first, each entry
+  // merged with its story. `max` keeps it to the most recent few (Home's
+  // Continue listening, Profile), so the reads don't grow with the history.
+  async getUserProgress({ max } = {}) {
     if (!this.uid) return [];
-    const snap = await getDocs(collection(db, 'users', this.uid, 'progress'));
-    const progressDocs = snap.docs.map((d) => ({ storyId: d.id, ...d.data() }));
+    const ref = collection(db, 'users', this.uid, 'progress');
+    const snap = await getDocs(max ? query(ref, orderBy('lastUpdated', 'desc'), fbLimit(max)) : ref);
+    return this._withStories(snap.docs.map((d) => ({ storyId: d.id, ...d.data() })));
+  }
 
+  // One page of the history for Library, with a cursor for the next.
+  async getUserProgressPage({ cursor = null, pageSize = 20 } = {}) {
+    if (!this.uid) return { items: [], cursor: null, hasMore: false };
+    const c = [orderBy('lastUpdated', 'desc')];
+    if (cursor) c.push(startAfter(cursor));
+    c.push(fbLimit(pageSize));
+    const snap = await getDocs(query(collection(db, 'users', this.uid, 'progress'), ...c));
+    return {
+      items: await this._withStories(snap.docs.map((d) => ({ storyId: d.id, ...d.data() }))),
+      cursor: snap.docs[snap.docs.length - 1] || cursor,
+      hasMore: snap.docs.length === pageSize,
+    };
+  }
+
+  async _withStories(progressDocs) {
     // Enrich with full story data (title, coverImage, genre, duration, plays,
     // audioUrl, description, etc.) so RailCard renders correctly and playStory
     // has everything it needs.
@@ -887,46 +915,6 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
     } catch (error) {
       console.error('Error publishing community story:', error);
       throw error;
-    }
-  }
-
-  async getCommunityStories() {
-    try {
-      // Wait for index to be ready (index building can take 1-2 minutes)
-      const MAX_RETRIES = 3;
-      const DELAY_MS = 2000;
-      
-      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        try {
-          const q = query(
-            collection(db, 'stories'),
-            // under_review stories are invisible to everyone, including their
-            // own author — the pipeline flips them to 'published' once audio,
-            // cover and doc are all wired.
-            //
-            // No isCommunityStory filter: the Community feed shows both
-            // user-submitted stories and the AI daily library, merged by
-            // recency — Home stays the one curated to isCommunityStory === false.
-            where('status', '==', 'published'),
-            orderBy('createdAt', 'desc'),
-            fbLimit(50)
-          );
-          
-          const snapshot = await getDocs(q);
-          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } catch (error) {
-          if (error.code === 'failed-precondition' && attempt < MAX_RETRIES - 1) {
-            // Index is building, wait and retry
-            console.log(`⏳ Index building, retrying in ${DELAY_MS/1000}s... (attempt ${attempt + 1}/${MAX_RETRIES})`);
-            await new Promise(resolve => setTimeout(resolve, DELAY_MS));
-            continue;
-          }
-          throw error;
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching community stories:', error);
-      return [];
     }
   }
 

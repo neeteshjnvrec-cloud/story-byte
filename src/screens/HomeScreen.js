@@ -61,7 +61,7 @@ export const HomeScreen = () => {
       }
       const [res, prog] = await Promise.all([
         apiService.getStories({ ...params, community: 'all' }),
-        apiService.getUserProgress(),
+        apiService.getUserProgress({ max: 20 }),
       ]);
       setStories(res.stories || []);
       setProgress(unfinished(prog));
@@ -80,7 +80,7 @@ export const HomeScreen = () => {
   // Continue listening row refreshes whenever Home comes back into view.
   useFocusEffect(useCallback(() => {
     let active = true;
-    apiSafe(() => apiService.getUserProgress(), null).then((prog) => {
+    apiSafe(() => apiService.getUserProgress({ max: 20 }), null).then((prog) => {
       if (active && prog) setProgress(unfinished(prog));
     });
     return () => { active = false; };

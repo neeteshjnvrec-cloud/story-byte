@@ -52,7 +52,8 @@ export const ProfileScreen = () => {
     try {
       setLoading(true);
       const userStatsData = await apiService.getUserStats();
-      const userHistory = await apiService.getUserProgress();
+      // Only the 5 shown under Recently played.
+      const userHistory = await apiService.getUserProgress({ max: 5 });
 
       setStats(userStatsData);
       setHistory(userHistory || []);

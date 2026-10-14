@@ -61,7 +61,7 @@ export function CommunityScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const {
-    user, communityStories, fetchCommunityStories, receiveCommunityStories,
+    user, communityStories, fetchCommunityStories, receiveCommunityStories, loadMoreCommunity, communityHasMore,
     toggleFavorite, getStoryMetrics, toggleLike, rateStory, recordShare, setLastPlayTab,
   } = useAppContext();
   const { playStory, setNextStory } = useAudioPlayer();
@@ -80,12 +80,13 @@ export function CommunityScreen() {
       if (!cancelled) { setError(e.message || 'Failed to load stories'); setLoading(false); }
     });
 
-    // Real-time listener — show ALL published stories (daily + community)
+    // Real-time listener on the newest page — daily, community and video
+    // stories. Older pages load as the list nears its end (loadMoreCommunity).
     const q = query(
       collection(db, 'stories'),
-      where('status', '==', 'published'),
+      where('status', 'in', ['published', 'video']),
       orderBy('createdAt', 'desc'),
-      fbLimit(50)
+      fbLimit(20)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -433,6 +434,12 @@ export function CommunityScreen() {
           // like/rating/play state does, which is precisely when rows must repaint.
           extraData={getStoryMetrics}
           renderItem={renderItem}
+          // The next 20 as the end comes into view.
+          onEndReached={() => { if (communityHasMore) loadMoreCommunity(); }}
+          onEndReachedThreshold={0.6}
+          ListFooterComponent={communityHasMore && published.length ? (
+            <ActivityIndicator color={theme.accent} style={{ marginVertical: 20 }} />
+          ) : null}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Icon name="people" size={48} color={theme.textTertiary} />
