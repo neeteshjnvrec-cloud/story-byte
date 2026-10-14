@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   card: { width: CARD_WIDTH, borderRadius: 14, borderWidth: 1, overflow: 'hidden' },
   thumb: { width: CARD_WIDTH, height: Math.round((CARD_WIDTH * 9) / 16), backgroundColor: '#000' },
   badge: {
-    position: 'absolute', left: 8, top: 8, flexDirection: 'row', alignItems: 'center', gap: 4,
+    position: 'absolute', left: 8, bottom: 8, flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: '#E62117', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2,
   },
   duration: {

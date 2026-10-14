@@ -86,7 +86,7 @@ const card = (p, site) => `
         </span>
       </a>`;
 
-function renderHome(pages, site = SITE, previousVerification = '') {
+function renderHome(pages, site = SITE, previousVerification = '', videos = []) {
   site = site.replace(/\/$/, '');
   const play = appLink('storybyte_web', 'home', 'web');
   const kathas = pages.filter((p) => p.devotional && p.lang === 'hi');
@@ -157,6 +157,16 @@ function renderHome(pages, site = SITE, previousVerification = '') {
     .card-desc { color: var(--muted); font-size: 14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .feature .card-title { font-size: 22px; }
     .feature .card-desc { font-size: 16px; -webkit-line-clamp: 5; }
+    .videos { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
+    .video { flex: 0 0 min(80%, 300px); scroll-snap-align: start; }
+    @media (min-width: 760px) {
+      .videos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; }
+    }
+    .video .thumb { position: relative; }
+    .video img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #000; }
+    .yt { position: absolute; left: 8px; bottom: 8px; background: #e62117; color: #fff; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+    .len { position: absolute; right: 8px; bottom: 8px; background: rgba(0,0,0,.75); color: #fff; font-size: 12px; padding: 1px 6px; border-radius: 4px; }
+    .section-note { color: var(--muted); margin: -8px 0 14px; }
     .get-app { margin-top: 40px; padding: 24px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; text-align: center; }
     footer { margin-top: 32px; color: var(--muted); font-size: 14px; text-align: center; }
   </style>
@@ -183,6 +193,22 @@ ${today ? `
         <span class="btn btn-small" style="align-self:flex-start">▶ अभी सुनें</span>
       </span>
     </a>` : ''}
+${videos.length ? `
+    <h2>पूरी कथाएँ — YouTube पर</h2>
+    <p class="section-note">लंबी कथाएँ और धारावाहिक, पूरे विस्तार से।</p>
+    <div class="videos">${videos.slice(0, 20).map((v) => `
+      <a class="card video" href="${esc(v.youtubeUrl)}" rel="noopener">
+        <span class="thumb">
+          <img src="${esc(v.thumbnail)}" alt="" loading="lazy" width="320" height="180">
+          <span class="yt">▶ YouTube</span>
+          ${v.durationSec > 0 ? `<span class="len">${Math.round(v.durationSec / 60)} मिनट</span>` : ''}
+        </span>
+        <span class="card-body">
+          <span class="card-title">${esc(v.title)}</span>
+          ${v.description ? `<span class="card-desc">${esc(v.description)}</span>` : ''}
+        </span>
+      </a>`).join('')}
+    </div>` : ''}
 ${rest.length ? `
     <h2>सभी कथाएँ</h2>
     <div class="grid">${rest.map((p) => card(p, site)).join('')}
@@ -266,10 +292,10 @@ function writeSiteIndex(pubDir, site = SITE) {
   const pages = readPages(pubDir);
   const home = path.join(pubDir, 'index.html');
   const previous = fs.existsSync(home) ? meta(fs.readFileSync(home, 'utf8'), 'google-site-verification') : '';
-  fs.writeFileSync(home, renderHome(pages, site, previous));
+  const videos = readLongVideos(pubDir);
+  fs.writeFileSync(home, renderHome(pages, site, previous, videos));
   fs.writeFileSync(path.join(pubDir, 'sitemap.xml'), renderSitemap(pages, site));
   fs.writeFileSync(path.join(pubDir, 'robots.txt'), renderRobots(site));
-  const videos = readLongVideos(pubDir);
   fs.writeFileSync(path.join(pubDir, 'long-videos.json'), `${JSON.stringify({ updatedAt: new Date().toISOString(), videos }, null, 1)}\n`);
   return { pages: pages.length, videos: videos.length };
 }
