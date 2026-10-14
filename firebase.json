@@ -21,7 +21,8 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "episodes/**/*.mp4"
+      "episodes/**/*.mp4",
+      "episodes/**/scene-*.jpg"
     ],
     "predeploy": [
       "node \"$PROJECT_DIR/scripts/build-site-index.js\""

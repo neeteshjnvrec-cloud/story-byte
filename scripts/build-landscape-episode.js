@@ -909,6 +909,11 @@ async function main() {
     throw new Error('Landscape video rendering failed');
   }
 
+  // The app's cover: one scene picture, kept as cover.jpg. The scene-*.jpg
+  // files themselves aren't committed or deployed (.gitignore, firebase.json).
+  const coverPath = path.join(outputDirectory, 'cover.jpg');
+  fs.copyFileSync(scenes[Math.floor(scenes.length / 2)].file, coverPath);
+
   console.log('Rendering thumbnail...');
   const thumbnailPath = path.join(outputDirectory, 'thumbnail.jpg');
   const art = await thumbnailArt(plan, bible, scenes[Math.floor(scenes.length / 2)].file);
@@ -943,7 +948,7 @@ async function main() {
         description: plan.description,
         genre: /devot|bhakti|katha|mytholog|spiritual/i.test(genre) ? 'devotional' : String(genre).split(/[,\s]+/)[0].toLowerCase(),
         language, durationSec: audioDuration, audioPath,
-        coverSource: scenes[Math.floor(scenes.length / 2)].file,
+        coverSource: coverPath,
         youtubeUrl: published.youtube?.url,
       });
     } catch (error) {

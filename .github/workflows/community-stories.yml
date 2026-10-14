@@ -109,7 +109,7 @@ jobs:
           # Only the last day's videos stay in the repo — nothing reads them
           # after posting, and each one otherwise rides along in every deploy.
           node scripts/prune-old-videos.js || true
-          git add public/audio public/covers public/instagram 2>/dev/null || true
+          git add public/audio public/covers 2>/dev/null || true
           git commit -m "chore: community story audio + covers" || echo "nothing to commit"
           # The daily workflow pushes to main too; rebase so a stale branch
           # doesn't reject the push. A real push failure must stay loud — it
