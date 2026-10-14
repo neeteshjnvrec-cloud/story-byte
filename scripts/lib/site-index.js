@@ -2,6 +2,10 @@
  * The website's front door for search engines: a real home page listing
  * every story page, a sitemap, and robots.txt.
  *
+ * Also a page per long YouTube episode (/v/<id>, played on our site under a
+ * StoryByte loading screen), watch.html (the app's player), and
+ * long-videos.json (the app's Long stories row).
+ *
  * Built from the story pages already in public/s/ (lib/story-page.js), so
  * whatever wrote those pages, this picks them up. Runs before every hosting
  * deploy (firebase.json → hosting.predeploy → scripts/build-site-index.js).
@@ -58,11 +62,12 @@ function readPages(pubDir) {
 
 const day = (d) => d.toISOString().slice(0, 10);
 
-function renderSitemap(pages, site = SITE) {
+function renderSitemap(pages, site = SITE, videos = []) {
   const home = site.replace(/\/$/, '');
   const urls = [
     `  <url><loc>${home}/</loc>${pages[0] ? `<lastmod>${day(pages[0].date)}</lastmod>` : ''}</url>`,
     ...pages.map((p) => `  <url><loc>${esc(`${home}/s/${p.slug}`)}</loc><lastmod>${day(p.date)}</lastmod></url>`),
+    ...videos.map((v) => `  <url><loc>${esc(`${home}/v/${v.id}`)}</loc>${v.publishedAt ? `<lastmod>${String(v.publishedAt).slice(0, 10)}</lastmod>` : ''}</url>`),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
 }
@@ -85,6 +90,49 @@ const card = (p, site) => `
           ${p.description ? `<span class="card-desc">${esc(p.description)}</span>` : ''}
         </span>
       </a>`;
+
+// Shared look of the generated pages (home and video pages).
+const BASE_CSS = `
+    :root { --bg: #fff8ef; --card: #ffffff; --ink: #2b1d12; --muted: #6f5a48; --accent: #d9480f; --line: #f0e0cc; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #1a130d; --card: #251b13; --ink: #f6eadb; --muted: #c4ad96; --accent: #ff8a4c; --line: #3a2a1c; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Noto Sans Devanagari", sans-serif; }
+    a { color: inherit; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px 48px; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
+    .logo { font-weight: 800; font-size: 20px; text-decoration: none; }
+    .logo span { color: var(--accent); }
+    .btn { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; padding: 12px 20px; border-radius: 999px; }
+    .btn-small { padding: 8px 14px; font-size: 14px; }
+    .hero { padding: 32px 0 24px; }
+    .hero h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.25; margin: 0 0 12px; }
+    .hero p { color: var(--muted); font-size: 18px; margin: 0 0 20px; max-width: 640px; }
+    h2 { font-size: 22px; margin: 36px 0 14px; }
+    .feature { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; text-decoration: none; }
+    .feature img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; display: block; }
+    .feature .card-body { padding: 0 18px 18px; }
+    @media (min-width: 640px) { .feature { grid-template-columns: 280px minmax(0, 1fr); } .feature .card-body { padding: 18px 18px 18px 0; } }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 14px; }
+    .card { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; text-decoration: none; }
+    .card img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; display: block; }
+    .card-body { display: flex; flex-direction: column; gap: 6px; padding: 12px; }
+    .card-title { font-weight: 700; line-height: 1.35; }
+    .card-desc { color: var(--muted); font-size: 14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .feature .card-title { font-size: 22px; }
+    .feature .card-desc { font-size: 16px; -webkit-line-clamp: 5; }
+    .videos { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
+    .video { flex: 0 0 min(80%, 300px); scroll-snap-align: start; }
+    @media (min-width: 760px) {
+      .videos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; }
+    }
+    .video .thumb { position: relative; }
+    .video img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #000; }
+    .yt { position: absolute; left: 8px; bottom: 8px; background: #e62117; color: #fff; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+    .len { position: absolute; right: 8px; bottom: 8px; background: rgba(0,0,0,.75); color: #fff; font-size: 12px; padding: 1px 6px; border-radius: 4px; }
+    .section-note { color: var(--muted); margin: -8px 0 14px; }
+    .get-app { margin-top: 40px; padding: 24px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; text-align: center; }
+    footer { margin-top: 32px; color: var(--muted); font-size: 14px; text-align: center; }
+`;
 
 function renderHome(pages, site = SITE, previousVerification = '', videos = []) {
   site = site.replace(/\/$/, '');
@@ -130,46 +178,7 @@ function renderHome(pages, site = SITE, previousVerification = '', videos = []) 
   <meta property="og:locale" content="hi_IN">
   <script type="application/ld+json">${JSON.stringify(app).replace(/</g, '\\u003c')}</script>
   <style>
-    :root { --bg: #fff8ef; --card: #ffffff; --ink: #2b1d12; --muted: #6f5a48; --accent: #d9480f; --line: #f0e0cc; }
-    @media (prefers-color-scheme: dark) { :root { --bg: #1a130d; --card: #251b13; --ink: #f6eadb; --muted: #c4ad96; --accent: #ff8a4c; --line: #3a2a1c; } }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Noto Sans Devanagari", sans-serif; }
-    a { color: inherit; }
-    .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px 48px; }
-    header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
-    .logo { font-weight: 800; font-size: 20px; text-decoration: none; }
-    .logo span { color: var(--accent); }
-    .btn { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; padding: 12px 20px; border-radius: 999px; }
-    .btn-small { padding: 8px 14px; font-size: 14px; }
-    .hero { padding: 32px 0 24px; }
-    .hero h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.25; margin: 0 0 12px; }
-    .hero p { color: var(--muted); font-size: 18px; margin: 0 0 20px; max-width: 640px; }
-    h2 { font-size: 22px; margin: 36px 0 14px; }
-    .feature { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; text-decoration: none; }
-    .feature img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; display: block; }
-    .feature .card-body { padding: 0 18px 18px; }
-    @media (min-width: 640px) { .feature { grid-template-columns: 280px minmax(0, 1fr); } .feature .card-body { padding: 18px 18px 18px 0; } }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 14px; }
-    .card { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; text-decoration: none; }
-    .card img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; display: block; }
-    .card-body { display: flex; flex-direction: column; gap: 6px; padding: 12px; }
-    .card-title { font-weight: 700; line-height: 1.35; }
-    .card-desc { color: var(--muted); font-size: 14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    .feature .card-title { font-size: 22px; }
-    .feature .card-desc { font-size: 16px; -webkit-line-clamp: 5; }
-    .videos { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
-    .video { flex: 0 0 min(80%, 300px); scroll-snap-align: start; }
-    @media (min-width: 760px) {
-      .videos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; }
-    }
-    .video .thumb { position: relative; }
-    .video img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #000; }
-    .yt { position: absolute; left: 8px; bottom: 8px; background: #e62117; color: #fff; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
-    .len { position: absolute; right: 8px; bottom: 8px; background: rgba(0,0,0,.75); color: #fff; font-size: 12px; padding: 1px 6px; border-radius: 4px; }
-    .section-note { color: var(--muted); margin: -8px 0 14px; }
-    .get-app { margin-top: 40px; padding: 24px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; text-align: center; }
-    footer { margin-top: 32px; color: var(--muted); font-size: 14px; text-align: center; }
-  </style>
+${BASE_CSS}  </style>
 </head>
 <body>
   <div class="wrap">
@@ -194,20 +203,9 @@ ${today ? `
       </span>
     </a>` : ''}
 ${videos.length ? `
-    <h2>पूरी कथाएँ — YouTube पर</h2>
+    <h2>पूरी कथाएँ — वीडियो</h2>
     <p class="section-note">लंबी कथाएँ और धारावाहिक, पूरे विस्तार से।</p>
-    <div class="videos">${videos.slice(0, 20).map((v) => `
-      <a class="card video" href="${esc(v.youtubeUrl)}" rel="noopener">
-        <span class="thumb">
-          <img src="${esc(v.thumbnail)}" alt="" loading="lazy" width="320" height="180">
-          <span class="yt">▶ YouTube</span>
-          ${v.durationSec > 0 ? `<span class="len">${Math.round(v.durationSec / 60)} मिनट</span>` : ''}
-        </span>
-        <span class="card-body">
-          <span class="card-title">${esc(v.title)}</span>
-          ${v.description ? `<span class="card-desc">${esc(v.description)}</span>` : ''}
-        </span>
-      </a>`).join('')}
+    <div class="videos">${videos.slice(0, 20).map((v) => videoCard(v, site)).join('')}
     </div>` : ''}
 ${rest.length ? `
     <h2>सभी कथाएँ</h2>
@@ -287,6 +285,215 @@ function readLongVideos(pubDir) {
   return out.sort((a, b) => String(b.publishedAt).localeCompare(String(a.publishedAt)));
 }
 
+// --- video player ------------------------------------------------------------
+//
+// YouTube's embedded player (IFrame API), under a StoryByte loading screen
+// (logo, spinner, the video's own picture blurred behind) until YouTube says
+// the player is ready, instead of a black box. Used by the video pages
+// (/v/<id>) and by watch.html, the page the app's video screen loads.
+
+const PLAYER_CSS = `
+    .player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #120c08; border-radius: 16px; overflow: hidden; }
+    .player iframe, .player #yt-player { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .loader { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      background: #120c08 center / cover no-repeat; color: #fff; transition: opacity .35s ease; }
+    .loader::before { content: ""; position: absolute; inset: 0; background: inherit; filter: blur(14px) brightness(.45); transform: scale(1.15); }
+    .loader > * { position: relative; }
+    .mark { position: relative; width: 64px; height: 64px; display: grid; place-items: center; }
+    .mark b { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font: 800 26px/1 system-ui, sans-serif; color: #fff;
+      background: linear-gradient(135deg, #B5613A, #E0913A); box-shadow: 0 6px 24px rgba(224, 145, 58, .45); }
+    .mark i { position: absolute; inset: 0; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .18); border-top-color: #E0913A; animation: spin .9s linear infinite; }
+    .loader small { font: 600 14px/1.3 system-ui, "Noto Sans Devanagari", sans-serif; letter-spacing: .3px; opacity: .9; }
+    .player.ready .loader { opacity: 0; pointer-events: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .mark i { animation-duration: 3s; } }
+`;
+
+const loaderMarkup = (thumb) => `<div class="loader"${thumb ? ` style="background-image:url('${esc(thumb)}')"` : ''}>
+        <span class="mark"><i></i><b>S</b></span>
+        <small>StoryByte · कथा लोड हो रही है…</small>
+      </div>`;
+
+// startPlayer(box): builds the YouTube player inside `box` (.player with
+// data-id, data-autoplay) and fades the loader out once it's ready, or after
+// 10 s whatever happens, so a slow network never leaves it covering the video.
+const PLAYER_SCRIPT = `
+    function startPlayer(box) {
+      var done = function () { box.classList.add('ready'); };
+      setTimeout(done, 10000);
+      var make = function () {
+        new YT.Player('yt-player', {
+          videoId: box.dataset.id, host: 'https://www.youtube.com',
+          playerVars: { autoplay: box.dataset.autoplay === '1' ? 1 : 0, playsinline: 1, rel: 0, origin: location.origin },
+          events: { onReady: function (e) { if (box.dataset.autoplay === '1') e.target.playVideo(); setTimeout(done, 200); }, onError: done }
+        });
+      };
+      if (window.YT && YT.Player) return make();
+      window.onYouTubeIframeAPIReady = make;
+      var s = document.createElement('script');
+      s.src = 'https://www.youtube.com/iframe_api';
+      s.onerror = done;
+      document.head.appendChild(s);
+    }
+`;
+
+const isoDuration = (sec) => {
+  const s = Math.max(0, Math.round(sec || 0));
+  return `PT${Math.floor(s / 3600) ? `${Math.floor(s / 3600)}H` : ''}${Math.floor((s % 3600) / 60)}M${s % 60}S`;
+};
+
+const minutesHi = (sec) => (sec > 0 ? `${Math.round(sec / 60)} मिनट` : '');
+
+/** One video's card (home page, "more episodes"), linking to its page. */
+const videoCard = (v, site) => `
+      <a class="card video" href="${esc(`${site}/v/${v.id}`)}">
+        <span class="thumb">
+          <img src="${esc(v.thumbnail)}" alt="" loading="lazy" width="320" height="180">
+          <span class="yt">▶ देखें</span>
+          ${v.durationSec > 0 ? `<span class="len">${minutesHi(v.durationSec)}</span>` : ''}
+        </span>
+        <span class="card-body">
+          <span class="card-title">${esc(v.title)}</span>
+          ${v.description ? `<span class="card-desc">${esc(v.description)}</span>` : ''}
+        </span>
+      </a>`;
+
+/** A long episode's own page on our site: the video, its details, more episodes, the app. */
+function renderVideoPage(v, videos, site = SITE) {
+  site = site.replace(/\/$/, '');
+  const play = appLink('storybyte_web', 'video_page', 'web');
+  const url = `${site}/v/${v.id}`;
+  const image = `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`;
+  const sameSeries = videos.filter((o) => o.id !== v.id && o.seriesTitle === v.seriesTitle);
+  const more = [...sameSeries, ...videos.filter((o) => o.id !== v.id && o.seriesTitle !== v.seriesTitle)].slice(0, 9);
+  const meta = [v.seriesTitle, v.episode && `भाग ${v.episode}`, minutesHi(v.durationSec)].filter(Boolean);
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: v.title,
+    description: v.description || v.title,
+    thumbnailUrl: [image],
+    ...(v.publishedAt ? { uploadDate: v.publishedAt } : {}),
+    ...(v.durationSec > 0 ? { duration: isoDuration(v.durationSec) } : {}),
+    embedUrl: `https://www.youtube.com/embed/${v.id}`,
+    url,
+    inLanguage: v.language || 'hi',
+  };
+  return `<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>${esc(v.title)} · StoryByte</title>
+  <meta name="description" content="${esc(v.description || v.title)}">
+  <link rel="canonical" href="${esc(url)}">
+  <meta property="og:site_name" content="StoryByte">
+  <meta property="og:type" content="video.other">
+  <meta property="og:title" content="${esc(v.title)}">
+  <meta property="og:description" content="${esc(v.description || '')}">
+  <meta property="og:url" content="${esc(url)}">
+  <meta property="og:image" content="${esc(image)}">
+  <meta property="og:locale" content="hi_IN">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://www.youtube.com">
+  <link rel="preconnect" href="https://i.ytimg.com">
+  <script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>
+  <style>
+${BASE_CSS}${PLAYER_CSS}
+    .video-head { margin: 18px 0 6px; }
+    .video-head h1 { font-size: clamp(22px, 4.5vw, 30px); line-height: 1.3; margin: 0 0 8px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+    .chip { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; font-size: 14px; color: var(--muted); }
+    .desc { color: var(--muted); font-size: 17px; margin: 0 0 16px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="logo" href="${esc(site)}/">Story<span>Byte</span></a>
+      <a class="btn btn-small" href="${esc(play)}">ऐप डाउनलोड करें</a>
+    </header>
+
+    <div class="player" data-id="${esc(v.id)}" data-autoplay="0">
+      ${loaderMarkup(v.thumbnail)}
+      <div id="yt-player"></div>
+    </div>
+
+    <section class="video-head">
+      <h1>${esc(v.title)}</h1>
+      ${meta.length ? `<div class="chips">${meta.map((m) => `<span class="chip">${esc(m)}</span>`).join('')}</div>` : ''}
+      ${v.description ? `<p class="desc">${esc(v.description)}</p>` : ''}
+      <div class="actions">
+        <a class="btn" href="${esc(play)}">📱 ऐसी सारी कथाएँ — StoryByte ऐप</a>
+        <a class="btn btn-ghost btn-small" href="${esc(v.youtubeUrl)}" rel="noopener">YouTube पर देखें</a>
+      </div>
+    </section>
+${more.length ? `
+    <h2>${sameSeries.length ? 'अगली कथाएँ' : 'और पूरी कथाएँ'}</h2>
+    <div class="videos">${more.map((o) => videoCard(o, site)).join('')}
+    </div>` : ''}
+
+    <section class="get-app">
+      <h2 style="margin-top:0">हर सुबह नई कथा, सीधे आपके फ़ोन पर</h2>
+      <p>StoryByte ऐप में रोज़ की कथाएँ ऑडियो में और पूरी कथाएँ वीडियो में — मुफ़्त।</p>
+      <a class="btn" href="${esc(play)}">StoryByte ऐप डाउनलोड करें</a>
+    </section>
+
+    <footer>© StoryByte · <a href="${esc(site)}/">सभी कथाएँ</a> · <a href="${esc(site)}/privacy.html">Privacy</a></footer>
+  </div>
+  <script>${PLAYER_SCRIPT}
+    startPlayer(document.querySelector('.player'));
+  </script>
+</body>
+</html>
+`;
+}
+
+/**
+ * watch.html: just the player, full screen, for the app's video screen
+ * (src/screens/VideoScreen.js loads /watch?v=<id>). Autoplays, since the
+ * listener tapped the video to get here.
+ */
+function renderWatchPage() {
+  return `<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- YouTube's embedded player needs to know which site embeds it. -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex">
+  <title>StoryByte player</title>
+  <link rel="preconnect" href="https://www.youtube.com">
+  <link rel="preconnect" href="https://i.ytimg.com">
+  <style>
+    html, body { margin: 0; height: 100%; background: #120c08; overflow: hidden; }
+${PLAYER_CSS}
+    .player { position: fixed; inset: 0; aspect-ratio: auto; border-radius: 0; }
+  </style>
+</head>
+<body>
+  <div class="player" data-autoplay="1">
+    ${loaderMarkup('')}
+    <div id="yt-player"></div>
+  </div>
+  <script>${PLAYER_SCRIPT}
+    var id = (new URLSearchParams(location.search).get('v') || '').replace(/[^\\w-]/g, '').slice(0, 11);
+    var box = document.querySelector('.player');
+    if (id.length === 11) {
+      box.dataset.id = id;
+      box.querySelector('.loader').style.backgroundImage = "url('https://i.ytimg.com/vi/" + id + "/mqdefault.jpg')";
+      startPlayer(box);
+    }
+  </script>
+</body>
+</html>
+`;
+}
+
 /** Writes index.html, sitemap.xml, robots.txt and long-videos.json into `pubDir`. */
 function writeSiteIndex(pubDir, site = SITE) {
   const pages = readPages(pubDir);
@@ -294,10 +501,18 @@ function writeSiteIndex(pubDir, site = SITE) {
   const previous = fs.existsSync(home) ? meta(fs.readFileSync(home, 'utf8'), 'google-site-verification') : '';
   const videos = readLongVideos(pubDir);
   fs.writeFileSync(home, renderHome(pages, site, previous, videos));
-  fs.writeFileSync(path.join(pubDir, 'sitemap.xml'), renderSitemap(pages, site));
+  fs.writeFileSync(path.join(pubDir, 'sitemap.xml'), renderSitemap(pages, site, videos));
+  // A page per long video (/v/<id>), and the app's player page. Pages for
+  // videos no longer listed are removed.
+  const vDir = path.join(pubDir, 'v');
+  fs.mkdirSync(vDir, { recursive: true });
+  const keep = new Set(videos.map((v) => `${v.id}.html`));
+  for (const f of fs.readdirSync(vDir)) if (f.endsWith('.html') && !keep.has(f)) fs.rmSync(path.join(vDir, f));
+  for (const v of videos) fs.writeFileSync(path.join(vDir, `${v.id}.html`), renderVideoPage(v, videos, site));
+  fs.writeFileSync(path.join(pubDir, 'watch.html'), renderWatchPage());
   fs.writeFileSync(path.join(pubDir, 'robots.txt'), renderRobots(site));
   fs.writeFileSync(path.join(pubDir, 'long-videos.json'), `${JSON.stringify({ updatedAt: new Date().toISOString(), videos }, null, 1)}\n`);
   return { pages: pages.length, videos: videos.length };
 }
 
-module.exports = { readPages, readLongVideos, publishedAt, renderHome, renderSitemap, renderRobots, writeSiteIndex };
+module.exports = { readPages, readLongVideos, publishedAt, renderHome, renderSitemap, renderRobots, renderVideoPage, renderWatchPage, writeSiteIndex };
