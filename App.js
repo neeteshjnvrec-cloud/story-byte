@@ -63,25 +63,40 @@ function AuthStack() {
 
 // Main app stack shown when signed in: 4 tabs + StoryDetail + Settings + Onboarding
 function MainStack({ isNewUser, navigationRef, ready }) {
-  const { userStats } = useAppContext();
+  const { userStats, updateUserProfile } = useAppContext();
 
   // Whether mandatory profile fields are missing. Only known once the profile
   // has loaded: treating "not loaded yet" as incomplete opened Edit Profile on
   // every launch, because the screens are ready before the profile arrives.
+  // The name counts if it comes from the Google account (Edit Profile shows
+  // it pre-filled but only saved it if it was typed over).
   const needsProfile = React.useMemo(() => {
     if (!userStats) return false;
-    return !userStats.fullName || !userStats.gender || !userStats.favoriteGenre;
+    return !(userStats.fullName || userStats.displayName) || !userStats.gender || !userStats.favoriteGenre;
   }, [userStats]);
 
-  // Auto-open EditProfile when the profile is incomplete — once per launch,
-  // so saving one field (still incomplete) doesn't open it again.
-  const askedForProfile = React.useRef(false);
+  // Keep the Google account's name as the profile name when none was saved,
+  // so everything that shows fullName (published stories, comments) has it.
   React.useEffect(() => {
-    if (needsProfile && ready && navigationRef.current && !askedForProfile.current) {
-      askedForProfile.current = true;
-      navigationRef.current.navigate('EditProfile');
+    if (userStats?.userId && !userStats.fullName && userStats.displayName) {
+      updateUserProfile({ fullName: userStats.displayName }).catch(() => {});
     }
-  }, [needsProfile, ready]);
+  }, [userStats?.userId, userStats?.fullName, userStats?.displayName, updateUserProfile]);
+
+  // Open Edit Profile when the profile is incomplete — once per account, ever.
+  // It used to reopen on every launch until gender and favourite genre were
+  // both set; whoever skips it can finish their profile from the Profile tab.
+  React.useEffect(() => {
+    if (!needsProfile || !ready || !navigationRef.current || !userStats?.userId) return;
+    const key = `storybyte-profile-prompted-${userStats.userId}`;
+    let cancelled = false;
+    AsyncStorage.getItem(key).then((asked) => {
+      if (cancelled || asked === 'true' || !navigationRef.current) return;
+      AsyncStorage.setItem(key, 'true').catch(() => {});
+      navigationRef.current.navigate('EditProfile');
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [needsProfile, ready, userStats?.userId]);
 
   // Tapping a push notification opens the story it's about. Without this a push
   // just brought the app to whatever screen it was last on, which made the
