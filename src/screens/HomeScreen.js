@@ -1,20 +1,28 @@
-// Home — vertical-driven feed: hero + Continue listening + rails by genre.
+// Home — vertical-driven feed: Continue listening + hero + rails by genre.
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, ScrollView, Pressable, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
 import { useAudioPlayer } from '../context/AudioContext';
 import { useTheme } from '../hooks/useTheme';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { Hero, RailCard } from '../components/story/StoryCard';
+import { ContinueCard } from '../components/story/ContinueCard';
 import { storyPlays } from '../utils/storyMetrics';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
 import { FilterModal } from '../components/FilterModal';
 import apiService from '../services/api';
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
+// Started but not finished (and with a real story behind them), most recent
+// first — the order getUserProgress already returns.
+const unfinished = (prog) => (prog || []).filter((p) => {
+  const pct = (typeof p.progress === 'number' && isFinite(p.progress)) ? p.progress : 0;
+  return pct > 0.01 && pct < 0.98 && p.title;
+}).slice(0, 10);
 
 async function apiSafe(fn, fallback) {
   try { return await fn(); } catch (e) { console.warn('Home load:', e?.message); return fallback; }
@@ -50,11 +58,7 @@ export const HomeScreen = () => {
         apiService.getUserProgress(),
       ]);
       setStories(res.stories || []);
-      setProgress((prog || []).filter((p) => {
-        const rawPct = p.progress;
-        const pct = (typeof rawPct === 'number' && isFinite(rawPct)) ? rawPct : 0;
-        return pct < 0.98;
-      }).slice(0, 10));
+      setProgress(unfinished(prog));
     } catch (e) {
       console.error('Home load error:', e);
       setError(e?.message || 'Failed to load stories');
@@ -65,6 +69,21 @@ export const HomeScreen = () => {
   }, []);
 
   useEffect(() => { load(language, activeFilters); }, [language, activeFilters]);
+
+  // Positions change while the user listens elsewhere in the app, so the
+  // Continue listening row refreshes whenever Home comes back into view.
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    apiSafe(() => apiService.getUserProgress(), null).then((prog) => {
+      if (active && prog) setProgress(unfinished(prog));
+    });
+    return () => { active = false; };
+  }, []));
+
+  const removeFromContinue = (item) => {
+    setProgress((list) => list.filter((p) => (p.id || p.storyId) !== (item.id || item.storyId)));
+    apiService.removeProgress(item.storyId || item.id);
+  };
 
   const onRefresh = () => { setRefreshing(true); load(language, activeFilters); };
   const pickLang = (l) => { setLanguage(l); setLoading(true); load(l, activeFilters); };
@@ -152,6 +171,23 @@ export const HomeScreen = () => {
           contentContainerStyle={{ paddingBottom: 150 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.accent} />}
         >
+          {progress.length ? (
+            <View style={s.continueSection}>
+              <AppText variant="h3" style={[s.sectionTitle, { paddingHorizontal: 16 }]}>Continue listening</AppText>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.continueRow}>
+                {progress.map((item) => (
+                  <ContinueCard
+                    key={item.storyId || item.id}
+                    item={item}
+                    onOpen={() => openStory(item)}
+                    onResume={() => play(item)}
+                    onRemove={() => removeFromContinue(item)}
+                  />
+                ))}
+              </ScrollView>
+            </View>
+          ) : null}
+
           {hero ? (
             <Hero story={hero} onPress={() => openStory(hero)} onPlay={() => play(hero)} />
           ) : null}
@@ -251,6 +287,8 @@ const styles = (theme, tokens) =>
       backgroundColor: theme.card,
     },
     section: { marginTop: 20, paddingHorizontal: 16 },
+    continueSection: { marginTop: 16, marginBottom: 4 },
+    continueRow: { paddingHorizontal: 16, gap: 12 },
     sectionTitle: { marginBottom: 12, color: theme.text },
     rail: {
       flexDirection: 'row',

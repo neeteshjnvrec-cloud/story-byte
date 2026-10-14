@@ -437,6 +437,18 @@ class ApiService {
     };
   }
 
+  // Drops a story from "Continue listening" (deletes its saved position).
+  async removeProgress(storyId) {
+    if (!this.uid) return { success: false, reason: 'unauthenticated' };
+    try {
+      await deleteDoc(doc(db, 'users', this.uid, 'progress', storyId));
+      return { success: true };
+    } catch (error) {
+      console.warn('removeProgress:', error?.message);
+      return { success: false };
+    }
+  }
+
   // Saves the user's playback position for a story.
   async saveProgress(storyId, { progress, currentTime, duration, pagesCompleted, speed }) {
     if (!this.uid) return { success: false, reason: 'unauthenticated' };
