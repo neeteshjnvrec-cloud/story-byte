@@ -67,7 +67,6 @@
         }
       ],
       "expo-notifications",
-      "expo-audio",
       "expo-sharing",
       [
         "expo-splash-screen",
