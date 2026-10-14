@@ -13,6 +13,8 @@ import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../ui/AppText';
 import { Icon } from '../ui/Icon';
 import { KeyboardAvoider } from '../ui/KeyboardAvoider';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useKeyboardState } from 'react-native-keyboard-controller';
 import apiService from '../../services/api';
 import { useAppContext } from '../../context/AppContext';
 
@@ -28,6 +30,11 @@ function timeAgo(dateValue) {
 }
 
 export function CommentSheet({ story, visible, onClose }) {
+  // The sheet is drawn behind Android's navigation bar, so the comment box
+  // needs the bar's height below it — except with the keyboard up, which
+  // covers the bar anyway (the avoider already lifts the sheet over it).
+  const insets = useSafeAreaInsets();
+  const keyboardVisible = useKeyboardState((state) => state.isVisible);
   const { theme } = useTheme();
   const { user, userStats } = useAppContext();
   const [comments, setComments] = useState([]);
@@ -166,7 +173,7 @@ export function CommentSheet({ story, visible, onClose }) {
 
             {/* Input */}
             {user ? (
-              <View style={[styles.inputRow, { borderTopColor: theme.divider }]}>
+              <View style={[styles.inputRow, { borderTopColor: theme.divider, paddingBottom: 10 + (keyboardVisible ? 0 : insets.bottom) }]}>
                 <TextInput
                   ref={inputRef}
                   value={text}

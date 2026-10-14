@@ -155,7 +155,9 @@ export function CreateStoryScreen() {
         ref={scrollRef}
         style={styles.scrollView}
         contentContainerStyle={styles.content}
-        bottomOffset={32}
+        // Room below the focused field for the Generate button too, so it can
+        // be tapped without closing the keyboard.
+        bottomOffset={110}
         showsVerticalScrollIndicator={false}
       >
         {!isPreview ? (

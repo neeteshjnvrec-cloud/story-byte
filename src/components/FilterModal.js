@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { AppText } from './ui/AppText';
 import { Icon } from './ui/Icon';
@@ -43,6 +44,9 @@ const DURATIONS = [
 ];
 
 export const FilterModal = ({ visible, onClose, onApply, initialFilters }) => {
+  // Android draws the sheet behind its navigation bar (edge-to-edge), so the
+  // buttons need the bar's height below them or they end up under it.
+  const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const [selectedGenre, setSelectedGenre] = useState(initialFilters?.genre || 'all');
   const [selectedLanguage, setSelectedLanguage] = useState(initialFilters?.language || 'all');
@@ -104,6 +108,8 @@ export const FilterModal = ({ visible, onClose, onApply, initialFilters }) => {
       visible={visible}
       transparent
       animationType="slide"
+      statusBarTranslucent
+      navigationBarTranslucent
       onRequestClose={onClose}
     >
       <Pressable style={styles.overlay} onPress={onClose}>
@@ -183,7 +189,7 @@ export const FilterModal = ({ visible, onClose, onApply, initialFilters }) => {
           </Modal>
 
           {/* Buttons */}
-          <View style={[styles.footer, { borderTopColor: theme.border }]}>
+          <View style={[styles.footer, { borderTopColor: theme.border, paddingBottom: 16 + insets.bottom }]}>
             <Pressable
               onPress={handleReset}
               style={[styles.button, styles.resetButton, { backgroundColor: theme.card }]}
