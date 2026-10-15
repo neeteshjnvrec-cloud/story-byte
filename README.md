@@ -1,3 +1,5 @@
+<a href="https://trendshift.io/repositories/82054?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-82054" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/82054/weekly" alt="morluto%2Frea | Trendshift" width="250" height="55"/></a>
+
 # 📖 StoryByte - Premium Audio Stories App
 
 **Listen. Escape. Repeat.**
