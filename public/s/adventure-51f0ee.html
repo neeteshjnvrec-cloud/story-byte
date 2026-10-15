@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-09-05_hi_adventure_%E0%A4%96%E0%A5%8B%E0%A4%AF%E0%A4%BE-%E0%A4%B9%E0%A5%81%E0%A4%86-%E0%A4%87%E0%A4%82%E0%A4%A6%E0%A5%8D%E0%A4%B0%E0%A4%A7%E0%A4%A8%E0%A5%81%E0%A4%B7.jpg" alt="Cover art for खोया हुआ इंद्रधनुष" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">adventure</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">4 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-09-05_hi_adventure_%E0%A4%96%E0%A5%8B%E0%A4%AF%E0%A4%BE-%E0%A4%B9%E0%A5%81%E0%A4%86-%E0%A4%87%E0%A4%82%E0%A4%A6%E0%A5%8D%E0%A4%B0%E0%A4%A7%E0%A4%A8%E0%A5%81%E0%A4%B7.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-09-05_hi_adventure_%E0%A4%96%E0%A5%8B%E0%A4%AF%E0%A4%BE-%E0%A4%B9%E0%A5%81%E0%A4%86-%E0%A4%87%E0%A4%82%E0%A4%A6%E0%A5%8D%E0%A4%B0%E0%A4%A7%E0%A4%A8%E0%A5%81%E0%A4%B7.mp3">Download the recording</a>.
       </audio>
@@ -159,7 +158,7 @@
     <p class="lead">एक छोटी लड़की और उसकी पालतू बिल्ली की साहसिक यात्रा जो दोस्ती और साझा करने की सीख देती है।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>कहानी के आरम्भ में, एक छोटी लड़की, माया, अपनी प्यारी बिल्ली, म्याऊ, के साथ जंगल के पास एक छोटी झोपड़ी में रहती थी। एक दिन, माया को अपने दादा के कमरे में एक पुराना नक्शा मिला। नक्शे पर एक इंद्रधनुष का निशान था, जो कहता था कि उसे एक गुप्त खजाना मिलेगा। माया और म्याऊ ने तय किया कि वे इस खजाने को खोजने के लिए एक साहसिक यात्रा पर निकलेंगे।</p>
       <p>वे अपने बैग में कुछ नाश्ता, एक पानी की बोतल, और एक छोटी लाल टॉर्च ले गए। माया ने कहा, &quot;म्याऊ, चलो इस इंद्रधनुष के पीछे चलते हैं!&quot; म्याऊ ने अपनी पूंछ हिलाते हुए जवाब दिया, &quot;हाँ, माया!&quot;</p>
@@ -174,9 +173,10 @@
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

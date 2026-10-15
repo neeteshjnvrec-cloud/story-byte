@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-10-06_hi_devotional_%E0%A4%B9%E0%A4%A8%E0%A5%81%E0%A4%AE%E0%A4%BE%E0%A4%A8-%E0%A4%95%E0%A5%80-%E0%A4%B2%E0%A4%82%E0%A4%95%E0%A4%BE-%E0%A4%AF%E0%A4%BE%E0%A4%A4%E0%A5%8D%E0%A4%B0%E0%A4%BE-%E0%A4%B8%E0%A4%AE%E0%A5%81%E0%A4%A6%E0%A5%8D%E0%A4%B0-%E0%A4%AA%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A4%B0%E0%A4%A8%E0%A5%87-%E0%A4%95%E0%A5%80.jpg" alt="Cover art for हनुमान की लंका यात्रा: समुद्र पार करने की कथा" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">devotional</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">3 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-10-06_hi_devotional_%E0%A4%B9%E0%A4%A8%E0%A5%81%E0%A4%AE%E0%A4%BE%E0%A4%A8-%E0%A4%95%E0%A5%80-%E0%A4%B2%E0%A4%82%E0%A4%95%E0%A4%BE-%E0%A4%AF%E0%A4%BE%E0%A4%A4%E0%A5%8D%E0%A4%B0%E0%A4%BE-%E0%A4%B8%E0%A4%AE%E0%A5%81%E0%A4%A6%E0%A5%8D%E0%A4%B0-%E0%A4%AA%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A4%B0%E0%A4%A8%E0%A5%87-%E0%A4%95%E0%A5%80.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-10-06_hi_devotional_%E0%A4%B9%E0%A4%A8%E0%A5%81%E0%A4%AE%E0%A4%BE%E0%A4%A8-%E0%A4%95%E0%A5%80-%E0%A4%B2%E0%A4%82%E0%A4%95%E0%A4%BE-%E0%A4%AF%E0%A4%BE%E0%A4%A4%E0%A5%8D%E0%A4%B0%E0%A4%BE-%E0%A4%B8%E0%A4%AE%E0%A5%81%E0%A4%A6%E0%A5%8D%E0%A4%B0-%E0%A4%AA%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A4%B0%E0%A4%A8%E0%A5%87-%E0%A4%95%E0%A5%80.mp3">Download the recording</a>.
       </audio>
@@ -159,7 +158,7 @@
     <p class="lead">हनुमान जी ने दृढ़ भक्ति से समुद्र पार कर लंका में सीता माँ को खोजा।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>&quot;अरे हनुमान, समुद्र को पार करो!&quot; राम ने दृढ़ निश्चय के साथ कहा। &quot;मैं तुम्हारी शक्ति पर भरोसा करता हूँ, मेरे आदेश मानो,&quot; उन्होंने आगे जोड़ा। इन शब्दों से हनुमान का हृदय पवित्र हो गया, और वह तुरंत उत्तर दिया, &quot;भगवान, मैं तुम्हारी सेवा में सब कुछ त्याग दूँगा।&quot; फिर वह वानरराज सुग्रीव के पास पहुँचा, जहाँ राम ने सीता की हरण की पीड़ा सुनाई। हनुमान ने संकल्प किया, “मैं इस अडिग विश्वास को जल में भी नहीं डगमगाने दूँगा।”</p>
       <p>वह अपने विशाल पंख फड़फड़ाते हुए आकाश में उड़ता रहा, जब तक वह समुद्र के किनारे पहुँचा। लहरें ऊँची-नीची थीं, पर हनुमान ने मन में कहा, “भक्त के मन में डर नहीं रहता।” उसने अपनी पूँछ को पवन में बदलकर, एक महान छलांग लगाई और समुद्र को पार कर लंका पहुँचा। लंका के द्वारों को पार करते हुए वह रावण के महल में घुसे, जहाँ कई दानव उसकी शक्ति को देख कर चकित हुए। वह लंका के बगीचे, महलों और अंधेरी गलियों में खोजता रहा। हर कदम पर वह रावण के सैनिकों से टकराता, पर उसकी अडिग शक्ति उन्हें परास्त करती। अंत में वह आशोक वृक्ष के पास पहुँचा, जहाँ शांति की एक झलक थी।</p>
@@ -169,9 +168,10 @@
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

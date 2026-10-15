@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-10-08_hi_devotional_%E0%A4%A8%E0%A4%B0%E0%A4%B8%E0%A4%BF%E0%A4%82%E0%A4%B9-%E0%A4%85%E0%A4%B5%E0%A4%A4%E0%A4%BE%E0%A4%B0-%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%B9%E0%A5%8D%E0%A4%B2%E0%A4%BE%E0%A4%A6-%E0%A4%95%E0%A5%80-%E0%A4%B0%E0%A4%95%E0%A5%8D%E0%A4%B7%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%85%E0%A4%A6%E0%A5%8D%E0%A4%AD%E0%A5%81%E0%A4%A4.jpg" alt="Cover art for नरसिंह अवतार: प्रह्लाद की रक्षा की अद्भुत कथा" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">devotional</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">2 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-10-08_hi_devotional_%E0%A4%A8%E0%A4%B0%E0%A4%B8%E0%A4%BF%E0%A4%82%E0%A4%B9-%E0%A4%85%E0%A4%B5%E0%A4%A4%E0%A4%BE%E0%A4%B0-%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%B9%E0%A5%8D%E0%A4%B2%E0%A4%BE%E0%A4%A6-%E0%A4%95%E0%A5%80-%E0%A4%B0%E0%A4%95%E0%A5%8D%E0%A4%B7%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%85%E0%A4%A6%E0%A5%8D%E0%A4%AD%E0%A5%81%E0%A4%A4.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-10-08_hi_devotional_%E0%A4%A8%E0%A4%B0%E0%A4%B8%E0%A4%BF%E0%A4%82%E0%A4%B9-%E0%A4%85%E0%A4%B5%E0%A4%A4%E0%A4%BE%E0%A4%B0-%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%B9%E0%A5%8D%E0%A4%B2%E0%A4%BE%E0%A4%A6-%E0%A4%95%E0%A5%80-%E0%A4%B0%E0%A4%95%E0%A5%8D%E0%A4%B7%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%85%E0%A4%A6%E0%A5%8D%E0%A4%AD%E0%A5%81%E0%A4%A4.mp3">Download the recording</a>.
       </audio>
@@ -159,16 +158,17 @@
     <p class="lead">यह कथा भगवान विष्णु की कथा है जहाँ नरसिंह अवतार ने प्रह्लाद की रक्षा की।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>एक बार असुर राजा हिरण्यकश्यप ने अपने पुत्र प्रह्लाद को अपने ही अधर्म में बंधना चाहा। प्रह्लाद छोटा बच्चा था, पर उसका हृदय केवल भगवान विष्णु में लगा था। हर सुबह वह शंख ध्वनि में विष्णु की आरती गाता, और हर बार हिरण्यकश्यप को क्रोध से भर देता। राजा ने कई बार प्रह्लाद को मारने की कोशिश की—जंगल में सर्प, अग्नि, और यहाँ‑तक कि विशाल बौद्धिक युद्ध—पर प्रह्लाद अडिग रहा। अंत में वह अपने किले के भीतर एक मजबूत स्तम्भ बनवा दिया, जहाँ से वह विष्णु को पुकारता रहा, &quot;हे विष्णु, मेरे बचाव करो।&quot; हिरण्यकश्यप ने क्रोध में आकर उस स्तम्भ को तोड़ने का आदेश दिया, पर जब वह प्रहार करता तो धरती कांपने लगी। तभी वह स्तम्भ से अजीब सी रोशनी निकली और एक गूँजती हुई आवाज़ बोली—&quot;अहं विष्णु, मैं ही हूँ।&quot; फिर एक भीषण दहाड़ के साथ, स्तम्भ के भीतर से आधे मनुष्य, आधे सिंह रूप में नरसिंह प्रकट हुआ। उसकी आँखों में असीम क्रोध और दया की ज्वाला थी। नरसिंह ने हिरण्यकश्यप को धरती पर गिरा दिया, फिर प्रह्लाद के सामने खड़ा होकर उसकी भक्ति को प्रणाम किया। उसने प्रह्लाद को अपने हाथों से उठाया, और शांति की ध्वनि के साथ कहा—&quot;भक्त के लिये मैं सदैव उपस्थित हूँ।&quot; प्रह्लाद ने आँखों में आँसू लेकर विष्णु को धन्यवाद दिया, और किले की दीवारों पर लिखी गई शाप को दूर कर दिया। इस प्रकार नरसिंह अवतार ने अधर्म को नष्ट कर, सच्ची भक्ति की शक्ति को सिद्ध किया। आज भी यह कथा हमें सिखाती है—धर्म के मार्ग पर दृढ़ रहो, और भगवान विष्णु हमेशा तुम्हारे साथ हैं। आशिर्वाद: सत्य और प्रेम के साथ जीवन जियो, प्रभु की कृपा सदैव तुम्हारे साथ रहे।</p>
       </div>
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

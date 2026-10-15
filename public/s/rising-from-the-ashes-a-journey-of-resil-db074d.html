@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">Get the app</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-09-08_en_motivation_rising-from-the-ashes-a-journey-of-resil.jpg" alt="Cover art for Rising from the Ashes: A Journey of Resilience" width="768" height="768">
@@ -174,7 +173,8 @@
     <div class="get-app">
       <h2>Listen to more on StoryByte</h2>
       <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">Get the StoryByte app</a>
+      <p><a href="https://storybyte-76716.web.app/">More stories →</a></p>
     </div>
 
     <div class="footer">

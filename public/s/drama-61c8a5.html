@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-08-16_hi_drama_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%AE%E0%A5%8B%E0%A4%B9%E0%A4%AC%E0%A5%8D%E0%A4%AC%E0%A4%A4.jpg" alt="Cover art for परिवार की मोहब्बत" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">drama</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">2 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-08-16_hi_drama_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%AE%E0%A5%8B%E0%A4%B9%E0%A4%AC%E0%A5%8D%E0%A4%AC%E0%A4%A4.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-08-16_hi_drama_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%AE%E0%A5%8B%E0%A4%B9%E0%A4%AC%E0%A5%8D%E0%A4%AC%E0%A4%A4.mp3">Download the recording</a>.
       </audio>
@@ -159,16 +158,17 @@
     <p class="lead">एक परिवार की कहानी जो प्यार, त्याग और माफी की भावना से भरी हुई है</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>मैंने अपने जीवन में कई उतार-चढ़ाव देखे हैं, लेकिन मेरे परिवार ने मुझे हमेशा संभाले रखा। मेरे पिता एक मजदूर थे, जो दिन-रात मेहनत करके हमारे परिवार का पालन-पोषण करते थे। मेरी माँ एक घरेलू महिला थीं, जो हमेशा हमारी देखभाल में लगी रहती थीं। मेरे भाई और बहन भी मुझे बहुत प्यार करते थे। हमारा परिवार बहुत ही गरीब था, लेकिन हमारे पास प्यार की कोई कमी नहीं थी। एक दिन, मेरे पिता को एक दुर्घटना हो गई और वे बिस्तर से बंध गए। मेरी माँ ने उनकी देखभाल में दिन-रात लगी रहीं। मैं और मेरे भाई-बहन भी उनकी सेवा में जुट गए। हमने अपने पिता को बचाने के लिए हर संभव कोशिश की, लेकिन वे नहीं बचे। उनकी मृत्यु के बाद, हमारा परिवार टूट गया। मेरी माँ ने हमें संभाला, लेकिन वे भी बहुत दुखी थीं। मैंने अपने पिता की मृत्यु के बाद, अपने परिवार की जिम्मेदारी ली। मैंने नौकरी ढूंढी और अपने परिवार का पालन-पोषण करने लगा। मेरी माँ ने मुझे हमेशा प्यार और समर्थन दिया। मेरे भाई-बहन भी मुझे बहुत प्यार करते थे। हमारा परिवार फिर से खुशियों से भर गया। मैंने सीखा कि परिवार का प्यार और समर्थन सबसे बड़ा धन है। मैं अपने परिवार को बहुत प्यार करता हूँ और उनके लिए हमेशा कुछ करने को तैयार रहता हूँ।</p>
       </div>
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

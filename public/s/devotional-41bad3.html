@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-10-04_hi_devotional_%E0%A4%AF%E0%A4%B6%E0%A5%8B%E0%A4%A6%E0%A4%BE-%E0%A4%A8%E0%A5%87-%E0%A4%AC%E0%A4%BE%E0%A4%B2-%E0%A4%95%E0%A5%83%E0%A4%B7%E0%A5%8D%E0%A4%A3-%E0%A4%95%E0%A5%87-%E0%A4%AE%E0%A5%81%E0%A4%81%E0%A4%B9-%E0%A4%AE%E0%A5%87%E0%A4%82-%E0%A4%A6%E0%A5%87%E0%A4%96%E0%A4%BE-%E0%A4%AC%E0%A5%8D%E0%A4%B0%E0%A4%B9.jpg" alt="Cover art for यशोदा ने बाल कृष्ण के मुँह में देखा ब्रह्मांड" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">devotional</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">3 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-10-04_hi_devotional_%E0%A4%AF%E0%A4%B6%E0%A5%8B%E0%A4%A6%E0%A4%BE-%E0%A4%A8%E0%A5%87-%E0%A4%AC%E0%A4%BE%E0%A4%B2-%E0%A4%95%E0%A5%83%E0%A4%B7%E0%A5%8D%E0%A4%A3-%E0%A4%95%E0%A5%87-%E0%A4%AE%E0%A5%81%E0%A4%81%E0%A4%B9-%E0%A4%AE%E0%A5%87%E0%A4%82-%E0%A4%A6%E0%A5%87%E0%A4%96%E0%A4%BE-%E0%A4%AC%E0%A5%8D%E0%A4%B0%E0%A4%B9.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-10-04_hi_devotional_%E0%A4%AF%E0%A4%B6%E0%A5%8B%E0%A4%A6%E0%A4%BE-%E0%A4%A8%E0%A5%87-%E0%A4%AC%E0%A4%BE%E0%A4%B2-%E0%A4%95%E0%A5%83%E0%A4%B7%E0%A5%8D%E0%A4%A3-%E0%A4%95%E0%A5%87-%E0%A4%AE%E0%A5%81%E0%A4%81%E0%A4%B9-%E0%A4%AE%E0%A5%87%E0%A4%82-%E0%A4%A6%E0%A5%87%E0%A4%96%E0%A4%BE-%E0%A4%AC%E0%A5%8D%E0%A4%B0%E0%A4%B9.mp3">Download the recording</a>.
       </audio>
@@ -159,16 +158,17 @@
     <p class="lead">माँ यशोदा को अपने नन्हे बाल कृष्ण के मुँह में अनंत सृष्टि का अद्भुत दर्शन मिलता है।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>क्या आपने कभी सोचा है कि माँ यशोदा ने अपने नन्हे बाल कृष्ण के मुँह में पूरे ब्रह्मांड को कैसे देखा? जब वह अपने नन्हे हाथों से लट्टू घुमा रहा था, अचानक एक चमत्कार ने सबका दिल धड़काया। यशोदा ने अपने प्यारे बाल को गोद में उठाया और धीरे‑धीरे उसके मुँह को खोलने को कहा, “बच्चे, अब थोड़ा खा ले।” जैसे ही कृष्ण ने अपना छोटा‑छोटा मुँह खोला, माँ की आँखों के सामने अनन्त सृष्टि का दृश्य प्रकट हुआ। ध्वज‑धारी पर्वत, घने जंगल, बहते नदियाँ, स्वर्ग के देवता, इन्द्र के वज्र, और यहाँ‑तक कि शेषनाग भी उसकी दाँतों के बीच लहराते दिखे। यशोदा ने कांपते हाथों से कहा, “हे बालक! यह सब मेरे सामने क्यों प्रकट हुआ?” कृष्ण ने हँसते हुए उत्तर दिया, “माँ, मैं वही हूँ जो सबका कारण हूँ; मेरे अंदर ही सृष्टि का सार बसा है।” उसी क्षण वह अपना लट्टू फिर से घुमा कर, धीरे‑धीरे अपना मुँह बंद कर लेता है और सृष्टि फिर से धुंधली हो जाती है। यशोदा का हृदय आभा से भर गया, वह समझ गई कि वह केवल एक नन्हा बालक नहीं, बल्कि संपूर्ण ब्रह्माण्ड का अंश है। गाँव वाले इस अद्भुत दृश्य को देख कर विस्मित हो गये और सभी ने मिलकर कृष्ण की आराधना की। यशोदा के आँसू आँखों में भर आए, पर वे आँसू प्रसन्नता के थे। उसने कहा, “हे बालक, तेरा यह स्वरूप मेरे हृदय को शान्ति देता है, मैं तुझमें सृष्टि का सार देखती हूँ।” गाँव के बुजुर्ग भी इस दृश्य से मंत्रमुग्ध हो गये और कहा, “ये बालक ही तो वह शिशु है जिसके लिये पुराणों में कहा गया है, ‘जगधारी।’” इस समय हवा में पवनिक ध्वनि जैसे बांसुरी की मधुर तान बजने लगी, और सभी की मन में शुद्ध प्रेम का प्रसार हुआ। इस कथा से हमें यह सीख मिलती है कि सच्ची भक्ति में छोटे से छोटे बाल में भी परम सत्य का प्रतिबिंब निहित रहता है। जब हम अपने दिल को शुद्ध कर देखेंगे, तो हम भी अपने भीतर अनन्त ब्रह्मांड को पहचान पाएँगे। इस ज्ञान को अपने जीवन में उतारें और हर छोटे‑छोटे क्षण को पूजें, क्योंकि वही परमात्मा का वास है। परमेश्वर की कृपा आप पर बनी रहे, यही मेरी प्रार्थना।</p>
       </div>
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

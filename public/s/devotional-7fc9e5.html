@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-10-03_hi_devotional_%E0%A4%B6%E0%A4%A8%E0%A4%BF-%E0%A4%A6%E0%A5%87%E0%A4%B5-%E0%A4%95%E0%A4%BE-%E0%A4%B5%E0%A4%BF%E0%A4%95%E0%A5%8D%E0%A4%B0%E0%A4%AE%E0%A4%BE%E0%A4%A6%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A4%B0-%E0%A4%AA%E0%A4%B0%E0%A5%80%E0%A4%95%E0%A5%8D%E0%A4%B7%E0%A4%A3.jpg" alt="Cover art for शनि देव का विक्रमादित्य पर परीक्षण" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">devotional</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">3 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-10-03_hi_devotional_%E0%A4%B6%E0%A4%A8%E0%A4%BF-%E0%A4%A6%E0%A5%87%E0%A4%B5-%E0%A4%95%E0%A4%BE-%E0%A4%B5%E0%A4%BF%E0%A4%95%E0%A5%8D%E0%A4%B0%E0%A4%AE%E0%A4%BE%E0%A4%A6%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A4%B0-%E0%A4%AA%E0%A4%B0%E0%A5%80%E0%A4%95%E0%A5%8D%E0%A4%B7%E0%A4%A3.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-10-03_hi_devotional_%E0%A4%B6%E0%A4%A8%E0%A4%BF-%E0%A4%A6%E0%A5%87%E0%A4%B5-%E0%A4%95%E0%A4%BE-%E0%A4%B5%E0%A4%BF%E0%A4%95%E0%A5%8D%E0%A4%B0%E0%A4%AE%E0%A4%BE%E0%A4%A6%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A4%B0-%E0%A4%AA%E0%A4%B0%E0%A5%80%E0%A4%95%E0%A5%8D%E0%A4%B7%E0%A4%A3.mp3">Download the recording</a>.
       </audio>
@@ -159,16 +158,17 @@
     <p class="lead">शनि देव ने राजा विक्रमादित्य की धैर्य, सत्यनिष्ठा और आत्मसंयम की परीक्षा ली, जिससे मिला उन्हें आशीर्वाद।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>शनि देव ने गहरी आवाज़ में कहा, &quot;विक्रम, अब तुम्हारी धीरज की सच्ची परीक्षा शुरू होगी&quot;। विक्रम ने उत्तर दिया, &quot;हे शनि, मैं सत्य के पथ पर चलूँगा, चाहे कठिनाई कितनी भी हो&quot;। इस कथा का आरम्भ उस समय से होता है जब सम्राट विक्रमादित्य, अपने न्यायप्रिय स्वभाव और असीम दानशीलता के लिये पूरे भारत में प्रसिद्ध थे। उन्होंने अनाथ बच्चों को भोजन कराया, बँधे हुए पंडितों को मुक्त किया और हमेशा अपने प्रजा की भलाई को प्रथम स्थान दिया। शनि देव, जो कर्मफल के नियन्ता हैं, देखना चाहते थे कि इस महान राजा का ह्रदय किस हद तक अडिग है, इसलिए वे अपने स्वरूप बदल कर एक ब्राह्मण रूप धारण कर दरबार में प्रवेश किए। वह ब्राह्मण, शनि की आँखों से देखे हुए, धीरे‑धीरे बोले, &quot;राजा, मुझे केवल एक पिंड जल चाहिए, पर वह सात दिनों तक न सूखे। यदि तुम इसे मुझे दे सको तो मैं तुम्हें असीम धन्यत्व दूँगा&quot;। विक्रम ने बिना किसी संकोच के अपने महल के सबसे स्वच्छ जल से भरपूर एक सुनहरा कलश निकाल कर ब्राह्मण को सौंप दिया और कहा, &quot;इसे अपनी रक्षा में रखो, मैं तुम्हारी सहायता करने को सदैव तत्पर हूँ&quot;। ब्राह्मण ने कलश लेकर रात के अंधेरे में जंगल की ओर प्रस्थान किया। अगले दिन जब राजा ने कलश की खोज शुरू की तो पाते हैं कि वह गहरी घाटी में गिरा है, जहाँ चारों ओर जलप्रपात, अग्निकुंड, और दुष्ट साधु‑संतान ने अपना जाल बिछा रखा है। शनि ने बार‑बार विक्रम को भय, क्रोध और अधीरता की भावना से भरने की कोशिश की—वह तेज़ आँधी लाकर, जल को उभाड़ कर, अग्नि को बढ़ाकर, तथा शत्रु सैनिकों को भेजकर। परन्तु राजा ने अपने मन को शान्त रखा, गहरी सांस ली और शांति से प्रत्येक बाधा को पार किया। वह जल में पैर डुबो कर भी श्वास नहीं खोया, अग्नि के सामने भी अपने कर्तव्य से विचलित नहीं हुआ, और दुष्ट साधु के प्रलोभनों से भी अपना सत्य नहीं छोड़ा। सातवें दिन जब वह कलश तक पहुँचा, तो शनि देव अपने मूल रूप में प्रकट हुए, मुस्कुराते हुए बोले, &quot;विक्रम, तुम्हारी अडिग धीरज और सत्यनिष्ठा ने मुझे प्रसन्न किया है। अब मैं तुम्हें अनंत सुख, स्वास्थ्य और समृद्धि का वरदान देता हूँ&quot;। शनि ने कलश को स्वर्ण रूप में परिवर्तित कर दिया, जिससे सम्पूर्ण राज्य में धन‑समृद्धि और शांति का प्रकाश फैला। राजा ने इस आशीर्वाद को अपने प्रजा के साथ बाँटा, सभी ने शनि की कृपा से प्रेरित होकर धैर्य और सत्य के मार्ग पर चलना शुरू किया। इस कथा से हमें यह सीख मिलती है—कठिन समय में भी शान्ति और धीरज बनाए रखें, क्योंकि यही ईश्वर का सर्वश्रेष्ठ उपहार है। शनि देव की यह परीक्षा हमें सिखाती है, धीरज ही सच्ची शक्ति है। जय शनि! 🙏</p>
       </div>
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-09-14_hi_devotional_%E0%A4%97%E0%A4%A3%E0%A5%87%E0%A4%B6-%E0%A4%9A%E0%A4%A4%E0%A5%81%E0%A4%B0%E0%A5%8D%E0%A4%A5%E0%A5%80-%E0%A4%95%E0%A5%80-%E0%A4%AE%E0%A5%8B%E0%A4%A6%E0%A4%95-%E0%A4%AF%E0%A4%BE%E0%A4%A4%E0%A5%8D%E0%A4%B0%E0%A4%BE.jpg" alt="Cover art for गणेश चतुर्थी की मोदक यात्रा" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">devotional</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">4 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-09-14_hi_devotional_%E0%A4%97%E0%A4%A3%E0%A5%87%E0%A4%B6-%E0%A4%9A%E0%A4%A4%E0%A5%81%E0%A4%B0%E0%A5%8D%E0%A4%A5%E0%A5%80-%E0%A4%95%E0%A5%80-%E0%A4%AE%E0%A5%8B%E0%A4%A6%E0%A4%95-%E0%A4%AF%E0%A4%BE%E0%A4%A4%E0%A5%8D%E0%A4%B0%E0%A4%BE.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-09-14_hi_devotional_%E0%A4%97%E0%A4%A3%E0%A5%87%E0%A4%B6-%E0%A4%9A%E0%A4%A4%E0%A5%81%E0%A4%B0%E0%A5%8D%E0%A4%A5%E0%A5%80-%E0%A4%95%E0%A5%80-%E0%A4%AE%E0%A5%8B%E0%A4%A6%E0%A4%95-%E0%A4%AF%E0%A4%BE%E0%A4%A4%E0%A5%8D%E0%A4%B0%E0%A4%BE.mp3">Download the recording</a>.
       </audio>
@@ -159,7 +158,7 @@
     <p class="lead">एक छोटे से गाँव में एक बच्चे की गणेश के प्रति प्रेम और त्यौहार की खुशी की कहानी।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>गाँव के बुजुर्गों के बीच हमेशा से एक खास परंपरा चलती आई है। हर साल गणेश चतुर्थी के दिन, एक धूमधाम भरी प्रक्रिया होती है। इस बार की कहानी है एक छोटे से पप्पू की, जो अपनी पहली गणेश चतुर्थी पर अनुभव करता है।</p>
       <p>पप्पू, उम्र नौ, अपनी माँ के साथ बाजार में गया। उसकी माँ ने उसे एक छोटा सा हाथ से बना हुआ गणेश मूर्ति खरीदी, जिस पर चाँदी की पंखुड़ियाँ सजी थीं। पप्पू ने मूर्ति को बड़ाई से घुमाते हुए कहा, &quot;माँ, यह तो भगवान गणेश की तरह दिखता है, पर क्या वह हमें कुछ कहेंगे?&quot;</p>
@@ -178,9 +177,10 @@
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

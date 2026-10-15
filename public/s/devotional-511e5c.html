@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-09-14_hi_devotional_%E0%A4%97%E0%A4%A3%E0%A4%AA%E0%A4%A4%E0%A4%BF-%E0%A4%95%E0%A5%80-%E0%A4%A6%E0%A4%BF%E0%A4%B5%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%95%E0%A5%8D%E0%A4%B0%E0%A4%BF%E0%A4%AF%E0%A4%BE.jpg" alt="Cover art for गणपति की दिव्य प्रक्रिया" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">devotional</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">4 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-09-14_hi_devotional_%E0%A4%97%E0%A4%A3%E0%A4%AA%E0%A4%A4%E0%A4%BF-%E0%A4%95%E0%A5%80-%E0%A4%A6%E0%A4%BF%E0%A4%B5%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%95%E0%A5%8D%E0%A4%B0%E0%A4%BF%E0%A4%AF%E0%A4%BE.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-09-14_hi_devotional_%E0%A4%97%E0%A4%A3%E0%A4%AA%E0%A4%A4%E0%A4%BF-%E0%A4%95%E0%A5%80-%E0%A4%A6%E0%A4%BF%E0%A4%B5%E0%A5%8D%E0%A4%AF-%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%95%E0%A5%8D%E0%A4%B0%E0%A4%BF%E0%A4%AF%E0%A4%BE.mp3">Download the recording</a>.
       </audio>
@@ -159,7 +158,7 @@
     <p class="lead">एक छोटी लड़की के साथ गणेश चतुर्थी की मधुर यात्रा</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>गांव के कोने में एक छोटे से घर में, एक लड़की अमृता अपने पिता के साथ गणेश चतुर्थी की तैयारी कर रही थी। सुबह के सवेरा में, पिता ने उसे एक छोटा सा पाटी का गुड़िया लाकर दिखाया, जिस पर बिंदू और चंद्रमा का चित्र बना हुआ था। &quot;ये है गणपति जी,&quot; उन्होंने कहा, &quot;इसे हमारे दिल से प्रेम और धैर्य के साथ समर्पित करना है।&quot; अमृता ने ध्यान से सुना और अपने हाथ से माटी के बर्तन में हल्की-हल्की हाथों से एक छोटा सा अर्चना किया। उसके बाद, पिता ने मोदक के लिए रोटी बनाने की तैयारी शुरू की। मोदक की खुशबू ने पूरे घर को भर दिया। हर एक मोदक पर, पिता ने एक छोटा सा तिल का चिपटा लगाया, क्योंकि वह मानते थे कि तिल में शुद्धता और धैर्य का प्रतीक है।</p>
       <p>रात को जब मंदिर के द्वार पर लालटेन जले, तो अमृता ने अपनी छोटी हाथों से गंगा की धारा के साक्षात पानी के साथ गणपति के लिए एक छोटा सा दर्पण सजाया। वह दर्पण गणेश जी के सामने रखकर, उसने मोदक के साथ एक छोटी सी प्रार्थना की, &quot;पिताजी, कृपया हमें इस गणपति के गुण सीखने का अवसर दें।&quot;</p>
@@ -172,9 +171,10 @@
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

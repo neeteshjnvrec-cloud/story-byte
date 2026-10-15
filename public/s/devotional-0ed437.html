@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-10-14_hi_devotional_%E0%A4%AE%E0%A4%BE%E0%A4%81-%E0%A4%95%E0%A5%82%E0%A4%B7%E0%A5%8D%E0%A4%AE%E0%A4%BE%E0%A4%82%E0%A4%A1%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%95%E0%A4%A5%E0%A4%BE-%E0%A4%85%E0%A4%82%E0%A4%A7%E0%A4%95%E0%A4%BE%E0%A4%B0-%E0%A4%B8%E0%A5%87-%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%95%E0%A4%BE%E0%A4%B6-%E0%A4%A4%E0%A4%95.jpg" alt="Cover art for माँ कूष्मांडा की कथा – अंधकार से प्रकाश तक" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">devotional</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">2 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-10-14_hi_devotional_%E0%A4%AE%E0%A4%BE%E0%A4%81-%E0%A4%95%E0%A5%82%E0%A4%B7%E0%A5%8D%E0%A4%AE%E0%A4%BE%E0%A4%82%E0%A4%A1%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%95%E0%A4%A5%E0%A4%BE-%E0%A4%85%E0%A4%82%E0%A4%A7%E0%A4%95%E0%A4%BE%E0%A4%B0-%E0%A4%B8%E0%A5%87-%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%95%E0%A4%BE%E0%A4%B6-%E0%A4%A4%E0%A4%95.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-10-14_hi_devotional_%E0%A4%AE%E0%A4%BE%E0%A4%81-%E0%A4%95%E0%A5%82%E0%A4%B7%E0%A5%8D%E0%A4%AE%E0%A4%BE%E0%A4%82%E0%A4%A1%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%95%E0%A4%A5%E0%A4%BE-%E0%A4%85%E0%A4%82%E0%A4%A7%E0%A4%95%E0%A4%BE%E0%A4%B0-%E0%A4%B8%E0%A5%87-%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%95%E0%A4%BE%E0%A4%B6-%E0%A4%A4%E0%A4%95.mp3">Download the recording</a>.
       </audio>
@@ -159,16 +158,17 @@
     <p class="lead">माँ कूष्मांडा ने अपनी मुस्कान से अंधकार में ब्रह्मांड का सृजन किया, एक प्रेरणादायक कथा।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>जैसे ही माँ कूष्मांडा ने अपनी मुस्कान पलाई, अंधकार में चमकते हुए सूर्य, चंद्रमा और तारों का सृजन हो गया। उसी क्षण ब्रह्माण्ड का पहला प्रकाश जल उठा, और सभी जीवों को जीवन मिला। बहुत समय पहले, जब केवल अंधकार ही अंधकार था, देवता और ऋषियों ने मिलकर इस अंधकार को दूर करने की योजना बनाई। उन्होंने ब्रह्मा जी से प्रार्थना की, “हे ब्रह्मा, इस शून्य में प्रकाश लाने की शक्ति कौन दे सकता है?” तब ब्रह्मा ने उत्तर दिया, “केवल कूष्मांडा, जो अष्टकोण में जन्मी थी, ही इस काम को कर सकती है।” कूष्मांडा ने शुद्ध श्वास लिया और कहा, “मैं इस अंधकार को अपने हृदय की शुद्धता से दूर करूँगी।” जैसे ही उसने मुस्कराई, उसकी मुस्कान से उज्ज्वल प्रकाश की लहरें फैलीं, और सृष्टि के सभी तत्व उत्पन्न हुए। प्रथम सूर्य ने कहा, “मैं अब उजाला लाऊँगा,” चंद्रमा ने कहा, “मैं शीतलता दूँगा,” और तारे ने कहा, “मैं रात को सजाऊँगा।” फिर पृथ्वी ने धीरे‑धीरे आकार लिया, जल ने बहना शुरू किया, वायु ने गति पायी और अग्नि ने गर्मी दी। ऋषियों ने प्रसन्नता से कहा, “हे कूष्मांडा, आपकी हँसी ने सृष्टि को जन्म दिया।” माँ कूष्मांडा ने मुस्कुराते हुए कहा, “यह सब तुम्हारी भक्ति का फल है,” और स्वर्गलोक की ओर लौट गई। परन्तु उसकी मुस्कान आज भी हर मन में प्रकाश लाती है, अंधकार को दूर करती है। इस कथा से सीखें, सच्ची शुद्ध हँसी में ही सृष्टि का रहस्य निहित है; आपकी मुस्कान से संसार प्रकाशित हो।</p>
       </div>
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

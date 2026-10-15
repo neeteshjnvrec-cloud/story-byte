@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/community_1787465260720_FwJFdXofL5bmfdmdfpg4wn27oBk2.jpg" alt="Cover art for यात्रा के रंग: जीवन में परिवर्तन" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">adventure</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">4 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/community_1787465260720_FwJFdXofL5bmfdmdfpg4wn27oBk2.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/community_1787465260720_FwJFdXofL5bmfdmdfpg4wn27oBk2.mp3">Download the recording</a>.
       </audio>
@@ -159,16 +158,17 @@
     <p class="lead">यात्रा हमें भीतर से बदल देती है, नई राहों पर चलने की प्रेरणा देती है।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>मैं एक छोटे से गाँव से निकला, जहाँ हर सुबह वही पुरानी धूप, वही पुरानी आवाज़ें थीं। लेकिन जब मैंने पहली बार बैग पैक किया और रास्ते पर चल पड़ा, तो मेरे भीतर कुछ बदलने लगा। पहाड़ों की ठंडी हवा, रेगिस्तानों की गरमी, समुद्र की लहरें—हर एक अनुभव ने मेरे दिल में नई ध्वनि बजाई। मैं देखता हूँ कि यात्रा सिर्फ जगह बदलती नहीं, बल्कि हमारे सोचने के तरीके को भी बदल देती है। एक बार मैं हिमालय की बर्फीली चोटियों में पहुंचा, जहाँ ठंड की चुभन ने मेरे हाथों को काँप दिया। लेकिन वही ठंडी हवा मेरे अंदर छिपी हुई डर को भी पिघला कर, मुझे साहस का नया सिला दिया। रास्ते में मिलते हुए स्थानीय लोग अपने जीवन की कहानियाँ सुनाते, अपने संघर्षों को साझा करते। उनकी मुस्कुराहट में मैंने समझा कि कठिनाइयाँ सिर्फ एक पड़ाव हैं, मंज़िल नहीं। इस तरह की छोटी‑छोटी मुलाक़ातें मेरे अंदर एक नई ऊर्जा भर देतीं, जैसे कोई अनकही कहानी जो धीरे‑धीरे खुल रही हो। मैं जब रेगिस्तान के सुनहरे टीलों के बीच से गुजर रहा था, तो सूरज की तपिश ने मुझे सिखाया कि धीरज रखना कितना ज़रूरी है। हर कदम पर रेत मेरे पैर में चुभती, पर मैं थक कर नहीं रुकता, क्योंकि मैं जानता था कि हर पसीना मेरे सपनों के एक नए पंख को खोल रहा है। समुद्र किनारे जब मैं खड़ा था, लहरों की आवाज़ मेरे कानों में संगीत बन गई। मैं महसूस करता हूँ कि जैसे समुद्र की लहरें निरंतर आगे बढ़ती हैं, वैसे ही मेरे विचार भी अब स्थिर नहीं रहेंगे। यात्रा ने मुझे सिखाया कि हर मोड़ पर एक नया विकल्प होता है, और हर विकल्प हमें हमारे अंदर छिपे हुए साहस से मिलवाता है। जब मैं पहाड़ी रास्ते से नीचे उतरता, तो एक बुज़ुर्ग यात्री ने कहा, &quot;जीवन की सबसे बड़ी यात्रा वही है, जो हम अपने भीतर करते हैं।&quot; इस बात ने मेरे दिल में गूँज बनाई। मैं समझा कि यात्रा का असली अर्थ बाहरी स्थान नहीं, बल्कि आत्मा की खोज है। रास्ते में कई बार मैं थक जाता, लेकिन जब मैं अपने पीछे देखता, तो मैं देखता कि मैंने कितना कुछ सीखा है—भाषाएँ, संस्कृति, भोजन, और सबसे बड़ी बात, खुद को पहचानना। अब मैं जानता हूँ कि यात्रा हमें केवल नए दृश्य नहीं देती, बल्कि हमारे सपनों को नई दिशा देती है। जब मैं वापस अपने गाँव पहुँचा, तो मेरे हाथों में वही पुरानी मिट्टी थी, पर मेरे दिल में नई उमंग थी। गाँव वाले मेरे बदलते रूप को देख हैरान थे, और मैं उन्हें बताता, &quot;हर कदम पर मैं नया सीख रहा हूँ, हर रात मैं नए सपने देख रहा हूँ।&quot; इस तरह यात्रा ने मेरे अंदर एक प्रेरणा की लहर दौड़ा दी, जो अब कभी थमती नहीं। अब जब भी कोई पूछता, &quot;तुम्हें यात्रा क्यों करनी चाहिए?&quot;, मैं कहता, &quot;क्योंकि यात्रा तुम्हारे भीतर की गहरी आवाज़ को सुनाती है, तुम्हें अपने आप से मिलाती है, और तुम्हारे सपनों को हकीकत में बदल देती है।&quot; इस कहानी को सुनते हुए, मैं तुम्हें भी यही प्रेरणा देना चाहता हूँ—अपनी बैग पैक करो, रास्ते पर चलो, और देखो कि कैसे यात्रा तुम्हारी जिंदगी को नया रंग देती है, नई आशा देती है, और तुम्हें वह साहस देती है, जो हर दिन को एक नई कहानी बनाता है।</p>
       </div>
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">
