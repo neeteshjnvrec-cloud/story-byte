@@ -365,7 +365,8 @@ const PLAYER_SCRIPT = `
         }
       };
       var make = function () {
-        new YT.Player('yt-player', {
+        // window.sbPlayer: the app pauses and resumes it (FloatingVideoPlayer.js).
+        window.sbPlayer = new YT.Player('yt-player', {
           videoId: id, host: 'https://www.youtube.com',
           playerVars: { autoplay: box.dataset.autoplay === '1' ? 1 : 0, playsinline: 1, rel: 0, origin: location.origin },
           events: {

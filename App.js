@@ -17,6 +17,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { AppContextProvider, useAppContext } from './src/context/AppContext';
 import { AudioProvider } from './src/context/AudioContext';
+import { VideoProvider } from './src/context/VideoContext';
 import { WalletProvider } from './src/context/WalletContext';
 import { ThemeProvider } from './src/hooks/useTheme';
 import { AppNavigator } from './src/navigation/AppNavigator';
@@ -31,6 +32,7 @@ import { SettingsScreen } from './src/screens/SettingsScreen';
 import { NotificationsScreen } from './src/screens/NotificationsScreen';
 import { CoinsScreen } from './src/screens/CoinsScreen';
 import { FloatingAudioPlayer } from './src/components/FloatingAudioPlayer';
+import { FloatingVideoPlayer } from './src/components/FloatingVideoPlayer';
 import { notificationService } from './src/services/notificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
@@ -137,6 +139,7 @@ function MainStack({ isNewUser, navigationRef, ready }) {
         ) : null}
       </Stack.Navigator>
       <FloatingAudioPlayer />
+      <FloatingVideoPlayer navigationRef={navigationRef} />
     </>
   );
 }
@@ -197,10 +200,13 @@ export default function App() {
                     the finish reward). */}
                 <WalletProvider>
                   <AudioProvider>
-                    <NavigationContainer ref={navigationRef} onReady={() => setReady(true)}>
-                      <StatusBar style="auto" />
-                      <Root navigationRef={navigationRef} ready={ready} />
-                    </NavigationContainer>
+                    {/* The YouTube video that keeps playing across screens. */}
+                    <VideoProvider>
+                      <NavigationContainer ref={navigationRef} onReady={() => setReady(true)}>
+                        <StatusBar style="auto" />
+                        <Root navigationRef={navigationRef} ready={ready} />
+                      </NavigationContainer>
+                    </VideoProvider>
                   </AudioProvider>
                 </WalletProvider>
               </AppContextProvider>
