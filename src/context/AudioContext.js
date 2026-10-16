@@ -9,6 +9,7 @@ import { useWallet } from './WalletContext';
 import { isPaidStory } from '../services/wallet';
 import { noteStoryFinished } from '../utils/askForRating';
 import { isVideoStory } from '../utils/videoStory';
+import { useVideo } from './VideoContext';
 
 const AudioContext = createContext();
 
@@ -46,6 +47,10 @@ export const AudioProvider = ({ children }) => {
   // playback callbacks below always reach the current wallet.
   const coins = useWallet();
   const coinsRef = useRef(coins);
+  // The floating video player (context/VideoContext.js), for video stories.
+  const video = useVideo();
+  const videoRef = useRef(video);
+  videoRef.current = video;
   useEffect(() => { coinsRef.current = coins; }, [coins]);
 
   useEffect(() => {
@@ -182,10 +187,12 @@ export const AudioProvider = ({ children }) => {
   // Play a story with optional starting page
   const playStory = useCallback(async (story, startPage = 0) => {
     try {
-      // A video story has no audio. Screens open its page instead; anything
-      // that still lands here goes to YouTube rather than failing.
+      // A video story has no audio: Play starts it in the floating video
+      // player (components/FloatingVideoPlayer.js), which pauses this audio
+      // when the video starts.
       if (isVideoStory(story)) {
-        if (story.youtubeUrl) Linking.openURL(story.youtubeUrl).catch(() => {});
+        if (videoRef.current?.playMini) videoRef.current.playMini(story);
+        else if (story.youtubeUrl) Linking.openURL(story.youtubeUrl).catch(() => {});
         return;
       }
       // A paid long episode plays only once unlocked: its audio URL lives in

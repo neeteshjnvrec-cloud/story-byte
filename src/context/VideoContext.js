@@ -3,7 +3,8 @@
 //
 //   inline — on the video's story page, laid over the space the page keeps
 //            for it (`frame`, in window coordinates).
-//   mini   — a small floating window on any other screen, until it's closed.
+//   mini   — a small floating window on any other screen, until it's closed;
+//            also where a video story's Play button starts it.
 //
 // The player is the same WebView in both, only resized, so the video never
 // reloads. Watching counts like listening: one play per visit and the place
@@ -43,6 +44,19 @@ export function VideoProvider({ children }) {
     setMode('inline');
   }, []);
 
+  /** A Play button on a video story: start it in the mini window. */
+  const playMini = useCallback((story) => {
+    const current = videoRef.current;
+    if (current?.story.id === story.id) { setMode((m) => m); return; }
+    started.current = false;
+    countedPlay.current = false;
+    setPlaying(false);
+    // A story from Firestore has createdAt; the website's list stand-in
+    // (LongVideosRow) doesn't, and has no record to count plays on.
+    setVideo({ story, videoId: story.youtubeId, counts: !!story.createdAt });
+    setMode('mini');
+  }, []);
+
   /** The story page of `storyId` was left: keep playing small, or close if it never started. */
   const leave = useCallback((storyId) => {
     if (videoRef.current?.story.id !== storyId) return;
@@ -71,8 +85,8 @@ export function VideoProvider({ children }) {
   }, [user, recordPlay]);
 
   const value = useMemo(() => ({
-    video, mode, frame, playing, showInline, leave, closeVideo, onPlayerEvent,
-  }), [video, mode, frame, playing, showInline, leave, closeVideo, onPlayerEvent]);
+    video, mode, frame, playing, showInline, playMini, leave, closeVideo, onPlayerEvent,
+  }), [video, mode, frame, playing, showInline, playMini, leave, closeVideo, onPlayerEvent]);
 
   return <VideoContext.Provider value={value}>{children}</VideoContext.Provider>;
 }

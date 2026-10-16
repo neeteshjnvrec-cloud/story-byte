@@ -102,8 +102,9 @@ export const HomeScreen = () => {
   const openStory = (s) => navigation.navigate('StoryDetail', { storyId: s.id, story: s });
   const play = async (s) => {
     // A locked paid episode opens its page, where it can be unlocked; a video
-    // story opens its page, which plays it.
-    if (!canPlay(s) || isVideoStory(s)) return openStory(s);
+    // story starts in the floating video player.
+    if (!canPlay(s)) return openStory(s);
+    if (isVideoStory(s)) return playStory(s);
     setLastPlayTab('home');
     setNextStory(() => {
       const idx = stories.findIndex((st) => st.id === s.id);

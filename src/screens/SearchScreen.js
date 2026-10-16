@@ -213,7 +213,8 @@ export const SearchScreen = () => {
   };
 
   const handlePlayStory = async (story) => {
-    if (isVideoStory(story)) return handleStoryPress(story);
+    // A video story starts in the floating video player, right here.
+    if (isVideoStory(story)) return playStory(story);
     await playStory(story);
     navigation.navigate('Home');
     // Small delay so the Home tab activates before navigating to detail

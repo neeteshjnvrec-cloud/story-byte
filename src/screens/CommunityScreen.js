@@ -173,8 +173,8 @@ export function CommunityScreen() {
   };
 
   const handlePlay = async (story) => {
-    // A video story plays on its page.
-    if (isVideoStory(story)) return navigation.navigate('StoryDetail', { storyId: story.id || story.storyId, story });
+    // A video story starts in the floating video player.
+    if (isVideoStory(story)) return playStory(story);
     setLastPlayTab('community');
     // Provide the autoplay next-story callback: find this story's index in the
     // feed and return the next one (wrapping is fine — unlikely in a 50-item

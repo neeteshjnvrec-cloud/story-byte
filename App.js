@@ -199,15 +199,17 @@ export default function App() {
                     user) and the player (which plays paid episodes and pays
                     the finish reward). */}
                 <WalletProvider>
-                  <AudioProvider>
-                    {/* The YouTube video that keeps playing across screens. */}
-                    <VideoProvider>
+                  {/* The YouTube video that keeps playing across screens;
+                      outside the audio player, whose Play starts a video
+                      story in it. */}
+                  <VideoProvider>
+                    <AudioProvider>
                       <NavigationContainer ref={navigationRef} onReady={() => setReady(true)}>
                         <StatusBar style="auto" />
                         <Root navigationRef={navigationRef} ready={ready} />
                       </NavigationContainer>
-                    </VideoProvider>
-                  </AudioProvider>
+                    </AudioProvider>
+                  </VideoProvider>
                 </WalletProvider>
               </AppContextProvider>
             </ThemeProvider>
