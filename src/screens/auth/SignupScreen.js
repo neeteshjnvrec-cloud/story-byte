@@ -1,7 +1,7 @@
 // Sign up — the sign-in screen's design (AuthLayout): Google first, or a
 // name, email and password.
 import React, { useRef, useState } from 'react';
-import { View, Linking, StyleSheet } from 'react-native';
+import { View, Pressable, Linking, StyleSheet } from 'react-native';
 import { useAppContext } from '../../context/AppContext';
 import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../../components/ui/AppText';
@@ -27,6 +27,8 @@ export const SignupScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  // The email already has an account: offer to sign in with it instead.
+  const [existingEmail, setExistingEmail] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const google = useGoogleAuth(setError);
   const emailRef = useRef(null);
@@ -39,12 +41,17 @@ export const SignupScreen = ({ navigation }) => {
     if (password.length < 6) return setError('Password should be at least 6 characters');
     if (password !== confirmPassword) return setError('Passwords do not match');
     try {
-      setError(''); setSubmitting(true);
+      setError(''); setExistingEmail(null); setSubmitting(true);
       await signupWithEmail(email.trim(), password, displayName.trim());
       // Nothing to navigate to: once the account exists, App.js swaps these
       // sign-in screens for the welcome screens, then Home.
     } catch (e) {
-      setError(getAuthErrorMessage(e.code, 'signup'));
+      if (e.code === 'auth/email-already-in-use') {
+        setExistingEmail(email.trim());
+        setError('This email already has a StoryByte account.');
+      } else {
+        setError(getAuthErrorMessage(e.code, 'signup'));
+      }
     } finally { setSubmitting(false); }
   };
 
@@ -83,6 +90,20 @@ export const SignupScreen = ({ navigation }) => {
       {mismatch ? <AppText variant="caption" color="error" style={styles.hint}>Passwords don't match yet</AppText> : null}
 
       {error ? <AppText variant="caption" color="error" style={styles.error}>{error}</AppText> : null}
+      {existingEmail ? (
+        <View style={[styles.existing, { backgroundColor: theme.accentSoft }]}>
+          <AppText variant="caption" color="textSecondary" style={{ flex: 1 }}>
+            Signed up before, or with Google? Sign in with it instead.
+          </AppText>
+          <Pressable
+            onPress={() => navigation.popTo('Login', { email: existingEmail })}
+            hitSlop={8}
+            accessibilityRole="button"
+          >
+            <AppText variant="label" color="accent">Sign in instead</AppText>
+          </Pressable>
+        </View>
+      ) : null}
 
       <Button title="Create account" onPress={handleSignup} loading={submitting} style={{ marginTop: 4 }} />
 
@@ -103,6 +124,7 @@ const styles = StyleSheet.create({
   perk: { flex: 1, alignItems: 'center', gap: 4 },
   hint: { marginTop: -8, marginBottom: 12, marginLeft: 2 },
   error: { marginBottom: 12, marginLeft: 2 },
+  existing: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 14, padding: 12, marginTop: -4, marginBottom: 14 },
   legal: { textAlign: 'center', marginTop: 14 },
 });
 

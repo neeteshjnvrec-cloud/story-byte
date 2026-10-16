@@ -1,6 +1,6 @@
 // Sign in — story art up top (AuthLayout), then Google, then email and
 // password, with "Forgot password?" by the password field.
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { useAppContext } from '../../context/AppContext';
 import { AppText } from '../../components/ui/AppText';
@@ -9,14 +9,22 @@ import { Button } from '../../components/ui/Button';
 import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 import { AuthLayout, GoogleButton, OrDivider, AuthFooterLink } from './AuthLayout';
 
-export const LoginScreen = ({ navigation }) => {
+export const LoginScreen = ({ navigation, route }) => {
   const { loginWithEmail } = useAppContext();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(route?.params?.email || '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const google = useGoogleAuth(setError);
   const passwordRef = useRef(null);
+
+  // Sent here from sign up with an email that already has an account.
+  useEffect(() => {
+    if (!route?.params?.email) return;
+    setEmail(route.params.email);
+    setError('');
+    passwordRef.current?.focus();
+  }, [route?.params?.email]);
 
   const handleLogin = async () => {
     if (!email.trim() || !password) { setError('Please enter your email and password'); return; }

@@ -124,30 +124,36 @@ export const AppContextProvider = ({ children }) => {
   }, [loadUserData]);
 
   // --- Email/Password Auth ---------------------------------------------------
+  //
+  // These don't touch `loading`: that's the startup "restoring your session"
+  // state, during which App.js renders nothing, so setting it here took the
+  // sign-in screens away mid-attempt and rebuilt them afterwards, losing the
+  // form and its error message. The screens show their own spinner.
+  //
+  // An auth/* error (wrong password, email already in use, no such account…)
+  // is the user's to fix and the screen explains it; logging it as an error
+  // only put a red error box over the screen in development builds.
+  const logAuthError = (label, error) => {
+    if (!String(error?.code || '').startsWith('auth/')) console.error(label, error);
+  };
 
   const loginWithEmail = async (email, password) => {
-    setLoading(true);
     try {
       await authServiceLogin(email, password);
       return auth.currentUser;
     } catch (error) {
-      console.error('Login error:', error);
+      logAuthError('Login error:', error);
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const signupWithEmail = async (email, password, displayName) => {
-    setLoading(true);
     try {
       await authServiceSignup(email, password, displayName);
       return auth.currentUser;
     } catch (error) {
-      console.error('Signup error:', error);
+      logAuthError('Signup error:', error);
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -157,7 +163,7 @@ export const AppContextProvider = ({ children }) => {
       await sendResetEmail(email);
       return { success: true };
     } catch (error) {
-      console.error('Password reset error:', error);
+      logAuthError('Password reset error:', error);
       throw error;
     }
   };
