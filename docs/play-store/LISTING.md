@@ -2,14 +2,16 @@
 
 Paste into Play Console → Grow → Store presence → Main store listing.
 
-## Graphics (`screenshots/`)
+## Graphics
 
 | Play Console field | File | Size |
 |---|---|---|
-| Phone screenshots, in this order | `01-home.jpg` … `08-browse.jpg` | 1080×1920 JPEG each |
-| Feature graphic | `feature-graphic.jpg` | 1024×500 JPEG |
+| Phone screenshots, in this order | `screenshots/01-home.jpg` … `08-browse.jpg` | 1080×1920 JPEG each |
+| 7-inch tablet screenshots | `tablet-7in/01-home.jpg` … `08-browse.jpg` | 1080×1920 JPEG each |
+| 10-inch tablet screenshots | `tablet-10in/01-home.jpg` … `08-browse.jpg` | 1440×2560 JPEG each |
+| Feature graphic | `screenshots/feature-graphic.jpg` | 1024×500 JPEG |
 
-Play's limits: 2–8 phone screenshots, 16:9 or 9:16, 320–3840 px a side, ≤ 8 MB each; feature graphic exactly 1024×500.
+Play's limits: up to 8 screenshots per device type, 16:9 or 9:16, 320–3840 px a side, ≤ 8 MB each; feature graphic exactly 1024×500. The tablet screenshots show the app at real tablet sizes (600×960 and 800×1280 dp, portrait, as the app is portrait-only).
 
 ## App name (30 characters max)
 
