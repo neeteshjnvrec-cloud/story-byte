@@ -212,8 +212,49 @@ async function sendBroadcastNotification(story) {
   );
 }
 
+// --- author names --------------------------------------------------------------
+// The app saved "Anonymous" as the author when the profile had no full name
+// yet (a Google sign-in's name wasn't copied into it), and the app can't
+// look the name up itself: user profiles are private. This fills in the
+// author's profile name (full name, else their Google name) on their
+// community stories, pending and published alike. Runs every time, before
+// anything else, and only touches stories that still say Anonymous.
+const ANON = ['Anonymous', ''];
+
+async function backfillAuthorNames() {
+  try {
+    const snap = await db.collection('stories')
+      .where('isCommunityStory', '==', true)
+      .where('authorName', 'in', ANON)
+      .get();
+    const profiles = new Map();
+    let fixed = 0;
+    for (const doc of snap.docs) {
+      const { authorId, authorProfilePic } = doc.data();
+      if (!authorId) continue;
+      if (!profiles.has(authorId)) {
+        const u = await db.collection('users').doc(authorId).get().catch(() => null);
+        profiles.set(authorId, u?.exists ? u.data() : null);
+      }
+      const u = profiles.get(authorId);
+      const name = String(u?.fullName || u?.displayName || '').trim();
+      if (!name) continue;
+      const update = { authorName: name.slice(0, 60) };
+      const pic = u.profilePic || u.photoURL;
+      if (!authorProfilePic && pic) update.authorProfilePic = pic;
+      await doc.ref.update(update);
+      fixed++;
+    }
+    if (fixed) console.log(`👤 Author name filled in on ${fixed} community story(ies)`);
+  } catch (e) {
+    console.warn(`  ⚠️  Author names not filled in: ${e.message}`);
+  }
+}
+
 // --- main --------------------------------------------------------------------
 async function main() {
+  await backfillAuthorNames();
+
   fs.mkdirSync(path.join(PUB, 'audio'), { recursive: true });
   fs.mkdirSync(path.join(PUB, 'covers'), { recursive: true });
   // Shareable story pages, staged alongside the audio and covers so the single
@@ -506,7 +547,12 @@ async function main() {
       // local disk, so it doesn't need the Firebase Hosting deploy above
       // to have happened first.
       if (item.videoUrl) {
-        await postStoryToYouTube(socialStory, path.join(PUB, 'instagram', mediaKey(item.id), 'story.mp4'));
+        const yt = await postStoryToYouTube(socialStory, path.join(PUB, 'instagram', mediaKey(item.id), 'story.mp4'));
+        // The story's page in the app plays the video too (StoryDetailScreen).
+        if (yt.posted && yt.videoId) {
+          await db.collection('stories').doc(item.id).update({ youtubeId: yt.videoId, youtubeKind: 'short' })
+            .catch((e) => console.warn(`  ⚠️  Video id not saved on ${item.id}: ${e.message}`));
+        }
       }
     }
   }

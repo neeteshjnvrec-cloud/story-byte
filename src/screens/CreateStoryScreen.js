@@ -22,6 +22,7 @@ import { HeaderNotificationButton } from '../components/HeaderNotificationButton
 import { KeyboardAwareScroll } from '../components/ui/KeyboardAvoider';
 import { GENRES } from '../constants/genres';
 import { LANGUAGES } from '../types/story';
+import { myAuthorName } from '../utils/author';
 
 // The language's own name first — that's how a speaker recognises "its" at a
 // glance — then the English name in parens for everybody else. Orthography is
@@ -39,7 +40,7 @@ export function CreateStoryScreen() {
   const { theme, tokens } = useTheme();
   // Inputs in the app's own font (TextInput otherwise uses Roboto on Android).
   const inputFont = { fontFamily: tokens.type.body.fontFamily };
-  const { generateStory, publishCommunityStory, isGenerating, userStats } = useAppContext();
+  const { generateStory, publishCommunityStory, isGenerating, userStats, user } = useAppContext();
 
   const [title, setTitle] = useState('');
   const [prompt, setPrompt] = useState('');
@@ -79,7 +80,7 @@ export function CreateStoryScreen() {
       const published = await publishCommunityStory({
         ...generatedStory,
         language: selectedLanguage,
-        authorName: userStats?.fullName || 'Anonymous',
+        authorName: myAuthorName(user, userStats) || 'Anonymous',
         authorProfilePic: userStats?.profilePic || userStats?.photoURL || '',
       });
       if (published?.limited) {

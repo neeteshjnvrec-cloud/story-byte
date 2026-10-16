@@ -18,6 +18,8 @@ import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import { CommentSheet } from '../components/comments/CommentSheet';
 import { shareStory } from '../utils/shareStory';
 import apiService from '../services/api';
+import { AuthorRow, MoreFromAuthor, useAuthorStories } from '../components/story/AuthorCard';
+import { authorOf, myAuthorName } from '../utils/author';
 
 // ---------------------------------------------------------------------------
 // Chapter parser
@@ -100,7 +102,7 @@ export const StoryDetailScreen = () => {
   const { playStory, playPause, isPlaying, currentStory } = useAudioPlayer();
   const {
     toggleFavorite, user, getStoryMetrics, toggleLike, recordShare, recordPlay,
-    rateStory: rateStoryInContext, receiveStoryDocs, downloads, downloadingIds, toggleDownload,
+    rateStory: rateStoryInContext, receiveStoryDocs, downloads, downloadingIds, toggleDownload, userStats,
   } = useAppContext();
   const { canPlay, unlock, balance, premiumAudioUrl } = useWallet();
   const [unlocking, setUnlocking] = useState(false);
@@ -119,6 +121,8 @@ export const StoryDetailScreen = () => {
   const videoId = isVideoStory(story) ? story.youtubeId : null;
   // A daily story whose Short is on YouTube: the Short plays on its page too.
   const shortId = shortIdOf(story);
+  const authorName = authorOf(story, { uid: user?.uid, name: myAuthorName(user, userStats) });
+  const authorStories = useAuthorStories(story);
 
   // Chapter state
   const [chapters, setChapters] = useState(null);
@@ -333,6 +337,8 @@ export const StoryDetailScreen = () => {
 
         <AppText variant="bodyL" color="textSecondary" style={{ marginTop: 12, lineHeight: 25 }}>{story.description}</AppText>
 
+        <AuthorRow story={story} name={authorName} stories={authorStories} />
+
         <View style={styles.actions}>
           {videoId ? (
             <Button
@@ -375,7 +381,7 @@ export const StoryDetailScreen = () => {
 
         {shortId ? (
           <View style={styles.section}>
-            <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 12 }}>WATCH THE SHORT</AppText>
+            <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 12 }}>{story.isCommunityStory ? 'WATCH THE VIDEO' : 'WATCH THE SHORT'}</AppText>
             <YouTubePlayer
               videoId={shortId}
               vertical
@@ -457,6 +463,8 @@ export const StoryDetailScreen = () => {
             ) : null}
           </View>
         )}
+
+        <MoreFromAuthor story={story} name={authorName} stories={authorStories} />
       </ScrollView>
       {story && inDb && (
         <CommentSheet

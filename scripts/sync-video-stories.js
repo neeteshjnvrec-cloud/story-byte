@@ -10,10 +10,11 @@
  *      stories never list them (they'd try to play missing audio); the
  *      current app lists them on Home and in Community and plays them in
  *      YouTube's player.
- *   2. Daily stories whose YouTube Short is known get youtubeId and
- *      youtubeKind "short", so their page can play the Short too. New Shorts
- *      are recorded by build-stories.js when they're uploaded; this fills in
- *      older ones from the weekly analytics snapshot
+ *   2. Daily and community stories whose YouTube video is known get
+ *      youtubeId and youtubeKind "short", so their page can play it too. New
+ *      ones are recorded by build-stories.js and generate-community-audio.js
+ *      when they're uploaded; this fills in older ones from the weekly
+ *      analytics snapshot
  *      (reports/social/latest.json), matching the Short's title to the
  *      story's socialTitle the same way scripts/analyze-social.js does.
  *
@@ -92,7 +93,13 @@ function longVideoStories() {
   });
 }
 
-/** [{ storyId, youtubeId }] for daily stories whose Short is in the analytics snapshot. */
+/**
+ * [{ storyId, youtubeId }] for stories whose video is in the analytics
+ * snapshot: a daily story's Short by its socialTitle, a community story's
+ * video by its title (generate-community-audio.js uploads it under the
+ * story's title, cut to YouTube's 100 characters). A community title that
+ * matches more than one video is skipped rather than guessed.
+ */
 function shortsFromReport(stories) {
   let report;
   try {
@@ -101,9 +108,17 @@ function shortsFromReport(stories) {
     return [];
   }
   const shorts = report.youtube?.shorts || [];
+  const all = [...shorts, ...(report.youtube?.videos || [])];
   const out = [];
   for (const st of stories) {
-    if (!st.socialTitle || st.youtubeId) continue;
+    if (st.youtubeId || !st.audioUrl) continue;
+    if (st.isCommunityStory) {
+      const title = String(st.title || '').slice(0, 100).trim();
+      const hits = title ? [...new Set(all.filter((v) => String(v.title || '').trim() === title).map((v) => v.id))] : [];
+      if (hits.length === 1 && hits[0]) out.push({ storyId: st.id, youtubeId: hits[0] });
+      continue;
+    }
+    if (!st.socialTitle) continue;
     const hit = shorts.find((v) => String(v.title || '').startsWith(st.socialTitle));
     if (hit?.id) out.push({ storyId: st.id, youtubeId: hit.id });
   }
@@ -141,15 +156,15 @@ async function main() {
       await ref.set({ ...v.data, updatedAt: FieldValue.serverTimestamp(), ...counters }, { merge: true });
     }
 
-    // 2. Older Shorts onto their daily stories.
-    const daily = await db.collection('stories').where('isCommunityStory', '==', false).get();
-    const stories = daily.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // 2. Older Shorts onto their daily stories, and community stories' videos.
+    const published = await db.collection('stories').where('status', '==', 'published').get();
+    const stories = published.docs.map((d) => ({ id: d.id, ...d.data() }));
     const matches = shortsFromReport(stories);
     for (const m of matches) {
       if (DRY) { console.log(`  short ${m.youtubeId} → ${m.storyId}`); continue; }
       await db.collection('stories').doc(m.storyId).update({ youtubeId: m.youtubeId, youtubeKind: 'short' });
     }
-    console.log(`✅ ${videos.length} video stories ${DRY ? 'checked' : 'synced'}; ${matches.length} Shorts ${DRY ? 'matched' : 'attached'} to their stories`);
+    console.log(`✅ ${videos.length} video stories ${DRY ? 'checked' : 'synced'}; ${matches.length} Shorts/videos ${DRY ? 'matched' : 'attached'} to their stories`);
   } finally {
     if (fromEnv) fs.rmSync(saPath, { force: true });
   }

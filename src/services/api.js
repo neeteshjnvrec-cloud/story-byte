@@ -202,6 +202,24 @@ class ApiService {
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   }
 
+  // A community author's published stories, newest first. Equality-only, so
+  // no composite index is needed; sorted here instead of by the query.
+  async getStoriesByAuthor(authorId, max = 20) {
+    if (!authorId) return [];
+    const q = query(
+      collection(db, 'stories'),
+      where('authorId', '==', authorId),
+      where('status', '==', 'published'),
+      fbLimit(50)
+    );
+    const snap = await getDocs(q);
+    const ms = (t) => (t?.toMillis ? t.toMillis() : 0);
+    return snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => ms(b.createdAt) - ms(a.createdAt))
+      .slice(0, max);
+  }
+
   // Returns { categories: [{ name, count, totalPlays }] } aggregated from the
   // published daily library. Equality-only, so no composite index is needed.
   async getCategories() {

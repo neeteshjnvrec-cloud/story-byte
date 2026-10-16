@@ -35,6 +35,7 @@ import { HeaderNotificationButton } from '../components/HeaderNotificationButton
 import { Cover } from '../components/story/Cover';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import { CommentSheet } from '../components/comments/CommentSheet';
+import { authorOf, myAuthorName } from '../utils/author';
 import { shareStory } from '../utils/shareStory';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAudioPlayer } from '../context/AudioContext';
@@ -62,8 +63,9 @@ export function CommunityScreen() {
   const { theme } = useTheme();
   const {
     user, communityStories, fetchCommunityStories, receiveCommunityStories, loadMoreCommunity, communityHasMore,
-    toggleFavorite, getStoryMetrics, toggleLike, rateStory, recordShare, setLastPlayTab,
+    toggleFavorite, getStoryMetrics, toggleLike, rateStory, recordShare, setLastPlayTab, userStats,
   } = useAppContext();
+  const me = { uid: user?.uid, name: myAuthorName(user, userStats) };
   const { playStory, setNextStory } = useAudioPlayer();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -208,10 +210,7 @@ export function CommunityScreen() {
     const { liked, likesCount, saved, plays, rating, sharesCount, myRating } = getStoryMetrics(item);
     const isRatingOpen = ratingOpenFor === id;
     const postedAt = timeAgo(item.createdAt);
-    // Trim first: an empty-string authorName passes `||` but ''[0] is undefined.
-    // The AI daily library carries its name under `author`, not `authorName`
-    // (see build-stories.js) — fall back to it before "Anonymous".
-    const authorName = item.authorName?.trim() || item.author?.trim() || 'Anonymous';
+    const authorName = authorOf(item, me);
     const authorInitial = authorName[0].toUpperCase();
 
     return (
