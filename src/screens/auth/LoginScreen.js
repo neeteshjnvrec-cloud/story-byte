@@ -7,7 +7,7 @@ import { AppText } from '../../components/ui/AppText';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { useGoogleAuth } from '../../hooks/useGoogleAuth';
-import { AuthLayout, AUTH_ART, GoogleButton, OrDivider, AuthFooterLink } from './AuthLayout';
+import { AuthLayout, GoogleButton, OrDivider, AuthFooterLink } from './AuthLayout';
 
 export const LoginScreen = ({ navigation }) => {
   const { loginWithEmail } = useAppContext();
@@ -29,7 +29,7 @@ export const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <AuthLayout art={AUTH_ART.login} title="Welcome back" subtitle="Sign in to pick up your stories where you left off.">
+    <AuthLayout title="Welcome back" subtitle="Sign in to pick up your stories where you left off.">
       <GoogleButton onPress={google.signIn} loading={google.inProgress} />
       <OrDivider />
 

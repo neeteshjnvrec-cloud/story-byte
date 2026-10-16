@@ -1,7 +1,8 @@
-// The sign-in, sign-up and reset-password screens' shared frame: story art
-// across the top (assets/onboarding) with the StoryByte name over it, and a
-// rounded panel below it holding the title and the form. The whole page
-// scrolls with the keyboard, so the fields are never hidden behind it.
+// The sign-in, sign-up and reset-password screens' shared frame: the
+// StoryByte logo in gold on a dark collage of story covers from every genre
+// (assets/brand-*), and a rounded panel below holding the title and the
+// form. The whole page scrolls with the keyboard, so the fields are never
+// hidden behind it.
 import React from 'react';
 import { View, Pressable, Image, StyleSheet, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,17 +13,17 @@ import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
 import { KeyboardAwareScroll } from '../../components/ui/KeyboardAvoider';
 
-export const AUTH_ART = {
-  login: require('../../../assets/onboarding/hanuman-wide.jpg'),
-  signup: require('../../../assets/onboarding/durga-wide.jpg'),
-  reset: require('../../../assets/onboarding/palace-wide.jpg'),
-};
+const LOGO = require('../../../assets/brand-logo.png');
+const MOSAIC = require('../../../assets/brand-mosaic.jpg');
+// The logo's own ground: it's gold line art, made for a dark background.
+const BRAND_DARK = '#17110C';
 
-export function AuthLayout({ art, title, subtitle, onBack, children }) {
+export function AuthLayout({ title, subtitle, onBack, children }) {
   const { theme } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
-  const heroHeight = Math.max(170, Math.min(280, Math.round(height * 0.27))) + insets.top;
+  const heroHeight = Math.max(190, Math.min(300, Math.round(height * 0.3))) + insets.top;
+  const logoSize = Math.min(210, Math.round((heroHeight - insets.top) * 0.86));
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
@@ -33,20 +34,26 @@ export function AuthLayout({ art, title, subtitle, onBack, children }) {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        <View style={{ height: heroHeight }}>
-          <Image source={art} style={StyleSheet.absoluteFill} resizeMode="cover" />
-          {/* Keeps the status bar, back button and name readable on bright art. */}
-          <LinearGradient colors={['rgba(20,12,6,0.6)', 'rgba(20,12,6,0)']} style={[styles.topShade, { height: insets.top + 110 }]} />
-          <View style={[styles.heroTop, { paddingTop: insets.top + 10 }]}>
-            {onBack ? (
-              <Pressable onPress={onBack} hitSlop={10} style={styles.back} accessibilityRole="button" accessibilityLabel="Back">
-                <Icon name="chev-left" size={22} color="#fff" />
-              </Pressable>
-            ) : null}
-            <AppText variant="h2" style={styles.wordmark}>
-              Story<AppText variant="h2" style={[styles.wordmark, { color: '#F6B989' }]}>Byte</AppText>
-            </AppText>
+        <View style={{ height: heroHeight, backgroundColor: BRAND_DARK }}>
+          <Image source={MOSAIC} style={StyleSheet.absoluteFill} resizeMode="cover" />
+          {/* A pool of dark behind the logo, so the gold reads over the covers. */}
+          <LinearGradient
+            colors={['rgba(23,17,12,0.55)', 'rgba(23,17,12,0.82)', 'rgba(23,17,12,0.55)']}
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={[styles.logoWrap, { paddingTop: insets.top }]}>
+            <Image
+              source={LOGO}
+              style={{ width: logoSize, height: logoSize }}
+              resizeMode="contain"
+              accessibilityLabel="StoryByte — listen, escape, repeat"
+            />
           </View>
+          {onBack ? (
+            <Pressable onPress={onBack} hitSlop={10} style={[styles.back, { top: insets.top + 10 }]} accessibilityRole="button" accessibilityLabel="Back">
+              <Icon name="chev-left" size={22} color="#fff" />
+            </Pressable>
+          ) : null}
         </View>
 
         <View style={[styles.sheet, { backgroundColor: theme.background, paddingBottom: insets.bottom + 24 }]}>
@@ -119,10 +126,11 @@ export function AuthFooterLink({ text, link, onPress }) {
 }
 
 const styles = StyleSheet.create({
-  topShade: { position: 'absolute', top: 0, left: 0, right: 0 },
-  heroTop: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20 },
-  back: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' },
-  wordmark: { color: '#fff', textShadowColor: 'rgba(0,0,0,0.45)', textShadowRadius: 8, textShadowOffset: { width: 0, height: 1 } },
+  logoWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 22 },
+  back: {
+    position: 'absolute', left: 16, width: 38, height: 38, borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center',
+  },
   sheet: { flexGrow: 1, marginTop: -28, borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingHorizontal: 24, paddingTop: 28 },
   google: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12,

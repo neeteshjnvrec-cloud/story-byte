@@ -10,11 +10,11 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 import { getAuthErrorMessage } from './LoginScreen';
-import { AuthLayout, AUTH_ART, GoogleButton, OrDivider, AuthFooterLink } from './AuthLayout';
+import { AuthLayout, GoogleButton, OrDivider, AuthFooterLink } from './AuthLayout';
 
 const PRIVACY_URL = 'https://storybyte-76716.web.app/privacy.html';
 const PERKS = [
-  { icon: 'headphones', label: 'Daily katha' },
+  { icon: 'headphones', label: 'Every genre' },
   { icon: 'globe', label: '16 languages' },
   { icon: 'sparkles', label: 'Create stories' },
 ];
@@ -52,7 +52,6 @@ export const SignupScreen = ({ navigation }) => {
 
   return (
     <AuthLayout
-      art={AUTH_ART.signup}
       title="Create your account"
       subtitle="Free forever · no card needed"
       onBack={() => navigation.navigate('Login')}

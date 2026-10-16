@@ -1,8 +1,8 @@
-// Onboarding — the three welcome screens after signing up: listen (daily
-// kathas and stories in 16 languages), watch (long episodes and Shorts,
-// which play in the app) and create (an idea, written and narrated by AI,
-// shared with the community). Swipe or tap Next; Skip jumps straight in.
-// Each screen's artwork is real story art from the app (assets/onboarding).
+// Onboarding — the three welcome screens after signing up: listen (every
+// genre, in 16 languages), watch (long episodes and Shorts, which play in
+// the app) and create (an idea, written and narrated by AI, shared with the
+// community). Swipe or tap Next; Skip jumps straight in. The artwork is
+// real story art from the app (assets/onboarding), across genres.
 import React, { useEffect, useRef, useState } from 'react';
 import { View, ScrollView, Pressable, Image, Animated, StyleSheet, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -15,13 +15,27 @@ import { Button } from '../components/ui/Button';
 import { Icon } from '../components/ui/Icon';
 
 const ART = {
-  durga: require('../../assets/onboarding/durga.jpg'),
-  shailputri: require('../../assets/onboarding/shailputri.jpg'),
-  library: require('../../assets/onboarding/library.jpg'),
-  hanuman: require('../../assets/onboarding/hanuman-wide.jpg'),
-  short: require('../../assets/onboarding/shailputri-tall.jpg'),
-  palace: require('../../assets/onboarding/palace.jpg'),
+  // Listen: one cover per genre, the adventure in front.
+  devotional: require('../../assets/onboarding/durga.jpg'),
+  romance: require('../../assets/onboarding/library.jpg'),
+  adventure: require('../../assets/onboarding/palace.jpg'),
+  mystery: require('../../assets/onboarding/mystery.jpg'),
+  scifi: require('../../assets/onboarding/scifi.jpg'),
+  // Watch: Alien Is My Girlfriend, episode 3, and a romance Short.
+  episode: require('../../assets/onboarding/alien-wide.jpg'),
+  short: require('../../assets/onboarding/romance-tall.jpg'),
+  // Create.
+  forest: require('../../assets/onboarding/forest.jpg'),
 };
+export const BRAND_MARK = require('../../assets/brand-mark.png');
+
+const FAN = [
+  { art: 'devotional', label: 'Devotional' },
+  { art: 'romance', label: 'Romance' },
+  { art: 'adventure', label: 'Adventure' },
+  { art: 'mystery', label: 'Mystery' },
+  { art: 'scifi', label: 'Sci-fi' },
+];
 
 const shadow = (o = 0.22, r = 18, y = 10) => ({
   shadowColor: '#2A2118', shadowOpacity: o, shadowRadius: r, shadowOffset: { width: 0, height: y }, elevation: Math.round(r / 2),
@@ -50,18 +64,31 @@ function Equalizer({ color }) {
 }
 
 function ListenArt({ size, theme }) {
-  const front = Math.round(size * 0.62);
-  const back = Math.round(size * 0.48);
+  const front = Math.round(size * 0.5);
+  const side = Math.round(size * 0.36);
+  // [left edge, top, rotation, z] for the five covers, outside in.
+  const spots = [
+    [0, 46, -14, 1], [size * 0.13, 22, -7, 2], [(size - front) / 2, 0, 0, 3],
+    [size * 0.87 - side, 22, 7, 2], [size - side, 46, 14, 1],
+  ];
   return (
-    <View style={{ width: size, height: front + 70, alignItems: 'center' }}>
-      <Image source={ART.shailputri} style={[styles.card, { width: back, height: back, top: 44, left: -size * 0.02, transform: [{ rotate: '-10deg' }] }, shadow(0.18, 14, 8)]} />
-      <Image source={ART.library} style={[styles.card, { width: back, height: back, top: 44, right: -size * 0.02, transform: [{ rotate: '10deg' }] }, shadow(0.18, 14, 8)]} />
-      <Image source={ART.durga} style={[styles.card, { width: front, height: front, top: 0, borderRadius: 26 }, shadow(0.3, 22, 14)]} />
-      <View style={[styles.nowPlaying, { top: front - 26, backgroundColor: theme.surfaceElevated, borderColor: theme.border }, shadow(0.16, 14, 6)]}>
-        <Image source={ART.durga} style={styles.npThumb} />
+    <View style={{ width: size, height: front + 92, alignItems: 'center' }}>
+      {FAN.map((f, i) => {
+        const [left, top, rot, z] = spots[i];
+        const w = i === 2 ? front : side;
+        return (
+          <View key={f.art} style={[styles.fanCard, { left, top, width: w, height: w, zIndex: z, transform: [{ rotate: `${rot}deg` }] }, shadow(i === 2 ? 0.3 : 0.16, i === 2 ? 22 : 12, i === 2 ? 14 : 6)]}>
+            <Image source={ART[f.art]} style={StyleSheet.absoluteFill} />
+            {/* Only the front cover is wide enough to show its genre. */}
+            {i === 2 ? <View style={styles.genreTag}><AppText variant="micro" style={styles.onDark}>{f.label}</AppText></View> : null}
+          </View>
+        );
+      })}
+      <View style={[styles.nowPlaying, { top: front + 14, backgroundColor: theme.surfaceElevated, borderColor: theme.border }, shadow(0.16, 14, 6)]}>
+        <Image source={ART.adventure} style={styles.npThumb} />
         <View style={{ flexShrink: 1 }}>
-          <AppText variant="micro" color="accent" style={{ letterSpacing: 1 }}>TODAY'S KATHA</AppText>
-          <AppText variant="label" numberOfLines={1}>Maa Kushmanda's story</AppText>
+          <AppText variant="micro" color="accent" style={{ letterSpacing: 1 }}>NOW PLAYING · HINDI</AppText>
+          <AppText variant="label" numberOfLines={1}>यात्रा के रंग: जीवन में परिवर्तन</AppText>
         </View>
         <Equalizer color={theme.accent} />
       </View>
@@ -76,14 +103,14 @@ function WatchArt({ size, theme }) {
   return (
     <View style={{ width: w, height: h + 64 }}>
       <View style={[styles.video, { width: w, height: h }, shadow(0.28, 22, 14)]}>
-        <Image source={ART.hanuman} style={StyleSheet.absoluteFill} />
+        <Image source={ART.episode} style={StyleSheet.absoluteFill} />
         <LinearGradient colors={['transparent', 'rgba(0,0,0,0.65)']} style={StyleSheet.absoluteFill} />
         <View style={styles.bigPlay}><Icon name="play" size={28} color={theme.accent} /></View>
         <View style={styles.videoMeta}>
-          <AppText variant="micro" style={styles.onDarkMuted}>LONG STORY · EPISODE</AppText>
-          <AppText variant="label" style={styles.onDark}>Hanuman's leap to Lanka</AppText>
+          <AppText variant="micro" style={styles.onDarkMuted}>SCI-FI ROMANCE · EPISODE 3</AppText>
+          <AppText variant="label" style={styles.onDark}>Alien Is My Girlfriend</AppText>
         </View>
-        <View style={styles.duration}><AppText variant="micro" style={styles.onDark}>17 min</AppText></View>
+        <View style={styles.duration}><AppText variant="micro" style={styles.onDark}>16 min</AppText></View>
       </View>
       <View style={[styles.short, { width: shortW, height: Math.round((shortW * 16) / 9), borderColor: theme.background }, shadow(0.3, 16, 10)]}>
         <Image source={ART.short} style={StyleSheet.absoluteFill} />
@@ -105,7 +132,7 @@ function CreateArt({ size, theme }) {
           <Icon name="pencil" size={14} color={theme.accent} />
           <AppText variant="micro" color="accent" style={{ letterSpacing: 1 }}>YOUR IDEA</AppText>
         </View>
-        <AppText variant="bodyL" style={{ marginTop: 6 }}>“A traveller finds a palace hidden in the clouds…”</AppText>
+        <AppText variant="bodyL" style={{ marginTop: 6 }}>“Two friends follow a firefly into a forest no map shows…”</AppText>
       </View>
 
       <View style={styles.magic}>
@@ -118,9 +145,9 @@ function CreateArt({ size, theme }) {
       </View>
 
       <View style={[styles.result, { backgroundColor: theme.surfaceElevated, borderColor: theme.border }, shadow(0.2, 18, 10)]}>
-        <Image source={ART.palace} style={{ width: cover, height: cover, borderRadius: 16 }} />
+        <Image source={ART.forest} style={{ width: cover, height: cover, borderRadius: 16 }} />
         <View style={{ flex: 1, gap: 6 }}>
-          <AppText variant="h2" numberOfLines={2}>The Cloud Palace</AppText>
+          <AppText variant="h2" numberOfLines={2}>The Hidden Forest</AppText>
           <AppText variant="caption" color="textSecondary">by you · 3 min</AppText>
           <View style={[styles.row, { marginTop: 4 }]}>
             <View style={[styles.miniPlay, { backgroundColor: theme.accent }]}><Icon name="play" size={12} color={theme.onAccent} /></View>
@@ -154,8 +181,8 @@ const SLIDES = [
     key: 'listen',
     eyebrow: 'LISTEN',
     title: 'Stories worth\nlistening to',
-    body: 'A new devotional katha every morning, and stories in 16 languages — beautifully narrated, and free.',
-    chips: ['New every day', '16 languages', 'Free'],
+    body: 'Romance, mystery, adventure, kids’ tales, devotional kathas and more — new every day, in 16 languages, and free.',
+    chips: ['Every genre', '16 languages', 'Free'],
     Art: ListenArt,
   },
   {
@@ -213,9 +240,12 @@ export const OnboardingScreen = ({ onComplete }) => {
       <LinearGradient colors={[theme.accentSoft, theme.background]} style={styles.glow} pointerEvents="none" />
 
       <View style={[styles.top, { paddingTop: insets.top + 10 }]}>
-        <AppText variant="h2" style={{ color: theme.text }}>
-          Story<AppText variant="h2" color="accent">Byte</AppText>
-        </AppText>
+        <View style={styles.brand}>
+          <Image source={BRAND_MARK} style={styles.brandMark} resizeMode="contain" accessibilityIgnoresInvertColors />
+          <AppText variant="h2" style={{ color: theme.text }}>
+            Story<AppText variant="h2" color="accent">Byte</AppText>
+          </AppText>
+        </View>
         {!isLast ? (
           <Pressable onPress={finish} hitSlop={12} accessibilityRole="button" accessibilityLabel="Skip">
             <AppText variant="label" color="textSecondary">Skip</AppText>
@@ -304,7 +334,10 @@ const styles = StyleSheet.create({
   dot: { height: 8, borderRadius: 4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 6 },
 
-  card: { position: 'absolute', borderRadius: 20 },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  brandMark: { width: 42, height: 29 },
+  fanCard: { position: 'absolute', borderRadius: 18, overflow: 'hidden', backgroundColor: '#000' },
+  genreTag: { position: 'absolute', left: 6, bottom: 6, backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
   nowPlaying: {
     position: 'absolute', flexDirection: 'row', alignItems: 'center', gap: 10,
     paddingVertical: 8, paddingLeft: 8, paddingRight: 14, borderRadius: 18, borderWidth: 1, maxWidth: '92%',

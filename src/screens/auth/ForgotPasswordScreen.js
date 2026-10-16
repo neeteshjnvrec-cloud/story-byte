@@ -11,7 +11,7 @@ import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { AuthLayout, AUTH_ART } from './AuthLayout';
+import { AuthLayout } from './AuthLayout';
 
 export const ForgotPasswordScreen = ({ navigation }) => {
   const { resetPassword } = useAppContext();
@@ -38,7 +38,7 @@ export const ForgotPasswordScreen = ({ navigation }) => {
 
   if (sentTo) {
     return (
-      <AuthLayout art={AUTH_ART.reset} title="Check your inbox" onBack={() => navigation.navigate('Login')}>
+      <AuthLayout title="Check your inbox" onBack={() => navigation.navigate('Login')}>
         <View style={[styles.sent, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <View style={[styles.sentIcon, { backgroundColor: theme.accentSoft }]}>
             <Icon name="mail" size={26} color={theme.accent} />
@@ -62,7 +62,6 @@ export const ForgotPasswordScreen = ({ navigation }) => {
 
   return (
     <AuthLayout
-      art={AUTH_ART.reset}
       title="Forgot your password?"
       subtitle="No problem. Enter your account's email and we'll send you a link to set a new one."
       onBack={() => navigation.navigate('Login')}
