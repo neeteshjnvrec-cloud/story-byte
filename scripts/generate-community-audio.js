@@ -30,6 +30,7 @@ const { notifyAndPushUser, notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { fetchStoryImage } = require('./lib/scene-image');
 const { renderFallbackCover } = require('./lib/fallback-cover');
+const { backfillAuthorNames } = require('./lib/author-names');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { buildStoryVideo } = require('./lib/video');
 const { buildVideoScenes } = require('./lib/video-scenes');
@@ -213,38 +214,11 @@ async function sendBroadcastNotification(story) {
 }
 
 // --- author names --------------------------------------------------------------
-// The app saved "Anonymous" as the author when the profile had no full name
-// yet (a Google sign-in's name wasn't copied into it), and the app can't
-// look the name up itself: user profiles are private. This fills in the
-// author's profile name (full name, else their Google name) on their
-// community stories, pending and published alike. Runs every time, before
-// anything else, and only touches stories that still say Anonymous.
-const ANON = ['Anonymous', ''];
-
-async function backfillAuthorNames() {
+// Real names on community stories saved as "Anonymous" (lib/author-names.js).
+// Runs every time, before anything else.
+async function fillAuthorNames() {
   try {
-    const snap = await db.collection('stories')
-      .where('isCommunityStory', '==', true)
-      .where('authorName', 'in', ANON)
-      .get();
-    const profiles = new Map();
-    let fixed = 0;
-    for (const doc of snap.docs) {
-      const { authorId, authorProfilePic } = doc.data();
-      if (!authorId) continue;
-      if (!profiles.has(authorId)) {
-        const u = await db.collection('users').doc(authorId).get().catch(() => null);
-        profiles.set(authorId, u?.exists ? u.data() : null);
-      }
-      const u = profiles.get(authorId);
-      const name = String(u?.fullName || u?.displayName || '').trim();
-      if (!name) continue;
-      const update = { authorName: name.slice(0, 60) };
-      const pic = u.profilePic || u.photoURL;
-      if (!authorProfilePic && pic) update.authorProfilePic = pic;
-      await doc.ref.update(update);
-      fixed++;
-    }
+    const { fixed } = await backfillAuthorNames(db);
     if (fixed) console.log(`👤 Author name filled in on ${fixed} community story(ies)`);
   } catch (e) {
     console.warn(`  ⚠️  Author names not filled in: ${e.message}`);
@@ -253,7 +227,7 @@ async function backfillAuthorNames() {
 
 // --- main --------------------------------------------------------------------
 async function main() {
-  await backfillAuthorNames();
+  await fillAuthorNames();
 
   fs.mkdirSync(path.join(PUB, 'audio'), { recursive: true });
   fs.mkdirSync(path.join(PUB, 'covers'), { recursive: true });
