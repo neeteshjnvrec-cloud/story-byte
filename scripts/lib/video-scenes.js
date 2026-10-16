@@ -94,7 +94,7 @@ async function llmSceneList({ title, text, genre, description }, count) {
 }
 
 // Devotional art style comes from DEVOTIONAL_STYLE (lib/short-style.js) —
-// a clean 3D animated look by default.
+// a photorealistic epic-film look by default.
 function artStyle(genre) {
   return genre === 'devotional' ? devotionalArtStyle() : 'painterly storybook illustration, cinematic lighting, no text, no words';
 }

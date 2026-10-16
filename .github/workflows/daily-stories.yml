@@ -94,7 +94,7 @@ jobs:
           # pipeline narrates with edge-tts as before.
           SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
           SARVAM_SPEAKER: ${{ vars.SARVAM_SPEAKER }}
-          # Devotional art style: cartoon3d (default), cartoon2d or realistic —
+          # Devotional art style: realistic (default), cartoon3d or cartoon2d —
           # set as a repository variable (Settings → Secrets and variables → Actions → Variables).
           DEVOTIONAL_STYLE: ${{ vars.DEVOTIONAL_STYLE }}
           # Optional: your WhatsApp Channel's invite link, added to every
