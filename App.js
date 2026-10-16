@@ -41,11 +41,28 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
 
-// Check if user has completed onboarding
-async function checkOnboardingStatus() {
+// The welcome screens (OnboardingScreen) show once per account: always
+// right after signing up, even on a phone that has shown them before, and
+// once for an existing account on a phone that never has. The phone-wide
+// flag is from before they were per account; it still spares existing
+// accounts on phones that have already shown them.
+const WELCOME_DONE = 'storybyte-onboarding-complete';
+const welcomeDoneKey = (uid) => `${WELCOME_DONE}-${uid}`;
+// A new account: Firebase records its first sign-in at its creation (email
+// or Google sign-up alike); a session restored later keeps that time.
+const NEW_ACCOUNT_MS = 10 * 60 * 1000;
+
+async function shouldShowWelcome(user) {
   try {
-    const completed = await AsyncStorage.getItem('storybyte-onboarding-complete');
-    return completed === 'true';
+    const [phoneDone, accountDone] = await Promise.all([
+      AsyncStorage.getItem(WELCOME_DONE),
+      AsyncStorage.getItem(welcomeDoneKey(user.uid)),
+    ]);
+    if (accountDone === 'true') return false;
+    const { creationTime, lastSignInTime } = user.metadata || {};
+    const isNewAccount = !!creationTime && !!lastSignInTime
+      && Math.abs(Date.parse(lastSignInTime) - Date.parse(creationTime)) < NEW_ACCOUNT_MS;
+    return isNewAccount || phoneDone !== 'true';
   } catch (e) {
     return false;
   }
@@ -146,23 +163,32 @@ function MainStack({ isNewUser, navigationRef, ready }) {
 
 function Root({ navigationRef, ready }) {
   const { user, loading, userStats } = useAppContext();
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
-  const [isFirstLogin, setIsFirstLogin] = useState(false);
+  // Whether this account still gets the welcome screens: null while that's
+  // being checked, so a returning user never sees them flash past.
+  const [showWelcome, setShowWelcome] = useState(null);
 
   useEffect(() => {
-    checkOnboardingStatus().then(setHasCompletedOnboarding);
-  }, []);
+    if (!user) { setShowWelcome(null); return undefined; }
+    let alive = true;
+    shouldShowWelcome(user).then((show) => { if (alive) setShowWelcome(show); });
+    return () => { alive = false; };
+  }, [user?.uid]);
+
+  const finishWelcome = () => {
+    if (user) AsyncStorage.setItem(welcomeDoneKey(user.uid), 'true').catch(() => {});
+    setShowWelcome(false);
+  };
 
   // Show a minimal splash while auth state is being restored.
-  if (loading) {
+  if (loading || (user && showWelcome === null)) {
     return null;
   }
 
   // New user flow: show onboarding before main app
-  if (user && !hasCompletedOnboarding && !isFirstLogin) {
+  if (user && showWelcome) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <OnboardingScreen onComplete={() => setIsFirstLogin(true)} />
+        <OnboardingScreen onComplete={finishWelcome} />
       </GestureHandlerRootView>
     );
   }
