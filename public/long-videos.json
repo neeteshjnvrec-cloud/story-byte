@@ -1,6 +1,20 @@
 {
- "updatedAt": "2026-10-15T02:11:00.644Z",
+ "updatedAt": "2026-10-16T02:08:56.368Z",
  "videos": [
+  {
+   "id": "Vb6sy4wZApY",
+   "youtubeUrl": "https://youtu.be/Vb6sy4wZApY",
+   "thumbnail": "https://i.ytimg.com/vi/Vb6sy4wZApY/mqdefault.jpg",
+   "thumbnailHd": "https://i.ytimg.com/vi/Vb6sy4wZApY/maxresdefault.jpg",
+   "title": "Navratri | Season 1 Episode Day 5: रात्रि की परीक्षा",
+   "seriesTitle": "Navratri",
+   "season": "1",
+   "episode": "Day 5",
+   "description": "Aditi confronts a perilous test of faith as the sacred fire ignites the mysteries of the hidden shrine.",
+   "language": "hi",
+   "durationSec": 1010,
+   "publishedAt": "2026-10-15T17:10:14.425Z"
+  },
   {
    "id": "6LjTcmue9xU",
    "youtubeUrl": "https://youtu.be/6LjTcmue9xU",
