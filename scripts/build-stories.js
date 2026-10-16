@@ -43,7 +43,7 @@ const { appendSpokenTeaser, fallbackTeaser, endingCandidates } = require('./lib/
 const { withCloseUps, shortSceneCount } = require('./lib/close-ups');
 const { devotionalTrends } = require('./lib/trends');
 const { iconographyFor } = require('./lib/iconography');
-const { styleOfDay, fitShort, devotionalArtStyle } = require('./lib/short-style');
+const { styleOfDay, fitShort, devotionalArtStyle, styleKey } = require('./lib/short-style');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synth } = require('./lib/narrate');
@@ -439,6 +439,9 @@ async function run() {
       }
 
       console.log(`${isRetry ? '🔄 RETRY' : '🆕 NEW'} ${slot.language}/${slot.genre} (attempt ${attempts}/${maxAttempts})`);
+      if (slot.genre === 'devotional' && attempts === 1) {
+        console.log(`  🎨 Art style: ${styleKey(process.env.DEVOTIONAL_STYLE) || 'cartoon3d (default — set the DEVOTIONAL_STYLE repository variable to change it)'}`);
+      }
 
       try {
         // Step 1: Generate text
