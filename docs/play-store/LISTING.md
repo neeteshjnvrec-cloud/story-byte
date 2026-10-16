@@ -16,14 +16,18 @@ Play's limits: up to 8 screenshots per device type, 16:9 or 9:16, 320–3840 px 
 ## App name (30 characters max)
 
 ```
-StoryByte: Hindi Audio Stories
+StoryByte: Bolti Kahaniyan
 ```
+
+26 characters. "Stories that speak" — says audio without the word; "kahaniyan" keeps it in Hindi story searches.
 
 ## Short description (80 characters max)
 
 ```
-Hindi & English audio stories, daily kathas and video episodes — free
+Hindi audio stories & kathas — romance, mystery, bedtime and devotional
 ```
+
+71 characters. Carries the search words the title doesn't: "Hindi", "audio stories", "kathas".
 
 ## Full description (4000 characters max)
 
