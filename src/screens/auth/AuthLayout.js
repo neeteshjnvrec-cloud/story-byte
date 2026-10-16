@@ -14,7 +14,7 @@ import { Icon } from '../../components/ui/Icon';
 import { KeyboardAwareScroll } from '../../components/ui/KeyboardAvoider';
 
 const LOGO = require('../../../assets/brand-logo.png');
-const MOSAIC = require('../../../assets/brand-mosaic.jpg');
+const MOSAIC = require('../../../assets/brand-mosaic.webp');
 // The logo's own ground: it's gold line art, made for a dark background.
 const BRAND_DARK = '#17110C';
 

@@ -16,16 +16,16 @@ import { Icon } from '../components/ui/Icon';
 
 const ART = {
   // Listen: one cover per genre, the adventure in front.
-  devotional: require('../../assets/onboarding/durga.jpg'),
-  romance: require('../../assets/onboarding/library.jpg'),
-  adventure: require('../../assets/onboarding/palace.jpg'),
-  mystery: require('../../assets/onboarding/mystery.jpg'),
-  scifi: require('../../assets/onboarding/scifi.jpg'),
+  devotional: require('../../assets/onboarding/durga.webp'),
+  romance: require('../../assets/onboarding/library.webp'),
+  adventure: require('../../assets/onboarding/palace.webp'),
+  mystery: require('../../assets/onboarding/mystery.webp'),
+  scifi: require('../../assets/onboarding/scifi.webp'),
   // Watch: Alien Is My Girlfriend, episode 3, and a romance Short.
-  episode: require('../../assets/onboarding/alien-wide.jpg'),
-  short: require('../../assets/onboarding/romance-tall.jpg'),
+  episode: require('../../assets/onboarding/alien-wide.webp'),
+  short: require('../../assets/onboarding/romance-tall.webp'),
   // Create.
-  forest: require('../../assets/onboarding/forest.jpg'),
+  forest: require('../../assets/onboarding/forest.webp'),
 };
 export const BRAND_MARK = require('../../assets/brand-mark.png');
 

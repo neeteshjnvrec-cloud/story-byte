@@ -15,7 +15,9 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { useAppContext } from '../context/AppContext';
-import { Ionicons } from '@expo/vector-icons';
+// Only the Ionicons set: '@expo/vector-icons' itself bundles all 15 icon
+// fonts (~3.9 MB), and Ionicons is the only one the app uses.
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
