@@ -342,8 +342,20 @@ const PLAYER_SCRIPT = `
           }));
         } catch (err) {}
       };
+      // YouTube mutes a video that starts without a tap. The app's WebView
+      // allows sound without one (mediaPlaybackRequiresUserAction={false}),
+      // so in the app the sound comes back on as it starts — once, so a
+      // viewer who mutes it later stays muted. A browser would pause a video
+      // unmuted without a tap, so the website leaves it alone.
+      var inApp = !!window.ReactNativeWebView, unmuted = false;
+      var unmute = function (player) {
+        if (!inApp || unmuted) return;
+        unmuted = true;
+        try { if (player.isMuted()) player.unMute(); player.setVolume(100); } catch (err) {}
+      };
       var report = function (player, state) {
         if (state === 1) {
+          unmute(player);
           post(player, 'play');
           clearInterval(tick);
           tick = setInterval(function () { post(player, 'progress'); }, 15000);
@@ -353,11 +365,15 @@ const PLAYER_SCRIPT = `
         }
       };
       var make = function () {
-        new YT.Player('yt-player', {
+        // window.sbPlayer: the app pauses and resumes it (FloatingVideoPlayer.js).
+        window.sbPlayer = new YT.Player('yt-player', {
           videoId: id, host: 'https://www.youtube.com',
           playerVars: { autoplay: box.dataset.autoplay === '1' ? 1 : 0, playsinline: 1, rel: 0, origin: location.origin },
           events: {
-            onReady: function (e) { if (box.dataset.autoplay === '1') e.target.playVideo(); setTimeout(done, 200); },
+            onReady: function (e) {
+              if (box.dataset.autoplay === '1') { if (inApp) { e.target.unMute(); e.target.setVolume(100); } e.target.playVideo(); }
+              setTimeout(done, 200);
+            },
             onError: done,
             onStateChange: function (e) { report(e.target, e.data); }
           }

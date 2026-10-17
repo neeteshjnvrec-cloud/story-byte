@@ -15,13 +15,16 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { useAppContext } from '../context/AppContext';
-import { Ionicons } from '@expo/vector-icons';
+// Only the Ionicons set: '@expo/vector-icons' itself bundles all 15 icon
+// fonts (~3.9 MB), and Ionicons is the only one the app uses.
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { HeaderNotificationButton } from '../components/HeaderNotificationButton';
 import { KeyboardAwareScroll } from '../components/ui/KeyboardAvoider';
 import { GENRES } from '../constants/genres';
 import { LANGUAGES } from '../types/story';
+import { myAuthorName } from '../utils/author';
 
 // The language's own name first — that's how a speaker recognises "its" at a
 // glance — then the English name in parens for everybody else. Orthography is
@@ -39,7 +42,7 @@ export function CreateStoryScreen() {
   const { theme, tokens } = useTheme();
   // Inputs in the app's own font (TextInput otherwise uses Roboto on Android).
   const inputFont = { fontFamily: tokens.type.body.fontFamily };
-  const { generateStory, publishCommunityStory, isGenerating, userStats } = useAppContext();
+  const { generateStory, publishCommunityStory, isGenerating, userStats, user } = useAppContext();
 
   const [title, setTitle] = useState('');
   const [prompt, setPrompt] = useState('');
@@ -79,7 +82,7 @@ export function CreateStoryScreen() {
       const published = await publishCommunityStory({
         ...generatedStory,
         language: selectedLanguage,
-        authorName: userStats?.fullName || 'Anonymous',
+        authorName: myAuthorName(user, userStats) || 'Anonymous',
         authorProfilePic: userStats?.profilePic || userStats?.photoURL || '',
       });
       if (published?.limited) {

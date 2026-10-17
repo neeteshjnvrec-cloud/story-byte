@@ -2,7 +2,9 @@
 // so screens don't hardcode the icon library. Add names here as needed.
 import React from 'react';
 import { Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+// Only the Ionicons set: '@expo/vector-icons' itself bundles all 15 icon
+// fonts (~3.9 MB), and Ionicons is the only one the app uses.
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '../../hooks/useTheme';
 
 // The share glyph is the one icon users read as "the OS share button", so it

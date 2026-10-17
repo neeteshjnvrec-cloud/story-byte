@@ -19,7 +19,9 @@ export async function signInWithGoogle(idToken) {
     const userCredential = await signInWithCredential(auth, credential);
     return userCredential;
   } catch (error) {
-    console.error('Google sign-in error:', error);
+    // An auth/* error is explained on the screen (useGoogleAuth); logging it
+    // as an error only covered the screen with a red box in dev builds.
+    if (!String(error?.code || '').startsWith('auth/')) console.error('Google sign-in error:', error);
     throw error;
   }
 }

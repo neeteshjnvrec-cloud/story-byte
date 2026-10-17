@@ -17,6 +17,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { AppContextProvider, useAppContext } from './src/context/AppContext';
 import { AudioProvider } from './src/context/AudioContext';
+import { VideoProvider } from './src/context/VideoContext';
 import { WalletProvider } from './src/context/WalletContext';
 import { ThemeProvider } from './src/hooks/useTheme';
 import { AppNavigator } from './src/navigation/AppNavigator';
@@ -31,6 +32,7 @@ import { SettingsScreen } from './src/screens/SettingsScreen';
 import { NotificationsScreen } from './src/screens/NotificationsScreen';
 import { CoinsScreen } from './src/screens/CoinsScreen';
 import { FloatingAudioPlayer } from './src/components/FloatingAudioPlayer';
+import { FloatingVideoPlayer } from './src/components/FloatingVideoPlayer';
 import { notificationService } from './src/services/notificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
@@ -39,11 +41,28 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
 
-// Check if user has completed onboarding
-async function checkOnboardingStatus() {
+// The welcome screens (OnboardingScreen) show once per account: always
+// right after signing up, even on a phone that has shown them before, and
+// once for an existing account on a phone that never has. The phone-wide
+// flag is from before they were per account; it still spares existing
+// accounts on phones that have already shown them.
+const WELCOME_DONE = 'storybyte-onboarding-complete';
+const welcomeDoneKey = (uid) => `${WELCOME_DONE}-${uid}`;
+// A new account: Firebase records its first sign-in at its creation (email
+// or Google sign-up alike); a session restored later keeps that time.
+const NEW_ACCOUNT_MS = 10 * 60 * 1000;
+
+async function shouldShowWelcome(user) {
   try {
-    const completed = await AsyncStorage.getItem('storybyte-onboarding-complete');
-    return completed === 'true';
+    const [phoneDone, accountDone] = await Promise.all([
+      AsyncStorage.getItem(WELCOME_DONE),
+      AsyncStorage.getItem(welcomeDoneKey(user.uid)),
+    ]);
+    if (accountDone === 'true') return false;
+    const { creationTime, lastSignInTime } = user.metadata || {};
+    const isNewAccount = !!creationTime && !!lastSignInTime
+      && Math.abs(Date.parse(lastSignInTime) - Date.parse(creationTime)) < NEW_ACCOUNT_MS;
+    return isNewAccount || phoneDone !== 'true';
   } catch (e) {
     return false;
   }
@@ -63,25 +82,40 @@ function AuthStack() {
 
 // Main app stack shown when signed in: 4 tabs + StoryDetail + Settings + Onboarding
 function MainStack({ isNewUser, navigationRef, ready }) {
-  const { userStats } = useAppContext();
+  const { userStats, updateUserProfile } = useAppContext();
 
   // Whether mandatory profile fields are missing. Only known once the profile
   // has loaded: treating "not loaded yet" as incomplete opened Edit Profile on
   // every launch, because the screens are ready before the profile arrives.
+  // The name counts if it comes from the Google account (Edit Profile shows
+  // it pre-filled but only saved it if it was typed over).
   const needsProfile = React.useMemo(() => {
     if (!userStats) return false;
-    return !userStats.fullName || !userStats.gender || !userStats.favoriteGenre;
+    return !(userStats.fullName || userStats.displayName) || !userStats.gender || !userStats.favoriteGenre;
   }, [userStats]);
 
-  // Auto-open EditProfile when the profile is incomplete — once per launch,
-  // so saving one field (still incomplete) doesn't open it again.
-  const askedForProfile = React.useRef(false);
+  // Keep the Google account's name as the profile name when none was saved,
+  // so everything that shows fullName (published stories, comments) has it.
   React.useEffect(() => {
-    if (needsProfile && ready && navigationRef.current && !askedForProfile.current) {
-      askedForProfile.current = true;
-      navigationRef.current.navigate('EditProfile');
+    if (userStats?.userId && !userStats.fullName && userStats.displayName) {
+      updateUserProfile({ fullName: userStats.displayName }).catch(() => {});
     }
-  }, [needsProfile, ready]);
+  }, [userStats?.userId, userStats?.fullName, userStats?.displayName, updateUserProfile]);
+
+  // Open Edit Profile when the profile is incomplete — once per account, ever.
+  // It used to reopen on every launch until gender and favourite genre were
+  // both set; whoever skips it can finish their profile from the Profile tab.
+  React.useEffect(() => {
+    if (!needsProfile || !ready || !navigationRef.current || !userStats?.userId) return;
+    const key = `storybyte-profile-prompted-${userStats.userId}`;
+    let cancelled = false;
+    AsyncStorage.getItem(key).then((asked) => {
+      if (cancelled || asked === 'true' || !navigationRef.current) return;
+      AsyncStorage.setItem(key, 'true').catch(() => {});
+      navigationRef.current.navigate('EditProfile');
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [needsProfile, ready, userStats?.userId]);
 
   // Tapping a push notification opens the story it's about. Without this a push
   // just brought the app to whatever screen it was last on, which made the
@@ -122,29 +156,39 @@ function MainStack({ isNewUser, navigationRef, ready }) {
         ) : null}
       </Stack.Navigator>
       <FloatingAudioPlayer />
+      <FloatingVideoPlayer navigationRef={navigationRef} />
     </>
   );
 }
 
 function Root({ navigationRef, ready }) {
   const { user, loading, userStats } = useAppContext();
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
-  const [isFirstLogin, setIsFirstLogin] = useState(false);
+  // Whether this account still gets the welcome screens: null while that's
+  // being checked, so a returning user never sees them flash past.
+  const [showWelcome, setShowWelcome] = useState(null);
 
   useEffect(() => {
-    checkOnboardingStatus().then(setHasCompletedOnboarding);
-  }, []);
+    if (!user) { setShowWelcome(null); return undefined; }
+    let alive = true;
+    shouldShowWelcome(user).then((show) => { if (alive) setShowWelcome(show); });
+    return () => { alive = false; };
+  }, [user?.uid]);
+
+  const finishWelcome = () => {
+    if (user) AsyncStorage.setItem(welcomeDoneKey(user.uid), 'true').catch(() => {});
+    setShowWelcome(false);
+  };
 
   // Show a minimal splash while auth state is being restored.
-  if (loading) {
+  if (loading || (user && showWelcome === null)) {
     return null;
   }
 
   // New user flow: show onboarding before main app
-  if (user && !hasCompletedOnboarding && !isFirstLogin) {
+  if (user && showWelcome) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <OnboardingScreen onComplete={() => setIsFirstLogin(true)} />
+        <OnboardingScreen onComplete={finishWelcome} />
       </GestureHandlerRootView>
     );
   }
@@ -181,12 +225,17 @@ export default function App() {
                     user) and the player (which plays paid episodes and pays
                     the finish reward). */}
                 <WalletProvider>
-                  <AudioProvider>
-                    <NavigationContainer ref={navigationRef} onReady={() => setReady(true)}>
-                      <StatusBar style="auto" />
-                      <Root navigationRef={navigationRef} ready={ready} />
-                    </NavigationContainer>
-                  </AudioProvider>
+                  {/* The YouTube video that keeps playing across screens;
+                      outside the audio player, whose Play starts a video
+                      story in it. */}
+                  <VideoProvider>
+                    <AudioProvider>
+                      <NavigationContainer ref={navigationRef} onReady={() => setReady(true)}>
+                        <StatusBar style="auto" />
+                        <Root navigationRef={navigationRef} ready={ready} />
+                      </NavigationContainer>
+                    </AudioProvider>
+                  </VideoProvider>
                 </WalletProvider>
               </AppContextProvider>
             </ThemeProvider>

@@ -34,8 +34,10 @@ function PlayerLoading({ videoId, poster }) {
  *   page, where the story's audio may be playing).
  * onEvent: ({ type: play | progress | pause | ended, currentTime, duration })
  *   from the player, about every 15 s while it plays.
+ * webViewRef: the WebView, to control the player (`window.sbPlayer` on the
+ *   watch page) with injectJavaScript.
  */
-export function YouTubePlayer({ videoId, width, radius = 0, style, vertical = false, poster, autoplay = true, onEvent }) {
+export function YouTubePlayer({ videoId, width, radius = 0, style, vertical = false, poster, autoplay = true, onEvent, webViewRef }) {
   const height = Math.round(vertical ? (width * 16) / 9 : (width * 9) / 16);
   const params = [`v=${encodeURIComponent(videoId)}`];
   if (!autoplay) params.push('autoplay=0');
@@ -43,6 +45,7 @@ export function YouTubePlayer({ videoId, width, radius = 0, style, vertical = fa
   return (
     <View style={[{ width, height, borderRadius: radius, overflow: 'hidden', backgroundColor: PLAYER_BG }, style]}>
       <WebView
+        ref={webViewRef}
         source={{ uri: `${PLAYER_PAGE}?${params.join('&')}` }}
         style={{ flex: 1, backgroundColor: PLAYER_BG }}
         startInLoadingState

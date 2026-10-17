@@ -2,8 +2,8 @@
 // which live on YouTube. They're video stories in Firestore
 // (scripts/sync-video-stories.js), so their page has likes, comments and
 // the rest; until the first sync, the website's long-videos.json stands in.
-// Tapping a card opens its story page, which plays it in YouTube's player
-// (screens/StoryDetailScreen.js).
+// Tapping a card opens its story page (screens/StoryDetailScreen.js); its
+// Play button starts it right away in the floating video player.
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Pressable, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -11,6 +11,8 @@ import apiService from '../../services/api';
 import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../ui/AppText';
 import { Icon } from '../ui/Icon';
+import { PlayFab } from './StoryCard';
+import { useAudioPlayer } from '../../context/AudioContext';
 
 const LIST_URL = 'https://storybyte-76716.web.app/long-videos.json';
 const CARD_WIDTH = 240;
@@ -36,6 +38,7 @@ const asStory = (v) => ({
 function VideoCard({ video }) {
   const { theme } = useTheme() || { theme: {} };
   const navigation = useNavigation();
+  const { playStory } = useAudioPlayer();
   // maxresdefault is the sharpest but isn't made for every video; mqdefault always is.
   const fallbackThumb = `https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`;
   const [thumb, setThumb] = useState(video.coverImage || fallbackThumb);
@@ -57,6 +60,7 @@ function VideoCard({ video }) {
           <Icon name="play" size={12} color="#fff" />
           <AppText variant="micro" style={{ color: '#fff' }}>YouTube</AppText>
         </View>
+        <PlayFab size={38} solid onPress={() => playStory(video)} style={styles.fab} />
         {minutes(video.duration) ? (
           <View style={styles.duration}>
             <AppText variant="micro" style={{ color: '#fff' }}>{minutes(video.duration)}</AppText>
@@ -120,6 +124,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.75)', borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1,
   },
   body: { padding: 10 },
+  fab: { position: 'absolute', right: 8, top: 8 },
 });
 
 export default LongVideosRow;

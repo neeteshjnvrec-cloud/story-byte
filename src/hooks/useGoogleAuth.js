@@ -67,7 +67,11 @@ export function useGoogleAuth(onError) {
         onError && onError('Google did not return an ID token.');
       }
     } catch (e) {
-      onError && onError('Google sign-in failed. Please try again.');
+      onError && onError(e?.code === 'auth/account-exists-with-different-credential'
+        ? 'This email already has a StoryByte account with a password. Sign in with your email and password.'
+        : e?.code === 'auth/network-request-failed'
+          ? 'Network error. Please check your connection.'
+          : 'Google sign-in failed. Please try again.');
     } finally {
       setInProgress(false);
     }

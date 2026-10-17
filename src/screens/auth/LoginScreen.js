@@ -1,26 +1,30 @@
-// Login — warm storybook auth. Parchment ground, gradient logo badge, serif.
-import React, { useState } from 'react';
-import { View, Pressable, StyleSheet, Alert } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// Sign in — story art up top (AuthLayout), then Google, then email and
+// password, with "Forgot password?" by the password field.
+import React, { useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet } from 'react-native';
 import { useAppContext } from '../../context/AppContext';
-import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../../components/ui/AppText';
-import { Icon } from '../../components/ui/Icon';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { KeyboardAwareScroll } from '../../components/ui/KeyboardAvoider';
 import { useGoogleAuth } from '../../hooks/useGoogleAuth';
+import { AuthLayout, GoogleButton, OrDivider, AuthFooterLink } from './AuthLayout';
 
-export const LoginScreen = ({ navigation }) => {
+export const LoginScreen = ({ navigation, route }) => {
   const { loginWithEmail } = useAppContext();
-  const { theme } = useTheme() || { theme: {} };
-  const insets = useSafeAreaInsets();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(route?.params?.email || '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const google = useGoogleAuth(setError);
+  const passwordRef = useRef(null);
+
+  // Sent here from sign up with an email that already has an account.
+  useEffect(() => {
+    if (!route?.params?.email) return;
+    setEmail(route.params.email);
+    setError('');
+    passwordRef.current?.focus();
+  }, [route?.params?.email]);
 
   const handleLogin = async () => {
     if (!email.trim() || !password) { setError('Please enter your email and password'); return; }
@@ -33,49 +37,27 @@ export const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAwareScroll
-      style={{ flex: 1, backgroundColor: theme.background }}
-      contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 30 }]}
-      showsVerticalScrollIndicator={false}
-    >
-        <View style={styles.center}>
-          <LinearGradient colors={[theme.gradientStart, theme.gradientEnd]} style={styles.badge}>
-            <Icon name="book" size={38} color="#fff" />
-          </LinearGradient>
-          <AppText variant="displayM">Welcome back</AppText>
-          <AppText variant="body" color="textSecondary" style={{ marginTop: 4 }}>Sign in to continue your stories</AppText>
-        </View>
+    <AuthLayout title="Welcome back" subtitle="Sign in to pick up your stories where you left off.">
+      <GoogleButton onPress={google.signIn} loading={google.inProgress} />
+      <OrDivider />
 
-        <View style={{ marginTop: 26 }}>
-          <Input icon="mail" placeholder="you@email.com" value={email} onChangeText={setEmail}
-            keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
-          <Input icon="lock" placeholder="Password" value={password} onChangeText={setPassword} secure autoCapitalize="none" />
+      <Input label="Email" icon="mail" placeholder="you@email.com" value={email} onChangeText={setEmail}
+        keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email"
+        textContentType="emailAddress" returnKeyType="next" onSubmitEditing={() => passwordRef.current?.focus()} />
+      <Input label="Password" icon="lock" placeholder="Your password" value={password} onChangeText={setPassword}
+        secure autoCapitalize="none" autoComplete="current-password" textContentType="password"
+        ref={passwordRef} returnKeyType="go" onSubmitEditing={handleLogin} />
 
-          {error ? <AppText variant="caption" color="error" style={{ marginBottom: 10, marginLeft: 2 }}>{error}</AppText> : null}
+      <Pressable onPress={() => navigation.navigate('ForgotPassword')} style={styles.forgot} hitSlop={8} accessibilityRole="link">
+        <AppText variant="label" color="accent" style={{ fontSize: 13 }}>Forgot password?</AppText>
+      </Pressable>
 
-          <Button title="Sign in" onPress={handleLogin} loading={submitting} />
+      {error ? <AppText variant="caption" color="error" style={styles.error}>{error}</AppText> : null}
 
-          <Pressable onPress={() => navigation.navigate('ForgotPassword')} style={styles.forgot} hitSlop={8}>
-            <AppText variant="label" color="accent" style={{ fontSize: 13 }}>Forgot password?</AppText>
-          </Pressable>
+      <Button title="Sign in" onPress={handleLogin} loading={submitting} />
 
-          <View style={styles.orRow}>
-            <View style={[styles.line, { backgroundColor: theme.border }]} />
-            <AppText variant="caption" color="textTertiary">or</AppText>
-            <View style={[styles.line, { backgroundColor: theme.border }]} />
-          </View>
-
-          <Button title="Continue with Google" variant="ghost" leftIcon="globe"
-            loading={google.inProgress} onPress={google.signIn} />
-
-          <View style={styles.footer}>
-            <AppText variant="caption" color="textSecondary">New here? </AppText>
-            <Pressable onPress={() => navigation.navigate('Signup')} hitSlop={8}>
-              <AppText variant="label" color="accent" style={{ fontSize: 13 }}>Create an account</AppText>
-            </Pressable>
-          </View>
-        </View>
-      </KeyboardAwareScroll>
+      <AuthFooterLink text="New to StoryByte?" link="Create an account" onPress={() => navigation.navigate('Signup')} />
+    </AuthLayout>
   );
 };
 
@@ -95,16 +77,8 @@ export function getAuthErrorMessage(code, action = 'login') {
 }
 
 const styles = StyleSheet.create({
-  scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 28 },
-  center: { alignItems: 'center' },
-  badge: {
-    width: 78, height: 78, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginBottom: 16,
-    shadowColor: '#3C2814', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.35, shadowRadius: 20, elevation: 6,
-  },
-  forgot: { alignSelf: 'flex-end', marginTop: 12 },
-  orRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 18 },
-  line: { flex: 1, height: 1 },
-  footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 18 },
+  forgot: { alignSelf: 'flex-end', marginTop: -4, marginBottom: 16 },
+  error: { marginBottom: 12, marginLeft: 2 },
 });
 
 export default LoginScreen;

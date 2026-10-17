@@ -30,6 +30,7 @@ const { notifyAndPushUser, notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { fetchStoryImage } = require('./lib/scene-image');
 const { renderFallbackCover } = require('./lib/fallback-cover');
+const { backfillAuthorNames } = require('./lib/author-names');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { buildStoryVideo } = require('./lib/video');
 const { buildVideoScenes } = require('./lib/video-scenes');
@@ -212,8 +213,22 @@ async function sendBroadcastNotification(story) {
   );
 }
 
+// --- author names --------------------------------------------------------------
+// Real names on community stories saved as "Anonymous" (lib/author-names.js).
+// Runs every time, before anything else.
+async function fillAuthorNames() {
+  try {
+    const { fixed } = await backfillAuthorNames(db);
+    if (fixed) console.log(`👤 Author name filled in on ${fixed} community story(ies)`);
+  } catch (e) {
+    console.warn(`  ⚠️  Author names not filled in: ${e.message}`);
+  }
+}
+
 // --- main --------------------------------------------------------------------
 async function main() {
+  await fillAuthorNames();
+
   fs.mkdirSync(path.join(PUB, 'audio'), { recursive: true });
   fs.mkdirSync(path.join(PUB, 'covers'), { recursive: true });
   // Shareable story pages, staged alongside the audio and covers so the single
@@ -506,7 +521,12 @@ async function main() {
       // local disk, so it doesn't need the Firebase Hosting deploy above
       // to have happened first.
       if (item.videoUrl) {
-        await postStoryToYouTube(socialStory, path.join(PUB, 'instagram', mediaKey(item.id), 'story.mp4'));
+        const yt = await postStoryToYouTube(socialStory, path.join(PUB, 'instagram', mediaKey(item.id), 'story.mp4'));
+        // The story's page in the app plays the video too (StoryDetailScreen).
+        if (yt.posted && yt.videoId) {
+          await db.collection('stories').doc(item.id).update({ youtubeId: yt.videoId, youtubeKind: 'short' })
+            .catch((e) => console.warn(`  ⚠️  Video id not saved on ${item.id}: ${e.message}`));
+        }
       }
     }
   }

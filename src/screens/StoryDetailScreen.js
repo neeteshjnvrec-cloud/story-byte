@@ -1,11 +1,12 @@
 // Story Detail — warm design: cover, meta, play/resume, favorite, transcript.
 import React, { useState, useEffect, useRef } from 'react';
 import { View, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator, Linking, useWindowDimensions } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer } from '../context/AudioContext';
 import { useAppContext } from '../context/AppContext';
 import { useWallet } from '../context/WalletContext';
+import { useVideo } from '../context/VideoContext';
 import { isPaidStory } from '../services/wallet';
 import { useTheme } from '../hooks/useTheme';
 import { AppText } from '../components/ui/AppText';
@@ -18,6 +19,8 @@ import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import { CommentSheet } from '../components/comments/CommentSheet';
 import { shareStory } from '../utils/shareStory';
 import apiService from '../services/api';
+import { AuthorRow, MoreFromAuthor, useAuthorStories } from '../components/story/AuthorCard';
+import { authorOf, myAuthorName } from '../utils/author';
 
 // ---------------------------------------------------------------------------
 // Chapter parser
@@ -99,8 +102,8 @@ export const StoryDetailScreen = () => {
   const { theme = {} } = useTheme();
   const { playStory, playPause, isPlaying, currentStory } = useAudioPlayer();
   const {
-    toggleFavorite, user, getStoryMetrics, toggleLike, recordShare, recordPlay,
-    rateStory: rateStoryInContext, receiveStoryDocs, downloads, downloadingIds, toggleDownload,
+    toggleFavorite, user, getStoryMetrics, toggleLike, recordShare,
+    rateStory: rateStoryInContext, receiveStoryDocs, downloads, downloadingIds, toggleDownload, userStats,
   } = useAppContext();
   const { canPlay, unlock, balance, premiumAudioUrl } = useWallet();
   const [unlocking, setUnlocking] = useState(false);
@@ -119,6 +122,8 @@ export const StoryDetailScreen = () => {
   const videoId = isVideoStory(story) ? story.youtubeId : null;
   // A daily story whose Short is on YouTube: the Short plays on its page too.
   const shortId = shortIdOf(story);
+  const authorName = authorOf(story, { uid: user?.uid, name: myAuthorName(user, userStats) });
+  const authorStories = useAuthorStories(story);
 
   // Chapter state
   const [chapters, setChapters] = useState(null);
@@ -141,18 +146,36 @@ export const StoryDetailScreen = () => {
     })();
   }, [storyId, receiveStoryDocs]);
 
-  // Watching a video story counts like listening: one play per visit, and
-  // its place saved for History, Continue listening and Profile's minutes.
-  const countedPlay = useRef(false);
-  const onVideoEvent = (e) => {
-    if (!inDb || !user || !story) return;
-    if (e.type === 'play' && !countedPlay.current) {
-      countedPlay.current = true;
-      recordPlay(story);
-    }
-    const at = e.type === 'ended' ? e.duration : e.currentTime;
-    apiService.saveVideoProgress(story, at, e.duration).catch(() => {});
+  // The video plays in the app-wide player (components/FloatingVideoPlayer.js),
+  // laid over `videoSlot` while this page is open and shrunk to a floating
+  // window when you leave it, so it keeps playing. It counts plays and saves
+  // the place for History and Continue listening (context/VideoContext.js).
+  const { showInline, leave } = useVideo();
+  const videoSlot = useRef(null);
+  const latest = useRef({});
+  latest.current = { story, inDb };
+  const placeVideo = () => {
+    const slot = videoSlot.current;
+    const { story: s, inDb: counts } = latest.current;
+    if (slot && s) showInline(s, slot, { counts });
   };
+  useFocusEffect(React.useCallback(() => {
+    if (!videoId) return undefined;
+    // After the screen has slid in, so the video doesn't arrive before the page.
+    const timer = setTimeout(placeVideo, 350);
+    const off = navigation.addListener('transitionEnd', placeVideo);
+    return () => {
+      clearTimeout(timer);
+      off();
+      leave(latest.current.story?.id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoId]));
+  // Plays count once the story's record has loaded.
+  useEffect(() => {
+    if (videoId && inDb && navigation.isFocused() && videoSlot.current) placeVideo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inDb]);
 
   // A story playing in the background would talk over the video.
   useEffect(() => {
@@ -310,10 +333,18 @@ export const StoryDetailScreen = () => {
           ) : null}
         </Pressable>}
       </View>
+      {videoId ? (
+        // Stays put while the text scrolls; the player is laid over it.
+        <View
+          onLayout={(e) => {
+            const { x, y, width, height } = e.nativeEvent.layout;
+            videoSlot.current = { x, y, width, height };
+          }}
+          style={[styles.videoSlot, { height: Math.round(((screenWidth - 40) * 9) / 16) }]}
+        />
+      ) : null}
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 140 }} showsVerticalScrollIndicator={false}>
-        {videoId
-          ? <YouTubePlayer videoId={videoId} width={screenWidth - 40} radius={22} style={{ marginBottom: 14 }} onEvent={onVideoEvent} />
-          : <Cover story={story} style={styles.cover} radius={22} />}
+        {videoId ? null : <Cover story={story} style={styles.cover} radius={22} />}
         <AppText variant="h1" style={{ marginTop: 4 }}>{story.title}</AppText>
 
         {/* Zero-valued metrics are omitted rather than shown as "0" — same rule
@@ -332,6 +363,8 @@ export const StoryDetailScreen = () => {
         </View>
 
         <AppText variant="bodyL" color="textSecondary" style={{ marginTop: 12, lineHeight: 25 }}>{story.description}</AppText>
+
+        <AuthorRow story={story} name={authorName} stories={authorStories} />
 
         <View style={styles.actions}>
           {videoId ? (
@@ -375,7 +408,7 @@ export const StoryDetailScreen = () => {
 
         {shortId ? (
           <View style={styles.section}>
-            <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 12 }}>WATCH THE SHORT</AppText>
+            <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 12 }}>{story.isCommunityStory ? 'WATCH THE VIDEO' : 'WATCH THE SHORT'}</AppText>
             <YouTubePlayer
               videoId={shortId}
               vertical
@@ -457,6 +490,8 @@ export const StoryDetailScreen = () => {
             ) : null}
           </View>
         )}
+
+        <MoreFromAuthor story={story} name={authorName} stories={authorStories} />
       </ScrollView>
       {story && inDb && (
         <CommentSheet
@@ -488,6 +523,7 @@ const styles = StyleSheet.create({
     minWidth: 16, height: 16, alignItems: 'center', justifyContent: 'center',
   },
   cover: { width: '100%', height: 220, marginBottom: 16 },
+  videoSlot: { marginHorizontal: 20, marginBottom: 10, borderRadius: 22, backgroundColor: '#000' },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' },
   rate: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 20 },

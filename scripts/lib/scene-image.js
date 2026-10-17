@@ -108,6 +108,15 @@ async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 135
  * giving up — a slower story build is a fine trade for not losing a
  * scene's bespoke art. Throws only if every pass fails.
  */
+// Which model drew an image: 'hq' (FLUX.2 at the frame's own aspect),
+// 'standard' (flux-1-schnell's 1024x1024 square, cropped and scaled up) or
+// 'pollinations'. Set on the returned Buffer, so callers that crop further
+// (a Short's close-ups) can tell an already scaled-up picture.
+function tagged(buf, source) {
+  buf.source = source;
+  return buf;
+}
+
 async function fetchStoryImage(prompt, seed, opts = {}) {
   const { width = 1080, height = 1350, chainRetries = 1, steps, hq } = opts;
   // `hq` ({ width, height, refs }) asks for the FLUX.2 model at its own
@@ -117,7 +126,7 @@ async function fetchStoryImage(prompt, seed, opts = {}) {
   if (hq) {
     try {
       const buf = await fetchCloudflareHQImage(prompt, hq);
-      return await sharp(buf).resize(width, height, { fit: 'cover', kernel: 'lanczos3' }).jpeg({ quality: 95 }).toBuffer();
+      return tagged(await sharp(buf).resize(width, height, { fit: 'cover', kernel: 'lanczos3' }).jpeg({ quality: 95 }).toBuffer(), 'hq');
     } catch (e) {
       console.warn(`    ⚠️  HQ image failed, using the standard model: ${e.message.slice(0, 160)}`);
     }
@@ -126,10 +135,10 @@ async function fetchStoryImage(prompt, seed, opts = {}) {
   for (let pass = 0; pass <= chainRetries; pass++) {
     try {
       const buf = await fetchCloudflareImage(prompt, { steps });
-      return await sharp(buf).resize(width, height, { fit: 'cover' }).jpeg({ quality: 90 }).toBuffer();
+      return tagged(await sharp(buf).resize(width, height, { fit: 'cover' }).jpeg({ quality: 90 }).toBuffer(), 'standard');
     } catch (primaryError) {
       try {
-        return await fetchPollinationsImage(prompt, seed, opts);
+        return tagged(await fetchPollinationsImage(prompt, seed, opts), 'pollinations');
       } catch (fallbackError) {
         lastError = new Error(`cloudflare: ${primaryError.message}; pollinations: ${fallbackError.message}`);
         if (pass < chainRetries) await sleep(10000 * (pass + 1));

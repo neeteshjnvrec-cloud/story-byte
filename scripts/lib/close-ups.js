@@ -33,14 +33,17 @@ async function closeUpOf(file, out, focus) {
 
 /**
  * Splits every scene at least `minSec` long into a wide shot (55% of its
- * time) and a close-up (the rest). Scenes are { file, duration }. Never
+ * time) and a close-up (the rest), except low-resolution ones
+ * ({ lowRes: true }). Scenes are { file, duration, lowRes? }. Never
  * throws: if a crop fails, that scene just stays one shot.
  */
 async function withCloseUps(scenes, { outDir, minSec = 6 } = {}) {
   const out = [];
   for (let i = 0; i < scenes.length; i++) {
     const scene = scenes[i];
-    if (!(scene.duration >= minSec)) {
+    // A picture from the fallback models is already a scaled-up crop of a
+    // 1024px square; cropping into it again only makes a blur.
+    if (!(scene.duration >= minSec) || scene.lowRes) {
       out.push(scene);
       continue;
     }

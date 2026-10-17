@@ -78,6 +78,14 @@ export const ProfileScreen = () => {
     }
   }, [signOut]);
 
+  // Memoize derived data to prevent unnecessary recalculations. Before the
+  // signed-out return below: hooks must run in the same order every render.
+  const name = useMemo(() => user?.displayName || (user?.email ? user.email.split('@')[0] : 'You'), [user?.displayName, user?.email]);
+  const initial = useMemo(() => (name[0] || 'U').toUpperCase(), [name]);
+  const minutes = useMemo(() => stats?.minutesListened || 0, [stats?.minutesListened]);
+  const listenTime = useMemo(() => `${Math.floor(minutes / 60)}h ${minutes % 60}m`, [minutes]);
+  const streak = useMemo(() => stats?.streak ?? userStats?.streak ?? 0, [stats?.streak, userStats?.streak]);
+
   if (!user) {
     return (
       <View style={[styles.container, styles.center, { backgroundColor: theme.background }]}>
@@ -87,13 +95,6 @@ export const ProfileScreen = () => {
       </View>
     );
   }
-
-  // Memoize derived data to prevent unnecessary recalculations
-  const name = useMemo(() => user.displayName || (user.email ? user.email.split('@')[0] : 'You'), [user.displayName, user.email]);
-  const initial = useMemo(() => (name[0] || 'U').toUpperCase(), [name]);
-  const minutes = useMemo(() => stats?.minutesListened || 0, [stats?.minutesListened]);
-  const listenTime = useMemo(() => `${Math.floor(minutes / 60)}h ${minutes % 60}m`, [minutes]);
-  const streak = useMemo(() => stats?.streak ?? userStats?.streak ?? 0, [stats?.streak, userStats?.streak]);
 
   // Memoized components to prevent unnecessary re-renders
   const StatCard = React.memo(({ value, label }) => (

@@ -1,7 +1,9 @@
 // Bottom tab navigation: Home · Browse · Community · Create · Library · Profile
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
+// Only the Ionicons set: '@expo/vector-icons' itself bundles all 15 icon
+// fonts (~3.9 MB), and Ionicons is the only one the app uses.
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { FONTS } from '../theme/tokens';

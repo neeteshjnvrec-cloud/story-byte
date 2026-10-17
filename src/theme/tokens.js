@@ -16,25 +16,19 @@ export const FONTS = {
   // Devanagari (Hindi) — routed by content language.
   devBody: 'NotoSansDevanagari_400Regular',
   devSemi: 'NotoSansDevanagari_600SemiBold',
-  // Kids display face.
-  kids: 'Baloo2_700Bold',
-  kidsSemi: 'Baloo2_600SemiBold',
 };
 
-// The map passed to useFonts() in App.js.
+// The map passed to useFonts() in App.js. Only the faces FONTS uses: every
+// font listed here ships inside the app (Baloo for a kids face and Sora
+// were bundled but never used, ~1 MB).
 export const FONT_MAP = {
-  Fraunces_400Regular: require('@expo-google-fonts/fraunces/400Regular/Fraunces_400Regular.ttf'),
   Fraunces_600SemiBold: require('@expo-google-fonts/fraunces/600SemiBold/Fraunces_600SemiBold.ttf'),
   Fraunces_700Bold: require('@expo-google-fonts/fraunces/700Bold/Fraunces_700Bold.ttf'),
-  Sora_600SemiBold: require('@expo-google-fonts/sora/600SemiBold/Sora_600SemiBold.ttf'),
-  Sora_700Bold: require('@expo-google-fonts/sora/700Bold/Sora_700Bold.ttf'),
   Inter_400Regular: require('@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf'),
   Inter_500Medium: require('@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf'),
   Inter_600SemiBold: require('@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf'),
   NotoSansDevanagari_400Regular: require('@expo-google-fonts/noto-sans-devanagari/400Regular/NotoSansDevanagari_400Regular.ttf'),
   NotoSansDevanagari_600SemiBold: require('@expo-google-fonts/noto-sans-devanagari/600SemiBold/NotoSansDevanagari_600SemiBold.ttf'),
-  Baloo2_600SemiBold: require('@expo-google-fonts/baloo-2/600SemiBold/Baloo2_600SemiBold.ttf'),
-  Baloo2_700Bold: require('@expo-google-fonts/baloo-2/700Bold/Baloo2_700Bold.ttf'),
 };
 
 // --- Type ramp -------------------------------------------------------------

@@ -77,9 +77,10 @@ function fitShort(durSec) {
 }
 
 // The look of the devotional art, picked by DEVOTIONAL_STYLE (a GitHub
-// Actions variable) for the daily Shorts, and per series for the landscape
-// episodes (build-landscape-episode.js):
-//   cartoon3d (default) — a clean 3D animated-feature look, the style of the
+// Actions variable) for the daily Shorts (realistic when it isn't set), and
+// per series for the landscape episodes (build-landscape-episode.js;
+// cartoon3d for a new series when it isn't set):
+//   cartoon3d — a clean 3D animated-feature look, the style of the
 //     channel's best "Divine Bal Krishna … Cinematic AI Animation" reels.
 //     Image models draw this crisply and consistently; faces, hands and the
 //     blue-skinned deities hold up far better than in photoreal.
@@ -110,9 +111,17 @@ function artStyleFor(style, { orientation = 'vertical' } = {}) {
   return `${ART_STYLES[styleKey(style) || 'cartoon3d']}, ${framing}, no text, no words`;
 }
 
-/** The daily Shorts' style, from DEVOTIONAL_STYLE. */
-function devotionalArtStyle(opts) {
-  return artStyleFor(process.env.DEVOTIONAL_STYLE, opts);
+// The daily Shorts' look when DEVOTIONAL_STYLE isn't set.
+const SHORTS_DEFAULT_STYLE = 'realistic';
+
+/** The daily Shorts' style key: DEVOTIONAL_STYLE, else realistic. */
+function shortsStyleKey() {
+  return styleKey(process.env.DEVOTIONAL_STYLE) || SHORTS_DEFAULT_STYLE;
 }
 
-module.exports = { styleOfDay, fitShort, devotionalArtStyle, artStyleFor, styleKey, STYLE_KEYS, SHORTS_MAX_SEC, MAX_TEMPO };
+/** The daily Shorts' style prompt (see shortsStyleKey). */
+function devotionalArtStyle(opts) {
+  return artStyleFor(shortsStyleKey(), opts);
+}
+
+module.exports = { styleOfDay, fitShort, devotionalArtStyle, shortsStyleKey, artStyleFor, styleKey, STYLE_KEYS, SHORTS_MAX_SEC, MAX_TEMPO };

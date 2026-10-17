@@ -1,27 +1,39 @@
-// Signup — matches the warm auth design.
-import React, { useState } from 'react';
-import { View, Pressable, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// Sign up — the sign-in screen's design (AuthLayout): Google first, or a
+// name, email and password.
+import React, { useRef, useState } from 'react';
+import { View, Pressable, Linking, StyleSheet } from 'react-native';
 import { useAppContext } from '../../context/AppContext';
 import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { KeyboardAwareScroll } from '../../components/ui/KeyboardAvoider';
+import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 import { getAuthErrorMessage } from './LoginScreen';
+import { AuthLayout, GoogleButton, OrDivider, AuthFooterLink } from './AuthLayout';
+
+const PRIVACY_URL = 'https://storybyte-76716.web.app/privacy.html';
+const PERKS = [
+  { icon: 'headphones', label: 'Every genre' },
+  { icon: 'globe', label: '16 languages' },
+  { icon: 'sparkles', label: 'Create stories' },
+];
 
 export const SignupScreen = ({ navigation }) => {
   const { signupWithEmail } = useAppContext();
   const { theme } = useTheme() || { theme: {} };
-  const insets = useSafeAreaInsets();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  // The email already has an account: offer to sign in with it instead.
+  const [existingEmail, setExistingEmail] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const google = useGoogleAuth(setError);
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+  const confirmRef = useRef(null);
 
   const handleSignup = async () => {
     if (!displayName.trim()) return setError('Please enter your name');
@@ -29,60 +41,91 @@ export const SignupScreen = ({ navigation }) => {
     if (password.length < 6) return setError('Password should be at least 6 characters');
     if (password !== confirmPassword) return setError('Passwords do not match');
     try {
-      setError(''); setSubmitting(true);
+      setError(''); setExistingEmail(null); setSubmitting(true);
       await signupWithEmail(email.trim(), password, displayName.trim());
-      // Navigate to profile setup after successful signup
-      navigation.navigate('ProfileSetup');
+      // Nothing to navigate to: once the account exists, App.js swaps these
+      // sign-in screens for the welcome screens, then Home.
     } catch (e) {
-      setError(getAuthErrorMessage(e.code, 'signup'));
+      if (e.code === 'auth/email-already-in-use') {
+        setExistingEmail(email.trim());
+        setError('This email already has a StoryByte account.');
+      } else {
+        setError(getAuthErrorMessage(e.code, 'signup'));
+      }
     } finally { setSubmitting(false); }
   };
 
+  const mismatch = confirmPassword.length > 0 && confirmPassword !== password;
+
   return (
-    <View style={{ flex: 1, backgroundColor: theme.background }}>
-      <View style={[styles.top, { paddingTop: insets.top + 6 }]}>
-        <Pressable onPress={() => navigation.navigate('Login')} hitSlop={10}><Icon name="chev-left" /></Pressable>
-      </View>
-      <KeyboardAwareScroll contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.center}>
-          <LinearGradient colors={[theme.gradientStart, theme.gradientEnd]} style={styles.badge}>
-            <Icon name="book" size={38} color="#fff" />
-          </LinearGradient>
-          <AppText variant="displayM">Create your account</AppText>
-          <AppText variant="body" color="textSecondary" style={{ marginTop: 4 }}>Free forever · no card needed</AppText>
-        </View>
-
-        <View style={{ marginTop: 24 }}>
-          <Input icon="user" placeholder="Your name" value={displayName} onChangeText={setDisplayName} autoCapitalize="words" />
-          <Input icon="mail" placeholder="you@email.com" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
-          <Input icon="lock" placeholder="Choose a password (min 6)" value={password} onChangeText={setPassword} secure autoCapitalize="none" />
-          <Input icon="lock" placeholder="Confirm password" value={confirmPassword} onChangeText={setConfirmPassword} secure autoCapitalize="none" />
-
-          {error ? <AppText variant="caption" color="error" style={{ marginBottom: 10, marginLeft: 2 }}>{error}</AppText> : null}
-
-          <Button title="Create account" onPress={handleSignup} loading={submitting} />
-
-          <View style={styles.footer}>
-            <AppText variant="caption" color="textSecondary">Already have an account? </AppText>
-            <Pressable onPress={() => navigation.navigate('Login')} hitSlop={8}>
-              <AppText variant="label" color="accent" style={{ fontSize: 13 }}>Sign in</AppText>
-            </Pressable>
+    <AuthLayout
+      title="Create your account"
+      subtitle="Free forever · no card needed"
+      onBack={() => navigation.navigate('Login')}
+    >
+      <View style={[styles.perks, { backgroundColor: theme.accentSoft }]}>
+        {PERKS.map((p) => (
+          <View key={p.label} style={styles.perk}>
+            <Icon name={p.icon} size={18} color={theme.accent} />
+            <AppText variant="caption" color="accent" numberOfLines={1} style={{ fontWeight: '600' }}>{p.label}</AppText>
           </View>
+        ))}
+      </View>
+
+      <GoogleButton onPress={google.signIn} loading={google.inProgress} />
+      <OrDivider />
+
+      <Input label="Your name" icon="user" placeholder="What should we call you?" value={displayName} onChangeText={setDisplayName}
+        autoCapitalize="words" autoComplete="name" textContentType="name"
+        returnKeyType="next" onSubmitEditing={() => emailRef.current?.focus()} />
+      <Input label="Email" icon="mail" placeholder="you@email.com" value={email} onChangeText={setEmail} ref={emailRef}
+        keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email" textContentType="emailAddress"
+        returnKeyType="next" onSubmitEditing={() => passwordRef.current?.focus()} />
+      <Input label="Password" icon="lock" placeholder="At least 6 characters" value={password} onChangeText={setPassword} ref={passwordRef}
+        secure autoCapitalize="none" autoComplete="new-password" textContentType="newPassword"
+        returnKeyType="next" onSubmitEditing={() => confirmRef.current?.focus()} />
+      <Input label="Confirm password" icon="lock" placeholder="Type it again" value={confirmPassword} onChangeText={setConfirmPassword} ref={confirmRef}
+        secure autoCapitalize="none" autoComplete="new-password" textContentType="newPassword"
+        returnKeyType="go" onSubmitEditing={handleSignup} />
+      {mismatch ? <AppText variant="caption" color="error" style={styles.hint}>Passwords don't match yet</AppText> : null}
+
+      {error ? <AppText variant="caption" color="error" style={styles.error}>{error}</AppText> : null}
+      {existingEmail ? (
+        <View style={[styles.existing, { backgroundColor: theme.accentSoft }]}>
+          <AppText variant="caption" color="textSecondary" style={{ flex: 1 }}>
+            Signed up before, or with Google? Sign in with it instead.
+          </AppText>
+          <Pressable
+            onPress={() => navigation.popTo('Login', { email: existingEmail })}
+            hitSlop={8}
+            accessibilityRole="button"
+          >
+            <AppText variant="label" color="accent">Sign in instead</AppText>
+          </Pressable>
         </View>
-      </KeyboardAwareScroll>
-    </View>
+      ) : null}
+
+      <Button title="Create account" onPress={handleSignup} loading={submitting} style={{ marginTop: 4 }} />
+
+      <AppText variant="caption" color="textTertiary" style={styles.legal}>
+        By continuing you agree to our{' '}
+        <AppText variant="caption" color="accent" onPress={() => Linking.openURL(PRIVACY_URL).catch(() => {})} style={{ fontWeight: '600' }}>
+          Privacy Policy
+        </AppText>.
+      </AppText>
+
+      <AuthFooterLink text="Already have an account?" link="Sign in" onPress={() => navigation.navigate('Login')} />
+    </AuthLayout>
   );
 };
 
 const styles = StyleSheet.create({
-  top: { paddingHorizontal: 20, paddingBottom: 4 },
-  scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 28, paddingBottom: 40 },
-  center: { alignItems: 'center' },
-  badge: {
-    width: 78, height: 78, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginBottom: 16,
-    shadowColor: '#3C2814', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.35, shadowRadius: 20, elevation: 6,
-  },
-  footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 18 },
+  perks: { flexDirection: 'row', borderRadius: 16, paddingVertical: 12, marginTop: -6, marginBottom: 18 },
+  perk: { flex: 1, alignItems: 'center', gap: 4 },
+  hint: { marginTop: -8, marginBottom: 12, marginLeft: 2 },
+  error: { marginBottom: 12, marginLeft: 2 },
+  existing: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 14, padding: 12, marginTop: -4, marginBottom: 14 },
+  legal: { textAlign: 'center', marginTop: 14 },
 });
 
 export default SignupScreen;
