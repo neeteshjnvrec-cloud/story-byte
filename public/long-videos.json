@@ -1,6 +1,20 @@
 {
- "updatedAt": "2026-10-16T02:08:56.368Z",
+ "updatedAt": "2026-10-17T01:59:48.050Z",
  "videos": [
+  {
+   "id": "XfGf4sKSxIw",
+   "youtubeUrl": "https://youtu.be/XfGf4sKSxIw",
+   "thumbnail": "https://i.ytimg.com/vi/XfGf4sKSxIw/mqdefault.jpg",
+   "thumbnailHd": "https://i.ytimg.com/vi/XfGf4sKSxIw/maxresdefault.jpg",
+   "title": "Navratri Maa Katyayani, the sixth form of Goddess Durga | S1 EDay 6: Katyayani’s Blessing of Courage",
+   "seriesTitle": "Navratri Maa Katyayani, the sixth form of Goddess Durga",
+   "season": "1",
+   "episode": "Day 6",
+   "description": "When doubts rise, Maa Katyayani bestows a fiery resolve that tests every heart.",
+   "language": "hi",
+   "durationSec": 1007,
+   "publishedAt": "2026-10-16T12:38:00.128Z"
+  },
   {
    "id": "Vb6sy4wZApY",
    "youtubeUrl": "https://youtu.be/Vb6sy4wZApY",
