@@ -43,6 +43,10 @@ Thumbs.db
 npm-debug*
 yarn-debug*
 yarn-error*
+*-firebase-adminsdk-*.json
+/.carousel-preview/
+/remakes/
+/deity-candidates/
 
 # --- not part of the app -----------------------------------------------------
 # The website: story audio, covers, pages, episode text (~210 MB).
@@ -50,7 +54,8 @@ yarn-error*
 # The daily/weekly content pipeline and its reports.
 /scripts/
 /reports/
-# Firebase backend: rules, rule tests, functions, hosting config.
+# Firebase backend: rules, rule tests, hosting config. functions/ is gone
+# but may still hold a local service-account key.
 /firestore/
 /functions/
 /firebase.json
@@ -63,10 +68,12 @@ yarn-error*
 /storybyte-design-system.html
 /*.md
 /LICENSE
-# Old backups and one-off test scripts.
+# Assets the app doesn't use: a duplicate of icon.png, and a README.
+/assets/logo.png
+/assets/deities/
+# Old backups and the env template.
 /*.bak-*
-/test-bundle.js
-/test_models.js
+/.env.example
 # Repo tooling.
 /.github/
 /.claude/

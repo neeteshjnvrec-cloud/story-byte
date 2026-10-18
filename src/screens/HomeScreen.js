@@ -38,13 +38,15 @@ export const HomeScreen = () => {
   const insets = useSafeAreaInsets();
   const { theme, tokens } = useTheme();
   const { playStory, setNextStory } = useAudioPlayer();
-  const { setLastPlayTab } = useAppContext();
+  const { setLastPlayTab, storyLanguage } = useAppContext();
   const { canPlay } = useWallet();
   const [stories, setStories] = useState([]);
   const [progress, setProgress] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [language, setLanguage] = useState('All');
+  // Opens on Settings → Story language; the chips change it for this visit.
+  const [language, setLanguage] = useState(storyLanguage || 'All');
+  useEffect(() => { if (storyLanguage) setLanguage(storyLanguage); }, [storyLanguage]);
   const [showFilter, setShowFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState(null);
   const [error, setError] = useState(null);

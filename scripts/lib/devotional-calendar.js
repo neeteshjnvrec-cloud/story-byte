@@ -134,10 +134,18 @@ function istWeekday(now = new Date()) {
   return new Date(now.getTime() + 5.5 * 3600 * 1000).getUTCDay();
 }
 
-/** Today's deity and katha. `dateStr` (YYYY-MM-DD) keeps the katha stable
- *  across retries of the same day. */
-function deityOfDay(dateStr, now = new Date()) {
-  const deity = DEITIES[istWeekday(now)];
+/** `dateStr` (YYYY-MM-DD) plus `n` days. */
+function addDays(dateStr, n) {
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** A date's deity and katha. Everything keys off the run's India date
+ *  (YYYY-MM-DD), so the katha is stable across retries of the same day and
+ *  tomorrow's is simply date + 1. */
+function deityOfDay(dateStr) {
+  const deity = DEITIES[new Date(`${dateStr}T00:00:00Z`).getUTCDay()];
   const week = Math.floor(Date.parse(`${dateStr}T00:00:00Z`) / (7 * 86400000));
   return { ...deity, katha: deity.kathas[week % deity.kathas.length] };
 }
@@ -147,55 +155,106 @@ function istDate(now = new Date()) {
   return new Date(now.getTime() + 5.5 * 3600 * 1000).toISOString().slice(0, 10);
 }
 
-// Sharad Navratri 2026 (11-19 October): each day is devoted to one of the
-// nine forms of Durga (Navadurga), and that day's form is what devotees
-// search for ("मां शैलपुत्री की कथा" tops YouTube's suggestions on day 1).
-// Dates follow the 2026 panchang; refresh yearly alongside occasions.js.
-const NAVRATRI = [
-  ['2026-10-11', 'Shailputri', 'माँ शैलपुत्री', 'daughter of the mountain king Himavan, riding the bull Nandi, trident and lotus in her hands', 'how Sati was reborn as Shailputri, daughter of the Himalaya, after her sacrifice at Daksha\'s yagna'],
-  ['2026-10-12', 'Brahmacharini', 'माँ ब्रह्मचारिणी', 'barefoot ascetic goddess in white, rosary and water pot, deep in meditation in a forest', 'Parvati\'s thousands of years of tapasya as Brahmacharini to win Shiva'],
-  ['2026-10-13', 'Chandraghanta', 'माँ चंद्रघंटा', 'golden goddess riding a tiger, a half-moon shaped like a bell on her forehead, ten arms with weapons', 'how Chandraghanta\'s bell-like roar terrified the demons and calmed Shiva\'s wedding procession'],
-  ['2026-10-14', 'Kushmanda', 'माँ कूष्मांडा', 'radiant eight-armed goddess on a lion, glowing like the sun, creating the cosmos with her smile', 'how Kushmanda created the universe with her smile when there was only darkness'],
-  ['2026-10-15', 'Skandamata', 'माँ स्कंदमाता', 'mother goddess on a lion holding baby Kartikeya (Skanda) in her lap, lotus flowers', 'Skandamata, mother of Kartikeya, and how her son defeated the demon Tarakasura'],
-  ['2026-10-16', 'Katyayani', 'माँ कात्यायनी', 'fierce warrior goddess on a lion, sword raised, born in Sage Katyayan\'s ashram', 'how Katyayani was born to Sage Katyayan and slew Mahishasura'],
-  ['2026-10-17', 'Kalaratri', 'माँ कालरात्रि', 'dark fierce goddess riding a donkey, flowing hair, fiery breath, protecting her devotees', 'how Kalaratri destroyed the demon Raktabeej, whose every drop of blood spawned a new demon'],
-  ['2026-10-18', 'Mahagauri', 'माँ महागौरी', 'serene goddess in pure white riding a white bull, glowing like the moon', 'how Parvati\'s tapasya-darkened skin was washed in the Ganga by Shiva and she became radiant Mahagauri'],
-  ['2026-10-19', 'Siddhidatri', 'माँ सिद्धिदात्री', 'goddess seated on a lotus granting the eight siddhis, devotees and gods bowing before her', 'how Siddhidatri granted Shiva the eight siddhis, making him Ardhanarishvara'],
+// Navratri: each of the nine days is devoted to one of the nine forms of
+// Durga (Navadurga), and that day's form is what devotees search for
+// ("मां शैलपुत्री की कथा" tops YouTube's suggestions on day 1). Chaitra
+// (spring) and Sharad (autumn) Navratri both follow it.
+const NAVADURGA = [
+  ['Shailputri', 'माँ शैलपुत्री', 'daughter of the mountain king Himavan, riding the bull Nandi, trident and lotus in her hands', 'how Sati was reborn as Shailputri, daughter of the Himalaya, after her sacrifice at Daksha\'s yagna'],
+  ['Brahmacharini', 'माँ ब्रह्मचारिणी', 'barefoot ascetic goddess in white, rosary and water pot, deep in meditation in a forest', 'Parvati\'s thousands of years of tapasya as Brahmacharini to win Shiva'],
+  ['Chandraghanta', 'माँ चंद्रघंटा', 'golden goddess riding a tiger, a half-moon shaped like a bell on her forehead, ten arms with weapons', 'how Chandraghanta\'s bell-like roar terrified the demons and calmed Shiva\'s wedding procession'],
+  ['Kushmanda', 'माँ कूष्मांडा', 'radiant eight-armed goddess on a lion, glowing like the sun, creating the cosmos with her smile', 'how Kushmanda created the universe with her smile when there was only darkness'],
+  ['Skandamata', 'माँ स्कंदमाता', 'mother goddess on a lion holding baby Kartikeya (Skanda) in her lap, lotus flowers', 'Skandamata, mother of Kartikeya, and how her son defeated the demon Tarakasura'],
+  ['Katyayani', 'माँ कात्यायनी', 'fierce warrior goddess on a lion, sword raised, born in Sage Katyayan\'s ashram', 'how Katyayani was born to Sage Katyayan and slew Mahishasura'],
+  ['Kalaratri', 'माँ कालरात्रि', 'dark fierce goddess riding a donkey, flowing hair, fiery breath, protecting her devotees', 'how Kalaratri destroyed the demon Raktabeej, whose every drop of blood spawned a new demon'],
+  ['Mahagauri', 'माँ महागौरी', 'serene goddess in pure white riding a white bull, glowing like the moon', 'how Parvati\'s tapasya-darkened skin was washed in the Ganga by Shiva and she became radiant Mahagauri'],
+  ['Siddhidatri', 'माँ सिद्धिदात्री', 'goddess seated on a lotus granting the eight siddhis, devotees and gods bowing before her', 'how Siddhidatri granted Shiva the eight siddhis, making him Ardhanarishvara'],
 ];
 
-/** Today's Navadurga form (as a deity-of-the-day) during Navratri, else null. */
+// Each Navratri's first day (Drik Panchang). Refresh yearly alongside
+// occasions.js.
+const NAVRATRIS = [
+  { start: '2026-10-11', name: 'Navratri', hashtag: '#navratri' },
+  { start: '2027-04-07', name: 'Chaitra Navratri', hashtag: '#chaitranavratri' },
+  { start: '2027-09-30', name: 'Navratri', hashtag: '#navratri' },
+];
+
+/** That date's Navadurga form (as a deity-of-the-day) during a Navratri, else null. */
 function navratriDeity(dateIst) {
-  const day = NAVRATRI.findIndex(([date]) => date === dateIst);
-  if (day < 0) return null;
-  const [, name, hindi, visual, katha] = NAVRATRI[day];
+  for (const n of NAVRATRIS) {
+    const day = Math.round((Date.parse(`${dateIst}T00:00:00Z`) - Date.parse(`${n.start}T00:00:00Z`)) / 86400000);
+    if (day < 0 || day > 8) continue;
+    const [name, hindi, visual, katha] = NAVADURGA[day];
+    return {
+      key: 'devi', name: `Maa ${name} (${n.name} day ${day + 1})`, hindi, visual, katha,
+      hashtags: [n.hashtag, '#jaimatadi', `#maa${name.toLowerCase()}`, '#maadurga'],
+    };
+  }
+  return null;
+}
+
+/**
+ * A festival day's katha (occasions.js) in the shape of a deity-of-the-day,
+ * so the writer, cover and video treat it like any other katha. `eve` picks
+ * the festival's best-known katha, posted the afternoon before.
+ */
+function festivalDeity(occasion, eve = false) {
+  const katha = eve ? occasion.eveKatha : occasion.katha;
+  if (!katha) return null;
   return {
-    key: 'devi', name: `Maa ${name} (Navratri day ${day + 1})`, hindi, visual, katha,
-    hashtags: ['#navratri', '#jaimatadi', `#maa${name.toLowerCase()}`, '#maadurga'],
+    key: occasion.deity || 'festival', name: occasion.name, hindi: occasion.hindi || occasion.name,
+    visual: occasion.visual, katha, hashtags: occasion.hashtags || [occasion.hashtag].filter(Boolean),
   };
 }
 
 /**
- * What a day's devotional story is about: during Navratri that day's form
- * of Durga (plus any devotional festival); otherwise a devotional festival
- * (occasions.js) takes the day; else the weekday's deity and that week's
- * katha. `date` is the run's YYYY-MM-DD and `now` its instant — tomorrow's
- * is (date + 1 day, now + 24h), which is what tomorrow's run will pick.
+ * What a day's devotional story is about: a festival with its own katha
+ * (occasions.js); else during Navratri that day's form of Durga (plus the
+ * Navratri occasion); else any other devotional occasion; else the
+ * weekday's deity and that week's katha. `date` is the run's India
+ * date (YYYY-MM-DD).
  */
-function kathaOfDay(date, now = new Date()) {
+function kathaOfDay(date) {
   const { getOccasion } = require('../occasions');
   const occasion = getOccasion(date);
   const devotional = occasion?.genre === 'devotional' ? occasion : undefined;
-  const navratri = navratriDeity(istDate(now));
+  // A festival with its own katha wins even on a Navratri day (Ram Navami
+  // is Chaitra Navratri's ninth day): it's what people search for that day.
+  const festival = devotional && festivalDeity(devotional);
+  if (festival) return { deity: festival, occasion: devotional };
+  const navratri = navratriDeity(date);
   if (navratri) return { deity: navratri, occasion: devotional };
   if (devotional) return { occasion: devotional };
-  return { deity: deityOfDay(date, now) };
+  return { deity: deityOfDay(date) };
 }
 
 /** Tomorrow's katha, as tomorrow's daily run will choose it. */
-function nextKatha(date, now = new Date()) {
-  const next = new Date(`${date}T00:00:00Z`);
-  next.setUTCDate(next.getUTCDate() + 1);
-  return kathaOfDay(next.toISOString().slice(0, 10), new Date(now.getTime() + 86400e3));
+function nextKatha(date) {
+  return kathaOfDay(addDays(date, 1));
+}
+
+/**
+ * The katha for the afternoon before `festivalDate`, or null when no
+ * festival with an eve katha falls on that date. The festival-eve run
+ * (FESTIVAL_EVE) posts it, a day ahead of the people searching for it.
+ */
+function eveKathaOf(festivalDate) {
+  const { OCCASIONS } = require('../occasions');
+  const occasion = OCCASIONS.find((o) => o.date === festivalDate && o.genre === 'devotional' && o.eveKatha);
+  return occasion ? { deity: festivalDeity(occasion, true), occasion } : null;
+}
+
+/**
+ * The festival a Sunday long video should tell, from that Sunday and the
+ * six days after it (a long video takes days to be found in search): one of
+ * the year's biggest if the week has one, else the nearest. Returns
+ * { deity, katha } with the festival's best-known katha, or null.
+ */
+function festivalOfWeek(sundayDate) {
+  const week = [0, 1, 2, 3, 4, 5, 6].map((i) => eveKathaOf(addDays(sundayDate, i))).filter(Boolean);
+  // One of the year's biggest (`top`) wins the week; else the nearest.
+  const eve = week.find((e) => e.occasion.top) || week[0];
+  return eve ? { deity: eve.deity, katha: eve.deity.katha } : null;
 }
 
 /** One line describing a katha slot, for prompts. */
@@ -204,4 +263,7 @@ function describeKatha({ deity, occasion }) {
   return occasion ? `the festival ${occasion.name}` : '';
 }
 
-module.exports = { DEITIES, GENERAL_HASHTAGS, istWeekday, istDate, deityOfDay, navratriDeity, kathaOfDay, nextKatha, describeKatha };
+module.exports = {
+  DEITIES, GENERAL_HASHTAGS, istWeekday, istDate, addDays, deityOfDay, navratriDeity, festivalDeity, kathaOfDay, nextKatha,
+  eveKathaOf, festivalOfWeek, describeKatha,
+};

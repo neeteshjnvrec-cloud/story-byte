@@ -17,6 +17,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useKeyboardState } from 'react-native-keyboard-controller';
 import apiService from '../../services/api';
 import { useAppContext } from '../../context/AppContext';
+import { myAuthorName } from '../../utils/author';
+import { useNavigation } from '@react-navigation/native';
 
 function timeAgo(dateValue) {
   if (!dateValue) return '';
@@ -30,6 +32,7 @@ function timeAgo(dateValue) {
 }
 
 export function CommentSheet({ story, visible, onClose }) {
+  const navigation = useNavigation();
   // The sheet is drawn behind Android's navigation bar, so the comment box
   // needs the bar's height below it — except with the keyboard up, which
   // covers the bar anyway (the avoider already lifts the sheet over it).
@@ -67,7 +70,7 @@ export function CommentSheet({ story, visible, onClose }) {
     try {
       await apiService.addComment(storyId, {
         authorId: user.uid,
-        authorName: userStats?.fullName || user.displayName || 'Anonymous',
+        authorName: myAuthorName(user, userStats) || 'Anonymous',
         authorPic: userStats?.profilePic || user.photoURL || '',
         text: trimmed,
       });
@@ -197,9 +200,15 @@ export function CommentSheet({ story, visible, onClose }) {
                 </TouchableOpacity>
               </View>
             ) : (
-              <View style={[styles.signedOut, { borderTopColor: theme.divider }]}>
-                <AppText variant="body" color="textSecondary">Sign in to comment.</AppText>
-              </View>
+              <TouchableOpacity
+                style={[styles.signedOut, { borderTopColor: theme.divider, paddingBottom: 14 + insets.bottom }]}
+                onPress={() => { onClose?.(); navigation.navigate('Login'); }}
+                accessibilityRole="button"
+              >
+                <AppText variant="body" color="textSecondary">
+                  <AppText variant="label" color="accent">Sign in</AppText> to comment.
+                </AppText>
+              </TouchableOpacity>
             )}
           </View>
         </View>

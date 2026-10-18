@@ -1,9 +1,11 @@
 /**
- * Shared image fetcher (Cloudflare Workers AI first, pollinations.ai as a
- * fallback) — used for the story cover AND both the carousel slide
- * renderer and the narrated-video scene renderer, so the image-generation
- * strategy (auth, pacing, sizing, timeout, seeding, fallback) is one
- * implementation instead of three.
+ * Shared image fetcher (Cloudflare Workers AI: FLUX.2, then flux-1-schnell,
+ * across every configured account — lib/cloudflare-image.js) — used for the
+ * story cover AND both the carousel slide renderer and the narrated-video
+ * scene renderer, so the image-generation strategy (sizing, timeout,
+ * fallback) is one implementation instead of three. (`seed` is still taken
+ * for callers' sake; Cloudflare's models don't use one.) pollinations.ai
+ * was the last resort until its pictures proved too poor to post.
  */
 const sharp = require('sharp');
 const { fetchCloudflareImage, fetchCloudflareHQImage } = require('./cloudflare-image');
@@ -18,100 +20,19 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-/** Exponential backoff (2s, 4s, 8s, 16s, capped at 20s) on top of the paced
- *  slot below — a transient 429/5xx/timeout deserves real waiting, not an
- *  immediate re-fire at the same failing moment. Taking longer here is a
- *  fine trade for not losing a scene's art. */
-function backoffMs(attempt) {
-  return Math.min(2000 * 2 ** attempt, 20000);
-}
-
-// Free registration at enter.pollinations.ai gets a Bearer token that lifts
-// the anonymous tier's 1-request/15s pace to 1-request/5s ("seed" tier) —
-// see POLLINATIONS-SETUP.md. Optional: everything here still works
-// anonymously (just slower/more timeout-prone) when this isn't set.
-const POLLINATIONS_TOKEN = process.env.POLLINATIONS_API_TOKEN || null;
-
-// A burst of back-to-back retries (what an earlier version of this file
-// did: a couple of seconds of backoff on 429) never gets ahead of
-// pollinations' own per-tier pace limit, it just re-trips it on the next
-// call. A single story needs a dozen-plus of these (cover + carousel
-// slides + video scenes all draw from it), so every call — across every
-// caller, sequential or not — is paced through this one module-level gate
-// instead of firing whenever its caller happens to be ready.
-const MIN_INTERVAL_MS = POLLINATIONS_TOKEN ? 5500 : 16000;
-let nextSlotAt = 0;
-
-async function waitForSlot() {
-  const wait = nextSlotAt - Date.now();
-  nextSlotAt = Math.max(nextSlotAt, Date.now()) + MIN_INTERVAL_MS;
-  if (wait > 0) await sleep(wait);
-}
-
 /**
- * Fetches one pollinations.ai image and returns it as a Buffer, or throws.
- * Paced through the shared gate above and authenticated when a token is
- * configured. Timeouts and 5xx get the same retry treatment as a 429
- * instead of failing on the first bad response — under load, pollinations'
- * free flux tier routinely takes longer than a quick call allows to render
- * at 1080x1350 (observed as a string of consecutive client-side timeouts
- * once request pacing on its own was already fixed) and its shared
- * infrastructure occasionally 500s transiently (observed taking down the
- * cover fetch — which throws rather than degrading gracefully, since a
- * missing cover fails the whole story — for 3 straight outer attempts with
- * no retry at all). A genuine 4xx (bad prompt, bad auth) still fails fast;
- * only 429/5xx/timeout are treated as "probably transient, worth another
- * shot at the next paced slot."
+ * Fetches one image: FLUX.2 at the frame's own aspect when `hq` is given,
+ * else (or if that fails) flux-1-schnell, whose 1024x1024 square is resized
+ * to fit — each trying every Cloudflare account with allocation left.
+ * Both already retry their own transient failures with backoff; if the
+ * whole chain still comes up empty (an outage, not a used-up allocation —
+ * that moves to the next account), one more pass after a real wait. Throws
+ * only if every pass fails.
  */
-async function fetchPollinationsImage(prompt, seed, { width = 1080, height = 1350, timeoutMs = 45000, retries = 3 } = {}) {
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&nologo=true&seed=${seed}&model=flux`;
-  const headers = POLLINATIONS_TOKEN ? { Authorization: `Bearer ${POLLINATIONS_TOKEN}` } : undefined;
-
-  for (let attempt = 0; ; attempt++) {
-    await waitForSlot();
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const res = await fetch(url, { signal: controller.signal, headers });
-      if (res.status === 429 || res.status >= 500) {
-        if (attempt < retries) { await sleep(backoffMs(attempt)); continue; }
-        throw new Error(`HTTP ${res.status}`);
-      }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const buf = Buffer.from(await res.arrayBuffer());
-      if (buf.length < 2048) throw new Error('response too small');
-      return buf;
-    } catch (e) {
-      if (e.name === 'AbortError' && attempt < retries) { await sleep(backoffMs(attempt)); continue; }
-      throw e.name === 'AbortError' ? new Error(`timed out after ${timeoutMs / 1000}s`) : e;
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-}
-
-/**
- * Fetches one image, trying Cloudflare Workers AI first (see
- * lib/cloudflare-image.js) and falling back to pollinations.ai if that
- * fails. Cloudflare needs no request pacing the way pollinations does
- * (see MIN_INTERVAL_MS above), so leading with it is both faster on the
- * common case and avoids pollinations entirely on days when Cloudflare
- * alone can carry the whole story — reserving pollinations for whenever
- * Cloudflare itself is unavailable (no credentials configured, its own
- * outage, or its free daily neuron allocation exhausted). Cloudflare's
- * Flux model has no explicit width/height parameter (it always returns
- * 1024x1024), so its output gets resized to match.
- *
- * Both providers already retry their own transient failures with backoff;
- * if the whole chain still comes up empty, that's rare enough (both down
- * at once) to be worth one more full pass after a real wait rather than
- * giving up — a slower story build is a fine trade for not losing a
- * scene's bespoke art. Throws only if every pass fails.
- */
-// Which model drew an image: 'hq' (FLUX.2 at the frame's own aspect),
-// 'standard' (flux-1-schnell's 1024x1024 square, cropped and scaled up) or
-// 'pollinations'. Set on the returned Buffer, so callers that crop further
-// (a Short's close-ups) can tell an already scaled-up picture.
+// Which model drew an image: 'hq' (FLUX.2 at the frame's own aspect) or
+// 'standard' (flux-1-schnell's 1024x1024 square, cropped and scaled up).
+// Set on the returned Buffer, so callers that crop further (a Short's
+// close-ups) can tell an already scaled-up picture.
 function tagged(buf, source) {
   buf.source = source;
   return buf;
@@ -135,14 +56,12 @@ async function fetchStoryImage(prompt, seed, opts = {}) {
   for (let pass = 0; pass <= chainRetries; pass++) {
     try {
       const buf = await fetchCloudflareImage(prompt, { steps });
-      return tagged(await sharp(buf).resize(width, height, { fit: 'cover' }).jpeg({ quality: 90 }).toBuffer(), 'standard');
-    } catch (primaryError) {
-      try {
-        return tagged(await fetchPollinationsImage(prompt, seed, opts), 'pollinations');
-      } catch (fallbackError) {
-        lastError = new Error(`cloudflare: ${primaryError.message}; pollinations: ${fallbackError.message}`);
-        if (pass < chainRetries) await sleep(10000 * (pass + 1));
-      }
+      return tagged(await sharp(buf).resize(width, height, { fit: 'cover', kernel: 'lanczos3' }).jpeg({ quality: 92 }).toBuffer(), 'standard');
+    } catch (e) {
+      lastError = e;
+      // Every account used up for today: waiting won't bring it back.
+      if (/used up today/.test(e.message)) break;
+      if (pass < chainRetries) await sleep(10000 * (pass + 1));
     }
   }
   throw lastError;
@@ -159,4 +78,52 @@ async function fetchSceneImage(prompt, seed, opts = {}) {
   }
 }
 
-module.exports = { fetchSceneImage, fetchStoryImage, fetchPollinationsImage, hashSeed };
+/**
+ * A stand-in for a missing picture: `buf` re-cropped to a different part of
+ * itself (`k` picks which), at `width` x `height`, so it doesn't read as the
+ * same frame twice.
+ */
+async function reframe(buf, k, width, height) {
+  const img = sharp(buf);
+  const meta = await img.metadata();
+  const w = Math.round(meta.width * 0.78);
+  const h = Math.round(meta.height * 0.78);
+  const spots = [[0.5, 0.35], [0.3, 0.55], [0.7, 0.55], [0.5, 0.7]];
+  const [fx, fy] = spots[k % spots.length];
+  const left = Math.max(0, Math.min(meta.width - w, Math.round(meta.width * fx - w / 2)));
+  const top = Math.max(0, Math.min(meta.height - h, Math.round(meta.height * fy - h / 2)));
+  return img.extract({ left, top, width: w, height: h })
+    .resize(width, height, { fit: 'cover', kernel: 'lanczos3' })
+    .jpeg({ quality: 92 })
+    .toBuffer();
+}
+
+/**
+ * Fills the gaps in a video's pictures (`images`: Buffers, null where the
+ * fetch failed) so no themed gradient card ends up in a video: each gap gets
+ * one more try (`retry(i)`, resolving to a Buffer or null), then the nearest
+ * picture that did come through, reframed. Only if not one picture came
+ * through at all does `fallback()` (a themed card) fill the slots. Stand-ins
+ * are tagged `.source = 'reused'`.
+ */
+async function fillMissingImages(images, { retry, fallback, width, height }) {
+  const out = [...images];
+  for (let i = 0; i < out.length; i++) {
+    if (!out[i] && retry) out[i] = await retry(i);
+  }
+  const have = out.map((b, i) => (b ? i : -1)).filter((i) => i >= 0);
+  for (let i = 0; i < out.length; i++) {
+    if (out[i]) continue;
+    if (!have.length) {
+      out[i] = await fallback();
+      continue;
+    }
+    const nearest = have.reduce((a, b) => (Math.abs(b - i) < Math.abs(a - i) ? b : a));
+    const buf = await reframe(out[nearest], i, width, height);
+    buf.source = 'reused';
+    out[i] = buf;
+  }
+  return out;
+}
+
+module.exports = { fetchSceneImage, fetchStoryImage, fillMissingImages, hashSeed };

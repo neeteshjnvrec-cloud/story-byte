@@ -25,6 +25,7 @@ import { KeyboardAwareScroll } from '../components/ui/KeyboardAvoider';
 import { GENRES } from '../constants/genres';
 import { LANGUAGES } from '../types/story';
 import { myAuthorName } from '../utils/author';
+import { useRequireAccount } from '../hooks/useRequireAccount';
 
 // The language's own name first — that's how a speaker recognises "its" at a
 // glance — then the English name in parens for everybody else. Orthography is
@@ -38,6 +39,7 @@ const LANGUAGE_LABELS = {
 
 export function CreateStoryScreen() {
   const navigation = useNavigation();
+  const requireAccount = useRequireAccount();
   const insets = useSafeAreaInsets();
   const { theme, tokens } = useTheme();
   // Inputs in the app's own font (TextInput otherwise uses Roboto on Android).
@@ -57,6 +59,7 @@ export function CreateStoryScreen() {
   const scrollRef = useRef(null);
 
   const handleGenerate = async () => {
+    if (!requireAccount('Sign in to write your own stories and share them with the community.')) return;
     if (!prompt.trim()) {
       Alert.alert('Missing Prompt', 'Please enter a story idea or prompt.');
       return;

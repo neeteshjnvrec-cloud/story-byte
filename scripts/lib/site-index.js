@@ -19,6 +19,7 @@ const fs = require('fs');
 const path = require('path');
 const { esc, SITE } = require('./story-page');
 const { appLink } = require('./app-link');
+const { WHATSAPP_CHANNEL_URL } = require('./social-extras');
 
 const unesc = (s) => String(s || '')
   .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
@@ -105,6 +106,7 @@ const BASE_CSS = `
     .logo span { color: var(--accent); }
     .btn { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; padding: 12px 20px; border-radius: 999px; }
     .btn-small { padding: 8px 14px; font-size: 14px; }
+    .btn-wa { background: #25D366; margin-top: 10px; }
     .hero { padding: 32px 0 24px; }
     .hero h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.25; margin: 0 0 12px; }
     .hero p { color: var(--muted); font-size: 18px; margin: 0 0 20px; max-width: 640px; }
@@ -192,6 +194,7 @@ ${BASE_CSS}  </style>
       <h1>🙏 रोज़ सुबह एक पावन कथा — पूरी, सच्ची, सुंदर।</h1>
       <p>हनुमान जी, शिव जी, श्री कृष्ण, गणेश जी, माँ दुर्गा और विष्णु भगवान की कथाएँ हिंदी में सुनें। हर दिन उस दिन के देवता की एक नई पूरी कथा — मुफ़्त, ऑफ़लाइन भी।</p>
       <a class="btn" href="${esc(play)}">📱 StoryByte ऐप — Google Play पर मुफ़्त</a>
+      <a class="btn btn-wa" href="${esc(WHATSAPP_CHANNEL_URL)}">💬 रोज़ की कथा WhatsApp पर</a>
     </section>
 ${today ? `
     <h2>आज की कथा</h2>

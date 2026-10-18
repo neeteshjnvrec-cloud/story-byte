@@ -30,7 +30,6 @@ const { notifyAndPushUser, notifyAndPushAll } = require('./lib/notify');
 const { writeStoryPage } = require('./lib/story-page');
 const { fetchStoryImage } = require('./lib/scene-image');
 const { renderFallbackCover } = require('./lib/fallback-cover');
-const { backfillAuthorNames } = require('./lib/author-names');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { buildStoryVideo } = require('./lib/video');
 const { buildVideoScenes } = require('./lib/video-scenes');
@@ -213,22 +212,8 @@ async function sendBroadcastNotification(story) {
   );
 }
 
-// --- author names --------------------------------------------------------------
-// Real names on community stories saved as "Anonymous" (lib/author-names.js).
-// Runs every time, before anything else.
-async function fillAuthorNames() {
-  try {
-    const { fixed } = await backfillAuthorNames(db);
-    if (fixed) console.log(`👤 Author name filled in on ${fixed} community story(ies)`);
-  } catch (e) {
-    console.warn(`  ⚠️  Author names not filled in: ${e.message}`);
-  }
-}
-
 // --- main --------------------------------------------------------------------
 async function main() {
-  await fillAuthorNames();
-
   fs.mkdirSync(path.join(PUB, 'audio'), { recursive: true });
   fs.mkdirSync(path.join(PUB, 'covers'), { recursive: true });
   // Shareable story pages, staged alongside the audio and covers so the single
@@ -267,12 +252,11 @@ async function main() {
     const audioPath = path.join(PUB, 'audio', `${storyId}.mp3`);
 
     try {
-      // 1. Generate cover image — pollinations.ai, falling back to
-      // Cloudflare Workers AI (see lib/scene-image.js), falling back to a
-      // local themed gradient card (no network call, can't fail) if both
-      // providers are down. Confirmed in production that a
-      // pollinations-only outage previously aborted the whole story here
-      // even though the actual text/audio content was generating fine.
+      // 1. Generate cover image — Cloudflare Workers AI across every
+      // configured account (lib/scene-image.js), falling back to a local
+      // themed gradient card (no network call, can't fail) only if every
+      // account fails: an image outage must never abort a story whose text
+      // and audio are fine.
       let coverBuf;
       try {
         coverBuf = await fetchStoryImage(coverPrompt(story), hashSeed(storyId), { width: 768, height: 768 });

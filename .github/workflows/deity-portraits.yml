@@ -38,6 +38,7 @@ jobs:
           PORTRAIT_CANDIDATES: ${{ inputs.candidates }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNTS: ${{ secrets.CLOUDFLARE_ACCOUNTS }}
           # Devotional art style: realistic (default), cartoon3d or cartoon2d —
           # set as a repository variable (Settings → Secrets and variables → Actions → Variables).
           DEVOTIONAL_STYLE: ${{ vars.DEVOTIONAL_STYLE }}

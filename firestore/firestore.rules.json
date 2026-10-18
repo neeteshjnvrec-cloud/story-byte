@@ -14,9 +14,13 @@ service cloud.firestore {
     }
     function dailyCounterId() { return request.auth.uid + '_' + todayKey(); }
 
-    // Config: public read (API keys are rate-limited, not secret)
+    // Config: public read, except the docs that hold credentials. config/github
+    // held a GitHub token that anyone could read without signing in; nothing
+    // in the app reads it any more. config/groq_settings holds the Groq keys
+    // the app uses to write community stories — signed-in only until that
+    // generation moves off the client, since any account can still read it.
     match /config/{docId} {
-      allow read: if true;
+      allow read: if docId != 'github' && (docId != 'groq_settings' || isSignedIn());
       allow write: if false; // Admin-only
     }
 
@@ -35,11 +39,51 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // How far one write may move a story's engagement counter. The app only
+    // ever increments by one, so a bigger jump is a forged count.
+    function counterStep(field, lo, hi) {
+      let delta = request.resource.data.get(field, 0) - resource.data.get(field, 0);
+      return request.resource.data.get(field, 0) is number && delta >= lo && delta <= hi;
+    }
+
+    // Rating fields as rateStory (src/services/api.js) writes them: a new
+    // rating adds one 1-5 score, a re-rate swaps one score for another, and
+    // the first rating on a story from before ratingSum existed starts over
+    // at one rating.
+    function validRatingChange() {
+      let n = request.resource.data;
+      let o = resource.data;
+      let countStep = n.get('ratingCount', 0) - o.get('ratingCount', 0);
+      let sumStep = n.get('ratingSum', 0) - o.get('ratingSum', 0);
+      return !n.diff(o).affectedKeys().hasAny(['rating', 'ratingSum', 'ratingCount'])
+        || (n.rating is number && n.rating >= 0 && n.rating <= 5
+          && (
+            (!('ratingSum' in o) && n.ratingCount == 1 && n.ratingSum >= 1 && n.ratingSum <= 5)
+            || (countStep == 1 && sumStep >= 1 && sumStep <= 5)
+            || (countStep == 0 && sumStep >= -4 && sumStep <= 4)
+          ));
+    }
+
     // Stories: public read, authenticated users can create community stories
     match /stories/{storyId} {
       allow read: if true;
+      // A new community story starts unpublished, with no audio and every
+      // counter at zero. Only the pipeline (Admin SDK) publishes it, so a
+      // modified client can't skip review or arrive with fake plays.
       allow create: if isSignedIn()
+        && request.resource.data.keys().hasOnly(['storyId', 'title', 'description', 'genre', 'language', 'text',
+             'audioUrl', 'coverImage', 'duration', 'authorName', 'authorId', 'authorProfilePic',
+             'isCommunityStory', 'status', 'likesCount', 'plays', 'rating', 'ratingSum', 'ratingCount',
+             'sharesCount', 'tags', 'modelUsed', 'ttsEngine', 'createdAt', 'updatedAt'])
         && request.resource.data.isCommunityStory == true
+        && request.resource.data.status == 'under_review'
+        && request.resource.data.get('audioUrl', '') == ''
+        && request.resource.data.get('likesCount', 0) == 0
+        && request.resource.data.get('plays', 0) == 0
+        && request.resource.data.get('rating', 0) == 0
+        && request.resource.data.get('ratingSum', 0) == 0
+        && request.resource.data.get('ratingCount', 0) == 0
+        && request.resource.data.get('sharesCount', 0) == 0
         && request.resource.data.authorId == request.auth.uid
         // Daily cap enforced server-side: this reads the counter's value as
         // of BEFORE this batch (cross-document get() sees the pre-batch
@@ -55,12 +99,29 @@ service cloud.firestore {
       // update fail, so anything the client increments has to be listed here.
       allow update: if isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['plays', 'rating', 'ratingSum', 'ratingCount', 'lastPlayedAt', 'lastRatedAt', 'lastReview', 'likesCount', 'lastLikedAt', 'commentsCount', 'sharesCount', 'lastSharedAt']);
+              .hasOnly(['plays', 'rating', 'ratingSum', 'ratingCount', 'lastPlayedAt', 'lastRatedAt', 'lastReview', 'likesCount', 'lastLikedAt', 'commentsCount', 'sharesCount', 'lastSharedAt'])
+        && counterStep('plays', 0, 1)
+        && counterStep('sharesCount', 0, 1)
+        && counterStep('likesCount', -1, 1)
+        && counterStep('commentsCount', -1, 1)
+        && validRatingChange()
+        && (!('lastReview' in request.resource.data)
+          || (request.resource.data.lastReview is string && request.resource.data.lastReview.size() <= 1000));
 
-      // Comments subcollection
+      // Comments subcollection. A comment carries its writer's own uid, so
+      // nobody can post under someone else's name and then be unable to
+      // delete it (delete checks authorId).
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if isSignedIn();
+        allow create: if isSignedIn()
+          && request.resource.data.keys().hasOnly(['authorId', 'authorName', 'authorPic', 'text', 'createdAt'])
+          && request.resource.data.authorId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 2000
+          && request.resource.data.get('authorName', '') is string
+          && request.resource.data.get('authorName', '').size() <= 100
+          && request.resource.data.createdAt == request.time;
         allow delete: if isSignedIn() && request.auth.uid == resource.data.authorId;
       }
     }

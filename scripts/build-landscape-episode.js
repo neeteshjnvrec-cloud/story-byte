@@ -27,7 +27,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const { fetchSceneImage, fetchStoryImage, hashSeed } = require('./lib/scene-image');
+const { fetchSceneImage, fetchStoryImage, fillMissingImages, hashSeed } = require('./lib/scene-image');
 const { renderLandscapeVideo, WIDTH, HEIGHT } = require('./lib/video-landscape');
 const { callGroqJson, extractJson } = require('./lib/carousel-copy');
 const { parseSrt } = require('./lib/subtitles');
@@ -710,7 +710,7 @@ function hashtag(value) {
   return `#${String(value).replace(/[^\p{L}\p{N}]+/gu, '')}`;
 }
 
-const WHATSAPP = String(process.env.WHATSAPP_CHANNEL_URL || '').trim();
+const { followLines } = require('./lib/social-extras');
 
 function kathaMetadata({ plan, cues, parts }) {
   const chapters = chapterMarks(cues, parts, plan.chapters);
@@ -731,7 +731,7 @@ function kathaMetadata({ plan, cues, parts }) {
     ...(chapters.length ? ['⏱️ अध्याय', ...chapters.map((m) => `${timestamp(m.time)} ${m.label}`), ''] : []),
     '🙏 रोज़ एक नई कथा — हमारे Shorts देखें और चैनल सब्सक्राइब करें',
     `📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: ${APP_LINK}`,
-    ...(WHATSAPP ? [`💬 रोज़ नई कथा WhatsApp पर: ${WHATSAPP}`] : []),
+    ...followLines(),
     '',
     [...new Set([...KATHA_HASHTAGS, '#katha', '#bhakti', '#sanatandharma', '#hindistory', '#StoryByte'])].join(' '),
   ].join('\n');
@@ -866,6 +866,8 @@ async function main() {
   console.log(`Generating ${sceneCount} landscape scenes...`);
   const scenes = [];
   const scenePrompts = [];
+  const images = [];
+  const requests = [];
   for (let index = 0; index < sceneCount; index += 1) {
     const sceneNumber = index + 1;
     const segment = segments[index];
@@ -877,22 +879,31 @@ async function main() {
     scenePrompts.push(description);
 
     console.log(`Generating scene ${sceneNumber}/${sceneCount}...`);
-    let image = await fetchSceneImage(
+    const request = [
       scenePrompt(description, bible),
       hashSeed(`${title}-s${season}-${episode}-${sceneNumber}`),
       // Native 16:9 from FLUX.2 (lib/cloudflare-image.js), scaled 1.43x to
       // 1920x1080 — not a 1024 square cropped to a 576px strip and blown up.
-      { width: WIDTH, height: HEIGHT, steps: IMAGE_STEPS, hq: HQ_LANDSCAPE }
-    );
-    if (!image) {
-      // One failed image used to abort the whole ~15-minute episode.
-      console.warn(`Scene ${sceneNumber}: image generation failed, using a themed fallback card`);
-      image = await renderFallbackCover(themeKey, { width: WIDTH, height: HEIGHT });
-    }
-    const imagePath = path.join(outputDirectory, `scene-${String(sceneNumber).padStart(2, '0')}.jpg`);
-    fs.writeFileSync(imagePath, image);
-    scenes.push({ file: imagePath, duration: Math.max(2, segment.end - segment.start) });
+      { width: WIDTH, height: HEIGHT, steps: IMAGE_STEPS, hq: HQ_LANDSCAPE },
+    ];
+    requests.push(request);
+    images.push(await fetchSceneImage(...request));
   }
+  // A failed picture gets another try, then a reframed neighbour — never a
+  // gradient card in the middle of the episode (one only if no picture at all
+  // came through). One failed image used to abort the whole episode.
+  const failed = images.filter((image) => !image).length;
+  if (failed) console.warn(`${failed} scene image(s) failed: retrying, then reusing a neighbouring picture`);
+  const filled = await fillMissingImages(images, {
+    retry: (i) => fetchSceneImage(...requests[i]),
+    fallback: () => renderFallbackCover(themeKey, { width: WIDTH, height: HEIGHT }),
+    width: WIDTH, height: HEIGHT,
+  });
+  filled.forEach((image, index) => {
+    const imagePath = path.join(outputDirectory, `scene-${String(index + 1).padStart(2, '0')}.jpg`);
+    fs.writeFileSync(imagePath, image);
+    scenes.push({ file: imagePath, duration: Math.max(2, segments[index].end - segments[index].start) });
+  });
 
   const videoPath = path.join(outputDirectory, 'episode.mp4');
   console.log('Rendering 1920x1080 landscape video with captions...');

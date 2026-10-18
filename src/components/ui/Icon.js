@@ -31,7 +31,7 @@ const MAP = {
   timer: 'timer-outline', lock: 'lock-closed-outline',
   eye: 'eye-outline', 'eye-off': 'eye-off-outline', mail: 'mail-outline',
   'chev-down': 'chevron-down', 'chev-left': 'chevron-back', 'chev-right': 'chevron-forward',
-  flame: 'flame', bell: 'notifications-outline', globe: 'globe-outline',
+  flame: 'flame', bell: 'notifications-outline', globe: 'globe-outline', whatsapp: 'logo-whatsapp',
   'bell-slash': 'notifications-off-outline', 'bell-off': 'notifications-off-outline',
   info: 'information-circle-outline', trash: 'trash-outline',
   people: 'people-outline', sparkles: 'sparkles',

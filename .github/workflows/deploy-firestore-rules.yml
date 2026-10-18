@@ -3,7 +3,7 @@ name: Deploy Firestore Rules
 # Publishes firestore/firestore.rules.json (including the coin rules) to the
 # live database. Run it by hand after the rules change, before releasing an
 # app version that depends on them. The rules' own tests:
-# firestore/tests/coins.rules.test.mjs.
+# firestore/tests/coins.rules.test.mjs and stories.rules.test.mjs.
 on:
   workflow_dispatch:
 
@@ -22,11 +22,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Test the coin rules in the emulator first
+      - name: Test the rules in the emulator first
         working-directory: firestore/tests
         run: |
           npm install --no-save --no-audit --no-fund @firebase/rules-unit-testing@4 firebase@11 firebase-tools@14
-          npx firebase emulators:exec --only firestore --project demo-coins "node --test coins.rules.test.mjs"
+          npx firebase emulators:exec --only firestore --project demo-coins "node --test coins.rules.test.mjs stories.rules.test.mjs"
       - name: Deploy the rules and indexes
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

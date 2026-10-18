@@ -21,7 +21,7 @@ const PROGRESS_SAVE_INTERVAL = 30000; // 30 seconds
 export const AudioProvider = ({ children }) => {
   // Play counts live in AppContext's shared metric store so every screen
   // showing this story updates together.
-  const { recordPlay, autoplayNext, setLastPlayTab, downloads } = useAppContext() || {};
+  const { recordPlay, autoplayNext, setLastPlayTab, downloads, defaultSpeed = 1 } = useAppContext() || {};
   const [currentStory, setCurrentStory] = useState(null);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -450,6 +450,16 @@ export const AudioProvider = ({ children }) => {
     const newTime = Math.max(currentTime - 10, 0);
     await player.seekTo(newTime);
   }, []);
+
+  // Settings → Default speed: applies when it loads and whenever it changes,
+  // including to a story already playing. The player's own speed button
+  // still changes it for the session.
+  useEffect(() => {
+    setSpeed(defaultSpeed);
+    if (playerRef.current) {
+      try { playerRef.current.setPlaybackRate(defaultSpeed); } catch (e) {}
+    }
+  }, [defaultSpeed]);
 
   const cycleSpeed = useCallback(() => {
     const currentIndex = SPEEDS.indexOf(speed);

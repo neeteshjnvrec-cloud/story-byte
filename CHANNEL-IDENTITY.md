@@ -43,7 +43,7 @@ clips, bhajans or long pravachans. Here, every day:
 | Pillar | What | Format | Goal |
 | --- | --- | --- | --- |
 | वार की कथा | The weekday deity's katha | Daily Short | Views, subscribers, habit |
-| पर्व-व्रत कथा | Festival and vrat kathas on the day | Daily Short (takes priority) | Trend and search spikes |
+| पर्व-व्रत कथा | Festival and vrat kathas: the best-known one the afternoon before, a second on the day | Extra Short the day before + the day's Short | Trend and search spikes |
 | बाल लीला | Bal Krishna, Bal Hanuman, Bal Ganesh | Within the daily rotation | The channel's best performers |
 | रविवार की पूरी कथा | One katha told in full, ~15 minutes | Weekly long video | Search ranking, watch hours |
 
@@ -52,7 +52,8 @@ clips, bhajans or long pravachans. Here, every day:
 | When (IST) | What | Where |
 | --- | --- | --- |
 | Every morning (~5:30–6:00) | The day's katha Short, ending with tomorrow's teaser; first comment asks a question and repeats the teaser | YouTube, Facebook, Instagram |
-| Sunday ~10:30 | The week's long katha (Weekly Long Katha workflow), titled as people search: "हनुमान जी की कथा: …" | YouTube, Facebook |
+| Day before a festival, ~1–5 PM | The festival's best-known katha (e.g. Veeravati's करवा चौथ व्रत कथा), a day ahead of the searches; on the festival morning the daily Short is a second katha of it | YouTube, Facebook, Instagram |
+| Sunday ~10:30 | The week's long katha (Weekly Long Katha workflow), titled as people search: "हनुमान जी की कथा: …". A festival that Sunday or in the week after takes it (the biggest one, if two) | YouTube, Facebook |
 
 **Shorts vs. search.** The daily Shorts are for reach: the Shorts feed
 pushes them to new viewers. The Sunday long video is for search and watch
@@ -62,6 +63,16 @@ a thumbnail, and keeps paying off for months. Over 90 days that gives
 After the first month, look at which deities and kathas did best
 (`reports/social/latest.json`) and use **Remake Short** to give the winners
 a hand-finished version.
+
+**Festival calendar.** `scripts/occasions.js` defines each festival once
+(`FESTIVALS`) with two kathas: `eveKatha` (the best-known, posted the
+afternoon before by the 12:53 PM IST run of Daily Stories) and `katha` (the
+festival morning), and dates it per year in `FESTIVAL_DAYS`. Navratri days
+(`NAVRATRIS` in `scripts/lib/devotional-calendar.js`) tell that day's form of
+Durga. October 2026 through December 2027 is covered; add 2028's dates
+before January 2028, from a panchang (Drik Panchang), since lunar festivals
+move every year. To post a festival-eve katha by hand: Actions → Daily
+Stories → Run workflow → tick "Festival-eve run".
 
 ## Paste into YouTube Studio
 
@@ -80,7 +91,15 @@ a hand-finished version.
 
 📱 सभी कथाएँ ऑडियो में, मुफ़्त — StoryByte ऐप:
 https://play.google.com/store/apps/details?id=com.storybyte.app
+
+💬 रोज़ की कथा WhatsApp पर:
+https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l
 ```
+
+**Channel links** (Customisation → Basic info → Links): add the app
+(`https://play.google.com/store/apps/details?id=com.storybyte.app`) and
+the WhatsApp Channel. These show on the channel banner, where they can be
+tapped, unlike links in Shorts comments.
 
 **Banner text:** `रोज़ सुबह एक पावन कथा • हर रविवार पूरी कथा`
 
@@ -94,14 +113,58 @@ https://play.google.com/store/apps/details?id=com.storybyte.app
 For this audience, a WhatsApp Channel works the way an email list does
 elsewhere: a direct line to your viewers that no feed algorithm controls.
 
-1. WhatsApp → **Updates** → **+** → **New channel**. Name it like the channel, and use the slogan as its description.
-2. Channel info → **Share** → copy the link (`https://whatsapp.com/channel/…`).
-3. GitHub → this repository → **Settings → Secrets and variables → Actions → Variables → New repository variable**: name `WHATSAPP_CHANNEL_URL`, value the link.
+**The channel:** `रोज़ एक कथा | StoryByte` —
+https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l
 
-From the next run, every Short's description, Reel caption, Facebook post
-and Sunday long video carries "💬 रोज़ नई कथा WhatsApp पर: …". Post each
-day's Short to the Channel too, by hand: WhatsApp has no posting API for
-Channels.
+The name carries the app's name, so viewers connect the channel, the Shorts
+and the app. Description (as set on the channel):
+
+```
+🙏 रोज़ सुबह एक पावन कथा — पूरी, सच्ची, सुंदर।
+
+सोमवार महादेव • मंगलवार हनुमान जी • बुधवार गणपति बप्पा • गुरुवार भगवान विष्णु • शुक्रवार माँ दुर्गा-लक्ष्मी • शनिवार शनि देव • रविवार श्री कृष्ण
+पर्व-त्योहार पर उस दिन की विशेष व्रत कथा।
+
+📱 सभी कथाएँ ऑडियो में, मुफ़्त — StoryByte ऐप:
+https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dwhatsapp%26utm_medium%3Dsocial%26utm_campaign%3Dchannel
+```
+
+The tagged Play Store link makes the channel's installs show up as
+`whatsapp` in Play Console → Statistics → Store listing acquisition.
+Profile picture: the navy-and-gold StoryByte logo; keep it free of
+generator watermarks.
+
+**Where the link appears (automatic):**
+
+- Every Short's description, Reel caption, Facebook post and Sunday long
+  video ends with "💬 रोज़ नई कथा WhatsApp पर: …" (`scripts/lib/social-extras.js`,
+  also used by `scripts/build-landscape-episode.js`).
+- The website: a green WhatsApp button on the home page
+  (`scripts/lib/site-index.js`) and a link on every Hindi story page
+  (`scripts/lib/story-page.js`). Pages written before this change get it
+  when `scripts/build-story-pages.js` re-renders them.
+- The app: Settings → **Daily katha on WhatsApp** (`src/screens/SettingsScreen.js`).
+
+The link lives in `scripts/lib/social-extras.js` and `src/screens/SettingsScreen.js`.
+To move the pipeline to a new channel without a code change, set the
+`WHATSAPP_CHANNEL_URL` repository variable (GitHub → Settings → Secrets
+and variables → Actions → Variables); the app needs a new release.
+
+**Daily routine (by hand, ~2 minutes).** WhatsApp has no posting API for
+Channels, so:
+
+1. **Every morning, ~6 AM:** post the day's katha Short or story link with
+   one line, e.g. "आज मंगलवार — हनुमान जी की कथा 🙏". The same time every
+   day builds the habit.
+2. **Share the post to your WhatsApp Status and family groups.** WhatsApp
+   barely recommends Channels, so this is how new followers find it.
+3. **About once a week, a poll** ("कल किस देवता की कथा सुनना चाहेंगे?"):
+   people who vote keep seeing the channel.
+4. **Festivals:** post the vrat katha **a day early** (Karwa Chauth, Diwali,
+   Chhath…). Those are the posts that get forwarded most.
+
+Add a second admin (Channel info → Admins) so posting doesn't stop when
+you can't.
 
 ## Monetization
 

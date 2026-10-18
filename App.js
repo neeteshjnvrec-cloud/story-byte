@@ -80,9 +80,11 @@ function AuthStack() {
   );
 }
 
-// Main app stack shown when signed in: 4 tabs + StoryDetail + Settings + Onboarding
+// Main app stack shown when signed in, or to a guest: tabs + StoryDetail +
+// Settings + Onboarding. A guest also gets the sign-in screens here, opened
+// from "Sign in" prompts; signing in swaps in a fresh signed-in stack.
 function MainStack({ isNewUser, navigationRef, ready }) {
-  const { userStats, updateUserProfile } = useAppContext();
+  const { user, userStats, updateUserProfile } = useAppContext();
 
   // Whether mandatory profile fields are missing. Only known once the profile
   // has loaded: treating "not loaded yet" as incomplete opened Edit Profile on
@@ -151,6 +153,13 @@ function MainStack({ isNewUser, navigationRef, ready }) {
         <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Coins" component={CoinsScreen} />
+        {!user ? (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Signup" component={SignupScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          </>
+        ) : null}
         {isNewUser ? (
           <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         ) : null}
@@ -162,7 +171,7 @@ function MainStack({ isNewUser, navigationRef, ready }) {
 }
 
 function Root({ navigationRef, ready }) {
-  const { user, loading, userStats } = useAppContext();
+  const { user, guest, loading, userStats } = useAppContext();
   // Whether this account still gets the welcome screens: null while that's
   // being checked, so a returning user never sees them flash past.
   const [showWelcome, setShowWelcome] = useState(null);
@@ -193,7 +202,7 @@ function Root({ navigationRef, ready }) {
     );
   }
 
-  return user ? <MainStack isNewUser={false} navigationRef={navigationRef} ready={ready} /> : <AuthStack />;
+  return user || guest ? <MainStack isNewUser={false} navigationRef={navigationRef} ready={ready} /> : <AuthStack />;
 }
 
 export default function App() {

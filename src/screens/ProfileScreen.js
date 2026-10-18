@@ -5,7 +5,9 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  StyleSheet
+  StyleSheet,
+  Share,
+  Linking,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,6 +20,11 @@ import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
 import { CompactRow } from '../components/story/StoryCard';
 import { ProfileInfoCard } from '../components/profile/ProfileInfoCard';
+import { useWallet } from '../context/WalletContext';
+import { INVITEE_COINS, INVITER_COINS } from '../services/wallet';
+import { sharedAppLink } from '../utils/shareStory';
+import { WHATSAPP_CHANNEL_URL } from '../constants/links';
+import { myAuthorName } from '../utils/author';
 
 export const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -27,6 +34,9 @@ export const ProfileScreen = () => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
+  // Community stories this account wrote and the pipeline published.
+  const [myStories, setMyStories] = useState([]);
+  const { wallet, balance } = useWallet();
 
   // Cache for user data to prevent redundant fetches
   const [statsCache, setStatsCache] = useState(null);
@@ -54,6 +64,7 @@ export const ProfileScreen = () => {
       const userStatsData = await apiService.getUserStats();
       // Only the 5 shown under Recently played.
       const userHistory = await apiService.getUserProgress({ max: 5 });
+      apiService.getStoriesByAuthor(user.uid, 10).then(setMyStories).catch(() => {});
 
       setStats(userStatsData);
       setHistory(userHistory || []);
@@ -70,6 +81,17 @@ export const ProfileScreen = () => {
     }
   }, [user, statsCache, historyCache]);
 
+  // The invite code is the app's own word of mouth: the friend gets coins on
+  // joining, and so does whoever invited them (Coins screen has the details).
+  const shareInvite = useCallback(() => {
+    const code = wallet?.inviteCode;
+    Share.share({
+      message: code
+        ? `🙏 StoryByte पर रोज़ नई कथा सुनिए! मेरा invite code ${code} डालें और ${INVITEE_COINS} coins पाएं: ${sharedAppLink('invite')}`
+        : `🙏 StoryByte पर रोज़ नई कथा सुनिए: ${sharedAppLink('invite')}`,
+    }).catch(() => {});
+  }, [wallet?.inviteCode]);
+
   const handleSignOut = useCallback(async () => {
     try {
       await signOut();
@@ -80,18 +102,24 @@ export const ProfileScreen = () => {
 
   // Memoize derived data to prevent unnecessary recalculations. Before the
   // signed-out return below: hooks must run in the same order every render.
-  const name = useMemo(() => user?.displayName || (user?.email ? user.email.split('@')[0] : 'You'), [user?.displayName, user?.email]);
+  const name = useMemo(() => myAuthorName(user, userStats) || 'You', [user, userStats]);
   const initial = useMemo(() => (name[0] || 'U').toUpperCase(), [name]);
   const minutes = useMemo(() => stats?.minutesListened || 0, [stats?.minutesListened]);
   const listenTime = useMemo(() => `${Math.floor(minutes / 60)}h ${minutes % 60}m`, [minutes]);
   const streak = useMemo(() => stats?.streak ?? userStats?.streak ?? 0, [stats?.streak, userStats?.streak]);
 
   if (!user) {
+    // A guest: what an account adds, and the way in.
     return (
-      <View style={[styles.container, styles.center, { backgroundColor: theme.background }]}>
-        <AppText variant="body" color="textSecondary" style={{ textAlign: 'center', paddingHorizontal: 40 }}>
-          Please sign in to view your profile
+      <View style={[styles.container, styles.center, { backgroundColor: theme.background, paddingHorizontal: 32 }]}>
+        <Icon name="user-outline" size={44} color={theme.accent} />
+        <AppText variant="h2" style={{ textAlign: 'center', marginTop: 14 }}>Make StoryByte yours</AppText>
+        <AppText variant="body" color="textSecondary" style={{ textAlign: 'center', marginTop: 8, marginBottom: 24 }}>
+          Sign in to save favourites, continue stories on any phone, earn coins, comment and create your own stories.
         </AppText>
+        <Button title="Sign in or create account" onPress={() => navigation.navigate('Login')} style={{ alignSelf: 'stretch' }} />
+        <Button title="Settings" variant="ghost" leftIcon="gear" onPress={() => navigation.navigate('Settings')}
+          style={{ alignSelf: 'stretch', marginTop: 10 }} />
       </View>
     );
   }
@@ -153,6 +181,28 @@ export const ProfileScreen = () => {
           </View>
         )}
 
+        {/* Shortcuts */}
+        <View style={styles.shortcuts}>
+          {[
+            { icon: 'wallet-outline', label: wallet ? `${balance} coins` : 'Coins', onPress: () => navigation.navigate('Coins') },
+            { icon: 'gift-outline', label: `Invite · +${INVITER_COINS}`, onPress: shareInvite },
+            { icon: 'library', label: 'Library', onPress: () => navigation.navigate('Library') },
+            { icon: 'whatsapp', label: 'WhatsApp', onPress: () => Linking.openURL(WHATSAPP_CHANNEL_URL).catch(() => {}) },
+          ].map((item) => (
+            <Pressable
+              key={item.label}
+              onPress={item.onPress}
+              style={[styles.shortcut, { backgroundColor: theme.card, borderColor: theme.border }]}
+              accessibilityRole="button"
+            >
+              <Icon name={item.icon} size={22} color={theme.accent} />
+              <AppText variant="caption" color="textSecondary" style={{ marginTop: 6, textAlign: 'center' }} numberOfLines={1}>
+                {item.label}
+              </AppText>
+            </Pressable>
+          ))}
+        </View>
+
         {/* Streak card */}
         <LinearGradient
           colors={[theme.gradientStart, theme.gradientEnd]}
@@ -200,6 +250,37 @@ export const ProfileScreen = () => {
                 key={item.storyId}
                 story={item}
                 onPress={() => navigation.navigate('StoryDetail', { storyId: item.storyId, story: { id: item.storyId, ...item } })}
+              />
+            ))
+          )}
+        </View>
+
+        {/* My stories */}
+        <View style={styles.section}>
+          <AppText variant="micro" color="textTertiary" style={styles.sectionLabel}>
+            MY STORIES
+          </AppText>
+          {myStories.length === 0 ? (
+            <Pressable
+              onPress={() => navigation.navigate('Create')}
+              style={[styles.createCard, { backgroundColor: theme.accentSoft }]}
+              accessibilityRole="button"
+            >
+              <Icon name="sparkles" size={22} color={theme.accent} />
+              <View style={{ flex: 1 }}>
+                <AppText variant="label" color="accent">Write your first story</AppText>
+                <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>
+                  One line is enough: it becomes a narrated story with a cover, for everyone to hear.
+                </AppText>
+              </View>
+              <Icon name="chev-right" size={18} color={theme.accent} />
+            </Pressable>
+          ) : (
+            myStories.map((item) => (
+              <CompactRow
+                key={item.id}
+                story={item}
+                onPress={() => navigation.navigate('StoryDetail', { storyId: item.id, story: item })}
               />
             ))
           )}
@@ -292,6 +373,28 @@ const styles = StyleSheet.create({
     flexBasis: '47%',
     borderRadius: 16,
     borderWidth: 1,
+    padding: 15,
+  },
+  shortcuts: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: 20,
+    marginTop: 16,
+  },
+  shortcut: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 4,
+  },
+  createCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginHorizontal: 20,
+    borderRadius: 16,
     padding: 15,
   },
   section: { marginTop: 28 },

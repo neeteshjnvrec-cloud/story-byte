@@ -30,7 +30,7 @@ export const FavoritesScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme() || { theme: {} };
   const insets = useSafeAreaInsets();
-  const { favorites, loading: contextLoading, downloads, downloadingIds, toggleDownload } = useAppContext();
+  const { user, favorites, loading: contextLoading, downloads, downloadingIds, toggleDownload } = useAppContext();
   const { playStory } = useAudioPlayer();
   const [stories, setStories] = useState([]);
   const [history, setHistory] = useState([]);
@@ -164,7 +164,7 @@ export const FavoritesScreen = () => {
         <EmptyState
           icon="heart"
           title="No favorites yet"
-          caption="Tap the heart on any story to save it here."
+          caption={user ? 'Tap the heart on any story to save it here.' : 'Sign in, then tap the heart on any story to save it here.'}
         />
       );
     }

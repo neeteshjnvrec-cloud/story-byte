@@ -6,16 +6,21 @@ import { setDoc, getDoc, doc, serverTimestamp, updateDoc, increment, getDocs, qu
 import { db } from '../services/firebase';
 import apiService from '../services/api';
 import { loginWithEmail as authServiceLogin, signupWithEmail as authServiceSignup, signOutUser, sendResetEmail } from '../services/auth';
-import { dispatchAudioWorkflow } from '../utils/communityAudioGen';
 import { storyPlays } from '../utils/storyMetrics';
 import { mergeNewestFirst } from '../utils/videoStory';
 import { notificationService } from '../services/notificationService';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as Network from 'expo-network';
 
 const STORAGE_AUTOPLAY = 'storybyte-autoplay-next';
 const STORAGE_LAST_TAB = 'storybyte-last-play-tab';
 const STORAGE_WIFI_ONLY = 'storybyte-wifi-only';
+const STORAGE_DEFAULT_SPEED = 'storybyte-default-speed';
+const STORAGE_STORY_LANGUAGE = 'storybyte-story-language';
 const STORAGE_DOWNLOADS = 'storybyte-downloads';
+// Set when someone chose "Continue without account" on sign in, so the app
+// opens straight to the stories next time too. Cleared by signing in.
+const STORAGE_GUEST = 'storybyte-guest';
 // Community feed stories per page.
 const COMMUNITY_PAGE = 5;
 
@@ -30,6 +35,11 @@ const storyIdOf = (story) => (typeof story === 'string' ? story : story?.id || s
 export const AppContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Guests browse and listen without an account; anything saved to an
+  // account (favourites, likes, ratings, comments, coins, creating stories)
+  // asks them to sign in (hooks/useRequireAccount.js).
+  const [guest, setGuest] = useState(false);
+  const [guestChecked, setGuestChecked] = useState(false);
   const [userStats, setUserStats] = useState(null);
   const [favorites, setFavorites] = useState([]);
 
@@ -104,10 +114,25 @@ export const AppContextProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    AsyncStorage.getItem(STORAGE_GUEST)
+      .then((saved) => setGuest(saved === 'true'))
+      .catch(() => {})
+      .finally(() => setGuestChecked(true));
+  }, []);
+
+  const continueAsGuest = useCallback(() => {
+    setGuest(true);
+    AsyncStorage.setItem(STORAGE_GUEST, 'true').catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
 
       if (firebaseUser) {
+        // Signed in: no longer a guest, and signing out later shows sign in.
+        setGuest(false);
+        AsyncStorage.removeItem(STORAGE_GUEST).catch(() => {});
         await loadUserData(firebaseUser);
         // Register for push here, once per sign-in. It used to live in a
         // button component that no screen renders, so it never ran — and even
@@ -357,6 +382,7 @@ export const AppContextProvider = ({ children }) => {
   const toggleFavorite = useCallback(async (story) => {
     const id = storyIdOf(story);
     if (!id) return;
+    if (!auth.currentUser) return { needsAuth: true };
     const wasFavorite = favorites.some(f => f.id === id);
 
     setFavorites((prev) => (wasFavorite
@@ -420,6 +446,10 @@ export const AppContextProvider = ({ children }) => {
   const [communityStories, setCommunityStories] = useState([]);
   const [autoplayNext, setAutoplayNextState] = useState(true);
   const [wifiOnly, setWifiOnlyState] = useState(false);
+  // Settings → Default speed (what every story starts at) and Story language
+  // (which language Home opens on: 'All', 'EN' or 'HI').
+  const [defaultSpeed, setDefaultSpeedState] = useState(1);
+  const [storyLanguage, setStoryLanguageState] = useState('All');
   const [lastPlayTab, setLastPlayTabState] = useState(null); // 'home' | 'community'
   // Downloads: local file URI + metadata, keyed by story id.
   const [downloads, setDownloads] = useState({});
@@ -433,6 +463,10 @@ export const AppContextProvider = ({ children }) => {
         if (saved !== null) setAutoplayNextState(saved === 'true');
         const wifi = await AsyncStorage.getItem(STORAGE_WIFI_ONLY);
         if (wifi !== null) setWifiOnlyState(wifi === 'true');
+        const speed = Number(await AsyncStorage.getItem(STORAGE_DEFAULT_SPEED));
+        if (speed > 0) setDefaultSpeedState(speed);
+        const lang = await AsyncStorage.getItem(STORAGE_STORY_LANGUAGE);
+        if (lang) setStoryLanguageState(lang);
         const tab = await AsyncStorage.getItem(STORAGE_LAST_TAB);
         if (tab) setLastPlayTabState(tab);
       } catch (e) {}
@@ -474,6 +508,16 @@ export const AppContextProvider = ({ children }) => {
     try { await AsyncStorage.setItem(STORAGE_WIFI_ONLY, String(val)); } catch (e) {}
   };
 
+  const setDefaultSpeed = useCallback((val) => {
+    setDefaultSpeedState(val);
+    AsyncStorage.setItem(STORAGE_DEFAULT_SPEED, String(val)).catch(() => {});
+  }, []);
+
+  const setStoryLanguage = useCallback((val) => {
+    setStoryLanguageState(val);
+    AsyncStorage.setItem(STORAGE_STORY_LANGUAGE, val).catch(() => {});
+  }, []);
+
   const setLastPlayTab = useCallback((tab) => {
     setLastPlayTabState(tab);
     try { AsyncStorage.setItem(STORAGE_LAST_TAB, tab).catch(() => {}); } catch (e) {}
@@ -506,10 +550,13 @@ export const AppContextProvider = ({ children }) => {
       return { downloaded: false, path: already.path };
     }
 
-    // NOTE: `wifiOnly` is persisted and surfaced in Settings, but not enforced
-    // here — detecting the connection type needs `expo-network`, which isn't in
-    // package.json. Enforcing it with the module absent would crash on import,
-    // so the gate is deliberately left out rather than faked.
+    // Settings → "Downloads over Wi-Fi only": no download on mobile data.
+    // An unknown connection type is let through rather than blocked.
+    if (wifiOnly) {
+      const net = await Network.getNetworkStateAsync().catch(() => null);
+      const onMobileData = net?.type === Network.NetworkStateType.CELLULAR;
+      if (onMobileData) return { downloaded: false, needsWifi: true };
+    }
 
     // documentDirectory, not cacheDirectory: the OS may purge the cache dir
     // under storage pressure, which would delete the audio the user downloaded
@@ -542,7 +589,7 @@ export const AppContextProvider = ({ children }) => {
     } finally {
       setDownloadingIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
     }
-  }, [downloads]);
+  }, [downloads, wifiOnly]);
 
   const generateStory = async ({ title, prompt, genre, language }) => {
     setIsGenerating(true);
@@ -588,21 +635,13 @@ export const AppContextProvider = ({ children }) => {
       const published = await apiService.publishCommunityStory(storyData);
       if (!published) return null;
 
-      const storyId = published.storyId || published.id;
-
       // Deliberately NOT added to communityStories. The doc is created with
       // status 'under_review', which is invisible to everyone including its
       // author; the realtime listener picks it up only once the pipeline flips
       // it to 'published'. Prepending it here used to pin an unpublished draft
-      // to the top of the feed for every user.
-      const dispatched = await dispatchAudioWorkflow(storyId);
-      if (!dispatched) {
-        // Not fatal: the community-stories workflow also runs on a schedule and
-        // sweeps up anything the dispatch missed. Worth logging loudly because
-        // it means publication is delayed to the next sweep.
-        console.error('[AppContext] workflow dispatch failed — story will be picked up by the scheduled run');
-      }
-
+      // to the top of the feed for every user. The community-stories workflow's
+      // hourly run picks it up; the app no longer triggers that run itself,
+      // because doing so meant shipping a GitHub token to every client.
       return published;
     } catch (error) {
       // The daily cap is actually enforced by the security rules (see
@@ -668,7 +707,10 @@ export const AppContextProvider = ({ children }) => {
 
   const value = useMemo(() => ({
     user,
-    loading,
+    // Startup isn't done until both the session and the guest choice are known.
+    loading: loading || !guestChecked,
+    guest,
+    continueAsGuest,
     userStats,
     favorites,
     communityStories,
@@ -701,12 +743,16 @@ export const AppContextProvider = ({ children }) => {
     // Downloads
     wifiOnly,
     setWifiOnly,
+    defaultSpeed,
+    setDefaultSpeed,
+    storyLanguage,
+    setStoryLanguage,
     downloads,
     downloadingIds,
     toggleDownload,
   }), [
-    user, loading, userStats, favorites, communityStories, isGenerating,
-    autoplayNext, lastPlayTab, wifiOnly,
+    user, loading, guestChecked, guest, continueAsGuest, userStats, favorites, communityStories, isGenerating,
+    autoplayNext, lastPlayTab, wifiOnly, defaultSpeed, setDefaultSpeed, storyLanguage, setStoryLanguage,
     toggleFavorite, isInFavorites, updateUserProfile, fetchCommunityStories,
     loadMoreCommunity, communityHasMore, receiveStoryDocs, receiveCommunityStories, getStoryMetrics, toggleLike,
     rateStory, recordPlay, recordShare, setAutoplayNext, setLastPlayTab, downloads, downloadingIds, toggleDownload,
