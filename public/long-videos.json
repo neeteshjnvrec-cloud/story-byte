@@ -1,6 +1,20 @@
 {
- "updatedAt": "2026-10-17T01:59:48.050Z",
+ "updatedAt": "2026-10-18T01:58:54.215Z",
  "videos": [
+  {
+   "id": "dap9qNOiUEI",
+   "youtubeUrl": "https://youtu.be/dap9qNOiUEI",
+   "thumbnail": "https://i.ytimg.com/vi/dap9qNOiUEI/mqdefault.jpg",
+   "thumbnailHd": "https://i.ytimg.com/vi/dap9qNOiUEI/maxresdefault.jpg",
+   "title": "Navratri | Season 1 Episode Day 7: Shadows Over the Sacred Flame",
+   "seriesTitle": "Navratri",
+   "season": "1",
+   "episode": "Day 7",
+   "description": "When the first Navratri fire flickers, ancient secrets stir and a hidden danger threatens the devotees.",
+   "language": "hi",
+   "durationSec": 998,
+   "publishedAt": "2026-10-17T12:24:00.420Z"
+  },
   {
    "id": "XfGf4sKSxIw",
    "youtubeUrl": "https://youtu.be/XfGf4sKSxIw",
