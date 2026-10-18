@@ -869,15 +869,6 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
       const storyId = `community_${Date.now()}_${this.uid}`;
       const storyRef = doc(db, 'stories', storyId);
 
-      // Generate a cover image URL locally (Pollinations AI — free, no key needed)
-      let coverImage = '';
-      try {
-        const prompt = encodeURIComponent(
-          `${storyData.genre} story illustration, children's book style, warm colors, ${storyData.title || ''}`
-        );
-        const seed = Math.floor(Math.random() * 99999);
-        coverImage = `https://image.pollinations.ai/prompt/${prompt}?width=768&height=768&nologo=true&seed=${seed}&model=flux`;
-      } catch (_) {}
 
       const storyDoc = {
         storyId,
@@ -887,7 +878,7 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
         language: storyData.language || 'en',
         text: storyData.text,
         audioUrl: '',          // filled by host-on-firebase.js after deploy
-        coverImage,            // real AI-generated URL saved immediately
+        coverImage: '',        // drawn by generate-community-audio.js before it publishes
         duration: 0,
         authorName: storyData.authorName || 'Anonymous',
         authorId: this.uid,

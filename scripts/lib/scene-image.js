@@ -38,27 +38,54 @@ function tagged(buf, source) {
   return buf;
 }
 
+// Battle kathas (Ram and Ravana, Durga and Mahishasura…) trip the models'
+// safety filter ("output has been flagged"): one Sunday video lost 15 of
+// its first 21 sharp pictures to it. The same moment, retold without the
+// violence, nearly always draws — the narration still tells the story.
+const VIOLENT_WORDS = /\b(slay(s|ing)?|slain|slew|kill(s|ed|ing)?|blood(y|ied)?|gore|corpses?|dead( bodies| body)?|severed|behead(s|ed|ing)?|decapitat\w*|stab(s|bed|bing)?|pierc(e|es|ed|ing)|wound(s|ed)?|dying|death|murder\w*|torture\w*|massacre\w*|carnage)\b/gi;
+
+/** `prompt` with the violent words taken out and a peaceful framing added. */
+function gentlerPrompt(prompt) {
+  return `${prompt.replace(VIOLENT_WORDS, 'facing')}. Devotional and dignified: the moment just before or after, ` +
+    'divine light and calm resolve, no blood, no wounds, no gore, no one hurt';
+}
+
 async function fetchStoryImage(prompt, seed, opts = {}) {
   const { width = 1080, height = 1350, chainRetries = 1, steps, hq } = opts;
+  // A flagged picture is retried once with the gentler prompt, and the
+  // standard model then gets the gentler one too.
+  let ask = prompt;
   // `hq` ({ width, height, refs }) asks for the FLUX.2 model at its own
   // native size first — same aspect as the final frame, so the result is
   // only ever scaled up a little, never cropped. Any failure (including
   // the free daily allocation running out) drops to the usual chain.
   if (hq) {
-    try {
-      const buf = await fetchCloudflareHQImage(prompt, hq);
-      return tagged(await sharp(buf).resize(width, height, { fit: 'cover', kernel: 'lanczos3' }).jpeg({ quality: 95 }).toBuffer(), 'hq');
-    } catch (e) {
-      console.warn(`    ⚠️  HQ image failed, using the standard model: ${e.message.slice(0, 160)}`);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const buf = await fetchCloudflareHQImage(ask, hq);
+        return tagged(await sharp(buf).resize(width, height, { fit: 'cover', kernel: 'lanczos3' }).jpeg({ quality: 95 }).toBuffer(), 'hq');
+      } catch (e) {
+        if (e.flagged && attempt === 0) {
+          console.warn('    ⚠️  HQ picture flagged by the safety filter; retrying with a gentler prompt');
+          ask = gentlerPrompt(prompt);
+          continue;
+        }
+        console.warn(`    ⚠️  HQ image failed, using the standard model: ${e.message.slice(0, 160)}`);
+        break;
+      }
     }
   }
   let lastError;
   for (let pass = 0; pass <= chainRetries; pass++) {
     try {
-      const buf = await fetchCloudflareImage(prompt, { steps });
+      const buf = await fetchCloudflareImage(ask, { steps });
       return tagged(await sharp(buf).resize(width, height, { fit: 'cover', kernel: 'lanczos3' }).jpeg({ quality: 92 }).toBuffer(), 'standard');
     } catch (e) {
       lastError = e;
+      if (e.flagged && ask === prompt) {
+        ask = gentlerPrompt(prompt);
+        continue;
+      }
       // Every account used up for today: waiting won't bring it back.
       if (/used up today/.test(e.message)) break;
       if (pass < chainRetries) await sleep(10000 * (pass + 1));

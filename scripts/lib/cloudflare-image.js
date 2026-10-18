@@ -31,8 +31,12 @@ function accounts() {
   if (process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN) {
     list.push({ id: process.env.CLOUDFLARE_ACCOUNT_ID.trim(), token: process.env.CLOUDFLARE_API_TOKEN.trim() });
   }
-  for (const pair of String(process.env.CLOUDFLARE_ACCOUNTS || '').split(/[\n,]+/)) {
-    const [id, token] = pair.trim().split(':').map((x) => (x || '').trim());
+  // Pasted secrets carry invisible characters (a U+2028 line separator from
+  // a notes app broke a whole Sunday video): drop every one of them, then
+  // split on any whitespace or comma. IDs and tokens never contain spaces.
+  const raw = String(process.env.CLOUDFLARE_ACCOUNTS || '').replace(/[\u200B-\u200D\uFEFF]/g, '');
+  for (const pair of raw.split(/[\s,;]+/u)) {
+    const [id, token] = pair.split(':').map((x) => (x || '').trim());
     if (id && token && !list.some((a) => a.id === id)) list.push({ id, token });
   }
   return list;
@@ -58,6 +62,9 @@ async function withAccounts(label, attempt) {
     try {
       return await attempt(account);
     } catch (e) {
+      // A flagged picture is about the prompt, not the account: another
+      // account would flag it too, and spend its allocation doing so.
+      if (e.flagged) throw e;
       if (e.usedUp) {
         usedUp.add(account.id);
         console.warn(`    ⚠️  Cloudflare account ${i + 1}/${all.length}: free daily allocation used up${i + 1 < all.length ? ', trying the next account' : ''}`);
@@ -67,6 +74,13 @@ async function withAccounts(label, attempt) {
   }
   if (all.every((a) => usedUp.has(a.id))) errors.push(`all ${all.length} account(s) used up today`);
   throw new Error(`${label}: ${errors.join('; ')}`);
+}
+
+/** Cloudflare's safety filter rejected the picture ("output has been flagged"). */
+function flaggedError(status, body) {
+  const e = new Error(`HTTP ${status}: ${String(body).slice(0, 200)}`);
+  e.flagged = /flagged/i.test(String(body));
+  return e;
 }
 
 function usedUpError(body) {
@@ -110,7 +124,7 @@ async function fetchCloudflareImageFrom({ id: accountId, token: apiToken }, prom
       }
       if (!res.ok) {
         const body = await res.text().catch(() => '');
-        throw new Error(`HTTP ${res.status}: ${body.slice(0, 200)}`);
+        throw flaggedError(res.status, body);
       }
       const json = await res.json();
       if (!json.success || !json.result?.image) {
@@ -163,7 +177,7 @@ async function fetchCloudflareHQImageFrom({ id: accountId, token: apiToken }, pr
       const json = await res.json().catch(() => ({}));
       if (isAllocationUsedUp(res.status, JSON.stringify(json))) throw usedUpError(JSON.stringify(json.errors || json));
       if (!res.ok || !json.success || !json.result?.image) {
-        throw new Error(`HTTP ${res.status}: ${JSON.stringify(json.errors || json).slice(0, 200)}`);
+        throw flaggedError(res.status, JSON.stringify(json.errors || json));
       }
       return Buffer.from(json.result.image, 'base64');
     } catch (e) {

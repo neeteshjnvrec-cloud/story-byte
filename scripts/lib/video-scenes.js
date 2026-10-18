@@ -24,7 +24,7 @@ const { extractJson, callGroqJson } = require('./carousel-copy');
 const { renderFallbackCover } = require('./fallback-cover');
 const sharp = require('sharp');
 const { iconographyFor } = require('./iconography');
-const { devotionalArtStyle } = require('./short-style');
+const { storyArtStyle, shortsStyleKey } = require('./short-style');
 
 // Approved reference portraits (one per figure key, e.g. hanuman.jpg) — see
 // assets/deities/README.md. Any image works; it's shrunk under the model's
@@ -96,7 +96,7 @@ async function llmSceneList({ title, text, genre, description }, count) {
 // Devotional art style comes from DEVOTIONAL_STYLE (lib/short-style.js) —
 // a photorealistic epic-film look by default.
 function artStyle(genre) {
-  return genre === 'devotional' ? devotionalArtStyle() : 'painterly storybook illustration, cinematic lighting, no text, no words';
+  return storyArtStyle(genre);
 }
 
 // FLUX.2 renders the devotional Shorts' portrait frames natively at 9:16
@@ -140,7 +140,9 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
     const figures = devotional ? iconographyFor(planned[i].prompt, { context: `${context} ${title}` }) : [];
     const looks = figures.map((f) => f.look).join('. ');
     const approved = [];
-    for (const f of figures) {
+    // The approved portraits are lifelike: as references they'd pull a
+    // stickman picture back toward realism, so that style draws without them.
+    if (shortsStyleKey() !== 'stickman') for (const f of figures) {
       const ref = await deityReference(f.key);
       if (ref) approved.push({ key: f.key, ref });
     }

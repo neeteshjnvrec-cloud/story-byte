@@ -7,6 +7,12 @@ on:
         description: 'Story ID to generate audio for (optional — if empty, processes all pending)'
         required: false
         default: ''
+      style:
+        description: 'Art style for this run (blank = the DEVOTIONAL_STYLE variable, else realistic)'
+        required: false
+        default: ''
+        type: choice
+        options: ['', realistic, cartoon3d, cartoon2d, stickman]
   # Older app versions trigger this from the app; current ones don't (that
   # needed a GitHub token readable by every client).
   repository_dispatch:
@@ -68,6 +74,9 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNTS: ${{ secrets.CLOUDFLARE_ACCOUNTS }}
+          # Art style for the covers and videos: realistic (default), cartoon3d,
+          # cartoon2d or stickman — the run's choice, else the repository variable.
+          DEVOTIONAL_STYLE: ${{ inputs.style || vars.DEVOTIONAL_STYLE }}
           # Optional — Instagram carousel auto-post. Left unset until
           # INSTAGRAM-SETUP.md's secrets are added; the pipeline just skips
           # the IG post until then.

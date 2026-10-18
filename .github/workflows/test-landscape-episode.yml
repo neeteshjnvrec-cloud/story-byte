@@ -30,11 +30,11 @@ on:
         default: 'science fiction romance'
         type: string
       style:
-        description: 'Art style — "series" keeps the look this series already has (a new series uses the DEVOTIONAL_STYLE variable, else cartoon3d)'
+        description: 'Art style — "series" keeps the look this series already has (a new series uses the DEVOTIONAL_STYLE variable, else realistic)'
         required: true
         default: 'series'
         type: choice
-        options: [series, cartoon3d, cartoon2d, realistic, illustration]
+        options: [series, realistic, cartoon3d, cartoon2d, stickman, illustration]
       publish:
         description: 'Publish the finished episode publicly to YouTube and Facebook'
         required: true

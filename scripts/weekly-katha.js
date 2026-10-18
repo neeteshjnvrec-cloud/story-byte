@@ -18,6 +18,7 @@ const { execFileSync } = require('child_process');
 const path = require('path');
 const { DEITIES, festivalOfWeek, istDate } = require('./lib/devotional-calendar');
 const { devotionalTrends } = require('./lib/trends');
+const { shortsStyleKey } = require('./lib/short-style');
 
 function pick(now = new Date()) {
   const choosing = process.env.KATHA_DEITY || (process.env.KATHA_INDEX !== undefined && process.env.KATHA_INDEX !== '');
@@ -52,6 +53,11 @@ async function main() {
       EPISODE_DEITY: deity.hindi,
       EPISODE_SEARCHES: trends.searches.join('\n'),
       EPISODE_HASHTAGS: deity.hashtags.join(' '),
+      // The same look as the daily Shorts (DEVOTIONAL_STYLE, else realistic)
+      // unless the run asks for another: passed explicitly, because the
+      // "Bhakti Katha" series bible saved cartoon3d on its first run and an
+      // unset EPISODE_STYLE would keep that forever.
+      EPISODE_STYLE: String(process.env.EPISODE_STYLE || '').trim() || shortsStyleKey(),
     },
   });
 }

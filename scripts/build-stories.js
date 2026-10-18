@@ -43,7 +43,7 @@ const { appendSpokenTeaser, fallbackTeaser, endingCandidates } = require('./lib/
 const { withCloseUps, shortSceneCount } = require('./lib/close-ups');
 const { devotionalTrends } = require('./lib/trends');
 const { iconographyFor } = require('./lib/iconography');
-const { styleOfDay, fitShort, devotionalArtStyle, shortsStyleKey } = require('./lib/short-style');
+const { styleOfDay, fitShort, devotionalArtStyle, storyArtStyle, shortsStyleKey } = require('./lib/short-style');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synth } = require('./lib/narrate');
@@ -315,7 +315,7 @@ function coverPrompt(slotOrStory, content) {
     : occasion ? `${occasion.visual}, ${occasion.name} celebration` : subject;
   // A devotional cover matches its video's art style (DEVOTIONAL_STYLE).
   if (genre === 'devotional') return `${finalSubject}. ${mood}, ${devotionalArtStyle()}`;
-  return `${finalSubject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text, no words`;
+  return `${finalSubject}. ${mood}, ${storyArtStyle(genre, { orientation: 'square' })}`;
 }
 
 function exactDuration(file) {

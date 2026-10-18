@@ -24,6 +24,7 @@ const { buildCarouselCopy } = require('./carousel-copy');
 const { fetchSceneImage, hashSeed } = require('./scene-image');
 const { theme } = require('./genre-theme');
 const { renderFallbackCover } = require('./fallback-cover');
+const { storyArtStyle } = require('./short-style');
 
 const W = 1080;
 const H = 1350;
@@ -267,7 +268,7 @@ async function buildCarouselSlides({ storyId, title, text, genre, description, c
       // its own beat of the story — not a generic reused cover — so the
       // carousel reads as story-specific art throughout, not a title card
       // followed by an afterthought.
-      const prompt = `${teaser.image}. ${t.mood}, painterly storybook illustration, cinematic lighting, no text, no words`;
+      const prompt = `${teaser.image}. ${t.mood}, ${storyArtStyle(genre)}`;
       bg = await fetchSceneImage(prompt, hashSeed(`${storyId}-${i}`));
     }
     if (!bg) {

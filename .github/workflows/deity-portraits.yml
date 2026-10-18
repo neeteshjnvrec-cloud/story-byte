@@ -15,6 +15,12 @@ on:
         required: false
         default: '2'
         type: string
+      style:
+        description: 'Art style for this run (blank = the DEVOTIONAL_STYLE variable, else realistic)'
+        required: false
+        default: ''
+        type: choice
+        options: ['', realistic, cartoon3d, cartoon2d, stickman]
 
 permissions:
   contents: read
@@ -39,9 +45,9 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNTS: ${{ secrets.CLOUDFLARE_ACCOUNTS }}
-          # Devotional art style: realistic (default), cartoon3d or cartoon2d —
+          # Art style for every picture: realistic (default), cartoon3d, cartoon2d or stickman —
           # set as a repository variable (Settings → Secrets and variables → Actions → Variables).
-          DEVOTIONAL_STYLE: ${{ vars.DEVOTIONAL_STYLE }}
+          DEVOTIONAL_STYLE: ${{ inputs.style || vars.DEVOTIONAL_STYLE }}
         run: node deity-portraits.js
       - uses: actions/upload-artifact@v4
         with:
