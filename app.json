@@ -15,7 +15,6 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.storybyte.app",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "This app uses the microphone for voice search.",
         "NSCameraUsageDescription": "StoryByte uses the camera so you can take a profile picture.",
         "NSPhotoLibraryUsageDescription": "StoryByte uses your photo library so you can choose a profile picture.",
         "UIBackgroundModes": [
@@ -31,12 +30,13 @@
         "backgroundColor": "#667eea"
       },
       "permissions": [
-        "android.permission.RECORD_AUDIO",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.WAKE_LOCK",
         "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.POST_NOTIFICATIONS"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -49,6 +49,8 @@
         {
           "android": {
             "usesCleartextTraffic": true,
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
             "compileSdkVersion": 36,
             "targetSdkVersion": 36,
             "minSdkVersion": 24
@@ -89,8 +91,7 @@
       },
       "eas": {
         "projectId": "d60ac706-e177-401b-8307-eb0cd8e8dfff"
-      },
-      "GITHUB_TOKEN": "${EXPO_PUBLIC_GITHUB_TOKEN}"
+      }
     },
     "updates": {
       "fallbackToCacheTimeout": 0

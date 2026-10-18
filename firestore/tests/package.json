@@ -3,6 +3,6 @@
   "private": true,
   "description": "Emulator tests for firestore/firestore.rules.json (see coins.rules.test.mjs).",
   "scripts": {
-    "test": "firebase emulators:exec --only firestore --project demo-coins \"node --test coins.rules.test.mjs\""
+    "test": "firebase emulators:exec --only firestore --project demo-coins \"node --test coins.rules.test.mjs stories.rules.test.mjs\""
   }
 }

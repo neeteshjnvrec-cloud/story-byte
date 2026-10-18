@@ -43,6 +43,7 @@ import { Image } from 'expo-image';
 import { collection, query, where, onSnapshot, orderBy, limit as fbLimit } from 'firebase/firestore';
 import { isVideoStory } from '../utils/videoStory';
 import { db } from '../services/firebase';
+import { useRequireAccount } from '../hooks/useRequireAccount';
 
 // Relative time formatter
 function timeAgo(dateValue) {
@@ -59,6 +60,7 @@ function timeAgo(dateValue) {
 
 export function CommunityScreen() {
   const navigation = useNavigation();
+  const requireAccount = useRequireAccount();
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const {
@@ -119,8 +121,8 @@ export function CommunityScreen() {
   // AppContext now, so the same tap behaves identically on Story Detail.
   const handleLike = async (story) => {
     try {
-      const result = await toggleLike(story);
-      if (result?.needsAuth) Alert.alert('Sign in required', 'Please sign in to like stories.');
+      if (!requireAccount('Sign in to like stories.')) return;
+      await toggleLike(story);
     } catch (e) {
       Alert.alert('Error', 'Could not update like');
     }
@@ -134,10 +136,7 @@ export function CommunityScreen() {
   // (Alert.alert can't do this: Android caps it at 3 buttons, so the old
   // six-button rating alert silently dropped most of its options there.)
   const handleRate = (story) => {
-    if (!user) {
-      Alert.alert('Sign in required', 'Please sign in to rate stories.');
-      return;
-    }
+    if (!requireAccount('Sign in to rate stories.')) return;
     const id = story.id || story.storyId;
     setRatingOpenFor(prev => (prev === id ? null : id));
   };
@@ -145,8 +144,7 @@ export function CommunityScreen() {
   const submitRating = async (story, rating) => {
     setRatingOpenFor(null);
     try {
-      const result = await rateStory(story, rating);
-      if (result?.needsAuth) Alert.alert('Sign in required', 'Please sign in to rate stories.');
+      await rateStory(story, rating);
     } catch (e) {
       Alert.alert('Error', 'Could not save rating');
     }
@@ -161,10 +159,7 @@ export function CommunityScreen() {
   };
 
   const handleSave = async (story) => {
-    if (!user) {
-      Alert.alert('Sign in required', 'Please sign in to save favorites.');
-      return;
-    }
+    if (!requireAccount('Sign in to save stories to your library.')) return;
     try {
       await toggleFavorite(story);
     } catch (e) {

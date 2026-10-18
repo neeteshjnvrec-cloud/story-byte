@@ -10,7 +10,7 @@ import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 import { AuthLayout, GoogleButton, OrDivider, AuthFooterLink } from './AuthLayout';
 
 export const LoginScreen = ({ navigation, route }) => {
-  const { loginWithEmail } = useAppContext();
+  const { loginWithEmail, guest, continueAsGuest } = useAppContext();
   const [email, setEmail] = useState(route?.params?.email || '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -36,8 +36,16 @@ export const LoginScreen = ({ navigation, route }) => {
     } finally { setSubmitting(false); }
   };
 
+  // Opened from a guest's "Sign in" prompt there's a screen to return to, and
+  // leaving goes back to it; as the first screen (signed out), leaving means
+  // continuing as a guest. Decided by the stack, not the guest flag alone:
+  // going back with nothing behind this screen is an unhandled GO_BACK.
+  const openedOverApp = guest && navigation.canGoBack();
+  const leave = () => (navigation.canGoBack() ? navigation.goBack() : continueAsGuest());
+
   return (
-    <AuthLayout title="Welcome back" subtitle="Sign in to pick up your stories where you left off.">
+    <AuthLayout title="Welcome back" subtitle="Sign in to pick up your stories where you left off."
+      onBack={openedOverApp ? leave : undefined}>
       <GoogleButton onPress={google.signIn} loading={google.inProgress} />
       <OrDivider />
 
@@ -57,6 +65,14 @@ export const LoginScreen = ({ navigation, route }) => {
       <Button title="Sign in" onPress={handleLogin} loading={submitting} />
 
       <AuthFooterLink text="New to StoryByte?" link="Create an account" onPress={() => navigation.navigate('Signup')} />
+
+      {/* Listening needs no account. A guest who opened this from a "Sign in"
+          prompt just goes back to where they were. */}
+      <Pressable onPress={leave} style={styles.guest} hitSlop={8} accessibilityRole="button">
+        <AppText variant="label" color="textSecondary" style={{ fontSize: 14 }}>
+          {openedOverApp ? 'Not now' : 'Continue without account'}
+        </AppText>
+      </Pressable>
     </AuthLayout>
   );
 };
@@ -79,6 +95,7 @@ export function getAuthErrorMessage(code, action = 'login') {
 const styles = StyleSheet.create({
   forgot: { alignSelf: 'flex-end', marginTop: -4, marginBottom: 16 },
   error: { marginBottom: 12, marginLeft: 2 },
+  guest: { alignSelf: 'center', marginTop: 18, paddingVertical: 6 },
 });
 
 export default LoginScreen;

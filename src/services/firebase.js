@@ -14,7 +14,8 @@ import {
   sendPasswordResetEmail,
   confirmPasswordReset,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  deleteUser
 } from '@firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
@@ -52,4 +53,4 @@ export { auth };
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-export { signInWithEmailAndPassword, createUserWithEmailAndPassword, firebaseSignOut, sendPasswordResetEmail, confirmPasswordReset, onAuthStateChanged, updateProfile };
+export { signInWithEmailAndPassword, createUserWithEmailAndPassword, firebaseSignOut, sendPasswordResetEmail, confirmPasswordReset, onAuthStateChanged, updateProfile, deleteUser };

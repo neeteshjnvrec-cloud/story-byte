@@ -7,12 +7,12 @@ on:
         description: 'Story ID to generate audio for (optional — if empty, processes all pending)'
         required: false
         default: ''
-  # Also trigger via API call from the app when a new community story is published
+  # Older app versions trigger this from the app; current ones don't (that
+  # needed a GitHub token readable by every client).
   repository_dispatch:
     types: [community-story-published]
-  # Safety net: the app's repository_dispatch can fail silently (bad or missing
-  # EXPO_PUBLIC_GITHUB_TOKEN), which would leave a story stuck in under_review
-  # and invisible forever. This sweeps up anything the dispatch missed.
+  # The hourly sweep is how a new community story gets its audio and is
+  # published: it processes every under_review (or failed) story.
   schedule:
     - cron: '17 * * * *'
 
@@ -61,19 +61,13 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FIREBASE_PROJECT_ID: storybyte-76716
           STORIES_FILTER: ${{ github.event.inputs.story_id || '' }}
-          # Optional — free pollinations.ai "seed" tier registration lifts
-          # the anonymous 1-request/15s image pace to 1-request/5s. Left
-          # unset until POLLINATIONS-SETUP.md's token is added; the
-          # pipeline just paces slower (and times out more under load)
-          # until then.
-          POLLINATIONS_API_TOKEN: ${{ secrets.POLLINATIONS_API_TOKEN }}
-          # Optional — Cloudflare Workers AI's free image-generation tier
-          # as an automatic fallback when pollinations.ai itself is down
-          # (it has had real multi-hour outages). Left unset until
-          # CLOUDFLARE-SETUP.md's secrets are added; the pipeline just
-          # falls straight to a local themed cover/card instead until then.
+          # Cloudflare Workers AI draws every picture (CLOUDFLARE-SETUP.md).
+          # CLOUDFLARE_ACCOUNTS adds more free accounts, one
+          # "accountId:apiToken" per line: when one account's 10,000 daily
+          # neurons run out, the next carries on (lib/cloudflare-image.js).
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNTS: ${{ secrets.CLOUDFLARE_ACCOUNTS }}
           # Optional — Instagram carousel auto-post. Left unset until
           # INSTAGRAM-SETUP.md's secrets are added; the pipeline just skips
           # the IG post until then.

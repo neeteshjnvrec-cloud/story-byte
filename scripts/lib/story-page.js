@@ -18,6 +18,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { WHATSAPP_CHANNEL_URL } = require('./social-extras');
 
 const PROJECT = process.env.FIREBASE_PROJECT_ID || 'storybyte-76716';
 const SITE = process.env.HOSTING_SITE || `https://${PROJECT}.web.app`;
@@ -303,6 +304,8 @@ function renderStoryPage(story, opts = {}) {
     }
     .get-app h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
     .get-app p { font-size: 14px; color: #4A3D2F; margin-bottom: 20px; }
+    .get-app .wa { margin: 18px 0 8px; font-weight: 700; }
+    .get-app .wa a { color: #128C7E; }
     .btn {
       display: inline-block; padding: 15px 30px; border-radius: 999px;
       background: linear-gradient(135deg, #B5613A, #E0913A);
@@ -363,6 +366,7 @@ ${paragraphs(story.text)}
       <h2>हर सुबह एक नई पावन कथा</h2>
       <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
       <a class="btn" href="${esc(playUrl)}">StoryByte ऐप डाउनलोड करें</a>
+      <p class="wa"><a href="${esc(WHATSAPP_CHANNEL_URL)}">💬 रोज़ की कथा WhatsApp पर पाएँ</a></p>
       <p><a href="${esc(site)}/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>` : `<div class="get-app">
       <h2>Listen to more on StoryByte</h2>

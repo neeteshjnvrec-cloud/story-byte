@@ -21,6 +21,7 @@ import { shareStory } from '../utils/shareStory';
 import apiService from '../services/api';
 import { AuthorRow, MoreFromAuthor, useAuthorStories } from '../components/story/AuthorCard';
 import { authorOf, myAuthorName } from '../utils/author';
+import { useRequireAccount } from '../hooks/useRequireAccount';
 
 // ---------------------------------------------------------------------------
 // Chapter parser
@@ -97,6 +98,7 @@ function parseChapters(text) {
 export const StoryDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const requireAccount = useRequireAccount();
   const insets = useSafeAreaInsets();
   const { storyId, story: initialStory } = route.params || {};
   const { theme = {} } = useTheme();
@@ -225,6 +227,7 @@ export const StoryDetailScreen = () => {
   };
 
   const handleUnlock = () => {
+    if (!requireAccount('Sign in to unlock episodes with coins. New accounts start with 10 free coins.')) return;
     const price = Number(story.priceCoins) || 0;
     if (balance < price) {
       return Alert.alert(
@@ -263,15 +266,15 @@ export const StoryDetailScreen = () => {
     if (!isHere) await playStory(story); else await playPause();
   };
   const handleLike = async () => {
-    if (!user) return Alert.alert('Sign in required', 'Please sign in to like stories.');
+    if (!requireAccount('Sign in to like stories.')) return;
     try { await toggleLike(story); } catch (e) { Alert.alert('Error', 'Could not update like'); }
   };
   const handleFavorite = async () => {
-    if (!user) return Alert.alert('Sign in required', 'Please sign in to save favorites.');
+    if (!requireAccount('Sign in to save stories to your library.')) return;
     try { await toggleFavorite(story); } catch (e) { Alert.alert('Error', 'Could not update favorite'); }
   };
   const handleRate = async (n) => {
-    if (!user) return Alert.alert('Sign in required', 'Please sign in to rate stories.');
+    if (!requireAccount('Sign in to rate stories.')) return;
     try { await rateStoryInContext(story, n); } catch (e) { Alert.alert('Error', 'Could not save rating'); }
   };
 
@@ -289,6 +292,11 @@ export const StoryDetailScreen = () => {
         // toggleDownload removes the file when already present; that's a success,
         // not a failure. (The icon already updates via downloads state.)
         Alert.alert('Removed', `"${story.title}" removed from offline listening.`);
+      } else if (result.needsWifi) {
+        Alert.alert('Waiting for Wi-Fi', 'Downloads over Wi-Fi only is on in Settings. Connect to Wi-Fi, or turn it off to download on mobile data.', [
+          { text: 'OK' },
+          { text: 'Settings', onPress: () => navigation.navigate('Settings') },
+        ]);
       } else {
         Alert.alert('Download failed', 'Could not download this story. Check your connection.');
       }

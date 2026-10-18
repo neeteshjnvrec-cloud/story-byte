@@ -270,10 +270,10 @@ async function buildCarouselSlides({ storyId, title, text, genre, description, c
       const prompt = `${teaser.image}. ${t.mood}, painterly storybook illustration, cinematic lighting, no text, no words`;
       bg = await fetchSceneImage(prompt, hashSeed(`${storyId}-${i}`));
     }
-    if (!bg && i === 0) {
-      // No bespoke art available (Groq off or the fetch failed) — the
-      // opening slide still deserves real art over a flat gradient, so fall
-      // back to the story's own cover (already generated, no network call).
+    if (!bg) {
+      // No bespoke art available (Groq off or the fetch failed) — a slide
+      // still deserves real art over a flat gradient, so fall back to the
+      // story's own cover (already generated, no network call).
       try {
         bg = await fs.promises.readFile(coverPath);
       } catch {

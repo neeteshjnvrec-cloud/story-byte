@@ -28,6 +28,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
 import { mergeNewestFirst } from '../utils/videoStory';
+import { myAuthorName } from '../utils/author';
 import Groq from 'groq-sdk';
 
 // Consecutive-day listening streak from a set of 'YYYY-MM-DD' strings.
@@ -795,7 +796,7 @@ JSON only: {"title":"max 60 chars","description":"one sentence","text":"450-800 
             tags: Array.isArray(parsed.tags) ? parsed.tags.slice(0, 6) : [genre],
             status: 'draft',
             authorId: this.uid,
-            authorName: auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || 'Anonymous',
+            authorName: myAuthorName(auth.currentUser, null) || 'Anonymous',
             modelUsed: model,
             keyUsed: keyIndex,
           };

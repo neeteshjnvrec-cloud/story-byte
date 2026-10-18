@@ -1,7 +1,6 @@
 /**
- * Cloudflare Workers AI image generation — an automatic fallback for when
- * pollinations.ai fails (see lib/scene-image.js), since pollinations has
- * shown real multi-hour outages in production.
+ * Cloudflare Workers AI image generation — every story picture comes from
+ * here (lib/scene-image.js).
  *
  * Unlike Gemini (which turned out to require billing enabled for image
  * models specifically as of a December 2025 policy change — confirmed
@@ -11,9 +10,14 @@
  * images/day, verified working end to end with a real account before this
  * was wired in.
  *
- * Optional by design: with no CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_API_TOKEN
- * configured, this throws immediately so the caller's fallback chain
- * (pollinations -> Cloudflare -> local themed card) just skips past it.
+ * Several accounts: each free account has its own 10,000 neurons a day,
+ * shared by every model and every workflow that day (a Short's FLUX.2
+ * pictures are ~160 each, a Sunday long video ~45 of them). When one
+ * account's allocation is used up, the next one carries on — waiting never
+ * helps, since it only resets at 00:00 UTC. Accounts, in order:
+ *   CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN (the original pair), then
+ *   CLOUDFLARE_ACCOUNTS: more "accountId:apiToken" pairs, one per line (or
+ *   comma-separated).
  */
 const MODEL = process.env.CLOUDFLARE_IMAGE_MODEL || '@cf/black-forest-labs/flux-1-schnell';
 
@@ -21,20 +25,69 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/** Every configured account, as [{ id, token }], the original pair first. */
+function accounts() {
+  const list = [];
+  if (process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN) {
+    list.push({ id: process.env.CLOUDFLARE_ACCOUNT_ID.trim(), token: process.env.CLOUDFLARE_API_TOKEN.trim() });
+  }
+  for (const pair of String(process.env.CLOUDFLARE_ACCOUNTS || '').split(/[\n,]+/)) {
+    const [id, token] = pair.trim().split(':').map((x) => (x || '').trim());
+    if (id && token && !list.some((a) => a.id === id)) list.push({ id, token });
+  }
+  return list;
+}
+
+// Accounts whose free allocation ran out during this run: skipped for the
+// rest of it, by every model (the neurons are per account, not per model).
+const usedUp = new Set();
+
+/** The daily-allocation error, as opposed to a brief rate limit. */
+function isAllocationUsedUp(status, body) {
+  return status === 429 && /neuron|allocation|4006|quota/i.test(body || '');
+}
+
+/** Runs `attempt(account)` on each account with allocation left, in order,
+ *  until one returns an image. Throws with every account's error if none does. */
+async function withAccounts(label, attempt) {
+  const all = accounts();
+  if (!all.length) throw new Error('CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_API_TOKEN not configured');
+  const errors = [];
+  for (const [i, account] of all.entries()) {
+    if (usedUp.has(account.id)) continue;
+    try {
+      return await attempt(account);
+    } catch (e) {
+      if (e.usedUp) {
+        usedUp.add(account.id);
+        console.warn(`    ⚠️  Cloudflare account ${i + 1}/${all.length}: free daily allocation used up${i + 1 < all.length ? ', trying the next account' : ''}`);
+      }
+      errors.push(`account ${i + 1}: ${e.message}`);
+    }
+  }
+  if (all.every((a) => usedUp.has(a.id))) errors.push(`all ${all.length} account(s) used up today`);
+  throw new Error(`${label}: ${errors.join('; ')}`);
+}
+
+function usedUpError(body) {
+  const e = new Error(`daily allocation used up: ${String(body).slice(0, 120)}`);
+  e.usedUp = true;
+  return e;
+}
+
 /** Fetches one image from Cloudflare Workers AI and returns it as a
  *  Buffer, or throws. The model has no width/height parameter — it always
  *  returns 1024x1024 — so callers that need a different size resize the
  *  result themselves (see fetchStoryImage in lib/scene-image.js).
  *
- *  Retries a 429/5xx/timeout with exponential backoff (2s, 4s, 8s) instead
- *  of failing on the first blip — a slower render is worth it to not drop
- *  a scene's art. Missing configuration and a genuine 4xx (bad prompt, bad
- *  auth) still fail immediately; those never get fixed by waiting. */
-async function fetchCloudflareImage(prompt, { timeoutMs = 45000, retries = 3, steps } = {}) {
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-  const apiToken = process.env.CLOUDFLARE_API_TOKEN;
-  if (!accountId || !apiToken) throw new Error('CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_API_TOKEN not configured');
+ *  A brief 429/5xx/timeout is retried with exponential backoff (2s, 4s, 8s)
+ *  on the same account; a used-up daily allocation moves straight to the
+ *  next account. A genuine 4xx (bad prompt, bad auth) fails that account. */
+function fetchCloudflareImage(prompt, opts = {}) {
+  return withAccounts('flux-1-schnell', (account) => fetchCloudflareImageFrom(account, prompt, opts));
+}
 
+async function fetchCloudflareImageFrom({ id: accountId, token: apiToken }, prompt, { timeoutMs = 45000, retries = 3, steps } = {}) {
   const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${MODEL}`;
 
   for (let attempt = 0; ; attempt++) {
@@ -50,8 +103,10 @@ async function fetchCloudflareImage(prompt, { timeoutMs = 45000, retries = 3, st
         signal: controller.signal,
       });
       if (res.status === 429 || res.status >= 500) {
+        const body = await res.text().catch(() => '');
+        if (isAllocationUsedUp(res.status, body)) throw usedUpError(body);
         if (attempt < retries) { await sleep(Math.min(2000 * 2 ** attempt, 20000)); continue; }
-        throw new Error(`HTTP ${res.status}`);
+        throw new Error(`HTTP ${res.status}: ${body.slice(0, 200)}`);
       }
       if (!res.ok) {
         const body = await res.text().catch(() => '');
@@ -81,12 +136,14 @@ async function fetchCloudflareImage(prompt, { timeoutMs = 45000, retries = 3, st
 const HQ_MODEL = process.env.CLOUDFLARE_HQ_MODEL || '@cf/black-forest-labs/flux-2-klein-4b';
 
 /** Fetches one image from the HQ model at `width` x `height` (multiples of
- *  16), optionally guided by `refs` (JPEG/PNG Buffers, each under 512x512).
- *  Returns a Buffer or throws — callers fall back to fetchCloudflareImage. */
-async function fetchCloudflareHQImage(prompt, { width, height, refs = [], timeoutMs = 90000, retries = 2 } = {}) {
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-  const apiToken = process.env.CLOUDFLARE_API_TOKEN;
-  if (!accountId || !apiToken) throw new Error('CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_API_TOKEN not configured');
+ *  16), optionally guided by `refs` (JPEG/PNG Buffers, each under 512x512),
+ *  from the first account with allocation left. Returns a Buffer or throws —
+ *  callers fall back to fetchCloudflareImage. */
+function fetchCloudflareHQImage(prompt, opts = {}) {
+  return withAccounts('FLUX.2', (account) => fetchCloudflareHQImageFrom(account, prompt, opts));
+}
+
+async function fetchCloudflareHQImageFrom({ id: accountId, token: apiToken }, prompt, { width, height, refs = [], timeoutMs = 90000, retries = 2 } = {}) {
   const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${HQ_MODEL}`;
 
   for (let attempt = 0; ; attempt++) {
@@ -104,8 +161,7 @@ async function fetchCloudflareHQImage(prompt, { width, height, refs = [], timeou
       const res = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${apiToken}` }, body: form, signal: controller.signal });
       if (res.status >= 500 && attempt < retries) { await sleep(Math.min(2000 * 2 ** attempt, 20000)); continue; }
       const json = await res.json().catch(() => ({}));
-      // 429 here is usually the free daily allocation running out — not
-      // worth waiting on; the caller drops to the cheaper model instead.
+      if (isAllocationUsedUp(res.status, JSON.stringify(json))) throw usedUpError(JSON.stringify(json.errors || json));
       if (!res.ok || !json.success || !json.result?.image) {
         throw new Error(`HTTP ${res.status}: ${JSON.stringify(json.errors || json).slice(0, 200)}`);
       }
@@ -119,4 +175,4 @@ async function fetchCloudflareHQImage(prompt, { width, height, refs = [], timeou
   }
 }
 
-module.exports = { fetchCloudflareImage, fetchCloudflareHQImage };
+module.exports = { fetchCloudflareImage, fetchCloudflareHQImage, accounts };

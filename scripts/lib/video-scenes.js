@@ -18,7 +18,7 @@ try {
 } catch {
   Groq = null;
 }
-const { fetchSceneImage, hashSeed } = require('./scene-image');
+const { fetchSceneImage, fillMissingImages, hashSeed } = require('./scene-image');
 const { theme } = require('./genre-theme');
 const { extractJson, callGroqJson } = require('./carousel-copy');
 const { renderFallbackCover } = require('./fallback-cover');
@@ -132,9 +132,11 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
   // consistent within the video.
   let mainKey = null;
   let mainRef = null;
-  const sources = {};
+  const devotional = genre === 'devotional';
+  const size = devotional ? { width: 1080, height: 1920 } : { width: 1080, height: 1350 };
+  const images = [];
+  const requests = [];
   for (let i = 0; i < planned.length; i++) {
-    const devotional = genre === 'devotional';
     const figures = devotional ? iconographyFor(planned[i].prompt, { context: `${context} ${title}` }) : [];
     const looks = figures.map((f) => f.look).join('. ');
     const approved = [];
@@ -157,23 +159,29 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
     // so a story's video doesn't just replay its carousel image set.
     // steps: 8 for when FLUX.2 is unavailable (daily allocation used up, or
     // an output it flags): the standard model's sharpest setting.
-    let image = await fetchSceneImage(prompt, hashSeed(`${storyId}-video-${i}`),
-      devotional ? { width: 1080, height: 1920, steps: 8, hq: { ...HQ_PORTRAIT, refs } } : undefined);
+    const request = [prompt, hashSeed(`${storyId}-video-${i}`),
+      devotional ? { ...size, steps: 8, hq: { ...HQ_PORTRAIT, refs } } : undefined];
+    requests.push(request);
+    const image = await fetchSceneImage(...request);
     if (image && devotional && !mainRef && figures.length) {
       mainKey = figures[0].key;
       // References must be under 512x512.
       mainRef = await sharp(image).resize(496, 496, { fit: 'inside' }).jpeg({ quality: 90 }).toBuffer();
     }
-    if (!image) {
-      // Never drop a scene outright: unlike the carousel (each slide stands
-      // alone), these scenes are concatenated back to back against a fixed
-      // narration track — skipping one shrinks the video below the audio's
-      // real length, so ffmpeg's `-shortest` cuts the narration off early.
-      // A local themed card (no network call, can't fail) keeps every
-      // slot filled and the full narration playing, even in the rare case
-      // both image providers are down for this one scene.
-      image = await renderFallbackCover(genre, devotional ? { width: 1080, height: 1920 } : { width: 1080, height: 1350 });
-    }
+    images.push(image);
+  }
+  // Never drop a scene outright: these scenes are concatenated back to back
+  // against a fixed narration track — skipping one shrinks the video below
+  // the audio's real length, so ffmpeg's `-shortest` cuts the narration off
+  // early. A failed picture gets another try, then a reframed neighbour; a
+  // themed card only if no picture came through at all.
+  const filled = await fillMissingImages(images, {
+    retry: (i) => fetchSceneImage(...requests[i]),
+    fallback: () => renderFallbackCover(genre, size),
+    ...size,
+  });
+  const sources = {};
+  filled.forEach((image, i) => {
     const file = path.join(outDir, `video-scene-${i + 1}.jpg`);
     fs.writeFileSync(file, image);
     const source = image.source || 'card';
@@ -181,9 +189,9 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
     // lowRes: anything but FLUX.2 is already a scaled-up crop, which a
     // close-up (lib/close-ups.js) would blow up further into a blur.
     scenes.push({ file, duration: Math.max(1.5, planned[i].end - planned[i].start), lowRes: source !== 'hq' });
-  }
+  });
   console.log(`  🖼️  Video pictures: ${Object.entries(sources).map(([k, n]) => `${n} ${k}`).join(', ')}` +
-    (sources.hq === scenes.length ? '' : ' (hq = FLUX.2; the rest are lower quality)'));
+    (sources.hq === scenes.length ? '' : ' (hq = FLUX.2; reused = a neighbouring picture reframed; the rest are lower quality)'));
   return scenes.length ? scenes : null;
 }
 

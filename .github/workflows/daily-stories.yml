@@ -2,12 +2,23 @@ name: Daily Stories
 
 on:
   schedule:
-    # 22:47 UTC = 4:17 AM IST. Deliberately NOT :00 or :30 — this repo's own
+    # 23:47 UTC = 5:17 AM IST. Deliberately NOT :00 or :30 — this repo's own
     # run history shows delays growing to 5+ hours at those two (the most
     # oversubscribed minutes on GitHub's shared scheduler, since most crons
     # default to a round number); an off-peak minute gets queued far less.
     - cron: '47 23 * * *'
+    # 07:23 UTC = 12:53 PM IST: the festival-eve run. When tomorrow is a
+    # festival (scripts/occasions.js), it posts that festival's best-known
+    # katha this afternoon, a day ahead of the searches; GitHub's queueing
+    # delay still lands it by early evening. Any other day it stops after
+    # the first step.
+    - cron: '23 7 * * *'
   workflow_dispatch:
+    inputs:
+      festival_eve:
+        description: "Festival-eve run: post tomorrow's festival katha now (does nothing if tomorrow isn't a festival)"
+        type: boolean
+        default: false
 
 concurrency:
   group: daily-stories
@@ -26,11 +37,30 @@ jobs:
         with:
           node-version: '20'
 
+      # The 12:53 PM IST run (or a manual festival-eve run) only goes on when
+      # tomorrow is a festival with an eve katha. Checked before any install,
+      # so an ordinary day costs seconds.
+      - name: Festival eve?
+        id: eve
+        run: |
+          if [ "${{ github.event.schedule }}" = "23 7 * * *" ] || [ "${{ inputs.festival_eve }}" = "true" ]; then
+            echo "mode=eve" >> "$GITHUB_OUTPUT"
+            tomorrow=$(TZ=Asia/Kolkata date -d tomorrow +%F)
+            if node -e "process.exit(require('./scripts/lib/devotional-calendar').eveKathaOf('$tomorrow') ? 0 : 1)"; then
+              echo "Tomorrow ($tomorrow) is a festival: posting its katha this afternoon."
+            else
+              echo "Tomorrow ($tomorrow) is not a festival: nothing to post."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
       - uses: actions/setup-python@v5
+        if: steps.eve.outputs.skip != 'true'
         with:
           python-version: '3.12'
 
       - name: Install edge-tts + ffmpeg + uv
+        if: steps.eve.outputs.skip != 'true'
         run: |
           python -m pip install --upgrade pip
           pip install edge-tts uv
@@ -41,12 +71,15 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install pipeline deps
+        if: steps.eve.outputs.skip != 'true'
         working-directory: scripts
         run: npm install
 
       - name: Generate + host stories
+        if: steps.eve.outputs.skip != 'true'
         working-directory: scripts
         env:
+          FESTIVAL_EVE: ${{ steps.eve.outputs.mode == 'eve' && '1' || '' }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
@@ -58,19 +91,13 @@ jobs:
           # Google Search Console's HTML-tag code, for the home page (CHANNEL-IDENTITY.md).
           GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION }}
           FIREBASE_PROJECT_ID: storybyte-76716
-          # Optional — free pollinations.ai "seed" tier registration lifts
-          # the anonymous 1-request/15s image pace to 1-request/5s. Left
-          # unset until POLLINATIONS-SETUP.md's token is added; the
-          # pipeline just paces slower (and times out more under load)
-          # until then.
-          POLLINATIONS_API_TOKEN: ${{ secrets.POLLINATIONS_API_TOKEN }}
-          # Optional — Cloudflare Workers AI's free image-generation tier
-          # as an automatic fallback when pollinations.ai itself is down
-          # (it has had real multi-hour outages). Left unset until
-          # CLOUDFLARE-SETUP.md's secrets are added; the pipeline just
-          # falls straight to a local themed cover/card instead until then.
+          # Cloudflare Workers AI draws every picture (CLOUDFLARE-SETUP.md).
+          # CLOUDFLARE_ACCOUNTS adds more free accounts, one
+          # "accountId:apiToken" per line: when one account's 10,000 daily
+          # neurons run out, the next carries on (lib/cloudflare-image.js).
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNTS: ${{ secrets.CLOUDFLARE_ACCOUNTS }}
           # Optional — Instagram carousel auto-post. Left unset until
           # INSTAGRAM-SETUP.md's secrets are added; the pipeline just skips
           # the IG post until then.
@@ -110,7 +137,7 @@ jobs:
       # the generate step failed partway. A Hosting deploy serves only what a
       # fresh checkout contains, so an uncommitted mp3 becomes a 404 later.
       - name: Persist generated audio + covers
-        if: always()
+        if: always() && steps.eve.outputs.skip != 'true'
         run: |
           git config user.name "storybyte-bot"
           git config user.email "bot@storybyte.app"

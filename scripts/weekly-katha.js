@@ -4,19 +4,25 @@
  * ~15-minute 16:9 retelling under the Hindi title people search for,
  * published to YouTube and Facebook.
  *
- * The deity rotates week by week through the seven weekday deities, and
- * the katha is a different one from the deity's Short that week, so the
- * long video never repeats the Short.
+ * A festival on that Sunday or in the week after it (occasions.js) takes
+ * the week, with its best-known katha: "करवा चौथ की कथा" is what people
+ * search for that week, and a long video needs a few days to be found.
+ * Otherwise the deity rotates week by week through the seven weekday
+ * deities, and the katha is a different one from the deity's Short that
+ * week, so the long video never repeats the Short.
  *
  * Env: everything build-landscape-episode.js takes. KATHA_DEITY (a key such
  * as "hanuman") and KATHA_INDEX pick the katha by hand instead.
  */
 const { execFileSync } = require('child_process');
 const path = require('path');
-const { DEITIES } = require('./lib/devotional-calendar');
+const { DEITIES, festivalOfWeek, istDate } = require('./lib/devotional-calendar');
 const { devotionalTrends } = require('./lib/trends');
 
 function pick(now = new Date()) {
+  const choosing = process.env.KATHA_DEITY || (process.env.KATHA_INDEX !== undefined && process.env.KATHA_INDEX !== '');
+  const festival = !choosing && festivalOfWeek(istDate(now));
+  if (festival) return festival;
   const week = Math.floor(now.getTime() / (7 * 86400000));
   const list = Object.values(DEITIES);
   const deity = list.find((d) => d.key === process.env.KATHA_DEITY) || list[week % list.length];

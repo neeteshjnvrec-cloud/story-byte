@@ -14,9 +14,17 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../hooks/useTheme';
 import { useAppContext } from '../context/AppContext';
 import apiService from '../services/api';
+import { auth, deleteUser } from '../services/firebase';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { openPlayStore } from '../utils/askForRating';
+import { WHATSAPP_CHANNEL_URL } from '../constants/links';
+
+// Tapping a row steps to the next option, like Appearance.
+const SPEED_STEPS = [0.75, 1, 1.25, 1.5, 2];
+const LANGUAGE_STEPS = ['All', 'HI', 'EN'];
+const LANGUAGE_LABELS = { All: 'All languages', HI: 'हिंदी', EN: 'English' };
+const nextOf = (list, value) => list[(list.indexOf(value) + 1) % list.length];
 
 // Inline pill toggle
 const Toggle = ({ value, onValueChange, theme }) => (
@@ -102,13 +110,23 @@ export const SettingsScreen = () => {
   // autoplayNext / wifiOnly live in AppContext (and AsyncStorage) — they used
   // to be local state here, so flipping either toggle changed nothing but the
   // switch graphic.
-  const { user, signOut, autoplayNext, setAutoplayNext, wifiOnly, setWifiOnly } = useAppContext();
+  const {
+    user, signOut, autoplayNext, setAutoplayNext, wifiOnly, setWifiOnly,
+    defaultSpeed, setDefaultSpeed, storyLanguage, setStoryLanguage,
+  } = useAppContext();
 
   const [deleting, setDeleting] = useState(false);
 
   const cycleAppearance = () => changeTheme(THEME_CYCLE[themeMode] || 'light');
   const appearanceValue = THEME_LABELS[themeMode] || 'System';
   const chevron = <Icon name="chev-right" size={18} color={theme.textTertiary} />;
+
+  // The devotional WhatsApp Channel (same link the pipeline puts in every post).
+  const openWhatsAppChannel = () => {
+    Linking.openURL(WHATSAPP_CHANNEL_URL).catch(() => {
+      Alert.alert('WhatsApp', `Could not open WhatsApp. Visit ${WHATSAPP_CHANNEL_URL}`);
+    });
+  };
 
   // Open privacy policy URL
   const openPrivacyPolicy = () => {
@@ -117,8 +135,25 @@ export const SettingsScreen = () => {
     });
   };
 
-  // Delete account flow
+  // Delete account flow. Firebase only deletes a sign-in account right after
+  // a fresh sign-in, so someone signed in a while ago is asked to sign in
+  // again first — otherwise their data would go but the account would stay.
+  const signedInRecently = () => {
+    const at = Date.parse(auth.currentUser?.metadata?.lastSignInTime || '');
+    return Number.isFinite(at) && Date.now() - at < 4 * 60 * 1000;
+  };
+
+  const askToSignInAgain = () => Alert.alert(
+    'Sign in again to continue',
+    'For your security, sign in again right before deleting your account. Sign out, sign back in, then tap Delete account.',
+    [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Sign out', onPress: () => signOut().catch(() => {}) },
+    ]
+  );
+
   const handleDeleteAccount = () => {
+    if (!signedInRecently()) return askToSignInAgain();
     Alert.alert(
       'Delete Account',
       'This will permanently delete your account and all data. This cannot be undone.',
@@ -154,12 +189,21 @@ export const SettingsScreen = () => {
       // 1. Archive to deleted_users + delete Firestore data
       await apiService.archiveAndDeleteUser();
 
-      // 2. Sign out (Firebase Auth account stays — needs server-side deletion)
-      await signOut();
+      // 2. Delete the sign-in account itself, so the email can't sign back in.
+      try {
+        await deleteUser(auth.currentUser);
+      } catch (err) {
+        if (err?.code !== 'auth/requires-recent-login') throw err;
+        setDeleting(false);
+        return askToSignInAgain();
+      }
+
+      // 3. Clear the app's signed-in state.
+      await signOut().catch(() => {});
 
       Alert.alert(
         'Account Deleted',
-        'Your account and all data have been permanently deleted.'
+        'Your account and its data have been deleted.'
       );
     } catch (err) {
       console.error('Delete account error:', err);
@@ -193,9 +237,9 @@ export const SettingsScreen = () => {
             theme={theme}
             icon="speed"
             label="Default speed"
-            value="1.0×"
+            value={`${defaultSpeed}×`}
             right={chevron}
-            onPress={() => {}}
+            onPress={() => setDefaultSpeed(nextOf(SPEED_STEPS, defaultSpeed))}
           />
           <Row
             theme={theme}
@@ -211,10 +255,10 @@ export const SettingsScreen = () => {
           <Row
             theme={theme}
             icon="globe"
-            label="Language"
-            value="English"
+            label="Story language"
+            value={LANGUAGE_LABELS[storyLanguage] || LANGUAGE_LABELS.All}
             right={chevron}
-            onPress={() => {}}
+            onPress={() => setStoryLanguage(nextOf(LANGUAGE_STEPS, storyLanguage))}
           />
           <Row
             theme={theme}
@@ -256,6 +300,13 @@ export const SettingsScreen = () => {
         <Group theme={theme} label="FEEDBACK">
           <Row
             theme={theme}
+            icon="whatsapp"
+            label="Daily katha on WhatsApp"
+            right={chevron}
+            onPress={openWhatsAppChannel}
+          />
+          <Row
+            theme={theme}
             icon="star-outline"
             label="Rate StoryByte"
             right={chevron}
@@ -277,6 +328,18 @@ export const SettingsScreen = () => {
         </Group>
 
         {/* ACCOUNT */}
+        {!user ? (
+          <Group theme={theme} label="ACCOUNT">
+            <Row
+              theme={theme}
+              icon="user"
+              label="Sign in or create account"
+              right={chevron}
+              onPress={() => navigation.navigate('Login')}
+              isLast
+            />
+          </Group>
+        ) : (
         <Group theme={theme} label="ACCOUNT">
           <Row
             theme={theme}
@@ -297,6 +360,7 @@ export const SettingsScreen = () => {
             isLast
           />
         </Group>
+        )}
       </ScrollView>
     </View>
   );

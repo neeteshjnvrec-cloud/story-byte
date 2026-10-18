@@ -38,7 +38,7 @@ const { postStoryToFacebook, postStoryVideo, commentOnFacebook } = require('./li
 const { postStoryToTelegram } = require('./lib/telegram');
 const { postStoryToYouTube, commentOnYouTube } = require('./lib/youtube');
 const { occasionPhrase } = require('./occasions');
-const { kathaOfDay, nextKatha, describeKatha, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
+const { kathaOfDay, nextKatha, eveKathaOf, describeKatha, istDate, addDays, GENERAL_HASHTAGS } = require('./lib/devotional-calendar');
 const { appendSpokenTeaser, fallbackTeaser, endingCandidates } = require('./lib/teaser');
 const { withCloseUps, shortSceneCount } = require('./lib/close-ups');
 const { devotionalTrends } = require('./lib/trends');
@@ -93,7 +93,17 @@ function parseModels(envValue) {
   return raw.split(',').map(s => s.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean);
 }
 const MODELS = parseModels(process.env.GROQ_MODEL);
-const DATE = process.env.STORY_DATE || new Date().toISOString().slice(0, 10);
+// The India date: the daily run starts at ~5:17 AM IST, which is still the
+// previous day in UTC — a UTC date there put each festival's story a day late.
+const DATE = process.env.STORY_DATE || istDate();
+// The festival-eve run (~1 PM IST, daily-stories.yml): when tomorrow is a
+// festival, it posts that festival's best-known katha this afternoon, a day
+// ahead of the people searching for it; on any other day it does nothing.
+const EVE = process.env.FESTIVAL_EVE === '1';
+const EVE_OF = EVE ? addDays(DATE, 1) : null;
+// failed_slots / generation_logs doc for this run, kept apart from the
+// morning run's so the two never read each other's retries.
+const RUN_KEY = EVE ? `${DATE}_eve` : DATE;
 const DAILY_COUNT = 1; // Exactly 1 story per day
 const MAX_RETRIES = 6; // Retry each slot up to 6 times (trying different models)
 
@@ -141,19 +151,19 @@ const hashSeed = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h *
 
 async function getFailedSlots() {
   // Load failed slots for retry
-  const snap = await db.collection('failed_slots').doc(DATE).get();
+  const snap = await db.collection('failed_slots').doc(RUN_KEY).get();
   if (snap.exists) return snap.data()?.slots || [];
   return [];
 }
 
 async function saveFailedSlots(slots) {
-  await db.collection('failed_slots').doc(DATE).set({
+  await db.collection('failed_slots').doc(RUN_KEY).set({
     slots, date: DATE, updatedAt: admin.firestore.FieldValue.serverTimestamp()
   }, { merge: true });
 }
 
 async function markSlotSuccess(slot) {
-  const docRef = db.collection('failed_slots').doc(DATE);
+  const docRef = db.collection('failed_slots').doc(RUN_KEY);
   const doc = await docRef.get();
   if (doc.exists) {
     const slots = (doc.data()?.slots || []).filter(s => s.language !== slot.language || s.genre !== slot.genre);
@@ -222,8 +232,8 @@ async function generateText(groq, slot) {
     : '';
   const sys = `You are a storyteller for an audio app. ${PROMPTS[slot.genre] || PROMPTS.drama}${occasionInstruction}${kathaInstruction}${hookInstruction}${trendInstruction} Write in ${langInstruction} ` +
     `JSON only: {"title":"max 60 chars","description":"one sentence","text":"${textSpec}","tags":["genre"]${socialTitleSpec}}.`;
-  const userPrompt = slot.occasion ? `Write a story for ${slot.occasion.name}.`
-    : slot.deity ? `Tell the katha: ${slot.deity.katha}.` : `Write a ${slot.genre} story.`;
+  const userPrompt = slot.deity ? `Tell the katha: ${slot.deity.katha}.`
+    : slot.occasion ? `Write a story for ${slot.occasion.name}.` : `Write a ${slot.genre} story.`;
 
   // Try each model in the fallback chain until one succeeds. The token
   // budget leaves room for reasoning models (gpt-oss), which think before
@@ -357,27 +367,36 @@ async function run() {
 
   // Get today's failed slots for retry
   const failedSlots = await getFailedSlots();
-  console.log(`\n📅 Today: ${DATE}`);
+  console.log(`\n📅 Today: ${DATE}${EVE ? ` (festival-eve run for ${EVE_OF})` : ''}`);
   console.log(`❌ Failed slots to retry: ${failedSlots.length}`);
+
+  const eve = EVE ? eveKathaOf(EVE_OF) : null;
+  if (EVE && !eve) {
+    console.log(`✓ No festival tomorrow (${EVE_OF}) — nothing to post this afternoon.`);
+    process.exit(0);
+  }
 
   // Select slots: prioritize failed slots for retry, then random
   let available = [...SLOTS];
 
-  // Filter out slots that already have stories today
+  // Filter out slots that already have stories today. The festival-eve story
+  // is posted on the same date as the morning one, so each run only counts
+  // its own kind: the eve run its eveOf story, the morning run the rest.
   for (const slot of SLOTS) {
-    const q = db.collection('stories')
-      .where('generatedDate', '==', DATE)
-      .where('language', '==', slot.language)
-      .where('genre', '==', slot.genre)
-      .limit(1);
+    const q = EVE
+      ? db.collection('stories').where('eveOf', '==', EVE_OF)
+      : db.collection('stories')
+        .where('generatedDate', '==', DATE)
+        .where('language', '==', slot.language)
+        .where('genre', '==', slot.genre);
     const snap = await q.get();
-    if (!snap.empty) {
+    if (snap.docs.some((d) => EVE || !d.get('eveOf'))) {
       available = available.filter(s => !(s.language === slot.language && s.genre === slot.genre));
     }
   }
 
   if (available.length === 0) {
-    console.log(`✓ Today's story (${DATE}) already exists — nothing to do.`);
+    console.log(`✓ ${EVE ? `The eve story for ${EVE_OF}` : `Today's story (${DATE})`} already exists — nothing to do.`);
     process.exit(0);
   }
 
@@ -386,14 +405,14 @@ async function run() {
   // takes the day, or else it's the weekday's deity and this week's katha.
   // Non-devotional occasions (e.g. Gandhi Jayanti, Karva Chauth) no longer
   // replace the devotional story.
-  const slot = { ...DAILY_SLOT, ...kathaOfDay(DATE) };
+  const slot = { ...DAILY_SLOT, ...(eve || kathaOfDay(DATE)) };
   const occasion = slot.occasion;
   // Tomorrow's katha, teased at the end of today's Short (lib/teaser.js).
   slot.next = nextKatha(DATE);
   // The day's look: camera moves, colour grade, captions, hook style, music.
   slot.look = styleOfDay(DATE);
   if (slot.deity) console.log(`🙏 Today's katha: ${slot.deity.name} — ${slot.deity.katha}`);
-  if (slot.occasion) console.log(`🎉 Today's occasion: ${occasion.name}`);
+  if (slot.occasion) console.log(`🎉 ${EVE ? 'Tomorrow' : 'Today'}'s occasion: ${occasion.name}`);
   console.log(`🔔 Tomorrow: ${describeKatha(slot.next)}`);
   // What India is searching for about today's deity/festival right now, so
   // the title, hook and tags use viewers' own words (lib/trends.js).
@@ -447,7 +466,7 @@ async function run() {
         // Step 1: Generate text
         let content = await generateText(groq, slot);
         if (slot.next && !content.nextTeaser) content.nextTeaser = fallbackTeaser(slot.next);
-        const id = `${DATE}_${slot.language}_${slot.genre}_${slug(content.title)}`;
+        const id = `${DATE}_${slot.language}_${slot.genre}_${EVE ? 'eve_' : ''}${slug(content.title)}`;
         const existing = await db.collection('stories').doc(id).get();
         if (existing.exists && existing.data().audioUrl) {
           console.log('skip (exists):', id);
@@ -455,12 +474,11 @@ async function run() {
           continue;
         }
 
-        // Step 2: Generate cover — pollinations.ai, falling back to
-        // Cloudflare Workers AI (see lib/scene-image.js), falling back to
-        // a local themed gradient card (no network call, can't fail) if
-        // both providers are down. Confirmed in production that a
-        // pollinations-only outage previously aborted the whole story here
-        // even though the actual text/audio content was generating fine.
+        // Step 2: Generate cover — Cloudflare Workers AI across every
+        // configured account (lib/scene-image.js), falling back to a local
+        // themed gradient card (no network call, can't fail) only if every
+        // account fails: an image outage must never abort a story whose
+        // text and audio are fine.
         const cover = path.join(PUB, 'covers', `${id}.jpg`);
         let coverBuf;
         try {
@@ -777,6 +795,8 @@ async function run() {
       generatedDate: DATE, voice: p.slot.voice, ttsEngine: 'edge-tts', author: 'StoryByte AI',
       tags: p.slot.occasion ? [...p.content.tags, p.slot.occasion.name] : p.content.tags,
       occasion: p.slot.occasion?.name || null,
+      // The festival this afternoon post is the eve of (festival-eve run).
+      eveOf: EVE_OF,
       // What the social posts were titled, so reports/social can tie each
       // YouTube/Instagram/Facebook post back to its story.
       socialTitle: p.content.socialTitle || null,
@@ -855,7 +875,7 @@ async function run() {
   }
 
   // Log generation
-  await db.collection('generation_logs').doc(DATE).set({
+  await db.collection('generation_logs').doc(RUN_KEY).set({
     date: DATE, count: pending.length, expected: DAILY_COUNT, failed: failedToday.length,
     at: admin.firestore.FieldValue.serverTimestamp()
   }, { merge: true });

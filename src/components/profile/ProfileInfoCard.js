@@ -4,6 +4,7 @@ import { View, Pressable, StyleSheet, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../hooks/useTheme';
 import { AppText } from '../ui/AppText';
+import { myAuthorName } from '../../utils/author';
 import { Icon } from '../ui/Icon';
 
 export const ProfileInfoCard = ({
@@ -19,7 +20,9 @@ export const ProfileInfoCard = ({
     return null;
   }
   
-  const name = userStats?.fullName || user?.displayName || (user?.email ? user.email.split('@')[0] : 'You');
+  // The name stories and comments are published under (the email's first name
+  // when the profile has none).
+  const name = myAuthorName(user, userStats) || 'You';
   const initial = (name[0] || 'U').toUpperCase();
   const phone = userStats?.phone || 'Not provided';
   const gender = userStats?.gender || 'Not specified';
