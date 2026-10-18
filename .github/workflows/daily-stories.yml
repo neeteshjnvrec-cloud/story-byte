@@ -19,6 +19,12 @@ on:
         description: "Festival-eve run: post tomorrow's festival katha now (does nothing if tomorrow isn't a festival)"
         type: boolean
         default: false
+      style:
+        description: 'Art style for this run (blank = the DEVOTIONAL_STYLE variable, else realistic)'
+        required: false
+        default: ''
+        type: choice
+        options: ['', realistic, cartoon3d, cartoon2d, stickman]
 
 concurrency:
   group: daily-stories
@@ -121,9 +127,9 @@ jobs:
           # pipeline narrates with edge-tts as before.
           SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
           SARVAM_SPEAKER: ${{ vars.SARVAM_SPEAKER }}
-          # Devotional art style: realistic (default), cartoon3d or cartoon2d —
+          # Art style for every picture: realistic (default), cartoon3d, cartoon2d or stickman —
           # set as a repository variable (Settings → Secrets and variables → Actions → Variables).
-          DEVOTIONAL_STYLE: ${{ vars.DEVOTIONAL_STYLE }}
+          DEVOTIONAL_STYLE: ${{ inputs.style || vars.DEVOTIONAL_STYLE }}
           # Optional: your WhatsApp Channel's invite link, added to every
           # post's description (repository variable).
           WHATSAPP_CHANNEL_URL: ${{ vars.WHATSAPP_CHANNEL_URL }}

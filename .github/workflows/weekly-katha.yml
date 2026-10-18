@@ -22,11 +22,11 @@ on:
         default: ''
         type: string
       style:
-        description: 'Art style (blank = the DEVOTIONAL_STYLE variable, else cartoon3d)'
+        description: 'Art style (blank = the same as the daily Shorts: the DEVOTIONAL_STYLE variable, else realistic)'
         required: false
         default: ''
         type: choice
-        options: ['', cartoon3d, cartoon2d, realistic, illustration]
+        options: ['', realistic, cartoon3d, cartoon2d, stickman, illustration]
       publish:
         description: 'Publish to YouTube and Facebook'
         required: true

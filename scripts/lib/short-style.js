@@ -76,16 +76,20 @@ function fitShort(durSec) {
   return { tempo, tailSec, fits: durSec / tempo + tailSec <= SHORTS_MAX_SEC + 0.05 };
 }
 
-// The look of the devotional art, picked by DEVOTIONAL_STYLE (a GitHub
-// Actions variable) for the daily Shorts (realistic when it isn't set), and
-// per series for the landscape episodes (build-landscape-episode.js;
-// cartoon3d for a new series when it isn't set):
+// The look of every picture the pipeline draws, picked by DEVOTIONAL_STYLE
+// (a GitHub Actions variable; realistic when it isn't set): the daily and
+// festival-eve Shorts, the Sunday long katha, new landscape series (an
+// existing series keeps the look saved in its bible), covers, carousel
+// slides and community stories (storyArtStyle):
 //   cartoon3d — a clean 3D animated-feature look, the style of the
 //     channel's best "Divine Bal Krishna … Cinematic AI Animation" reels.
 //     Image models draw this crisply and consistently; faces, hands and the
 //     blue-skinned deities hold up far better than in photoreal.
 //   cartoon2d — hand-painted 2D animation, like classic devotional cartoons.
 //   realistic — a live-action mythological epic film still.
+//   stickman — the viral stick-figure look: black stick figures with round
+//     heads on a plain background, a few flat colour accents. AI-drawn like
+//     the others (not the code-drawn animation of the stickman demo).
 const ART_STYLES = {
   cartoon3d: 'high-quality 3D animated feature film still, cute expressive characters with big gentle eyes, smooth ' +
     'clean shapes, crisp sharp details, vibrant saturated colours, soft global illumination and warm rim light, ' +
@@ -95,6 +99,10 @@ const ART_STYLES = {
   realistic: 'photorealistic cinematic film still from a big-budget Indian mythological epic, lifelike faces and ' +
     'natural skin texture, authentic costumes and jewellery, volumetric golden light, shallow depth of field, 35mm ' +
     'lens, highly detailed',
+  stickman: 'minimalist stick-figure drawing in the viral stickman animation style: simple black stick figures with ' +
+    'round white heads and thick clean black outlines, simple expressive faces, a few flat bright colour accents only ' +
+    'on key props and clothing, plain off-white background with a simple ground line, flat 2D vector art, no shading, ' +
+    'no realistic detail',
 };
 const STYLE_KEYS = Object.keys(ART_STYLES);
 
@@ -104,12 +112,17 @@ function styleKey(value) {
   return STYLE_KEYS.includes(key) ? key : null;
 }
 
-/** Prompt text for `style` (falls back to cartoon3d), framed for a tall
+/** Prompt text for `style` (falls back to realistic), framed for a tall
  *  Short or a widescreen episode. */
 function artStyleFor(style, { orientation = 'vertical' } = {}) {
   const framing = orientation === 'wide' ? 'widescreen 16:9 composition' : 'vertical composition';
-  return `${ART_STYLES[styleKey(style) || 'cartoon3d']}, ${framing}, no text, no words`;
+  return `${ART_STYLES[styleKey(style) || 'realistic']}, ${framing}, no text, no words`;
 }
+
+// realistic for a story that isn't mythology (romance, mystery, kids,
+// community stories…): the same film-still look without the epic costumes.
+const REALISTIC_STORY = 'photorealistic cinematic film still, lifelike faces and natural skin texture, natural ' +
+  'light, shallow depth of field, 35mm lens, highly detailed';
 
 // The daily Shorts' look when DEVOTIONAL_STYLE isn't set.
 const SHORTS_DEFAULT_STYLE = 'realistic';
@@ -124,4 +137,18 @@ function devotionalArtStyle(opts) {
   return artStyleFor(shortsStyleKey(), opts);
 }
 
-module.exports = { styleOfDay, fitShort, devotionalArtStyle, shortsStyleKey, artStyleFor, styleKey, STYLE_KEYS, SHORTS_MAX_SEC, MAX_TEMPO };
+/** The style prompt for any story's pictures, by genre: devotional ones get
+ *  devotionalArtStyle; others the same DEVOTIONAL_STYLE choice, with a
+ *  non-mythological version of realistic. `orientation` as artStyleFor. */
+function storyArtStyle(genre, opts = {}) {
+  if (genre === 'devotional') return devotionalArtStyle(opts);
+  const key = shortsStyleKey();
+  if (key !== 'realistic') return artStyleFor(key, opts);
+  const framing = opts.orientation === 'wide' ? 'widescreen 16:9 composition'
+    : opts.orientation === 'square' ? 'square composition' : 'vertical composition';
+  return `${REALISTIC_STORY}, ${framing}, no text, no words`;
+}
+
+module.exports = {
+  styleOfDay, fitShort, devotionalArtStyle, storyArtStyle, shortsStyleKey, artStyleFor, styleKey, STYLE_KEYS, SHORTS_MAX_SEC, MAX_TEMPO,
+};

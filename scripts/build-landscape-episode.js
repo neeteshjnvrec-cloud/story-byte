@@ -34,7 +34,7 @@ const { parseSrt } = require('./lib/subtitles');
 const { toCaptionChunks, captionFont } = require('./lib/landscape-captions');
 const { renderFallbackCover } = require('./lib/fallback-cover');
 const { GENRE_THEME, theme } = require('./lib/genre-theme');
-const { artStyleFor, styleKey } = require('./lib/short-style');
+const { artStyleFor, styleKey, shortsStyleKey } = require('./lib/short-style');
 const { iconographyFor } = require('./lib/iconography');
 const { renderEpisodeThumbnail, THUMB_WIDTH, THUMB_HEIGHT } = require('./lib/episode-thumbnail');
 const { uploadEpisodeToYouTube } = require('./lib/youtube');
@@ -650,7 +650,8 @@ function styleText() {
 
 /**
  * Explicit EPISODE_STYLE (workflow input) > the style saved in the series
- * bible > DEVOTIONAL_STYLE for a brand-new series (cartoon3d by default).
+ * bible > for a brand-new series, the Shorts' style (DEVOTIONAL_STYLE, else
+ * realistic).
  * A series that predates styles keeps 'illustration', so its look doesn't
  * change mid-season unless asked to.
  */
@@ -659,7 +660,7 @@ function resolveStyle(bible) {
   if (requested === 'illustration' || styleKey(requested)) return requested;
   if (bible.style) return bible.style;
   const isNew = !(bible.episodes || []).length;
-  return isNew ? (styleKey(process.env.DEVOTIONAL_STYLE) || 'cartoon3d') : 'illustration';
+  return isNew ? shortsStyleKey() : 'illustration';
 }
 
 function scenePrompt(description, bible) {

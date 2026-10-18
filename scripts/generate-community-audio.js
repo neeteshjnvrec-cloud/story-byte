@@ -33,6 +33,7 @@ const { renderFallbackCover } = require('./lib/fallback-cover');
 const { buildCarouselSlides } = require('./lib/carousel-slides');
 const { buildStoryVideo } = require('./lib/video');
 const { buildVideoScenes } = require('./lib/video-scenes');
+const { storyArtStyle } = require('./lib/short-style');
 const { parseSrt, toCaptionLines } = require('./lib/subtitles');
 const { bakeInCaptions } = require('./lib/caption-frames');
 const { REEL_MAX_SEC, clipScenes, clipAudio } = require('./lib/video-clip');
@@ -88,7 +89,7 @@ function coverPrompt(story) {
   // alone is often too abstract ("a story about faith and love") for the
   // image model to draw anything devotional-looking from.
   const subject = story.genre === 'devotional' ? (story.title || story.description || '') : (story.description || story.title || '');
-  return `${subject}. Storybook cover illustration, ${mood}, painterly, cozy, high detail, no text`;
+  return `${subject}. ${mood}, ${storyArtStyle(story.genre, { orientation: 'square' })}`;
 }
 
 const EDGE = [
