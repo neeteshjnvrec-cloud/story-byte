@@ -20,7 +20,7 @@ on:
         required: false
         default: ''
         type: choice
-        options: ['', realistic, cartoon3d, cartoon2d, stickman]
+        options: ['', realistic, epic, cartoon3d, cartoon2d, stickman]
 
 permissions:
   contents: read
@@ -57,7 +57,7 @@ jobs:
           CLOUDFLARE_ACCOUNTS: ${{ secrets.CLOUDFLARE_ACCOUNTS }}
           SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
           SARVAM_SPEAKER: ${{ vars.SARVAM_SPEAKER }}
-          # Art style for every picture: realistic (default), cartoon3d, cartoon2d or stickman —
+          # Art style for every picture: realistic (default), epic, cartoon3d, cartoon2d or stickman —
           # set as a repository variable (Settings → Secrets and variables → Actions → Variables).
           DEVOTIONAL_STYLE: ${{ inputs.style || vars.DEVOTIONAL_STYLE }}
         run: node remake-short.js

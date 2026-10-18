@@ -87,6 +87,9 @@ function fitShort(durSec) {
 //     blue-skinned deities hold up far better than in photoreal.
 //   cartoon2d — hand-painted 2D animation, like classic devotional cartoons.
 //   realistic — a live-action mythological epic film still.
+//   epic — dramatic devotional digital painting: fiery and golden glow, god
+//     rays, deep contrast, rich saturated colour (the look of the big viral
+//     katha Shorts, e.g. "काशी में हनुमान जी को काल भैरव ने क्यों बाँध दिया?").
 //   stickman — the viral stick-figure look: black stick figures with round
 //     heads on a plain background, a few flat colour accents. AI-drawn like
 //     the others (not the code-drawn animation of the stickman demo).
@@ -99,6 +102,9 @@ const ART_STYLES = {
   realistic: 'photorealistic cinematic film still from a big-budget Indian mythological epic, lifelike faces and ' +
     'natural skin texture, authentic costumes and jewellery, volumetric golden light, shallow depth of field, 35mm ' +
     'lens, highly detailed',
+  epic: 'epic cinematic devotional digital painting, dramatic fiery orange and divine golden glow, radiant aura and ' +
+    'god rays, deep contrast with rich shadows, intensely saturated warm colours, ornate temples, sacred fire and ' +
+    'smoke, heroic larger-than-life figures, intricate fine detail, ultra-detailed concept art',
   stickman: 'minimalist stick-figure drawing in the viral stickman animation style: simple black stick figures with ' +
     'round white heads and thick clean black outlines, simple expressive faces, a few flat bright colour accents only ' +
     'on key props and clothing, plain off-white background with a simple ground line, flat 2D vector art, no shading, ' +
