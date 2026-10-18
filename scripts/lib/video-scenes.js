@@ -62,7 +62,9 @@ async function llmSceneList({ title, text, genre, description }, count) {
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     const sys =
       'You describe scenes for illustrating an audio story as a narrated video. Given a full story, reply with ' +
-      'JSON only: {"scenes": [string, ...]}. Exactly ' + count + ' entries, in chronological order, walking the ' +
+      'JSON only: {"scenes": [string, ...], "hook": number}. "hook" is the 0-based index of the single most ' +
+      'dramatic, visually striking scene (usually the climax) — the video opens on it for two seconds to stop ' +
+      'scrollers. Exactly ' + count + ' scene entries, in chronological order, walking the ' +
       'ENTIRE story from beginning to end INCLUDING its resolution — unlike a teaser, this may and should show ' +
       'how it ends. Each entry is a 6-14 word ENGLISH visual description of that exact moment for an illustrator ' +
       '— concrete subject, setting and mood, specific to what actually happens in THIS story at that point (name ' +
@@ -85,8 +87,10 @@ async function llmSceneList({ title, text, genre, description }, count) {
     // thinking is how a completion comes back with no JSON in it at all.
     const content = await callGroqJson(groq, MODELS, { sys, user, temperature: 0.8, maxTokens: 4000, topP: 0.95 });
     const d = extractJson(content);
-    const scenes = Array.isArray(d.scenes) ? d.scenes.map((s) => String(s || '').trim()).filter(Boolean) : [];
-    return scenes.length ? scenes.slice(0, count) : null;
+    const scenes = Array.isArray(d.scenes) ? d.scenes.map((s) => String(s || '').trim()).filter(Boolean).slice(0, count) : [];
+    if (!scenes.length) return null;
+    const hook = Number.isInteger(d.hook) && d.hook > 0 && d.hook < scenes.length ? d.hook : Math.round(scenes.length * 0.7);
+    return { scenes, hook: Math.min(hook, scenes.length - 1) };
   } catch (e) {
     console.warn(`  ⚠️  Video scene generation failed: ${e.message}`);
     return null;
@@ -113,7 +117,8 @@ const HQ_PORTRAIT = { width: 864, height: 1536 };
 async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir, sceneCount, context = '' }) {
   if (!cues?.length || !audioDurSec) return null;
 
-  const prompts = await llmSceneList({ title, text, genre, description }, sceneCount || sceneCountFor(audioDurSec));
+  const plan = await llmSceneList({ title, text, genre, description }, sceneCount || sceneCountFor(audioDurSec));
+  const prompts = plan?.scenes;
   if (!prompts?.length) return null;
   // Boundaries snap to cue starts so each picture changes on a spoken
   // word, not mid-syllable.
@@ -192,8 +197,21 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
     // close-up (lib/close-ups.js) would blow up further into a blur.
     scenes.push({ file, duration: Math.max(1.5, planned[i].end - planned[i].start), lowRes: source !== 'hq' });
   });
+  // Hook first (devotional Shorts): the opening ~2s show the most striking
+  // picture — the climax — over the narration's opening hook line, then the
+  // story starts from the beginning. The first seconds decide whether a
+  // Shorts viewer keeps watching.
+  const hookAt = plan.hook;
+  const first = scenes[0];
+  const hookSec = Math.min(2.2, first.duration * 0.6);
+  if (devotional && scenes.length >= 4 && hookAt > 0 && first.duration - hookSec >= 1.5) {
+    scenes.splice(0, 1,
+      { file: scenes[hookAt].file, duration: hookSec, lowRes: scenes[hookAt].lowRes },
+      { ...first, duration: first.duration - hookSec });
+    console.log(`  🎬 Opens on scene ${hookAt + 1} (the hook) for ${hookSec.toFixed(1)}s`);
+  }
   console.log(`  🖼️  Video pictures: ${Object.entries(sources).map(([k, n]) => `${n} ${k}`).join(', ')}` +
-    (sources.hq === scenes.length ? '' : ' (hq = FLUX.2; reused = a neighbouring picture reframed; the rest are lower quality)'));
+    (sources.hq === filled.length ? '' : ' (hq = FLUX.2; reused = a neighbouring picture reframed; the rest are lower quality)'));
   return scenes.length ? scenes : null;
 }
 

@@ -34,7 +34,7 @@ on:
         required: true
         default: 'series'
         type: choice
-        options: [series, realistic, cartoon3d, cartoon2d, stickman, illustration]
+        options: [series, realistic, epic, cartoon3d, cartoon2d, stickman, illustration]
       publish:
         description: 'Publish the finished episode publicly to YouTube and Facebook'
         required: true

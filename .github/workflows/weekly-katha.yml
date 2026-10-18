@@ -26,7 +26,7 @@ on:
         required: false
         default: ''
         type: choice
-        options: ['', realistic, cartoon3d, cartoon2d, stickman, illustration]
+        options: ['', realistic, epic, cartoon3d, cartoon2d, stickman, illustration]
       publish:
         description: 'Publish to YouTube and Facebook'
         required: true
