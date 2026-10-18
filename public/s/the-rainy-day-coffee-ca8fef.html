@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Rainy Day Coffee · StoryByte</title>
+  <meta name="description" content="Two strangers find connection over a shared umbrella during a sudden downpour.">
+  <link rel="canonical" href="https://storybyte-76716.web.app/s/the-rainy-day-coffee-ca8fef">
+  <link rel="icon" href="https://storybyte-76716.web.app/covers/community_1792059494687_eD2elqa40vfAKo8qRhfyn8WhjKB2.jpg">
+
+  <!-- OpenGraph: this is what renders the preview card when the link is pasted
+       into WhatsApp, iMessage or Telegram. og:type stays "website" — it previews
+       predictably everywhere, where music.song does not. -->
+  <meta property="og:site_name" content="StoryByte">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="The Rainy Day Coffee">
+  <meta property="og:description" content="Two strangers find connection over a shared umbrella during a sudden downpour.">
+  <meta property="og:url" content="https://storybyte-76716.web.app/s/the-rainy-day-coffee-ca8fef">
+  <meta property="og:image" content="https://storybyte-76716.web.app/covers/community_1792059494687_eD2elqa40vfAKo8qRhfyn8WhjKB2.jpg">
+  <meta property="og:image:width" content="768">
+  <meta property="og:image:height" content="768">
+  <meta property="og:image:alt" content="Cover art for The Rainy Day Coffee">
+  <meta property="og:audio" content="https://storybyte-76716.web.app/audio/community_1792059494687_eD2elqa40vfAKo8qRhfyn8WhjKB2.mp3">
+  <meta property="og:audio:type" content="audio/mpeg">
+  <meta property="og:locale" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Rainy Day Coffee">
+  <meta name="twitter:description" content="Two strangers find connection over a shared umbrella during a sudden downpour.">
+  <meta name="twitter:image" content="https://storybyte-76716.web.app/covers/community_1792059494687_eD2elqa40vfAKo8qRhfyn8WhjKB2.jpg">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #F6EFE4;
+      color: #2A2118;
+      line-height: 1.7;
+      padding: 0 20px;
+    }
+    .container { max-width: 680px; margin: 0 auto; padding: 28px 0 72px; }
+    .brand {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+    }
+    .brand-icon {
+      width: 36px; height: 36px; border-radius: 11px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 19px; font-weight: 700;
+    }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
+    .brand-cta {
+      margin-left: auto; font-size: 14px; font-weight: 600;
+      color: #B5613A; text-decoration: none;
+    }
+    .cover {
+      width: 100%; aspect-ratio: 1 / 1; max-height: 420px;
+      object-fit: cover; border-radius: 20px;
+      border: 1px solid #EADFCC; background: #FCF7EF; display: block;
+    }
+    h1 { font-size: 27px; font-weight: 700; line-height: 1.25; margin: 22px 0 0; }
+    .byline { display: flex; align-items: center; gap: 11px; margin-top: 16px; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      object-fit: cover; flex-shrink: 0; border: 1px solid #EADFCC;
+    }
+    .avatar-fallback {
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 18px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; border: 0;
+    }
+    .byline-name { font-size: 15px; font-weight: 600; }
+    .byline-role { font-size: 13px; color: #A99C89; line-height: 1.3; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .chip {
+      font-size: 13px; font-weight: 600; color: #B5613A;
+      background: rgba(181, 97, 58, 0.1);
+      padding: 5px 12px; border-radius: 999px;
+    }
+    /* Genre arrives lowercase from the generator. Only it gets capitalised —
+       applying this to every chip rendered the duration as "12 Min". */
+    .chip-genre { text-transform: capitalize; }
+    .player {
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 16px;
+      padding: 16px; margin-top: 22px;
+    }
+    .player-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 10px;
+    }
+    audio { width: 100%; display: block; }
+    .lead { font-size: 17px; color: #4A3D2F; margin-top: 24px; }
+    .transcript { margin-top: 34px; }
+    .transcript-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      color: #A99C89; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .transcript-body {
+      background: #FCF7EF; border: 1px solid #EADFCC;
+      border-radius: 16px; padding: 22px;
+    }
+    .transcript-body p { font-size: 16px; color: #4A3D2F; margin-bottom: 15px; }
+    .transcript-body p:last-child { margin-bottom: 0; }
+    .get-app {
+      margin-top: 40px; padding: 28px 24px; text-align: center;
+      background: #FCF7EF; border: 1px solid #EADFCC; border-radius: 20px;
+    }
+    .get-app h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .get-app p { font-size: 14px; color: #4A3D2F; margin-bottom: 20px; }
+    .btn {
+      display: inline-block; padding: 15px 30px; border-radius: 999px;
+      background: linear-gradient(135deg, #B5613A, #E0913A);
+      color: #fff; font-size: 16px; font-weight: 700; text-decoration: none;
+    }
+    .footer {
+      text-align: center; font-size: 13px; color: #A99C89;
+      margin-top: 44px; padding-top: 22px; border-top: 1px solid #EADFCC;
+    }
+    .footer a { color: #A99C89; text-decoration: underline; }
+    @media (max-width: 480px) {
+      h1 { font-size: 23px; }
+      .container { padding-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand">
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">Get the app</a>
+    </div>
+
+    <img class="cover" src="https://storybyte-76716.web.app/covers/community_1792059494687_eD2elqa40vfAKo8qRhfyn8WhjKB2.jpg" alt="Cover art for The Rainy Day Coffee" width="768" height="768">
+
+    <h1>The Rainy Day Coffee</h1>
+
+    <div class="byline">
+      <img class="avatar" src="https://lh3.googleusercontent.com/a/ACg8ocI1SX5YRVlWahX9KlCFjUncu8pOMMhM6CpMym0z8FCoeXMBidk=s96-c" alt="" width="44" height="44">
+      <div>
+        <div class="byline-name">Forever</div>
+        <div class="byline-role">Narrated on StoryByte</div>
+      </div>
+    </div>
+
+    <div class="chips"><span class="chip chip-genre">romance</span><span class="chip">English</span><span class="chip">3 min</span></div>
+
+    <div class="player">
+      <div class="player-label">Listen</div>
+      <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/community_1792059494687_eD2elqa40vfAKo8qRhfyn8WhjKB2.mp3">
+        Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/community_1792059494687_eD2elqa40vfAKo8qRhfyn8WhjKB2.mp3">Download the recording</a>.
+      </audio>
+    </div>
+
+    <p class="lead">Two strangers find connection over a shared umbrella during a sudden downpour.</p>
+
+    <div class="transcript">
+      <div class="transcript-label">Story</div>
+      <div class="transcript-body">
+      <p>The sky cracked open without warning, the rain hammering against the pavement in a relentless drumroll. Elara pulled her coat tighter, watching the crowd of people on the corner of 5th and Main scatter for cover. She had no umbrella. She had no phone signal. And she was late.</p>
+      <p>Just as she was about to sprint for the awning of the bookstore, a large, dark silhouette moved into her peripheral vision. It was a man, tall and broad-shouldered, holding a massive black umbrella. He wasn&#39;t looking at her; he was looking at the rain, his expression one of quiet annoyance.</p>
+      <p>&quot;You&#39;re getting soaked,&quot; he said, his voice a low rumble that cut through the noise of the storm. He didn&#39;t ask. He stated a fact. Then, he shifted the umbrella, angling it to cover both of them.</p>
+      <p>Elara blinked, surprised. &quot;Oh. You don&#39;t have to.&quot;</p>
+      <p>&quot;I do,&quot; he said simply. &quot;I hate seeing people miss their appointments because of bad weather.&quot;</p>
+      <p>They stood there, side by side, under the shelter of his canopy. The rain whispered around them, creating a private bubble of silence in the chaotic street. He smelled like cedar and old books.</p>
+      <p>&quot;I&#39;m Julian,&quot; he offered, after a moment of awkward quiet.</p>
+      <p>&quot;Elara,&quot; she replied, a small smile tugging at the corner of her mouth. &quot;And I am very late. I have a meeting at seven.&quot;</p>
+      <p>&quot;It&#39;s seven-ten,&quot; Julian said, checking the watch on his wrist. &quot;You&#39;re already late. But I think you can make it to the lobby.&quot;</p>
+      <p>He started walking, moving with a steady, unhurried pace. Elara followed, her footsteps splashing softly. They didn&#39;t talk much at first. It was a comfortable silence, the kind that usually takes months to build. But then, as they turned the corner, she saw the reflection of their two faces in the window of a closed cafe. She looked at him, really looked at him, and saw the gentle concern in his eyes that didn&#39;t match his stoic exterior.</p>
+      <p>&quot;You&#39;re kind,&quot; she said, her voice barely above a whisper.</p>
+      <p>Julian paused. He turned to face her, the rain still falling heavily around them. &quot;I&#39;m just practical.&quot;</p>
+      <p>&quot;No,&quot; she said, stepping closer. The umbrella was getting crowded now. &quot;You&#39;re kind. And I think... I think I&#39;ve been waiting for this rain.&quot;</p>
+      <p>He looked at her, confused. &quot;Why?&quot;</p>
+      <p>&quot;Because before this, I was just rushing. Just surviving. But right now, in this moment, I&#39;m not thinking about the meeting. I&#39;m not thinking about the deadline. I&#39;m just here. With you.&quot;</p>
+      <p>Julian’s stern expression softened. A faint blush crept up his neck. He reached out, not to touch her, but to adjust the umbrella again, ensuring not a single drop touched her shoulder. &quot;Then let&#39;s not rush,&quot; he said. &quot;Let&#39;s just stand here a little longer.&quot;</p>
+      <p>And so they did. The rain kept falling, washing the city clean, but for the two of them, it was the beginning of something new. Something warm, amidst the cold. The meeting could wait. They had so much more to discover, one drop at a time.</p>
+      </div>
+    </div>
+
+    <div class="get-app">
+      <h2>Listen to more on StoryByte</h2>
+      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">Get the StoryByte app</a>
+      <p><a href="https://storybyte-76716.web.app/">More stories →</a></p>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 StoryByte · <a href="https://storybyte-76716.web.app/privacy.html">Privacy</a></p>
+    </div>
+  </div>
+</body>
+</html>

@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-08-20_hi_mystery_%E0%A4%B0%E0%A4%B9%E0%A4%B8%E0%A5%8D%E0%A4%AF%E0%A4%AE%E0%A4%AF%E0%A5%80-%E0%A4%B8%E0%A4%B0%E0%A5%8D%E0%A4%A6%E0%A5%80-%E0%A4%95%E0%A5%80-%E0%A4%B6%E0%A4%BE%E0%A4%AE.jpg" alt="Cover art for रहस्यमयी सर्दी की शाम" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">mystery</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">6 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-08-20_hi_mystery_%E0%A4%B0%E0%A4%B9%E0%A4%B8%E0%A5%8D%E0%A4%AF%E0%A4%AE%E0%A4%AF%E0%A5%80-%E0%A4%B8%E0%A4%B0%E0%A5%8D%E0%A4%A6%E0%A5%80-%E0%A4%95%E0%A5%80-%E0%A4%B6%E0%A4%BE%E0%A4%AE.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-08-20_hi_mystery_%E0%A4%B0%E0%A4%B9%E0%A4%B8%E0%A5%8D%E0%A4%AF%E0%A4%AE%E0%A4%AF%E0%A5%80-%E0%A4%B8%E0%A4%B0%E0%A5%8D%E0%A4%A6%E0%A5%80-%E0%A4%95%E0%A5%80-%E0%A4%B6%E0%A4%BE%E0%A4%AE.mp3">Download the recording</a>.
       </audio>
@@ -159,7 +158,7 @@
     <p class="lead">एक ठंडी रात में एक छोटे गाँव में घटित अद्भुत रहस्य का खुलासा।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>नमस्ते, मैं आपके सामने एक ऐसी कहानी लाया हूँ जो एक ठंडी सर्दी की शाम को छोटे‑से गाँव में हुई, और जो सुनते‑सुनते आपके दिमाग की चाबियाँ घुमा देगी। इस गाँव का नाम पायलपुर है, जहाँ हर घर की खिड़की पर बर्फ की बूँदें लटकती थीं और हर गलियों में धुंधली रोशनी का जाल बसा रहता था। एक रात, जब गाँव के लोग अपने‑अपने घरों में जलते हुए चूल्हे के सामने बैठे थे, तो अचानक गाँव के सबसे बुज़ुर्ग, दादाजी रघु की आवाज़ पूरे चौक में गूँज उठी – “मेरी घड़ी गायब हो गई है!” दादाजी की घड़ी सिर्फ समय नहीं, बल्कि एक पुरानी विरासत थी, जो पीढ़ी‑दर‑पीढ़ी पास‑पास चली आ रही थी। जब उन्होंने कहा, तो सबकी नज़रें उस छोटे‑से टेबल पर रखी धातु की घड़ी की ओर टिकी। वह घड़ी सुनहरी धातु की थी, जिसमें दो छोटे‑छोटे पेंडुलम लटके हुए थे, और हर घंटे की टिक‑टिक गाँव के दिल की धड़कन बन गई थी।</p>
       <p>अगले दिन, गाँव के युवा, सन्दीप, जिसने कभी जासूसियों की कहानियाँ पढ़ी थीं, खुद को इस रहस्य का हल खोजने के लिए तैयार कर लिया। उसने सबसे पहले दादाजी के कमरे की तलाशी ली। कमरे की दीवारें काली और धूसर थीं, पर एक छोटी सी खिड़की से धुंधली रोशनी अंदर आ रही थी। सन्दीप ने देखा कि दरवाज़ा ठीक‑ठाक बंद था, पर दादाजी की अलमारी के पीछे एक हल्की खड़खड़ाहट सुनाई दी। उसने धीरे‑धीरे अलमारी खोल दी, पर अंदर केवल पुराने कपड़े और एक धूल भरा बक्सा था। बक्से के ऊपर एक कागज़ का टुकड़ा था, जिस पर लिखा था – “जो देखता है, वही समझता है।” यह शब्द सन्दीप को उलझन में डाल गया।</p>
@@ -170,9 +169,10 @@
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

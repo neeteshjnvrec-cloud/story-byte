@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-08-29_hi_sleep_%E0%A4%9A%E0%A4%BE%E0%A4%81%E0%A4%A6%E0%A4%A8%E0%A5%80-%E0%A4%AC%E0%A4%97%E0%A5%80%E0%A4%9A%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%A8%E0%A5%80%E0%A4%82%E0%A4%A6-%E0%A4%95%E0%A4%B9%E0%A4%BE%E0%A4%A8%E0%A5%80.jpg" alt="Cover art for चाँदनी बगीचा की नींद कहानी" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">sleep</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">5 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-08-29_hi_sleep_%E0%A4%9A%E0%A4%BE%E0%A4%81%E0%A4%A6%E0%A4%A8%E0%A5%80-%E0%A4%AC%E0%A4%97%E0%A5%80%E0%A4%9A%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%A8%E0%A5%80%E0%A4%82%E0%A4%A6-%E0%A4%95%E0%A4%B9%E0%A4%BE%E0%A4%A8%E0%A5%80.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-08-29_hi_sleep_%E0%A4%9A%E0%A4%BE%E0%A4%81%E0%A4%A6%E0%A4%A8%E0%A5%80-%E0%A4%AC%E0%A4%97%E0%A5%80%E0%A4%9A%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%A8%E0%A5%80%E0%A4%82%E0%A4%A6-%E0%A4%95%E0%A4%B9%E0%A4%BE%E0%A4%A8%E0%A5%80.mp3">Download the recording</a>.
       </audio>
@@ -159,16 +158,17 @@
     <p class="lead">एक शांत बगीचे में चाँदनी और तालाब की सुकून भरी कहानी।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>एक ठंडी शाम को, जब सूरज धीरे‑धीरे अपनी आखिरी किरणें बिखेर रहा था, तो गाँव के किनारे बसे छोटे से बगीचे में एक खास शांति का माहौल छा गया था। बगीचे की हर पत्ती, हर फूल, जैसे थक कर आराम की तलाश में हों। हवा में हल्की सी ठंडक थी, और पत्तियों की सरसराहट एक मीठी लोरी जैसी लग रही थी। बगीचे के बीचों‑बीच एक छोटा सा तालाब था, जिसका पानी चाँदनी में चमक रहा था। तालाब के किनारे पर नीले‑नीले फूल खिले थे, जिनकी महक धीरे‑धीरे हवा में घुलती जा रही थी। जब चाँद पूरी तरह उभरा, तो उसकी रोशनी पानी पर पड़कर छोटे‑छोटे चमकते मोती बनाती थी। उस तालाब के पास एक पुरानी बेंच रखी थी, जिस पर बैठकर कोई भी इस शांति को महसूस कर सकता था। मैं भी उस बेंच पर बैठा, अपनी आँखें धीरे‑धीरे बंद कर, गहरी साँसें ले रहा था। हर साँस के साथ, मेरे भीतर की सारी थकान और चिंता धीरे‑धीरे बाहर निकलती हुई महसूस हुई। आसमान में तारे टिमटिमा रहे थे, जैसे छोटे‑छोटे दीपक हों जो रात को रोशन कर रहे हों। एक कोयल की मीठी आवाज़ दूर‑दूर तक गूँज रही थी, उसकी धुन में एक अजीब सी सुकून की लहर चल रही थी। मैं अपने आप को उस धुन में खोता गया, जैसे कोई नर्म कंबल मेरे कंधों पर बिछा हो। धीरे‑धीरे, तालाब की सतह पर हल्की लहरें उठने लगीं, जैसे कोई कोमल हाथ पानी को छू रहा हो। लहरों की आवाज़, पत्तियों की सरसराहट, कोयल की कूजन, और मेरे दिल की धड़कन—सब मिलकर एक सिम्फनी बना रहे थे, जो मुझे गहरी नींद की ओर ले जा रही थी। मैं अपने मन में एक कहानी बुनता रहा—एक छोटी सी परी, जो इस बगीचे में रहती थी, और हर रात चाँद की रोशनी को इकट्ठा करके तालाब में डाल देती थी, ताकि सभी जीवों को मीठे सपनों की शक्ति मिल सके। वह परी धीरे‑धीरे मेरे कान में फुसफुसाई, “अब आराम करो, प्रिय, तुम्हारी आँखें थक गई हैं, और तुम्हारा दिल शांति चाहता है।” इन शब्दों को सुनते‑सुनते, मेरी आँखें और भी भारी हो गईं। मैं अपने हाथों को बेंच पर रखकर, धीरे‑धीरे अपने शरीर को आराम देने लगा। मेरे पैर तालाब के ठंडे पानी में डुबकी लगाते हुए, एक हल्की ठंडक मेरे पूरे शरीर में फैल गई। अब, रात की चुप्पी में, मैं खुद को एक नरम बादल की तरह महसूस कर रहा हूँ, जो धीरे‑धीरे ऊपर उठ रहा है, और आकाश में घुल रहा है। मैं अपने आप को हल्का, मुक्त, और पूरी तरह से शांत महसूस करता हूँ। जैसे ही मैं इस शांति में डूबता हूँ, मेरे विचार धीरे‑धीरे धुंधले होते जाते हैं, और मेरे सपने एक मीठी धारा की तरह बहने लगते हैं। मैं जानता हूँ कि यह रात, यह बगीचा, यह तालाब, और यह चाँदनी मेरे भीतर एक गहरी, सुकून भरी नींद लाएगा। अब, मैं धीरे‑धीरे अपने आप को सोने के लिए तैयार करता हूँ, और इस शांति को अपने दिल में बसा लेता हूँ। मेरे शरीर की हर कोशिका, इस शांति को महसूस कर रही है, और मैं धीरे‑धीरे, बहुत धीरे‑धीरे, गहरी नींद में डूब जाता हूँ।</p>
       </div>
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

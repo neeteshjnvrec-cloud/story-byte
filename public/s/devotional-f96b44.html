@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-10-13_hi_devotional_%E0%A4%AE%E0%A4%BE%E0%A4%81-%E0%A4%9A%E0%A4%82%E0%A4%A6%E0%A5%8D%E0%A4%B0%E0%A4%98%E0%A4%82%E0%A4%9F%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%95%E0%A4%A5%E0%A4%BE-%E0%A4%A6%E0%A4%BE%E0%A4%A8%E0%A4%B5%E0%A5%8B%E0%A4%82-%E0%A4%95%E0%A5%8B-%E0%A4%AD%E0%A4%AF%E0%A4%AD%E0%A4%BF%E0%A4%A4-%E0%A4%95%E0%A4%B0%E0%A4%A8.jpg" alt="Cover art for माँ चंद्रघंटा की कथा – दानवों को भयभित करने वाली गर्जना" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">devotional</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">2 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-10-13_hi_devotional_%E0%A4%AE%E0%A4%BE%E0%A4%81-%E0%A4%9A%E0%A4%82%E0%A4%A6%E0%A5%8D%E0%A4%B0%E0%A4%98%E0%A4%82%E0%A4%9F%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%95%E0%A4%A5%E0%A4%BE-%E0%A4%A6%E0%A4%BE%E0%A4%A8%E0%A4%B5%E0%A5%8B%E0%A4%82-%E0%A4%95%E0%A5%8B-%E0%A4%AD%E0%A4%AF%E0%A4%AD%E0%A4%BF%E0%A4%A4-%E0%A4%95%E0%A4%B0%E0%A4%A8.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-10-13_hi_devotional_%E0%A4%AE%E0%A4%BE%E0%A4%81-%E0%A4%9A%E0%A4%82%E0%A4%A6%E0%A5%8D%E0%A4%B0%E0%A4%98%E0%A4%82%E0%A4%9F%E0%A4%BE-%E0%A4%95%E0%A5%80-%E0%A4%95%E0%A4%A5%E0%A4%BE-%E0%A4%A6%E0%A4%BE%E0%A4%A8%E0%A4%B5%E0%A5%8B%E0%A4%82-%E0%A4%95%E0%A5%8B-%E0%A4%AD%E0%A4%AF%E0%A4%AD%E0%A4%BF%E0%A4%A4-%E0%A4%95%E0%A4%B0%E0%A4%A8.mp3">Download the recording</a>.
       </audio>
@@ -159,16 +158,17 @@
     <p class="lead">शिवजी के विवाह में दानवों को हराने वाली माँ चंद्रघंटा की अद्भुत कथा, जो दिल को छू लेगी।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>“अरे दानवों, मेरे घँट की गर्जना सुनो!” चंद्रघंटा ने गर्जते हुए कहा। “अब तुम्हारा अंधकार समाप्त होगा!” उन्होंने फिर पुकारा। इस प्राचीन शृंखला की शुरुआत तब हुई, जब कैलाश पर भगवान शिव का विवाह होने वाला था। सारा स्वर्गलोक उत्सव से भर गया, पर दानव रावण और उनके सिपाही इस पवित्र अवसर को बिगाड़ने को तैयार थे। उन्होंने महा यज्ञ की ध्वनि को रोकने की कोशिश की, और शिव के सुदर्शन चक्र को बँधाने की योजना बनाई। जब दानवों की भीड़ लहराती हुई आई, तो देवताओं ने निराशा महसूस की; कोई भी उनकी शक्ति को रोक नहीं पा रहा था। तभी माँ चंद्रघंटा, जो अपनी चंद्रमुखी ध्वनि और घँट के समान शरीर के कारण जानी जाती थीं, प्रकट हुईं। उन्होंने अपने दो हाथों में दो चमकते शंख लिये और गहरी साँस लेकर घँट की ध्वनि निकालना शुरू किया। उनकी गर्जना ऐसा गूँज उठी जैसे सैकड़ों घंटियों की ध्वनि, जो पूरे पर्वत को हिला रही थी। “धर्म की आवाज़ सुनो, दानवों! तुम्हारी हार तय है,” उन्होंने कहा। दानवों के दिल में डर की लहर दौड़ गई; उनका शरीर कांपने लगा और वे एक-एक करके पीछे हटने लगे। शिव का विवाह अब शांति से चलता रहा, और सभी देवता चंद्रघंटा के साहस की प्रशंसा करने लगे। अंत में, माँ चंद्रघंटा ने दानवों को क्षमा की और कहा, “धर्म की रक्षा में हम सब एक साथ हैं।” यह कथा हमें सिखाती है कि सच्ची शक्ति भीतर की शुद्ध आवाज़ में है, जो अंधकार को दूर कर प्रकाश लाती है। जय माँ चंद्रघंटा!</p>
       </div>
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

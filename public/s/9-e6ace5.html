@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-10-09_hi_devotional_%E0%A4%A8%E0%A4%B5%E0%A4%B0%E0%A4%BE%E0%A4%A4%E0%A5%8D%E0%A4%B0%E0%A4%BF-%E0%A4%95%E0%A5%87-9-%E0%A4%A6%E0%A4%BF%E0%A4%B2-%E0%A4%9B%E0%A5%82-%E0%A4%B2%E0%A5%87%E0%A4%A8%E0%A5%87-%E0%A4%B5%E0%A4%BE%E0%A4%B2%E0%A5%87-%E0%A4%95%E0%A4%BF%E0%A4%B8%E0%A5%8D%E0%A4%B8%E0%A5%87.jpg" alt="Cover art for नवरात्रि के 9 दिल छू लेने वाले किस्से" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">devotional</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">2 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-10-09_hi_devotional_%E0%A4%A8%E0%A4%B5%E0%A4%B0%E0%A4%BE%E0%A4%A4%E0%A5%8D%E0%A4%B0%E0%A4%BF-%E0%A4%95%E0%A5%87-9-%E0%A4%A6%E0%A4%BF%E0%A4%B2-%E0%A4%9B%E0%A5%82-%E0%A4%B2%E0%A5%87%E0%A4%A8%E0%A5%87-%E0%A4%B5%E0%A4%BE%E0%A4%B2%E0%A5%87-%E0%A4%95%E0%A4%BF%E0%A4%B8%E0%A5%8D%E0%A4%B8%E0%A5%87.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-10-09_hi_devotional_%E0%A4%A8%E0%A4%B5%E0%A4%B0%E0%A4%BE%E0%A4%A4%E0%A5%8D%E0%A4%B0%E0%A4%BF-%E0%A4%95%E0%A5%87-9-%E0%A4%A6%E0%A4%BF%E0%A4%B2-%E0%A4%9B%E0%A5%82-%E0%A4%B2%E0%A5%87%E0%A4%A8%E0%A5%87-%E0%A4%B5%E0%A4%BE%E0%A4%B2%E0%A5%87-%E0%A4%95%E0%A4%BF%E0%A4%B8%E0%A5%8D%E0%A4%B8%E0%A5%87.mp3">Download the recording</a>.
       </audio>
@@ -159,16 +158,17 @@
     <p class="lead">नव वर्ष की नौ रातों में माँ दुर्गा के प्रेम और शक्ति की अनोखी कहानियों का सफ़र।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>&quot;मैं तुम्हें शक्ति दूँगी, माँ दुर्गा!&quot; गाँव के बुजुर्ग ने जब अपना हाथ ऊपर उठाया तो सभी की सांसें ठहर गईं। वही क्षण था जब नवरात्रि की पहली ध्वनि गूँज उठी और आशा की लहर गाँव में दौड़ पड़ी। पहला दिन, धूप‑सुखी खेतों की प्रार्थना में, एक किसान ने माँ से बारिश की दुआ की; दुर्गा ने उसके खेत में हल्की बूँदें बरसाईं, जिससे फसल हरी-भरी हो गई। दूसरे दिन, छोटी रीता ने अपने डर को मात देकर जंगल में खोए कुत्ते को खोज निकाला, माँ ने उसे साहस का वरदान दिया। तीसरे दिन, एक विधवा ने अपने दिल में शोक को दूर कर माँ की कथा सुन ली, जिससे उसके घर में फिर से हँसी की आवाज़ गूँजी। चौथे दिन, पंडित जी ने भजन गाते हुए दुर्गा के रूप को देखा, और पूरे गाँव में आध्यात्मिक संगीत की धारा बह गई। पाँचवे दिन, गरबा के रंगीन परिधान में सजे युवा नर्तकियों ने एक साथ कदम मिलाए, उनके दिलों में एकता का प्रकाश जला। छठे दिन, विद्वान ने माँ के नौ रूपों की गहराई को समझा, और ज्ञान का प्रकाश सभी को मिला। सातवें दिन, व्यापारी ने अपनी संपत्ति को गाँव के गरीबों में बाँटा, माँ ने उसकी दया को आशीर्वाद दिया। आठवें दिन, एक माँ ने अपने बच्चों को दुर्गा के शत्रुओं से बचाते हुए अपने साहस को दिखाया, जिससे परिवार में सुरक्षा का आशीर्वाद आया। नौवें दिन, माँ दुर्गा ने महिषासुर को हराकर नवरात्रि की अंतिम पूजा में अष्टमी‑दुर्गा अर्चना की ध्वनि गूँजी, सभी ने मिलकर अष्टमी‑आर्ति गाई और एकत्रित ऊर्जा से जीवन को नया मार्ग दिया। इस नौ रातों के सफ़र में हर दिल को शक्ति, साहस, प्रेम और एकता मिली; माँ दुर्गा का आशीर्वाद हमेशा साथ रहे, यही हमारी दुआ है।</p>
       </div>
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

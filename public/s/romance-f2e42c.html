@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-08-17_hi_romance_%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE-%E0%A4%95%E0%A5%80-%E0%A4%95%E0%A4%B9%E0%A4%BE%E0%A4%A8%E0%A5%80.jpg" alt="Cover art for प्रेम की कहानी" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">romance</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">2 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-08-17_hi_romance_%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE-%E0%A4%95%E0%A5%80-%E0%A4%95%E0%A4%B9%E0%A4%BE%E0%A4%A8%E0%A5%80.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-08-17_hi_romance_%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE-%E0%A4%95%E0%A5%80-%E0%A4%95%E0%A4%B9%E0%A4%BE%E0%A4%A8%E0%A5%80.mp3">Download the recording</a>.
       </audio>
@@ -159,16 +158,17 @@
     <p class="lead">दो दिलों की कहानी जो एक दूसरे से मिलने के लिए बनी है</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>मैंने कभी नहीं सोचा था कि मेरी जिंदगी में प्रेम आएगा, लेकिन जब वो आया तो सब कुछ बदल गया। मेरा नाम रोहन है और मैं एक साधारण से परिवार से आया हूँ। मैंने अपनी पढ़ाई पूरी की और नौकरी करने लगा। एक दिन मैं अपने दोस्त के साथ पार्क में घूमने गया था, तभी मैंने उसे देखा। वो एक लड़की थी जो अपने दोस्तों के साथ हंस-मजाक कर रही थी। मैंने उसे देखा और मुझे लगा कि वो बहुत सुंदर है। मैंने अपने दोस्त से कहा कि वो कौन है, तो उसने बताया कि वो उसकी दोस्त की बहन है। मैंने सोचा कि मैं उसे कभी नहीं मिल पाऊंगा, लेकिन मेरे दोस्त ने मुझे उसके पास ले जाने का वादा किया। कुछ दिनों बाद मेरा दोस्त मुझे उसके घर ले गया। जब मैंने उसे देखा तो मैं बहुत नर्वस हो गया, लेकिन उसने मुझे बहुत प्यार से बात की। हमने बहुत देर तक बात की और मुझे लगा कि वो बहुत अच्छी लड़की है। मैंने उसे अपने दिल की बात बताई और उसने भी मुझे अपने दिल की बात बताई। हम दोनों एक दूसरे से प्यार करने लगे और हमने साथ में रहने का फैसला किया। अब हम दोनों साथ में हैं और हमारी जिंदगी बहुत खुशहाल है। मैंने कभी नहीं सोचा था कि मेरी जिंदगी में प्रेम आएगा, लेकिन जब वो आया तो सब कुछ बदल गया। मैं उसे बहुत प्यार करता हूँ और मैं जानता हूँ कि वो भी मुझे बहुत प्यार करती है। हम दोनों एक दूसरे के लिए बने हैं और हमारा प्रेम हमेशा के लिए है।</p>
       </div>
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

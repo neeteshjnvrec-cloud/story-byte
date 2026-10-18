@@ -71,3 +71,4 @@ Set in GitHub → Settings → Secrets and variables → Actions: `GROQ_API_KEY`
 ## License
 
 MIT, see `LICENSE`.
+**Built with ❤️ using Firebase Free Tier**

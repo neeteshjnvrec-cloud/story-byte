@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/2026-08-16_hi_romance_%E0%A4%AA%E0%A5%8D%E0%A4%AF%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%AA%E0%A4%B9%E0%A4%B2%E0%A5%80-%E0%A4%AC%E0%A4%BE%E0%A4%B0%E0%A4%BF%E0%A4%B6.jpg" alt="Cover art for प्यार की पहली बारिश" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">romance</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">2 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/2026-08-16_hi_romance_%E0%A4%AA%E0%A5%8D%E0%A4%AF%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%AA%E0%A4%B9%E0%A4%B2%E0%A5%80-%E0%A4%AC%E0%A4%BE%E0%A4%B0%E0%A4%BF%E0%A4%B6.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/2026-08-16_hi_romance_%E0%A4%AA%E0%A5%8D%E0%A4%AF%E0%A4%BE%E0%A4%B0-%E0%A4%95%E0%A5%80-%E0%A4%AA%E0%A4%B9%E0%A4%B2%E0%A5%80-%E0%A4%AC%E0%A4%BE%E0%A4%B0%E0%A4%BF%E0%A4%B6.mp3">Download the recording</a>.
       </audio>
@@ -159,16 +158,17 @@
     <p class="lead">एक अनोखी मुलाकात से शुरू हुआ प्यार का सफर जो जिंदगी को बदल देता है</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>प्यार की पहली बारिश में भीगने का अनुभव कुछ ऐसा होता है जो जिंदगी को एक नया अर्थ दे देता है। मैंने कभी नहीं सोचा था कि मेरी जिंदगी में इतनी रंगत और खुशियाँ आ जाएंगी जब मैं उसको मिला। वह एक अनोखी मुलाकात थी जो मेरे दिल को छू गई। मैं एक कॉफी शॉप में बैठा था, अपने दिन की शुरुआत के लिए एक गर्मा गर्म कॉफी का इंतजार कर रहा था, तभी उसने मेरे पास आकर बैठने की इजाजत मांगी। मैंने हाँ कह दी और हमारी बातचीत शुरू हो गई। उसकी आँखों में जो चमक थी, वह मुझे आकर्षित कर रही थी। हमने अपने बारे में बात की, अपने सपनों के बारे में बात की, और धीरे धीरे हम एक दूसरे के करीब आ गए। मुझे लगता था कि जैसे हम दोनों एक दूसरे के लिए बने थे। वह मेरी बातों को ध्यान से सुनती थी और मैं उसकी बातों में खो जाता था। समय बीतता गया और हमारी मुलाकातें बढ़ती गईं। हम साथ में घूमने जाते, साथ में खाना खाते, और साथ में अपने जीवन के सपनों को पूरा करने की बातें करते। एक दिन, जब हम पार्क में बैठे थे, उसने मुझसे कहा कि वह मुझसे प्यार करती है। मेरे दिल ने जोर से धड़कना शुरू कर दिया और मैंने भी उसे अपना प्यार कबूल किया। तभी, आसमान में बादल जमा हो गए और पहली बारिश होने लगी। हम दोनों ने एक दूसरे का हाथ पकड़ा और बारिश में भीगने लगे। वह पल मेरी जिंदगी का सबसे खूबसूरत पल था। हमने एक दूसरे को गले लगाया और जाने कि हमारा प्यार हमेशा के लिए है। आज भी, जब बारिश होती है, मुझे वह पल याद आता है और मैं उसके साथ बिताए हर पल को याद करता हूँ। प्यार की पहली बारिश ने मेरी जिंदगी को एक नया अर्थ दिया और मैं उस प्यार को कभी नहीं भूल सकता।</p>
       </div>
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">

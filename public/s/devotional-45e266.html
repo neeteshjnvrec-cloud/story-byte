@@ -48,6 +48,7 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 19px; font-weight: 700;
     }
+    .brand-home { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { font-size: 19px; font-weight: 700; color: #2A2118; }
     .brand-cta {
       margin-left: auto; font-size: 14px; font-weight: 600;
@@ -126,13 +127,11 @@
 <body>
   <div class="container">
     <div class="brand">
-      <span class="brand-icon">S</span>
-      <span class="brand-text">StoryByte</span>
-      <!-- Straight to the store. This whole bar used to be one anchor to the
-           site root, which is a bare "StoryByte content" CDN stub — so the link
-           labelled "Get the app" landed on a blank page. There is no real
-           homepage to point the wordmark at, so it isn't a link. -->
-      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the app</a>
+      <!-- The wordmark goes to the home page (every story, lib/site-index.js);
+           "Get the app" goes straight to the store. -->
+      <a class="brand-home" href="https://storybyte-76716.web.app/"><span class="brand-icon">S</span>
+      <span class="brand-text">StoryByte</span></a>
+      <a class="brand-cta" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">ऐप डाउनलोड करें</a>
     </div>
 
     <img class="cover" src="https://storybyte-76716.web.app/covers/community_1789284141640_SrMquZMWUfdPcegQ4oRvQqW7pRr2.jpg" alt="Cover art for बाल कृष्ण की प्रेम-भक्ति कथा" width="768" height="768">
@@ -150,7 +149,7 @@
     <div class="chips"><span class="chip chip-genre">devotional</span><span class="chip">हिन्दी (Hindi)</span><span class="chip">4 min</span></div>
 
     <div class="player">
-      <div class="player-label">Listen</div>
+      <div class="player-label">सुनें</div>
       <audio controls preload="metadata" src="https://storybyte-76716.web.app/audio/community_1789284141640_SrMquZMWUfdPcegQ4oRvQqW7pRr2.mp3">
         Your browser can't play audio. <a href="https://storybyte-76716.web.app/audio/community_1789284141640_SrMquZMWUfdPcegQ4oRvQqW7pRr2.mp3">Download the recording</a>.
       </audio>
@@ -159,7 +158,7 @@
     <p class="lead">छोटे कृष्ण के लीलाओं में छिपा प्रेम और आस्था का सच्चा संदेश।</p>
 
     <div class="transcript">
-      <div class="transcript-label">Story</div>
+      <div class="transcript-label">कथा</div>
       <div class="transcript-body">
       <p>एक बार की बात है, वृंदावन की शांत बगिया में बंशी की मीठी धुन गूँज रही थी। उस बगिया में रहने वाले गोपियों और ग्वालों के बीच एक नन्हा बालक था, जिसका नाम था कृष्ण। वह न केवल खेल-कूद में निपुण था, बल्कि उसके हृदय में प्रेम और आस्था की अनंत धारा बहती थी।</p>
       <p>एक दिन, गाँव के बुजुर्गों ने बताया कि बरसात के बाद गाँव के पास की नदी में जलस्तर घट गया है, और जलस्रोत सूखा रहा है। लोग चिंतित थे, क्योंकि खेतों की सिंचाई नहीं हो पा रही थी। इस संकट को देखते ही बाल कृष्ण ने अपने छोटे हाथों से बांस की बंशी उठाई और बगिया के किनारे बैठ गया। वह बंशी से एक मधुर स्वर में बांसुरी बजाने लगा, जैसे कि वह भगवान की आवाज़ को बुला रहा हो।</p>
@@ -174,9 +173,10 @@
     </div>
 
     <div class="get-app">
-      <h2>Listen to more on StoryByte</h2>
-      <p>Thousands of narrated stories — new ones every day. Free to listen, offline too.</p>
-      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app">Get the StoryByte app</a>
+      <h2>हर सुबह एक नई पावन कथा</h2>
+      <p>StoryByte ऐप में सभी कथाएँ ऑडियो में, मुफ़्त — जहाँ छोड़ा वहीं से सुनें, ऑफ़लाइन भी।</p>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.storybyte.app&amp;referrer=utm_source%3Dstorybyte_web%26utm_medium%3Dweb%26utm_campaign%3Dstory_page">StoryByte ऐप डाउनलोड करें</a>
+      <p><a href="https://storybyte-76716.web.app/">और कथाएँ पढ़ें और सुनें →</a></p>
     </div>
 
     <div class="footer">
