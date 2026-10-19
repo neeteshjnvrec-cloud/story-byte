@@ -1,65 +1,153 @@
 {
-  "generatedAt": "2026-10-12T10:39:58.525Z",
+  "generatedAt": "2026-10-19T08:45:16.611Z",
   "youtube": {
     "handle": "@LatestStories4u",
     "channelId": "UCV2KpSzvpHxLpDOMaj07Vhw",
     "videos": [
       {
+        "id": "vWpk7MHETHo",
+        "format": "video",
+        "title": "Navratri | Season 1 Episode Day 8: Echoes of the First Sacred Fire",
+        "views": 13,
+        "age": "17 hours ago",
+        "length": "16:28",
+        "published": "2026-10-18T15:16:42+00:00",
+        "likes": 0
+      },
+      {
+        "id": "ef35oT5oZoE",
+        "format": "video",
+        "title": "राम जी की कथा: विजय दशहरा — रावण का विनाश ब्रह्मा बाण से",
+        "views": 7,
+        "age": "22 hours ago",
+        "length": "16:22",
+        "published": "2026-10-18T09:58:29+00:00",
+        "likes": 0
+      },
+      {
+        "id": "0v91mLRd33Y",
+        "format": "video",
+        "title": "रेल की खिड़की से झलकता प्यार",
+        "views": 3,
+        "age": "1 day ago",
+        "length": "4:12",
+        "published": "2026-10-17T19:39:25+00:00",
+        "likes": 0
+      },
+      {
+        "id": "dap9qNOiUEI",
+        "format": "video",
+        "title": "Navratri | Season 1 Episode Day 7: Shadows Over the Sacred Flame",
+        "views": 1,
+        "age": "1 day ago",
+        "length": "16:39",
+        "published": "2026-10-17T12:27:03+00:00",
+        "likes": 1
+      },
+      {
+        "id": "XfGf4sKSxIw",
+        "format": "video",
+        "title": "Navratri Maa Katyayani, the sixth form of Goddess Durga | S1 EDay 6: Katyayani’s Blessing of Courage",
+        "views": 5,
+        "age": "2 days ago",
+        "length": "16:48",
+        "published": "2026-10-16T12:37:46+00:00",
+        "likes": 0
+      },
+      {
+        "id": "Vb6sy4wZApY",
+        "format": "video",
+        "title": "Navratri | Season 1 Episode Day 5: रात्रि की परीक्षा",
+        "views": 3,
+        "age": "3 days ago",
+        "length": "16:51",
+        "published": "2026-10-15T17:10:07+00:00",
+        "likes": 1
+      },
+      {
+        "id": "xSH8eCTuWNc",
+        "format": "video",
+        "title": "The Rainy Day Coffee",
+        "views": 0,
+        "age": "3 days ago",
+        "length": "3:29",
+        "published": "2026-10-15T10:25:44+00:00",
+        "likes": 0
+      },
+      {
+        "id": "6LjTcmue9xU",
+        "format": "video",
+        "title": "Navratri | Season 1 Episode Day 4: अग्नि की प्रतिध्वनि",
+        "views": 33,
+        "age": "4 days ago",
+        "length": "17:00",
+        "published": "2026-10-14T11:19:40+00:00",
+        "likes": 2
+      },
+      {
+        "id": "yjLCo8CVWSE",
+        "format": "video",
+        "title": "Navratri | Season 1 Episode Day 3: विचार की ज्वाला",
+        "views": 4,
+        "age": "5 days ago",
+        "length": "12:40",
+        "published": "2026-10-13T10:36:27+00:00",
+        "likes": 0
+      },
+      {
+        "id": "QtDia_x3sE0",
+        "format": "video",
+        "title": "Navratri | Season 1 Episode Day 2: Whispers of the Sacred Flame",
+        "views": 6,
+        "age": "6 days ago",
+        "length": "13:50"
+      },
+      {
         "id": "OlmARSUrvMU",
         "format": "video",
         "title": "Navratri | Season 1 Episode Day 1: The First Dawn of Navratri",
-        "views": 12,
-        "age": "1 day ago",
-        "length": "16:01",
-        "published": "2026-10-11T08:34:48+00:00",
-        "likes": 0
+        "views": 20,
+        "age": "8 days ago",
+        "length": "16:01"
       },
       {
         "id": "zaQkTMPQEi8",
         "format": "video",
         "title": "Mahabharata  | Season 1 Episode 5: Echoes of the Forgotten Verse",
-        "views": 55,
-        "age": "2 days ago",
-        "length": "16:12",
-        "published": "2026-10-09T12:41:31+00:00",
-        "likes": 1
+        "views": 69,
+        "age": "9 days ago",
+        "length": "16:12"
       },
       {
         "id": "_-MZHiQTMyY",
         "format": "video",
         "title": "Mahabharata | Season 1 Episode 4: गुह्य गर्त में संघर्ष",
-        "views": 27,
-        "age": "3 days ago",
-        "length": "16:40",
-        "published": "2026-10-08T15:04:17+00:00",
-        "likes": 2
+        "views": 48,
+        "age": "10 days ago",
+        "length": "16:40"
       },
       {
         "id": "rU2Wq7xHCKs",
         "format": "video",
         "title": "Mahabharata  | Season 1 Episode 3: Echoes of the Timeless Vault",
         "views": 6,
-        "age": "5 days ago",
-        "length": "17:05",
-        "published": "2026-10-06T14:38:08+00:00",
-        "likes": 0
+        "age": "12 days ago",
+        "length": "17:05"
       },
       {
         "id": "assQz_svY8M",
         "format": "video",
         "title": "Mahabharata | Season 1 Episode 2: छायाओं की पुकार",
         "views": 5,
-        "age": "7 days ago",
-        "length": "16:40",
-        "published": "2026-10-05T04:23:10+00:00",
-        "likes": 0
+        "age": "2 weeks ago",
+        "length": "16:40"
       },
       {
         "id": "O1EPVVB8ypo",
         "format": "video",
         "title": "Mahabharata  | Season 1 Episode 1: अंधकार की पहली किरण",
-        "views": 68,
-        "age": "8 days ago",
+        "views": 70,
+        "age": "2 weeks ago",
         "length": "16:21"
       },
       {
@@ -67,7 +155,7 @@
         "format": "video",
         "title": "⚡️ शनि देव ने किया राजा विक्रमादित्य की अद्भुत परीक्षा",
         "views": 8,
-        "age": "9 days ago",
+        "age": "2 weeks ago",
         "length": "3:01"
       },
       {
@@ -75,7 +163,7 @@
         "format": "video",
         "title": "लक्ष्मी माता की अनुकम्पा का प्रकाश",
         "views": 2,
-        "age": "10 days ago",
+        "age": "2 weeks ago",
         "length": "3:25"
       },
       {
@@ -83,7 +171,7 @@
         "format": "video",
         "title": "The Rainbow River Quest #trending ",
         "views": 2,
-        "age": "12 days ago",
+        "age": "2 weeks ago",
         "length": "3:51"
       },
       {
@@ -91,7 +179,7 @@
         "format": "video",
         "title": "Hanuman Chalisa with Lyrics | Season 1 Episode 1: The Call of the Sacred Chant",
         "views": 14,
-        "age": "13 days ago",
+        "age": "2 weeks ago",
         "length": "16:18"
       },
       {
@@ -99,15 +187,15 @@
         "format": "video",
         "title": "विरह की धुन",
         "views": 3,
-        "age": "13 days ago",
+        "age": "2 weeks ago",
         "length": "4:01"
       },
       {
         "id": "74YMcueDFNE",
         "format": "video",
         "title": "Alien Is My Girlfriend | Season 1 Episode 3: रहस्य का द्वार",
-        "views": 8,
-        "age": "2 weeks ago",
+        "views": 11,
+        "age": "3 weeks ago",
         "length": "16:18"
       },
       {
@@ -115,7 +203,7 @@
         "format": "video",
         "title": "भूलभुलैया का रहस्य",
         "views": 1,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "3:16"
       },
       {
@@ -123,7 +211,7 @@
         "format": "video",
         "title": "The Quiet Light in the Storm",
         "views": 1,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "3:24"
       },
       {
@@ -131,15 +219,15 @@
         "format": "video",
         "title": "Alien Is My Girlfriend | Season 1 Episode 2: अलौकिक वादा",
         "views": 12,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "31:16"
       },
       {
         "id": "DJVt_LPFeTE",
         "format": "video",
         "title": "An Alien Is My Girlfriend | Episode 01 | Hindi Drama",
-        "views": 14,
-        "age": "2 weeks ago",
+        "views": 15,
+        "age": "3 weeks ago",
         "length": "5:58"
       },
       {
@@ -147,7 +235,7 @@
         "format": "video",
         "title": "Moonlit Meadow Whisper",
         "views": 4,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "4:15"
       },
       {
@@ -155,7 +243,7 @@
         "format": "video",
         "title": "परिवार की परछाइयाँ",
         "views": 2,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "3:21"
       },
       {
@@ -163,7 +251,7 @@
         "format": "video",
         "title": "सफलता की सीढ़ी: संघर्ष से सफलता तक",
         "views": 2,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "3:12"
       },
       {
@@ -171,170 +259,124 @@
         "format": "video",
         "title": "The Lantern in the Storm",
         "views": 1,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "3:36"
-      },
-      {
-        "id": "VPsQAgQXKmQ",
-        "format": "video",
-        "title": "The Clockmaker's Secret",
-        "views": 7,
-        "age": "2 weeks ago",
-        "length": "5:09"
-      },
-      {
-        "id": "7vMIidh7G7I",
-        "format": "video",
-        "title": "The Clockmaker's Secret",
-        "views": 1,
-        "age": "2 weeks ago",
-        "length": "4:25"
-      },
-      {
-        "id": "VHF7V1MtgDg",
-        "format": "video",
-        "title": "छाया वाले कमरे की सच्चाई",
-        "views": 3,
-        "age": "2 weeks ago",
-        "length": "4:35"
-      },
-      {
-        "id": "AJv69PjGmY8",
-        "format": "video",
-        "title": "चांदनी की कहानी",
-        "views": 1,
-        "age": "2 weeks ago",
-        "length": "4:30"
-      },
-      {
-        "id": "DPMci0gFVCE",
-        "format": "video",
-        "title": "अदृश्य पेंच",
-        "views": 3,
-        "age": "3 weeks ago",
-        "length": "5:04"
-      },
-      {
-        "id": "GUSx6cClbYM",
-        "format": "video",
-        "title": "छोटा दीपक, बड़ी रौशनी",
-        "views": 4,
-        "age": "3 weeks ago",
-        "length": "4:17"
-      },
-      {
-        "id": "ULxM_s9zKMs",
-        "format": "video",
-        "title": "The Bridge of Perseverance",
-        "views": 2,
-        "age": "3 weeks ago",
-        "length": "3:07"
-      },
-      {
-        "id": "YUjTy-7kNLw",
-        "format": "video",
-        "title": "Moonlit Whisper on the Gentle Lake",
-        "views": 1,
-        "age": "3 weeks ago",
-        "length": "4:56"
-      },
-      {
-        "id": "DIiVhlDuqpc",
-        "format": "video",
-        "title": "कुंजी के बिना रहस्य",
-        "views": 1,
-        "age": "3 weeks ago",
-        "length": "4:27"
-      },
-      {
-        "id": "zd7fDqUWqjM",
-        "format": "video",
-        "title": "The Shepherd's Quiet Trust",
-        "views": 2,
-        "age": "3 weeks ago",
-        "length": "3:33"
       }
     ],
     "shorts": [
       {
+        "id": "XgXNSq8PoAY",
+        "format": "short",
+        "title": "😲 माँ सिद्धिदात्री ने कैसे दी शिव को आठ सिद्धियाँ? #shorts",
+        "views": 13,
+        "published": "2026-10-19T02:12:11+00:00",
+        "likes": 1
+      },
+      {
+        "id": "ApZifLZrj_s",
+        "format": "short",
+        "title": "✨ माँ महागौरी: कैसे काली त्वचा बनी शुद्ध श्वेत? #shorts",
+        "views": 20,
+        "published": "2026-10-18T01:59:20+00:00",
+        "likes": 2
+      },
+      {
+        "id": "3UENcEuEp5w",
+        "format": "short",
+        "title": "😱 माँ कालरात्रि ने कैसे किया रक्तबीज को नष्ट? #shorts",
+        "views": 6,
+        "published": "2026-10-17T02:00:05+00:00",
+        "likes": 1
+      },
+      {
+        "id": "21jtMh3WvzQ",
+        "format": "short",
+        "title": "🕉️ माँ कात्यायनी क्या थी वह रहस्य? #shorts",
+        "views": 22,
+        "published": "2026-10-16T02:09:15+00:00",
+        "likes": 1
+      },
+      {
+        "id": "VOxecTn-ZEM",
+        "format": "short",
+        "title": "😲 माँ स्कंदमाता की कथा: शरद ने टारकासुर को कैसे मारा? #shorts",
+        "views": 10,
+        "published": "2026-10-15T02:11:26+00:00",
+        "likes": 1
+      },
+      {
+        "id": "7l6LVc5Ui1Y",
+        "format": "short",
+        "title": "😲 माँ कूष्मांडा की मुस्कान से बना ब्रह्मांड #shorts",
+        "views": 48,
+        "published": "2026-10-14T02:28:52+00:00",
+        "likes": 5
+      },
+      {
+        "id": "2-3GaOTdWBs",
+        "format": "short",
+        "title": "😱 माँ चंद्रघंटा की गर्जना से दानव भागे #shorts",
+        "views": 8
+      },
+      {
         "id": "pR5ZOjeZHBc",
         "format": "short",
         "title": "😲 माँ ब्रह्मचारिणी की तपस्या का रहस्य: नवरात्रि का दूसरा दिन #shorts",
-        "views": 11,
-        "published": "2026-10-12T02:59:43+00:00",
-        "likes": 0
+        "views": 18
       },
       {
         "id": "GAuZGZI7eZ4",
         "format": "short",
         "title": "Navaratri Day one #navratri #bhakti #trending #shorts",
-        "views": 286,
-        "published": "2026-10-11T11:33:18+00:00",
-        "likes": 10
+        "views": 343
       },
       {
         "id": "yoFF7OZ0Ehk",
         "format": "short",
         "title": "🕉️ माँ शैलपुत्री की कथा – पहला नवव्रत रहस्य #shorts",
-        "views": 23,
-        "published": "2026-10-11T02:30:31+00:00",
-        "likes": 1
+        "views": 24
       },
       {
         "id": "yzLSgcZCPV0",
         "format": "short",
         "title": "🌸 नवरात्रि की 9 अनकही कहानियां माँ दुर्गा के साथ #shorts",
-        "views": 2,
-        "published": "2026-10-10T03:02:51+00:00",
-        "likes": 0
+        "views": 2
       },
       {
         "id": "sGZobdVUznw",
         "format": "short",
         "title": "😱 माँ दुर्गा के नौ अद्भुत नवरात्रि किस्से #shorts",
-        "views": 7,
-        "published": "2026-10-09T03:26:27+00:00",
-        "likes": 1
+        "views": 7
       },
       {
         "id": "_Xyn8L-DPOQ",
         "format": "short",
         "title": "😲 जब भगवान विष्णु ने प्रह्लाद को बचाया: नरसिंह अवतार की कथा #shorts",
-        "views": 6,
-        "published": "2026-10-08T03:16:20+00:00",
-        "likes": 0
+        "views": 6
       },
       {
         "id": "vXKhekrN3es",
         "format": "short",
         "title": "🤔 क्या गणपति बप्पा ने माता‑पिता को घुमा कर जीत ली दौड़? #shorts",
-        "views": 23,
-        "published": "2026-10-07T03:07:32+00:00",
-        "likes": 0
+        "views": 23
       },
       {
         "id": "ZXDZ1t5srmU",
         "format": "short",
         "title": "Do you support me #trending #shorts",
-        "views": 200,
-        "published": "2026-10-06T07:30:34+00:00",
-        "likes": 4
+        "views": 200
       },
       {
         "id": "1CX_Im4DFqY",
         "format": "short",
         "title": "🚀 जब हनुमान ने किया समुद्र पार, लंका की खोज #shorts #hanuman",
-        "views": 69,
-        "published": "2026-10-06T03:32:57+00:00",
-        "likes": 0
+        "views": 69
       },
       {
         "id": "W8mEdx-s8Zc",
         "format": "short",
         "title": "New content creators #trending #shorts #newshorts",
-        "views": 33,
-        "published": "2026-10-05T11:30:30+00:00",
-        "likes": 3
+        "views": 33
       },
       {
         "id": "tCfurpan4vA",
@@ -358,7 +400,7 @@
         "id": "BfoA1wucH_k",
         "format": "short",
         "title": "😱 जब बाल कृष्ण के मुँह में माँ यशोदा ने देखा पूरा ब्रह्मांड #shorts",
-        "views": 48
+        "views": 49
       },
       {
         "id": "qrGrfyetg2U",
@@ -448,7 +490,7 @@
         "id": "u_rgaLHXcm0",
         "format": "short",
         "title": "#youtubeshorts #aiart #art",
-        "views": 138
+        "views": 159
       },
       {
         "id": "f-qzEDhFDoY",
@@ -521,48 +563,6 @@
         "format": "short",
         "title": "🌿 पेड़ की लकड़ियों से बने हनुमान जी 😱🚩 | Nature Creates Bajrangbali | Jai Shri Ram | #shorts",
         "views": 10000
-      },
-      {
-        "id": "UZIUQpJbc58",
-        "format": "short",
-        "title": "जगन्नाथ रथ यात्रा 2026 🙏 पुरी की दिव्य यात्रा | भगवान जगन्नाथ, बलभद्र और सुभद्रा का भव्य रथ उत्सव",
-        "views": 1200
-      },
-      {
-        "id": "IquYwcgaS8o",
-        "format": "short",
-        "title": "🌿 पेड़ की लकड़ियों से बने महादेव 😱🙏 | Nature Creates Lord Shiva  | #mahadev #shorts",
-        "views": 17000
-      },
-      {
-        "id": "Y97M7bvn4i0",
-        "format": "short",
-        "title": "पेड़ की टहनियों से बने गणपति बप्पा 😱🙏 | Ganesh Ji Natural Art | Amazing Wood Art #ganesh #shorts",
-        "views": 29000
-      },
-      {
-        "id": "cSImMB26tUM",
-        "format": "short",
-        "title": "Narayan Narayan hare hare #shorts #viral",
-        "views": 1200
-      },
-      {
-        "id": "Uxt2SKZhJ-4",
-        "format": "short",
-        "title": "😱 क्या समुद्र के नीचे छिपा था श्रीराम का दिव्य स्वर्ण मंदिर? | Part 1 #shorts #ram",
-        "views": 1200
-      },
-      {
-        "id": "PQRER8aise4",
-        "format": "short",
-        "title": "जब सब हँस रहे थे... तब प्रकट हुए माखन चोर बाल कृष्ण 😱🧈 #bhakti #trending #makhanchor #krishna",
-        "views": 3400
-      },
-      {
-        "id": "cfs7G6SeyDg",
-        "format": "short",
-        "title": "💙 Sacred Marble Orb → Shri Khatu Shyam Ji Mandir | Magical Transformation #shorts #khatushyam",
-        "views": 5500
       }
     ]
   },
@@ -571,10 +571,145 @@
       "id": "17841411923308355",
       "followers_count": 13,
       "follows_count": 0,
-      "media_count": 62,
+      "media_count": 71,
       "username": "cute_krishna.ai"
     },
     "media": [
+      {
+        "id": "18496783747096923",
+        "caption": "😲 माँ सिद्धिदात्री ने कैसे दी शिव को आठ सिद्धियाँ?\n\nक्या शंकर ने माँ सिद्धिदात्री से मिलीं आठ अष्ट सिद्धियों का रहस्य?\n\n🔔 कल सुनिए दशहरा की कथा: राम जी ने माँ दुर्गा से 108 नीले कमल माँगे और विजय पाई।\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-79fa92\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n\n#navratri #jaimatadi #maasiddhidatri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-19T02:11:09+0000",
+        "like_count": 1,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/DeqJvz3k-sm/",
+        "reach": 64,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 71
+      },
+      {
+        "id": "18119927884934711",
+        "caption": "✨ माँ महागौरी: कैसे काली त्वचा बनी शुद्ध श्वेत?\n\nशिव ने गंगाजल से काली पार्वती को कैसे श्वेत महागौरी बनाया?\n\n🔔 कल सुनिए, माँ सिद्धिदात्री कैसे शिव को आठ सिद्धियाँ देकर अर्द्धनारीश्वर बनाती हैं?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-5ea91f\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maamahagauri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-18T01:58:25+0000",
+        "like_count": 3,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/Denjh75Db7D/",
+        "reach": 101,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 4,
+        "views": 107
+      },
+      {
+        "id": "18221270749344433",
+        "caption": "🎧 रेल की खिड़की से झलकता प्यार\n\nक्या एक ट्रेन की खिड़की दो अनजान दिलों को हमेशा साथ रख सकती है?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/romance-3c3760\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#StoryByte #AudioStories #romance #ShortStory #StoryTime",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-17T19:38:44+0000",
+        "like_count": 1,
+        "comments_count": 0,
+        "permalink": "https://www.instagram.com/reel/Dem4IHcILnR/",
+        "reach": 3,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 3
+      },
+      {
+        "id": "18200461309391462",
+        "caption": "😱 माँ कालरात्रि ने कैसे किया रक्तबीज को नष्ट?\n\nक्या आप जानते हैं कि माँ कालरात्रि ने रक्तबीज की अनंत रक्तस्राव को कैसे रोका?\n\n🔔 कल सुनिए, माँ महागौरी की अद्भुत कथा जो बदल देगी आपकी सोच।\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-13c49d\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maakalaratri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-17T01:59:20+0000",
+        "like_count": 1,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/Dek-1FKitYT/",
+        "reach": 5,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 5
+      },
+      {
+        "id": "18053964773804224",
+        "caption": "🕉️ माँ कात्यायनी क्या थी वह रहस्य?\n\nक्या आप जानते हैं कि कैसे कात्यायनी ने मोर रूपी दानव को हराया?\n\n🔔 कल सुनिए माँ कालरात्रि का रहस्य, रक्तबीज के रक्त से उठे दानव की कहानी\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-e27b6f\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maakatyayani #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-16T02:08:26+0000",
+        "like_count": 0,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/DeibGtAEcXS/",
+        "reach": 3,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 4
+      },
+      {
+        "id": "18076507562722160",
+        "caption": "🎧 The Rainy Day Coffee\n\nWhat happens when a stranger's umbrella becomes the bridge between two strangers?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/the-rainy-day-coffee-ca8fef\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#StoryByte #AudioStories #romance #ShortStory #StoryTime",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-15T10:25:14+0000",
+        "like_count": 1,
+        "comments_count": 0,
+        "permalink": "https://www.instagram.com/reel/DegvL5fjbrO/",
+        "reach": 2,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 5
+      },
+      {
+        "id": "18140817853614038",
+        "caption": "😲 माँ स्कंदमाता की कथा: शरद ने टारकासुर को कैसे मारा?\n\nक्या माँ स्कंदमाता ने शरद को दैत्य से लड़ने भेजा?\n\n🔔 कल सुनिए, माँ कात्यायनी की अद्भुत जन्म कहानी और महिषासुर पर उनका विजय गीत।\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-df932e\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maaskandamata #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-15T02:10:33+0000",
+        "like_count": 1,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/Def2kfdACVA/",
+        "reach": 3,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 5
+      },
+      {
+        "id": "18105292121350303",
+        "caption": "😲 माँ कूष्मांडा की मुस्कान से बना ब्रह्मांड\n\nक्या एक मुस्कान ने अंधकार को उज्ज्वल ब्रह्माण्ड में बदल दिया?\n\n🔔 कल सुनिए, माँ स्कंदमाता की अद्भुत कथा, कैसे उन्होंने कार्तिकेय को बनाया\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-0ed437\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maakushmanda #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-14T02:28:07+0000",
+        "like_count": 1,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/DedTyCSD96k/",
+        "reach": 103,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 117
+      },
+      {
+        "id": "17894405442611640",
+        "caption": "😱 माँ चंद्रघंटा की गर्जना से दानव भागे\n\nक्या चंद्रघंटा की गर्जना से रावण के दिल में डर जागेगा?\n\n🔔 कल सुनिए, माँ कूष्मांडा की मुस्कान से कैसे हुआ ब्रह्माण्ड का सृजन\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-f96b44\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maachandraghanta #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "media_type": "VIDEO",
+        "media_product_type": "REELS",
+        "timestamp": "2026-10-13T04:14:11+0000",
+        "like_count": 2,
+        "comments_count": 1,
+        "permalink": "https://www.instagram.com/reel/Dea7IjVirRq/",
+        "reach": 16,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 3,
+        "views": 17
+      },
       {
         "id": "17978637368924899",
         "caption": "😲 माँ ब्रह्मचारिणी की तपस्या का रहस्य: नवरात्रि का दूसरा दिन\n\nक्या ब्रह्मचर्य की तपस्या ने शिव के दिल को सच में जीता?\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-29c090\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maabrahmacharini #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
@@ -584,11 +719,11 @@
         "like_count": 4,
         "comments_count": 1,
         "permalink": "https://www.instagram.com/reel/DeYNuy_Come/",
-        "reach": 98,
+        "reach": 101,
         "saved": 0,
         "shares": 0,
         "total_interactions": 5,
-        "views": 112
+        "views": 114
       },
       {
         "id": "17961721344208039",
@@ -599,11 +734,11 @@
         "like_count": 7,
         "comments_count": 1,
         "permalink": "https://www.instagram.com/reel/DeVlka5DOtC/",
-        "reach": 114,
+        "reach": 115,
         "saved": 0,
         "shares": 0,
         "total_interactions": 8,
-        "views": 121
+        "views": 123
       },
       {
         "id": "18199530370376572",
@@ -1511,11 +1646,191 @@
   "facebook": {
     "page": {
       "name": "Littlekrishna.ai",
-      "followers_count": 4212,
-      "fan_count": 4212,
+      "followers_count": 4208,
+      "fan_count": 4208,
       "id": "1036212629585326"
     },
     "posts": [
+      {
+        "id": "1036212629585326_122116489545332133",
+        "message": "😲 माँ सिद्धिदात्री ने कैसे दी शिव को आठ सिद्धियाँ?\n\nक्या शंकर ने माँ सिद्धिदात्री से मिलीं आठ अष्ट सिद्धियों का रहस्य?\n\n🔔 कल सुनिए दशहरा की कथा: राम जी ने माँ दुर्गा से 108 नीले कमल माँगे और विजय पाई।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-79fa92\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n\n#navratri #jaimatadi #maasiddhidatri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-19T02:12:24+0000",
+        "permalink_url": "https://www.facebook.com/reel/988241317653531/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116457373332133",
+        "message": "Aditi’s quest deepens as ancient shadows stir around the glowing temples of Varanasi.\n\n📺 Navratri — Season 1, Episode Day 8\n\n⏱️ Chapters\n0:00 अग्नि का आह्वान\n6:12 रहस्यमयी गली\n13:00 शापित शिल्प\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dlong_episode\n\n#Navratri #Season1 #S1EDay 8 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-18T15:22:41+0000",
+        "permalink_url": "https://www.facebook.com/reel/1048635624864113/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116450155332133",
+        "message": "‎Follow the StoryByte ✅ channel on WhatsApp: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l",
+        "created_time": "2026-10-18T13:32:14+0000",
+        "permalink_url": "https://www.facebook.com/122114621211332133/posts/122116450155332133",
+        "status_type": "mobile_status_update",
+        "reactions": 0,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116435965332133",
+        "message": "विजयदशमी की रात, जब अंधकार पर प्रकाश की जंग छेड़ती है, सुनिए वह अद्भुत कथा जिसमें राम जी ने ब्रह्मा बाण से रावण को पराजित किया। इस महाकाव्य में विभीषण के रहस्य और अमृत की शक्ति का उजागर होना दर्शाता है कि सत्य की जीत हमेशा होती है।\n\n⏱️ अध्याय\n0:00 अयोध्या से वनवास\n6:06 विभीषण का रहस्य\n11:39 विजयदशमी पर राम का बाण\n\n🙏 रोज़ एक नई कथा — हमारे Shorts देखें और चैनल सब्सक्राइब करें\n📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dweekly_katha\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n\n#dussehra #vijayadashami #jaishreeram #ravandahan #katha #bhakti #sanatandharma #hindistory #StoryByte",
+        "created_time": "2026-10-18T10:03:30+0000",
+        "permalink_url": "https://www.facebook.com/reel/1638234018012440/",
+        "status_type": "added_video",
+        "reactions": 2,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116404867332133",
+        "message": "✨ माँ महागौरी: कैसे काली त्वचा बनी शुद्ध श्वेत?\n\nशिव ने गंगाजल से काली पार्वती को कैसे श्वेत महागौरी बनाया?\n\n🔔 कल सुनिए, माँ सिद्धिदात्री कैसे शिव को आठ सिद्धियाँ देकर अर्द्धनारीश्वर बनाती हैं?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-5ea91f\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maamahagauri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-18T01:59:26+0000",
+        "permalink_url": "https://www.facebook.com/reel/1137640322642402/",
+        "status_type": "added_video",
+        "reactions": 1,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116383957332133",
+        "message": "रेल की खिड़की से झलकता प्यार\n\nक्या एक ट्रेन की खिड़की दो अनजान दिलों को हमेशा साथ रख सकती है?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/romance-3c3760\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#StoryByte #AudioStories #romance",
+        "created_time": "2026-10-17T19:40:01+0000",
+        "permalink_url": "https://www.facebook.com/reel/1685294526262215/",
+        "status_type": "added_video",
+        "reactions": 1,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116350027332133",
+        "message": "When the first Navratri fire flickers, ancient secrets stir and a hidden danger threatens the devotees.\n\n📺 Navratri — Season 1, Episode Day 7\n\n⏱️ Chapters\n0:00 आग की पहली चमक\n6:01 भटकी हुई आवाज़\n11:36 प्राचीन रहस्य का उद्घाटन\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dlong_episode\n\n#Navratri #Season1 #S1EDay 7 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-17T12:27:52+0000",
+        "permalink_url": "https://www.facebook.com/reel/2373636146501201/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116305807332133",
+        "message": "😱 माँ कालरात्रि ने कैसे किया रक्तबीज को नष्ट?\n\nक्या आप जानते हैं कि माँ कालरात्रि ने रक्तबीज की अनंत रक्तस्राव को कैसे रोका?\n\n🔔 कल सुनिए, माँ महागौरी की अद्भुत कथा जो बदल देगी आपकी सोच।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-13c49d\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maakalaratri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-17T02:00:26+0000",
+        "permalink_url": "https://www.facebook.com/reel/1866522328111001/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116262907332133",
+        "message": "When doubts rise, Maa Katyayani bestows a fiery resolve that tests every heart.\n\n📺 Navratri Maa Katyayani, the sixth form of Goddess Durga — Season 1, Episode Day 6\n\n⏱️ Chapters\n0:00 भय का सामना\n5:45 धैर्य की परीक्षा\n11:38 आश्चर्यजनक संकेत\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dlong_episode\n\n#NavratriMaaKatyayanithesixthformofGoddessDurga #Season1 #S1EDay 6 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-16T12:42:07+0000",
+        "permalink_url": "https://www.facebook.com/reel/2632939890509452/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116218903332133",
+        "message": "🕉️ माँ कात्यायनी क्या थी वह रहस्य?\n\nक्या आप जानते हैं कि कैसे कात्यायनी ने मोर रूपी दानव को हराया?\n\n🔔 कल सुनिए माँ कालरात्रि का रहस्य, रक्तबीज के रक्त से उठे दानव की कहानी\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-e27b6f\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maakatyayani #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-16T02:09:38+0000",
+        "permalink_url": "https://www.facebook.com/reel/1106880885431857/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116193229332133",
+        "message": "Aditi confronts a perilous test of faith as the sacred fire ignites the mysteries of the hidden shrine.\n\n📺 Navratri — Season 1, Episode Day 5\n\n⏱️ Chapters\n0:00 अग्नि का आह्वान\n6:04 भक्ति का संघर्ष\n11:53 छिपा रहस्य\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dlong_episode\n\n#Navratri #Season1 #S1EDay 5 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-15T17:14:23+0000",
+        "permalink_url": "https://www.facebook.com/reel/27870436419296467/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116165551332133",
+        "message": "The Rainy Day Coffee\n\nWhat happens when a stranger's umbrella becomes the bridge between two strangers?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/the-rainy-day-coffee-ca8fef\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#StoryByte #AudioStories #romance",
+        "created_time": "2026-10-15T10:26:55+0000",
+        "permalink_url": "https://www.facebook.com/reel/1714960956814779/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116136877332133",
+        "message": "😲 माँ स्कंदमाता की कथा: शरद ने टारकासुर को कैसे मारा?\n\nक्या माँ स्कंदमाता ने शरद को दैत्य से लड़ने भेजा?\n\n🔔 कल सुनिए, माँ कात्यायनी की अद्भुत जन्म कहानी और महिषासुर पर उनका विजय गीत।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-df932e\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maaskandamata #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-15T02:11:39+0000",
+        "permalink_url": "https://www.facebook.com/reel/1436148871948412/",
+        "status_type": "added_video",
+        "shares": 1,
+        "reactions": 3,
+        "comments": 1
+      },
+      {
+        "id": "1036212629585326_122116083873332133",
+        "message": "Aditi’s devotion is tested when the sacred fire reveals a hidden warning that could change Navratri forever.\n\n📺 Navratri — Season 1, Episode Day 4\n\n⏱️ Chapters\n0:00 आग का आवाहन\n6:03 भूलभुलैया का संकेत\n11:30 मातृ शरण की पुकार\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Navratri #Season1 #S1EDay 4 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-14T11:25:09+0000",
+        "permalink_url": "https://www.facebook.com/reel/4446118598985986/",
+        "status_type": "added_video",
+        "reactions": 2,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116056855332133",
+        "message": "😲 माँ कूष्मांडा की मुस्कान से बना ब्रह्मांड\n\nक्या एक मुस्कान ने अंधकार को उज्ज्वल ब्रह्माण्ड में बदल दिया?\n\n🔔 कल सुनिए, माँ स्कंदमाता की अद्भुत कथा, कैसे उन्होंने कार्तिकेय को बनाया\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-0ed437\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maakushmanda #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-14T02:29:00+0000",
+        "permalink_url": "https://www.facebook.com/reel/1089839290633446/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122116001301332133",
+        "message": "A night of hidden omens tests devotion as अदिति uncovers a secret that could change Varanasi's destiny.\n\n📺 Navratri — Season 1, Episode Day 3\n\n⏱️ Chapters\n0:00 प्रकाश की तलाश\n4:24 रहस्य की गूँज\n8:42 अंतिम संकेत\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Navratri #Season1 #S1EDay 3 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-13T10:42:04+0000",
+        "permalink_url": "https://www.facebook.com/reel/1375187539010823/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115980967332133",
+        "message": "😱 माँ चंद्रघंटा की गर्जना से दानव भागे\n\nक्या चंद्रघंटा की गर्जना से रावण के दिल में डर जागेगा?\n\n🔔 कल सुनिए, माँ कूष्मांडा की मुस्कान से कैसे हुआ ब्रह्माण्ड का सृजन\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-f96b44\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maachandraghanta #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-13T04:15:02+0000",
+        "permalink_url": "https://www.facebook.com/reel/1069626339247556/",
+        "status_type": "added_video",
+        "reactions": 1,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122115930621332133",
+        "message": "Aditi's devotion is tested as hidden omens stir the night of Navratri.\n\n📺 Navratri — Season 1, Episode Day 2\n\n⏱️ Chapters\n0:00 आग का आवाहन\n4:21 रहस्यमयी संकेत\n8:41 शुरुआती संघर्ष\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Navratri #Season1 #S1EDay 2 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-12T15:39:03+0000",
+        "permalink_url": "https://www.facebook.com/reel/3132474157097104/",
+        "status_type": "added_video",
+        "reactions": 0,
+        "comments": 0,
+        "shares": 0
+      },
       {
         "id": "1036212629585326_122115880497332133",
         "message": "😲 माँ ब्रह्मचारिणी की तपस्या का रहस्य: नवरात्रि का दूसरा दिन\n\nक्या ब्रह्मचर्य की तपस्या ने शिव के दिल को सच में जीता?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-29c090\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maabrahmacharini #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
@@ -2416,6 +2731,133 @@
     ],
     "videos": [
       {
+        "id": "988241317653531",
+        "description": "😲 माँ सिद्धिदात्री ने कैसे दी शिव को आठ सिद्धियाँ?\n\nक्या शंकर ने माँ सिद्धिदात्री से मिलीं आठ अष्ट सिद्धियों का रहस्य?\n\n🔔 कल सुनिए दशहरा की कथा: राम जी ने माँ दुर्गा से 108 नीले कमल माँगे और विजय पाई।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-79fa92\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n\n#navratri #jaimatadi #maasiddhidatri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-19T02:11:16+0000",
+        "length": 157.807,
+        "permalink_url": "/reel/988241317653531/"
+      },
+      {
+        "id": "1048635624864113",
+        "title": "Navratri | Season 1 Episode Day 8: Echoes of the First Sacred Fire",
+        "description": "Aditi’s quest deepens as ancient shadows stir around the glowing temples of Varanasi.\n\n📺 Navratri — Season 1, Episode Day 8\n\n⏱️ Chapters\n0:00 अग्नि का आह्वान\n6:12 रहस्यमयी गली\n13:00 शापित शिल्प\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dlong_episode\n\n#Navratri #Season1 #S1EDay 8 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-18T15:15:58+0000",
+        "length": 987.133,
+        "permalink_url": "/reel/1048635624864113/"
+      },
+      {
+        "id": "1638234018012440",
+        "title": "राम जी की कथा: विजय दशहरा — रावण का विनाश ब्रह्मा बाण से",
+        "description": "विजयदशमी की रात, जब अंधकार पर प्रकाश की जंग छेड़ती है, सुनिए वह अद्भुत कथा जिसमें राम जी ने ब्रह्मा बाण से रावण को पराजित किया। इस महाकाव्य में विभीषण के रहस्य और अमृत की शक्ति का उजागर होना दर्शाता है कि सत्य की जीत हमेशा होती है।\n\n⏱️ अध्याय\n0:00 अयोध्या से वनवास\n6:06 विभीषण का रहस्य\n11:39 विजयदशमी पर राम का बाण\n\n🙏 रोज़ एक नई कथा — हमारे Shorts देखें और चैनल सब्सक्राइब करें\n📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dweekly_katha\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n\n#dussehra #vijayadashami #jaishreeram #ravandahan #katha #bhakti #sanatandharma #hindistory #StoryByte",
+        "created_time": "2026-10-18T09:57:46+0000",
+        "length": 981.2,
+        "permalink_url": "/reel/1638234018012440/"
+      },
+      {
+        "id": "1137640322642402",
+        "description": "✨ माँ महागौरी: कैसे काली त्वचा बनी शुद्ध श्वेत?\n\nशिव ने गंगाजल से काली पार्वती को कैसे श्वेत महागौरी बनाया?\n\n🔔 कल सुनिए, माँ सिद्धिदात्री कैसे शिव को आठ सिद्धियाँ देकर अर्द्धनारीश्वर बनाती हैं?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-5ea91f\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maamahagauri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-18T01:58:30+0000",
+        "length": 147.223,
+        "permalink_url": "/reel/1137640322642402/"
+      },
+      {
+        "id": "1685294526262215",
+        "description": "रेल की खिड़की से झलकता प्यार\n\nक्या एक ट्रेन की खिड़की दो अनजान दिलों को हमेशा साथ रख सकती है?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/romance-3c3760\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#StoryByte #AudioStories #romance",
+        "created_time": "2026-10-17T19:38:51+0000",
+        "length": 251.592,
+        "permalink_url": "/reel/1685294526262215/"
+      },
+      {
+        "id": "2373636146501201",
+        "title": "Navratri | Season 1 Episode Day 7: Shadows Over the Sacred Flame",
+        "description": "When the first Navratri fire flickers, ancient secrets stir and a hidden danger threatens the devotees.\n\n📺 Navratri — Season 1, Episode Day 7\n\n⏱️ Chapters\n0:00 आग की पहली चमक\n6:01 भटकी हुई आवाज़\n11:36 प्राचीन रहस्य का उद्घाटन\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dlong_episode\n\n#Navratri #Season1 #S1EDay 7 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-17T12:23:09+0000",
+        "length": 998.088,
+        "permalink_url": "/reel/2373636146501201/"
+      },
+      {
+        "id": "1866522328111001",
+        "description": "😱 माँ कालरात्रि ने कैसे किया रक्तबीज को नष्ट?\n\nक्या आप जानते हैं कि माँ कालरात्रि ने रक्तबीज की अनंत रक्तस्राव को कैसे रोका?\n\n🔔 कल सुनिए, माँ महागौरी की अद्भुत कथा जो बदल देगी आपकी सोच।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-13c49d\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maakalaratri #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-17T01:59:25+0000",
+        "length": 142.303,
+        "permalink_url": "/reel/1866522328111001/"
+      },
+      {
+        "id": "2632939890509452",
+        "title": "Navratri Maa Katyayani, the sixth form of Goddess Durga | S1 EDay 6: Katyayani’s Blessing of Courage",
+        "description": "When doubts rise, Maa Katyayani bestows a fiery resolve that tests every heart.\n\n📺 Navratri Maa Katyayani, the sixth form of Goddess Durga — Season 1, Episode Day 6\n\n⏱️ Chapters\n0:00 भय का सामना\n5:45 धैर्य की परीक्षा\n11:38 आश्चर्यजनक संकेत\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dlong_episode\n\n#NavratriMaaKatyayanithesixthformofGoddessDurga #Season1 #S1EDay 6 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-16T12:37:07+0000",
+        "length": 1007.52,
+        "permalink_url": "/reel/2632939890509452/"
+      },
+      {
+        "id": "1106880885431857",
+        "description": "🕉️ माँ कात्यायनी क्या थी वह रहस्य?\n\nक्या आप जानते हैं कि कैसे कात्यायनी ने मोर रूपी दानव को हराया?\n\n🔔 कल सुनिए माँ कालरात्रि का रहस्य, रक्तबीज के रक्त से उठे दानव की कहानी\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-e27b6f\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maakatyayani #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-16T02:08:32+0000",
+        "length": 141.319,
+        "permalink_url": "/reel/1106880885431857/"
+      },
+      {
+        "id": "27870436419296467",
+        "title": "Navratri | Season 1 Episode Day 5: रात्रि की परीक्षा",
+        "description": "Aditi confronts a perilous test of faith as the sacred fire ignites the mysteries of the hidden shrine.\n\n📺 Navratri — Season 1, Episode Day 5\n\n⏱️ Chapters\n0:00 अग्नि का आह्वान\n6:04 भक्ति का संघर्ष\n11:53 छिपा रहस्य\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dlong_episode\n\n#Navratri #Season1 #S1EDay 5 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-15T17:09:16+0000",
+        "length": 1010.433,
+        "permalink_url": "/reel/27870436419296467/"
+      },
+      {
+        "id": "1714960956814779",
+        "description": "The Rainy Day Coffee\n\nWhat happens when a stranger's umbrella becomes the bridge between two strangers?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/the-rainy-day-coffee-ca8fef\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#StoryByte #AudioStories #romance",
+        "created_time": "2026-10-15T10:25:20+0000",
+        "length": 208.433,
+        "permalink_url": "/reel/1714960956814779/"
+      },
+      {
+        "id": "1436148871948412",
+        "description": "😲 माँ स्कंदमाता की कथा: शरद ने टारकासुर को कैसे मारा?\n\nक्या माँ स्कंदमाता ने शरद को दैत्य से लड़ने भेजा?\n\n🔔 कल सुनिए, माँ कात्यायनी की अद्भुत जन्म कहानी और महिषासुर पर उनका विजय गीत।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-df932e\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n\n#navratri #jaimatadi #maaskandamata #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-15T02:10:38+0000",
+        "length": 139.279,
+        "permalink_url": "/reel/1436148871948412/"
+      },
+      {
+        "id": "4446118598985986",
+        "title": "Navratri | Season 1 Episode Day 4: अग्नि की प्रतिध्वनि",
+        "description": "Aditi’s devotion is tested when the sacred fire reveals a hidden warning that could change Navratri forever.\n\n📺 Navratri — Season 1, Episode Day 4\n\n⏱️ Chapters\n0:00 आग का आवाहन\n6:03 भूलभुलैया का संकेत\n11:30 मातृ शरण की पुकार\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Navratri #Season1 #S1EDay 4 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-14T11:18:53+0000",
+        "length": 1019.232,
+        "permalink_url": "/reel/4446118598985986/"
+      },
+      {
+        "id": "1089839290633446",
+        "description": "😲 माँ कूष्मांडा की मुस्कान से बना ब्रह्मांड\n\nक्या एक मुस्कान ने अंधकार को उज्ज्वल ब्रह्माण्ड में बदल दिया?\n\n🔔 कल सुनिए, माँ स्कंदमाता की अद्भुत कथा, कैसे उन्होंने कार्तिकेय को बनाया\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-0ed437\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maakushmanda #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-14T02:28:13+0000",
+        "length": 116.433,
+        "permalink_url": "/reel/1089839290633446/"
+      },
+      {
+        "id": "1375187539010823",
+        "title": "Navratri | Season 1 Episode Day 3: विचार की ज्वाला",
+        "description": "A night of hidden omens tests devotion as अदिति uncovers a secret that could change Varanasi's destiny.\n\n📺 Navratri — Season 1, Episode Day 3\n\n⏱️ Chapters\n0:00 प्रकाश की तलाश\n4:24 रहस्य की गूँज\n8:42 अंतिम संकेत\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Navratri #Season1 #S1EDay 3 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-13T10:35:44+0000",
+        "length": 759.272,
+        "permalink_url": "/reel/1375187539010823/"
+      },
+      {
+        "id": "1069626339247556",
+        "description": "😱 माँ चंद्रघंटा की गर्जना से दानव भागे\n\nक्या चंद्रघंटा की गर्जना से रावण के दिल में डर जागेगा?\n\n🔔 कल सुनिए, माँ कूष्मांडा की मुस्कान से कैसे हुआ ब्रह्माण्ड का सृजन\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-f96b44\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maachandraghanta #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
+        "created_time": "2026-10-13T04:14:17+0000",
+        "length": 106.808,
+        "permalink_url": "/reel/1069626339247556/"
+      },
+      {
+        "id": "3132474157097104",
+        "title": "Navratri | Season 1 Episode Day 2: Whispers of the Sacred Flame",
+        "description": "Aditi's devotion is tested as hidden omens stir the night of Navratri.\n\n📺 Navratri — Season 1, Episode Day 2\n\n⏱️ Chapters\n0:00 आग का आवाहन\n4:21 रहस्यमयी संकेत\n8:41 शुरुआती संघर्ष\n\n🎧 More stories, free and fully narrated, on StoryByte\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#Navratri #Season1 #S1EDay 2 #AudioStory #StoryByte #HindiStory",
+        "created_time": "2026-10-12T15:34:31+0000",
+        "length": 829.392,
+        "permalink_url": "/reel/3132474157097104/"
+      },
+      {
         "id": "29857831683803610",
         "description": "😲 माँ ब्रह्मचारिणी की तपस्या का रहस्य: नवरात्रि का दूसरा दिन\n\nक्या ब्रह्मचर्य की तपस्या ने शिव के दिल को सच में जीता?\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-29c090\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app\n\n#navratri #jaimatadi #maabrahmacharini #maadurga #bhakti #sanatandharma #hindu #storybyte #Navratri",
         "created_time": "2026-10-12T02:59:04+0000",
@@ -2772,14 +3214,6 @@
         "created_time": "2026-09-14T09:45:04+0000",
         "length": 419.616,
         "permalink_url": "/reel/2073761500171889/"
-      },
-      {
-        "id": "1117814257378750",
-        "created_time": "2026-09-14T08:58:12+0000",
-        "length": 60,
-        "permalink_url": "/122114621211332133/videos/1117814257378750",
-        "total_video_views": 0,
-        "total_video_avg_time_watched": 0
       },
       {
         "id": "1091171540028961",
@@ -3925,7 +4359,7 @@
         "status": "published",
         "generatedDate": "2026-08-22",
         "duration": 214,
-        "plays": 12,
+        "plays": 13,
         "likes": 3,
         "shares": 4,
         "rating": 3,
@@ -4837,11 +5271,11 @@
         "status": "published",
         "generatedDate": "2026-09-14",
         "duration": 246,
-        "plays": 6,
+        "plays": 7,
         "likes": 1,
-        "shares": 5,
+        "shares": 6,
         "rating": 3,
-        "ratingCount": 2
+        "ratingCount": 3
       },
       {
         "id": "2026-09-14_hi_devotional_गणेश-चतुर्थी-का-त्योहार-एक-परिवार-की-कहा",
@@ -5008,7 +5442,7 @@
         "status": "published",
         "generatedDate": "2026-09-19",
         "duration": 266,
-        "plays": 0,
+        "plays": 2,
         "likes": 0,
         "shares": 0,
         "rating": 0,
@@ -5027,7 +5461,7 @@
         "status": "published",
         "generatedDate": "2026-09-20",
         "duration": 187,
-        "plays": 0,
+        "plays": 1,
         "likes": 0,
         "shares": 0,
         "rating": 0,
@@ -5274,7 +5708,7 @@
         "status": "published",
         "generatedDate": "2026-09-29",
         "duration": 240,
-        "plays": 0,
+        "plays": 1,
         "likes": 1,
         "shares": 0,
         "rating": 0,
@@ -5293,7 +5727,7 @@
         "status": "published",
         "generatedDate": "2026-09-30",
         "duration": 231,
-        "plays": 0,
+        "plays": 1,
         "likes": 1,
         "shares": 0,
         "rating": 4,
@@ -5391,8 +5825,8 @@
         "plays": 1,
         "likes": 1,
         "shares": 0,
-        "rating": 0,
-        "ratingCount": 0
+        "rating": 5,
+        "ratingCount": 1
       },
       {
         "id": "2026-10-06_hi_devotional_हनुमान-की-लंका-यात्रा-समुद्र-पार-करने-की",
@@ -5505,8 +5939,8 @@
         "plays": 0,
         "likes": 0,
         "shares": 0,
-        "rating": 0,
-        "ratingCount": 0
+        "rating": 5,
+        "ratingCount": 1
       },
       {
         "id": "2026-10-12_hi_devotional_माँ-ब्रह्मचारिणी-की-कथा-द्वितीय-नवरात्रि",
@@ -5521,6 +5955,139 @@
         "status": "published",
         "generatedDate": "2026-10-12",
         "duration": 125,
+        "plays": 5,
+        "likes": 1,
+        "shares": 0,
+        "rating": 5,
+        "ratingCount": 2
+      },
+      {
+        "id": "2026-10-13_hi_devotional_माँ-चंद्रघंटा-की-कथा-दानवों-को-भयभित-करन",
+        "title": "माँ चंद्रघंटा की कथा – दानवों को भयभित करने वाली गर्जना",
+        "socialTitle": "😱 माँ चंद्रघंटा की गर्जना से दानव भागे",
+        "deity": "devi",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Navratri",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-13",
+        "duration": 98,
+        "plays": 2,
+        "likes": 1,
+        "shares": 1,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "2026-10-14_hi_devotional_माँ-कूष्मांडा-की-कथा-अंधकार-से-प्रकाश-तक",
+        "title": "माँ कूष्मांडा की कथा – अंधकार से प्रकाश तक",
+        "socialTitle": "😲 माँ कूष्मांडा की मुस्कान से बना ब्रह्मांड",
+        "deity": "devi",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Navratri",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-14",
+        "duration": 107,
+        "plays": 7,
+        "likes": 2,
+        "shares": 1,
+        "rating": 5,
+        "ratingCount": 1
+      },
+      {
+        "id": "2026-10-15_hi_devotional_माँ-स्कंदमाता-की-कथा-शरद-ने-टारकासुर-को-",
+        "title": "माँ स्कंदमाता की कथा: शरद ने टारकासुर को कैसे हराया",
+        "socialTitle": "😲 माँ स्कंदमाता की कथा: शरद ने टारकासुर को कैसे मारा?",
+        "deity": "devi",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Navratri",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-15",
+        "duration": 123,
+        "plays": 0,
+        "likes": 2,
+        "shares": 1,
+        "rating": 5,
+        "ratingCount": 2
+      },
+      {
+        "id": "2026-10-16_hi_devotional_माँ-कात्यायनी-की-अद्भुत-कथा-नवरात्रि-का-",
+        "title": "माँ कात्यायनी की अद्भुत कथा – नवरात्रि का शिखर",
+        "socialTitle": "🕉️ माँ कात्यायनी क्या थी वह रहस्य?",
+        "deity": "devi",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Navratri",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-16",
+        "duration": 126,
+        "plays": 2,
+        "likes": 1,
+        "shares": 0,
+        "rating": 3,
+        "ratingCount": 1
+      },
+      {
+        "id": "2026-10-17_hi_devotional_माँ-कालरात्रि-की-कथा-रक्तबीज-का-अंत",
+        "title": "माँ कालरात्रि की कथा: रक्तबीज का अंत",
+        "socialTitle": "😱 माँ कालरात्रि ने कैसे किया रक्तबीज को नष्ट?",
+        "deity": "devi",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Navratri",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-17",
+        "duration": 128,
+        "plays": 0,
+        "likes": 1,
+        "shares": 0,
+        "rating": 5,
+        "ratingCount": 1
+      },
+      {
+        "id": "2026-10-18_hi_devotional_माँ-महागौरी-की-कथा-अंधकार-से-प्रकाश-तक",
+        "title": "माँ महागौरी की कथा – अंधकार से प्रकाश तक",
+        "socialTitle": "✨ माँ महागौरी: कैसे काली त्वचा बनी शुद्ध श्वेत?",
+        "deity": "devi",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Navratri",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-18",
+        "duration": 131,
+        "plays": 1,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "2026-10-19_hi_devotional_माँ-सिद्धिदात्री-की-कथा-शिव-को-आठ-सिद्धि",
+        "title": "माँ सिद्धिदात्री की कथा: शिव को आठ सिद्धियाँ कैसे मिलीं?",
+        "socialTitle": "😲 माँ सिद्धिदात्री ने कैसे दी शिव को आठ सिद्धियाँ?",
+        "deity": "devi",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Navratri",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-10-19",
+        "duration": 141,
         "plays": 0,
         "likes": 0,
         "shares": 0,
@@ -5578,7 +6145,7 @@
         "status": "published",
         "generatedDate": null,
         "duration": 225,
-        "plays": 3,
+        "plays": 4,
         "likes": 3,
         "shares": 0,
         "rating": 4,
@@ -5813,25 +6380,6 @@
         "ratingCount": 1
       },
       {
-        "id": "community_1789289596759_FwJFdXofL5bmfdmdfpg4wn27oBk2",
-        "title": "सदी भर की कहानी",
-        "socialTitle": null,
-        "deity": null,
-        "genre": "romance",
-        "language": "hi",
-        "occasion": null,
-        "isDaily": false,
-        "isCommunityStory": true,
-        "status": "published",
-        "generatedDate": null,
-        "duration": 202,
-        "plays": 1,
-        "likes": 1,
-        "shares": 0,
-        "rating": 0,
-        "ratingCount": 0
-      },
-      {
         "id": "community_1789298076805_nMfZCz7XnqhFUC8e7TV3HuW3V2t2",
         "title": "Starlit Promise on the Harbor",
         "socialTitle": null,
@@ -5904,6 +6452,348 @@
         "plays": 0,
         "likes": 1,
         "shares": 0,
+        "rating": 5,
+        "ratingCount": 1
+      },
+      {
+        "id": "community_1792059494687_eD2elqa40vfAKo8qRhfyn8WhjKB2",
+        "title": "The Rainy Day Coffee",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "romance",
+        "language": "en",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": true,
+        "status": "published",
+        "generatedDate": null,
+        "duration": 208,
+        "plays": 6,
+        "likes": 2,
+        "shares": 0,
+        "rating": 5,
+        "ratingCount": 1
+      },
+      {
+        "id": "community_1792258316039_pgIy1f6sTfRKBJXG8mC4JB0TVZB3",
+        "title": "रेल की खिड़की से झलकता प्यार",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "romance",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": true,
+        "status": "published",
+        "generatedDate": null,
+        "duration": 252,
+        "plays": 114,
+        "likes": 1,
+        "shares": 0,
+        "rating": 5,
+        "ratingCount": 1
+      },
+      {
+        "id": "yt_6LjTcmue9xU",
+        "title": "Navratri | Season 1 Episode Day 4: अग्नि की प्रतिध्वनि",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 1019,
+        "plays": 0,
+        "likes": 3,
+        "shares": 2,
+        "rating": 4,
+        "ratingCount": 3
+      },
+      {
+        "id": "yt_74YMcueDFNE",
+        "title": "Alien Is My Girlfriend | Season 1 Episode 3: रहस्य का द्वार",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "science",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 977,
+        "plays": 1,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "yt_O1EPVVB8ypo",
+        "title": "Mahabharata | Season 1 Episode 1: अंधकार की पहली किरण",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 980,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "yt_OlmARSUrvMU",
+        "title": "Navratri | Season 1 Episode Day 1: The First Dawn of Navratri",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 960,
+        "plays": 3,
+        "likes": 1,
+        "shares": 0,
+        "rating": 5,
+        "ratingCount": 1
+      },
+      {
+        "id": "yt_QtDia_x3sE0",
+        "title": "Navratri | Season 1 Episode Day 2: Whispers of the Sacred Flame",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 829,
+        "plays": 0,
+        "likes": 1,
+        "shares": 0,
+        "rating": 4,
+        "ratingCount": 1
+      },
+      {
+        "id": "yt_Vb6sy4wZApY",
+        "title": "Navratri | Season 1 Episode Day 5: रात्रि की परीक्षा",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 1010,
+        "plays": 7,
+        "likes": 2,
+        "shares": 0,
+        "rating": 5,
+        "ratingCount": 2
+      },
+      {
+        "id": "yt_XfGf4sKSxIw",
+        "title": "Navratri Maa Katyayani, the sixth form of Goddess Durga | S1 EDay 6: Katyayani’s Blessing of Courage",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 1007,
+        "plays": 16,
+        "likes": 1,
+        "shares": 0,
+        "rating": 5,
+        "ratingCount": 1
+      },
+      {
+        "id": "yt__-MZHiQTMyY",
+        "title": "Mahabharata | Season 1 Episode 4: गुह्य गर्त में संघर्ष",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 999,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "yt_assQz_svY8M",
+        "title": "Mahabharata | Season 1 Episode 2: छायाओं की पुकार",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "science",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 999,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "yt_dap9qNOiUEI",
+        "title": "Navratri | Season 1 Episode Day 7: Shadows Over the Sacred Flame",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 998,
+        "plays": 3,
+        "likes": 1,
+        "shares": 1,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "yt_ef35oT5oZoE",
+        "title": "राम जी की कथा: विजय दशहरा — रावण का विनाश ब्रह्मा बाण से",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 981,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "yt_rU2Wq7xHCKs",
+        "title": "Mahabharata | Season 1 Episode 3: Echoes of the Timeless Vault",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 1024,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "yt_tbd9mVDBdnM",
+        "title": "Hanuman Chalisa with Lyrics | Season 1 Episode 1: The Call of the Sacred Chant",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 977,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "yt_vWpk7MHETHo",
+        "title": "Navratri | Season 1 Episode Day 8: Echoes of the First Sacred Fire",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 987,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0
+      },
+      {
+        "id": "yt_yjLCo8CVWSE",
+        "title": "Navratri | Season 1 Episode Day 3: विचार की ज्वाला",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 759,
+        "plays": 0,
+        "likes": 1,
+        "shares": 1,
+        "rating": 5,
+        "ratingCount": 2
+      },
+      {
+        "id": "yt_zaQkTMPQEi8",
+        "title": "Mahabharata | Season 1 Episode 5: Echoes of the Forgotten Verse",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 971,
+        "plays": 0,
+        "likes": 1,
+        "shares": 4,
         "rating": 5,
         "ratingCount": 1
       }
