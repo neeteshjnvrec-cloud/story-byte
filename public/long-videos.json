@@ -1,6 +1,20 @@
 {
- "updatedAt": "2026-10-19T02:11:45.908Z",
+ "updatedAt": "2026-10-19T15:02:06.527Z",
  "videos": [
+  {
+   "id": "f1fMZy6_1es",
+   "youtubeUrl": "https://youtu.be/f1fMZy6_1es",
+   "thumbnail": "https://i.ytimg.com/vi/f1fMZy6_1es/mqdefault.jpg",
+   "thumbnailHd": "https://i.ytimg.com/vi/f1fMZy6_1es/maxresdefault.jpg",
+   "title": "Navratri | Season 1 Episode Day 9: Echoes of the Sacred Flame",
+   "seriesTitle": "Navratri",
+   "season": "1",
+   "episode": "Day 9",
+   "description": "As the first Navratri fire burns, अदिति confronts a hidden test that could reshape her devotion.",
+   "language": "hi",
+   "durationSec": 1014,
+   "publishedAt": "2026-10-19T10:38:05.844Z"
+  },
   {
    "id": "vWpk7MHETHo",
    "youtubeUrl": "https://youtu.be/vWpk7MHETHo",
