@@ -41,6 +41,7 @@ const { mediaKey } = require('./lib/media-key');
 const { postStoryCarousel, postStoryReel } = require('./lib/instagram');
 const { postStoryToFacebook, postStoryVideo } = require('./lib/facebook');
 const { postStoryToYouTube } = require('./lib/youtube');
+const { FIREBASE_TOOLS } = require('./lib/firebase-cli');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -435,7 +436,7 @@ async function main() {
   // thing, since the query matches 'failed' as well as 'under_review'.
   console.log(`\n🚀 Deploying ${processed.length} story asset(s) to Firebase Hosting...`);
   try {
-    execFileSync('npx', ['--yes', 'firebase-tools', 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
+    execFileSync('npx', ['--yes', FIREBASE_TOOLS, 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
       { cwd: ROOT, stdio: 'inherit', env: { ...process.env, GOOGLE_APPLICATION_CREDENTIALS: SA_PATH } });
     console.log('✅ Hosting deployed.');
   } catch (e) {

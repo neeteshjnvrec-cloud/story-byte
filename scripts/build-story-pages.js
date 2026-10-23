@@ -33,6 +33,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { writeStoryPage, SITE, PLAY_STORE_URL } = require('./lib/story-page');
+const { FIREBASE_TOOLS } = require('./lib/firebase-cli');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -121,7 +122,7 @@ async function main() {
   try {
     execFileSync(
       'npx',
-      ['--yes', 'firebase-tools', 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
+      ['--yes', FIREBASE_TOOLS, 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
       { cwd: ROOT, stdio: 'inherit', env: { ...process.env, GOOGLE_APPLICATION_CREDENTIALS: SA_PATH } }
     );
     console.log('✅ Hosting deployed.');

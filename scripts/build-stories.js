@@ -49,6 +49,7 @@ const { synthSarvam } = require('./lib/sarvam-tts');
 const { synth } = require('./lib/narrate');
 const { synthBackup } = require('./lib/backup-voice');
 const { mediaKey } = require('./lib/media-key');
+const { FIREBASE_TOOLS } = require('./lib/firebase-cli');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -771,7 +772,7 @@ async function run() {
 
   // Deploy all staged files to Firebase Hosting once
   console.log(`\n🚀 Deploying ${pending.length} daily story(ies) to Firebase Hosting...`);
-  execFileSync('npx', ['--yes', 'firebase-tools', 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
+  execFileSync('npx', ['--yes', FIREBASE_TOOLS, 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
     { cwd: ROOT, stdio: 'inherit', env: { ...process.env, GOOGLE_APPLICATION_CREDENTIALS: SA_PATH } });
 
   // Write daily story docs to Firestore

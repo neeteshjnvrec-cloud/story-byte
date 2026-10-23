@@ -6,6 +6,7 @@ const { execFileSync } = require('child_process');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const { FIREBASE_TOOLS } = require('./lib/firebase-cli');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -39,7 +40,7 @@ const seed = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 
     console.log('cover ✓', key, `(${Math.round(fs.statSync(out).size / 1024)}KB)`);
   }
   console.log('deploying to Firebase Hosting…');
-  execFileSync('npx', ['--yes', 'firebase-tools', 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
+  execFileSync('npx', ['--yes', FIREBASE_TOOLS, 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
     { cwd: ROOT, stdio: 'inherit', env: { ...process.env, GOOGLE_APPLICATION_CREDENTIALS: SA } });
   console.log('Done. Vertical banners live at https://' + PROJECT + '.web.app/verticals/<key>.jpg');
   process.exit(0);
