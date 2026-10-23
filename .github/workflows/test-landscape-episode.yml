@@ -146,7 +146,7 @@ jobs:
         run: |
           [ -n "$FIREBASE_SERVICE_ACCOUNT" ] || { echo "No FIREBASE_SERVICE_ACCOUNT; skipping"; exit 0; }
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
-          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx --yes firebase-tools deploy --only hosting --project storybyte-76716 --non-interactive
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx --yes firebase-tools@15.34.0 deploy --only hosting --project storybyte-76716 --non-interactive
           rm -f "$RUNNER_TEMP/sa.json"
           # The new episode as an app story too (likes, comments, Community feed).
           node scripts/sync-video-stories.js

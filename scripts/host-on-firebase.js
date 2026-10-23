@@ -14,6 +14,7 @@ const https = require('https');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { FIREBASE_TOOLS } = require('./lib/firebase-cli');
 
 const ROOT = path.resolve(__dirname, '..');
 const SA = path.join(ROOT, 'functions/firebase-service-account.json');
@@ -97,7 +98,7 @@ async function run() {
   console.log('deploying to Firebase Hosting…');
   const fbJson = path.join(PUB, 'firebase.json');
   fs.writeFileSync(fbJson, JSON.stringify({ hosting: { public: '.', ignore: ['firebase.json'] } }));
-  execFileSync('npx', ['--yes', 'firebase-tools', 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
+  execFileSync('npx', ['--yes', FIREBASE_TOOLS, 'deploy', '--only', 'hosting', '--project', PROJECT, '--non-interactive'],
     { cwd: PUB, stdio: 'inherit', env: { ...process.env, GOOGLE_APPLICATION_CREDENTIALS: SA } });
   try { fs.unlinkSync(fbJson); } catch (e) {}
 
