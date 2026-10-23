@@ -1,0 +1,36 @@
+{
+  "seriesTitle": "Ramayan",
+  "genre": "bhakti, devotional, educational, enagging ",
+  "language": "hi",
+  "characters": [
+    {
+      "name": "Rama",
+      "nativeName": "राम",
+      "role": "Prince of Ayodhya, avatar of Vishnu",
+      "look": "Early 20s, noble face, dark hair tied in a simple knot, wearing golden dhoti and a tiger-skin mantle"
+    },
+    {
+      "name": "Sita",
+      "nativeName": "सीता",
+      "role": "Princess of Mithila, devoted wife",
+      "look": "Late teens, gentle face, long black hair braided, wearing a red sari with gold embroidery"
+    },
+    {
+      "name": "Lakshmana",
+      "nativeName": "लक्ष्मण",
+      "role": "Rama’s younger brother, steadfast guardian",
+      "look": "Early 20s, determined face, short curly hair, dressed in a green dhoti and a simple cloth turban"
+    }
+  ],
+  "setting": "Ancient Ayodhya, its royal palace, and the dense, sacred forests bordering the kingdom.",
+  "episodes": [
+    {
+      "season": "1",
+      "episode": "1",
+      "title": "Divine Call: Rama's Forest Journey",
+      "description": "When a celestial summons disrupts Ayodhya’s peace, Rama, Sita, and Lakshmana embark on a perilous adventure that will test their devotion.",
+      "summary": "The kingdom of Ayodhya basks in peace, but a divine whisper shatters the calm. Rama, the beloved prince, receives a mysterious summons from the sage Vishwamitra. Sita and Lakshmana watch anxiously as destiny begins to stir. Vishwamitra arrives, urging Rama to protect the sacred yajna from the menacing demons that haunt the forest. Reluctant yet duty-bound, Rama accepts, but Lakshmana’s protective instincts flare, fearing for his brother’s safety. Sita, though bound to the palace, offers a blessing that strengthens Rama’s resolve. The trio prepares to leave, unaware that a dark presence watches from the shadows. At dawn, Rama, Sita, and Lakshmana step onto the forest path, the air thick with anticipation. Suddenly, a thunderous roar erupts as a massive demon, Tataka, emerges, blocking their way. Rama draws his bow, eyes blazing, while Sita clutches a talisman for protection. The episode ends as the demon lunges, leaving their fate hanging in the balance for the next episode."
+    }
+  ],
+  "style": "epic"
+}
