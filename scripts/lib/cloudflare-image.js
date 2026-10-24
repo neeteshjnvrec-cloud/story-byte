@@ -152,13 +152,15 @@ const HQ_MODEL = process.env.CLOUDFLARE_HQ_MODEL || '@cf/black-forest-labs/flux-
 /** Fetches one image from the HQ model at `width` x `height` (multiples of
  *  16), optionally guided by `refs` (JPEG/PNG Buffers, each under 512x512),
  *  from the first account with allocation left. Returns a Buffer or throws —
- *  callers fall back to fetchCloudflareImage. */
+ *  callers fall back to fetchCloudflareImage. `model` picks another FLUX.2
+ *  model with the same inputs, e.g. '@cf/black-forest-labs/flux-2-klein-9b'
+ *  (~1,400 neurons a picture: used for one-off reference portraits). */
 function fetchCloudflareHQImage(prompt, opts = {}) {
   return withAccounts('FLUX.2', (account) => fetchCloudflareHQImageFrom(account, prompt, opts));
 }
 
-async function fetchCloudflareHQImageFrom({ id: accountId, token: apiToken }, prompt, { width, height, refs = [], timeoutMs = 90000, retries = 2 } = {}) {
-  const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${HQ_MODEL}`;
+async function fetchCloudflareHQImageFrom({ id: accountId, token: apiToken }, prompt, { width, height, refs = [], model = HQ_MODEL, timeoutMs = 90000, retries = 2 } = {}) {
+  const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`;
 
   for (let attempt = 0; ; attempt++) {
     // The model only takes multipart form data, even for a bare prompt.

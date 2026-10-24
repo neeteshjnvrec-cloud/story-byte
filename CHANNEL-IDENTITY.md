@@ -236,8 +236,9 @@ people ("हनुमान जी की कथा" and so on).
 ## Telegram channel
 
 Every day's katha video goes to a Telegram channel with its title, the
-teaser and links to the story page and the app. Each Sunday's long katha
-goes there as its thumbnail with the YouTube link.
+teaser and links to the story page and the app, and so does each
+published community story. Each Sunday's long katha and each landscape
+episode goes there as its thumbnail with the YouTube link.
 
 Channel: **https://t.me/storybytes** (public).
 

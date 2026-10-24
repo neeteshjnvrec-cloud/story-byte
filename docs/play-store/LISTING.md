@@ -16,58 +16,64 @@ Play's limits: up to 8 screenshots per device type, 16:9 or 9:16, 320–3840 px 
 ## App name (30 characters max)
 
 ```
-StoryByte: Har Mood Ki Kahani
+StoryByte: Hindi Kahani, Katha
 ```
 
-29 characters. "A story for every mood" — matches the first screenshot's headline, "Stories for every mood"; "kahani" keeps it in Hindi story searches.
+30 characters. "Hindi kahani" and "katha" are the two searches this audience types; the old "Har Mood Ki Kahani" spent 14 characters on words nobody searches.
 
 ## Short description (80 characters max)
 
 ```
-Hindi audio stories & kathas — romance, mystery, bedtime and devotional
+Free Hindi audio stories, kahaniyan & daily bhakti katha — no coins, no ads
 ```
 
-71 characters. Carries the search words the title doesn't: "Hindi", "audio stories", "kathas".
+75 characters. Adds "audio stories", "kahaniyan" and "bhakti" (the title has "kahani" and "katha"), and leads with the reason to pick StoryByte over Pocket FM and Kuku FM: it's free.
 
 ## Full description (4000 characters max)
 
 ```
-Stories for every mood — beautifully narrated, in Hindi and English, and free.
+Free Hindi audio stories and a new bhakti katha every morning — no coins, no subscription, no ads. Listen to Hindi kahaniyan, devotional kathas and bedtime stories on StoryByte.
 
-StoryByte is your daily dose of audio stories: romance, mystery, adventure, bedtime and sleep stories, drama, motivation, kids' tales and devotional kathas. Press play and escape — on the commute, before bed, or whenever you need a break.
+हर सुबह एक नई पावन कथा — हनुमान जी, शिव जी, श्री कृष्ण, गणेश जी, माँ दुर्गा, शनि देव और विष्णु भगवान की। हर त्योहार की विशेष कथा, एक दिन पहले। सभी कहानियाँ मुफ़्त।
 
-🎧 LISTEN
-• New stories every day in Hindi and English
-• A new devotional katha every morning
+🙏 DAILY KATHA (रोज़ की कथा)
+• A new devotional katha every morning, for the day's deity: Hanuman ji on Tuesday, Shani Dev on Saturday, Shiv ji on Monday
+• Festival kathas the evening before: Diwali, Navratri, Janmashtami, Mahashivratri, Ganesh Chaturthi, Karwa Chauth and more
+• Full video kathas and series like Ramayan, Mahabharata and Navratri
+
+🎧 HINDI AUDIO STORIES (हिंदी कहानियाँ)
+• Romance, drama, mystery, adventure and motivational kahaniyan in Hindi and English
+• Bedtime and sleep stories, with a sleep timer
+• Kids' stories (bachon ki kahaniyan) with kids mode
+• New stories every day
+
+📖 LISTEN YOUR WAY
 • Read along: every story comes with its full text
-• Speed control, sleep timer, and Continue listening right where you stopped
-• Save favourites and download stories to listen offline
+• Continue listening right where you stopped
+• Playback speed control
+• Download stories and listen offline
+• Save favourites to your library
 
-🎬 WATCH
-• Full video episodes — Navratri, Mahabharata, Alien Is My Girlfriend and more
-• Shorts on story pages
-• Videos keep playing in a small floating window while you browse
+✍️ CREATE YOUR OWN STORY
+• Write one line and get a full narrated story with a cover picture
+• 16 languages: Hindi, Bengali, Marathi, Telugu, Tamil, Gujarati, English and more
+• Share it with the StoryByte community, where listeners like, rate and comment
 
-✨ CREATE
-• Write one line and AI turns it into a full story with a cover and a voice
-• Create in 16 languages, including Hindi, Bengali, Marathi, Telugu, Tamil, Gujarati and English
-• Share it with the StoryByte community
+🪙 100% FREE
+• Every story and katha is free. No coins to unlock episodes, no subscription
+• Daily check-in rewards, and coins for inviting friends
 
-👥 COMMUNITY
-• Listen to stories made by other listeners
-• Like, rate, comment and share
-• Follow your favourite storytellers' new stories
+Start your day with a katha on StoryByte. Download free and listen to today's katha now.
 
-🪙 REWARDS
-• Daily check-ins and streak bonuses
-• Invite friends and earn coins
+Find us when you search: hindi kahani, hindi stories, audio story, audio kahani, kahaniyan, katha, bhakti katha, vrat katha, hanuman katha, shiv katha, krishna katha, devotional stories, bedtime stories, sleep stories, romantic kahani, moral stories in hindi, story app.
 
-Popular searches: hindi kahani, audio story, kahaniyan, bedtime stories, sleep stories, katha, bhakti stories, romance stories, mystery stories, story app.
-
-Questions or ideas? Email ournewstoryteller@gmail.com or WhatsApp +91 95594 81239.
+Daily katha on WhatsApp and Telegram: storybyte-76716.web.app/whatsapp · t.me/storybytes
+Questions or ideas? Email ournewstoryteller@gmail.com
 
 StoryByte — Listen. Escape. Repeat.
 ```
+
+Primary keywords and where they appear: hindi kahani / kahaniyan (title, short, 4× in full), katha / bhakti katha (title, short, 6×), audio stories (short, 3×), bedtime / sleep stories (3×), devotional (2×). The first 167 characters, shown before "About this app" is expanded, carry "free", "Hindi audio stories", "bhakti katha" and "no coins".
 
 ## What's new (500 characters max)
 

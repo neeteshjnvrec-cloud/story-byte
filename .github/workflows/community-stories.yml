@@ -95,6 +95,9 @@ jobs:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          # Optional: post to a Telegram channel (CHANNEL-IDENTITY.md → Telegram).
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL: ${{ vars.TELEGRAM_CHANNEL || secrets.TELEGRAM_CHANNEL }}
         # The script deploys hosting itself (and refuses to publish when that
         # deploy fails), so the workflow must NOT deploy again — the old second
         # step had no auth and red-exited every successful run.
