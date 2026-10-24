@@ -60,14 +60,24 @@ async function fetchStoryImage(prompt, seed, opts = {}) {
   // only ever scaled up a little, never cropped. Any failure (including
   // the free daily allocation running out) drops to the usual chain.
   if (hq) {
-    for (let attempt = 0; attempt < 2; attempt++) {
+    // A flag names the "prompt / input image combination": after the gentler
+    // prompt, one last try without the reference images (a deity portrait or
+    // the story's first picture), which a non-violent katha was still flagged
+    // with.
+    let opts = hq;
+    for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const buf = await fetchCloudflareHQImage(ask, hq);
+        const buf = await fetchCloudflareHQImage(ask, opts);
         return tagged(await sharp(buf).resize(width, height, { fit: 'cover', kernel: 'lanczos3' }).jpeg({ quality: 95 }).toBuffer(), 'hq');
       } catch (e) {
         if (e.flagged && attempt === 0) {
           console.warn('    ⚠️  HQ picture flagged by the safety filter; retrying with a gentler prompt');
           ask = gentlerPrompt(prompt);
+          continue;
+        }
+        if (e.flagged && attempt === 1 && opts.refs?.length) {
+          console.warn('    ⚠️  Flagged again; retrying without the reference images');
+          opts = { ...opts, refs: [] };
           continue;
         }
         console.warn(`    ⚠️  HQ image failed, using the standard model: ${e.message.slice(0, 160)}`);
