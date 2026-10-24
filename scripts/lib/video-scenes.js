@@ -120,10 +120,18 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
   const plan = await llmSceneList({ title, text, genre, description }, sceneCount || sceneCountFor(audioDurSec));
   const prompts = plan?.scenes;
   if (!prompts?.length) return null;
-  // Boundaries snap to cue starts so each picture changes on a spoken
-  // word, not mid-syllable.
-  const at = (k) => (k <= 0 ? 0 : k >= prompts.length ? audioDurSec
-    : cues[Math.min(cues.length - 1, Math.floor((k / prompts.length) * cues.length))].start);
+  // Pictures change at even intervals, snapped to a cue start (a spoken
+  // word, not mid-syllable) when one is within 2s. Picking the boundary by
+  // cue *index* collapsed several boundaries onto the same cue when there
+  // were more pictures than (sentence-long) cues — those scenes got the
+  // 1.5s minimum and the pictures ran ahead of the narration.
+  const at = (k) => {
+    if (k <= 0) return 0;
+    if (k >= prompts.length) return audioDurSec;
+    const even = (k / prompts.length) * audioDurSec;
+    const near = cues.reduce((best, c) => (Math.abs(c.start - even) < Math.abs(best - even) ? c.start : best), Infinity);
+    return Math.abs(near - even) <= 2 ? near : even;
+  };
   const planned = prompts.map((prompt, i) => ({ prompt, start: at(i), end: at(i + 1) }));
 
   fs.mkdirSync(outDir, { recursive: true });
@@ -201,14 +209,22 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
   // picture — the climax — over the narration's opening hook line, then the
   // story starts from the beginning. The first seconds decide whether a
   // Shorts viewer keeps watching.
+  // The ~2s come out of the opening pictures — as many as it takes, each
+  // keeping at least a second: with sentence-long subtitle cues the first
+  // picture alone can be under two seconds, and the hook used to be skipped.
   const hookAt = plan.hook;
-  const first = scenes[0];
-  const hookSec = Math.min(2.2, first.duration * 0.6);
-  if (devotional && scenes.length >= 4 && hookAt > 0 && first.duration - hookSec >= 1.5) {
-    scenes.splice(0, 1,
-      { file: scenes[hookAt].file, duration: hookSec, lowRes: scenes[hookAt].lowRes },
-      { ...first, duration: first.duration - hookSec });
-    console.log(`  🎬 Opens on scene ${hookAt + 1} (the hook) for ${hookSec.toFixed(1)}s`);
+  if (devotional && scenes.length >= 4 && hookAt > 0) {
+    const hook = { file: scenes[hookAt].file, lowRes: scenes[hookAt].lowRes, duration: 0 };
+    for (let i = 0; i < scenes.length && hook.duration < 2.2; i++) {
+      const take = Math.min(2.2 - hook.duration, scenes[i].duration - 1);
+      if (take <= 0) continue;
+      scenes[i].duration -= take;
+      hook.duration += take;
+    }
+    if (hook.duration >= 1.2) {
+      scenes.unshift(hook);
+      console.log(`  🎬 Opens on scene ${hookAt + 1} (the hook) for ${hook.duration.toFixed(1)}s`);
+    }
   }
   console.log(`  🖼️  Video pictures: ${Object.entries(sources).map(([k, n]) => `${n} ${k}`).join(', ')}` +
     (sources.hq === filled.length ? '' : ' (hq = FLUX.2; reused = a neighbouring picture reframed; the rest are lower quality)'));
