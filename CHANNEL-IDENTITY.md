@@ -137,17 +137,28 @@ generator watermarks.
 **Where the link appears (automatic):**
 
 - Every Short's description, Reel caption, Facebook post and Sunday long
-  video ends with "💬 रोज़ नई कथा WhatsApp पर: …" (`scripts/lib/social-extras.js`,
+  video ends with "💬 रोज़ नई कथा WhatsApp पर: …" and the Telegram link (`scripts/lib/social-extras.js`,
   also used by `scripts/build-landscape-episode.js`).
-- The website: a green WhatsApp button on the home page
-  (`scripts/lib/site-index.js`) and a link on every Hindi story page
+- The website: green WhatsApp and blue Telegram buttons on the home page
+  (`scripts/lib/site-index.js`) and links on every Hindi story page
   (`scripts/lib/story-page.js`). Pages written before this change get it
   when `scripts/build-story-pages.js` re-renders them.
-- The app: Settings → **Daily katha on WhatsApp** (`src/screens/SettingsScreen.js`).
+- The app: Settings → **Daily katha on WhatsApp** and **Daily katha on Telegram**
+  (`src/screens/SettingsScreen.js`).
 
-The link lives in `scripts/lib/social-extras.js` and `src/screens/SettingsScreen.js`.
+**Short links** (redirects in `firebase.json`, no ads; use them in bios, videos
+and anywhere you type a link by hand):
+
+- `storybyte-76716.web.app/whatsapp` → the WhatsApp Channel
+- `storybyte-76716.web.app/telegram` → t.me/storybytes
+- `storybyte-76716.web.app/app` → Google Play (counted as `shortlink` in Play Console)
+
+They're temporary (302) redirects, so changing a destination in `firebase.json`
+moves every old post's link with it.
+
+The links live in `scripts/lib/social-extras.js` and `src/constants/links.js`.
 To move the pipeline to a new channel without a code change, set the
-`WHATSAPP_CHANNEL_URL` repository variable (GitHub → Settings → Secrets
+`WHATSAPP_CHANNEL_URL` or `TELEGRAM_CHANNEL_URL` repository variable (GitHub → Settings → Secrets
 and variables → Actions → Variables); the app needs a new release.
 
 **Daily routine (by hand, ~2 minutes).** WhatsApp has no posting API for
@@ -228,16 +239,17 @@ Every day's katha video goes to a Telegram channel with its title, the
 teaser and links to the story page and the app. Each Sunday's long katha
 goes there as its thumbnail with the YouTube link.
 
+Channel: **https://t.me/storybytes** (public).
+
 1. Telegram → **New Channel** → name it like the YouTube channel, make it
-   **Public**, and pick a link, e.g. `t.me/roz_ek_katha`.
+   **Public**, and pick a link (done: `t.me/storybytes`).
 2. Open **@BotFather** → `/newbot` → choose a name and username → copy the
    **token** it gives you.
 3. Your channel → **Administrators** → **Add Admin** → search for your bot →
    allow **Post Messages**.
 4. GitHub → this repository → **Settings → Secrets and variables → Actions**:
    - **Secrets** → New: `TELEGRAM_BOT_TOKEN` = the token.
-   - **Variables** → New: `TELEGRAM_CHANNEL` = `@` plus the channel's link
-     name, e.g. `@roz_ek_katha`.
+   - **Variables** → New: `TELEGRAM_CHANNEL` = `@storybytes`.
 
 From the next run, posting is automatic. Share the channel link in your
 YouTube channel description and WhatsApp to get the first members.

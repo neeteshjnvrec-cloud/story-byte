@@ -18,7 +18,7 @@ import { auth, deleteUser } from '../services/firebase';
 import { AppText } from '../components/ui/AppText';
 import { Icon } from '../components/ui/Icon';
 import { openPlayStore } from '../utils/askForRating';
-import { WHATSAPP_CHANNEL_URL } from '../constants/links';
+import { WHATSAPP_CHANNEL_URL, TELEGRAM_CHANNEL_URL } from '../constants/links';
 
 // Tapping a row steps to the next option, like Appearance.
 const SPEED_STEPS = [0.75, 1, 1.25, 1.5, 2];
@@ -125,6 +125,11 @@ export const SettingsScreen = () => {
   const openWhatsAppChannel = () => {
     Linking.openURL(WHATSAPP_CHANNEL_URL).catch(() => {
       Alert.alert('WhatsApp', `Could not open WhatsApp. Visit ${WHATSAPP_CHANNEL_URL}`);
+    });
+  };
+  const openTelegramChannel = () => {
+    Linking.openURL(TELEGRAM_CHANNEL_URL).catch(() => {
+      Alert.alert('Telegram', `Could not open Telegram. Visit ${TELEGRAM_CHANNEL_URL}`);
     });
   };
 
@@ -304,6 +309,13 @@ export const SettingsScreen = () => {
             label="Daily katha on WhatsApp"
             right={chevron}
             onPress={openWhatsAppChannel}
+          />
+          <Row
+            theme={theme}
+            icon="telegram"
+            label="Daily katha on Telegram"
+            right={chevron}
+            onPress={openTelegramChannel}
           />
           <Row
             theme={theme}
