@@ -93,7 +93,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           # Optional: post to a Telegram channel (CHANNEL-IDENTITY.md → Telegram).
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHANNEL: ${{ vars.TELEGRAM_CHANNEL }}
+          TELEGRAM_CHANNEL: ${{ vars.TELEGRAM_CHANNEL || secrets.TELEGRAM_CHANNEL }}
           # Google Search Console's HTML-tag code, for the home page (CHANNEL-IDENTITY.md).
           GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION }}
           FIREBASE_PROJECT_ID: storybyte-76716

@@ -12,6 +12,11 @@
     "site": "storybyte-76716",
     "public": "public",
     "cleanUrls": true,
+    "redirects": [
+      { "source": "/whatsapp", "destination": "https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l", "type": 302 },
+      { "source": "/telegram", "destination": "https://t.me/storybytes", "type": 302 },
+      { "source": "/app", "destination": "https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dshortlink%26utm_medium%3Dsocial%26utm_campaign%3Dshortlink", "type": 302 }
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",

@@ -5,6 +5,7 @@
 - Android app: [Google Play](https://play.google.com/store/apps/details?id=com.storybyte.app)
 - Website (every story's page, with audio and text): https://storybyte-76716.web.app
 - Daily katha on WhatsApp: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l
+- Daily katha on Telegram: https://t.me/storybytes
 
 Everything runs on free tiers: Firebase Spark, GitHub Actions, Groq, edge-tts and Cloudflare Workers AI.
 
