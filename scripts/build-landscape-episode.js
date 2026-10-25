@@ -44,6 +44,7 @@ const { postEpisodeToTelegram } = require('./lib/telegram');
 const { pause, RETRY_WAITS_SEC } = require('./lib/narrate');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synthBackup } = require('./lib/backup-voice');
+const { slowOpening, sharpenOpening } = require('./lib/hooks');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUBLIC = path.join(ROOT, 'public');
@@ -442,6 +443,23 @@ function trimToWords(text, maxWords, { keepEnding = false } = {}) {
   return [...head, ...tail].join('\n\n');
 }
 
+// Retention: a long video loses most viewers in its first minute and
+// keeps leaking at every slow stretch (the first episodes were watched 4-7%
+// of the way on average). So it opens cold on its most dramatic moment,
+// plants an open question every minute and a half, ends each part on a
+// turn, and ends the episode on a cliffhanger with a teaser of the next.
+const COLD_OPEN = KATHA
+  ? 'Open cold — no greeting, no "एक समय की बात है", no scene-setting: the first 3-4 sentences (about 30 seconds) drop ' +
+    'the listener into the most astonishing moment of this katha and end on the question it raises; then go back and ' +
+    'tell how it came to this. The very first sentence has at most 12 words. '
+  : 'Open cold — no greeting, no recap, no scene-setting: the first 3-4 sentences (about 30 seconds) drop the listener ' +
+    'into the most dramatic or mysterious moment of this episode from the outline — a danger, a shock or a secret — and ' +
+    'end on the question it raises; then go back and tell how it came to this. The very first sentence has at most 12 words. ';
+const RE_HOOKS = 'Keep the listener from leaving: about every 200 words (roughly every 90 seconds of narration), end a ' +
+  'paragraph on an open loop — a danger closing in, a secret about to come out, a question, or a turn like "but the ' +
+  'real test had not even begun" — and pay it off later. Vary them; never reuse a phrase. ';
+const TEASER = language === 'hi' ? '"अगले एपिसोड में…"' : '"Next time…"';
+
 async function writePart(groq, plan, bible, index, storySoFar, budget) {
   const isLast = index === PARTS - 1;
   const outline = plan.parts.map((summary, i) => `Part ${i + 1}: ${summary}`).join('\n');
@@ -450,9 +468,12 @@ async function writePart(groq, plan, bible, index, storySoFar, budget) {
       `vividly with devotion, emotion and dialogue. Katha: "${KATHA}". `
     : `You write serialized audio fiction for narration. Series: "${title}", season ${season}, episode ${episode}, genre: ${genre}. `;
   const ending = KATHA
-    ? 'This is the final part: tell the resolution fully, then close with the katha\'s lesson and one line of blessing. ' +
+    ? 'This is the final part: tell the resolution fully, then close with the katha\'s lesson and one line of blessing, ' +
+      'and a last line asking listeners to write in the comments which katha they want to hear next. ' +
       'The story must be complete — never a cliffhanger. '
-    : 'This is the final part: build to the climax and end on a cliffhanger for the next episode. ';
+    : 'This is the final part: build to the climax and end on a cliffhanger for the next episode — the last scene ' +
+      `leaves a sharp, unanswered question — then close with one short line beginning ${TEASER} that teases what is ` +
+      'coming without giving it away. ';
   const system =
     intro +
     `Episode title: "${plan.title}".\nCharacters — use exactly these names, spelled exactly like this:\n${characterBlock(bible)}\n` +
@@ -461,11 +482,13 @@ async function writePart(groq, plan, bible, index, storySoFar, budget) {
     `(at least ${Math.round(budget * 0.8)}, never more than ${Math.round(budget * 1.15)} — the episode must fit 15 minutes of narration). ` +
     'Detailed scenes, natural dialogue, emotional depth. ' +
     (index === 0
-      ? 'Open with a strong hook. '
+      ? COLD_OPEN
       : 'Continue seamlessly from exactly where the story so far stops — never repeat or summarise text that was already written. ') +
+    RE_HOOKS +
     (isLast
       ? ending
-      : 'Do not wrap up or end the episode — the story continues in the next part. ') +
+      : 'Do not wrap up or end the episode: end this part on a turning point or a new question that makes the listener ' +
+        'need the next part. ') +
     'Output only the story text in complete paragraphs: no title, no part labels, no markdown, no sound-effect labels.';
   const user = storySoFar
     ? `The story so far ends with:\n\n${storySoFar.slice(-2500)}\n\nWrite part ${index + 1} now.`
@@ -481,6 +504,30 @@ async function writePart(groq, plan, bible, index, storySoFar, budget) {
   if (words > limit) {
     console.warn(`Part ${index + 1}: ${words} words is over the ${budget}-word budget — trimming to ~${limit}`);
     return trimToWords(text, limit, { keepEnding: isLast });
+  }
+  return text;
+}
+
+/**
+ * Part 1 with its first two sentences rewritten into a hook when it still
+ * opens with slow scene-setting (lib/hooks.js); the rest kept as written.
+ */
+async function withSharpOpening(groq, plan, text) {
+  const slow = slowOpening(text);
+  if (!slow) return text;
+  try {
+    const sharper = await sharpenOpening((sys, user) => groqJson(groq, sys, user, 2500), {
+      title: plan.title, text,
+      what: KATHA ? 'long Hindi devotional katha video on YouTube' : `long ${genre} audio-drama episode on YouTube`,
+      hookStyle: 'drop the listener into the most dramatic moment of the story, or a question they must have answered',
+    });
+    if (sharper) {
+      console.log(`🪝 Slow opening (${slow}) — rewritten: ${sharper.split(/(?<=[।!?.])\s+/)[0]}`);
+      return sharper;
+    }
+    console.warn(`⚠️  Slow opening (${slow}); the rewrite didn't hook either, keeping it`);
+  } catch (e) {
+    console.warn(`⚠️  Slow opening (${slow}); rewrite failed, keeping it: ${e.message.slice(0, 120)}`);
   }
   return text;
 }
@@ -504,7 +551,8 @@ async function generateStory(groq) {
     // short part is balanced out by the ones after it.
     const written = countWords(parts.join(' '));
     const budget = Math.round(Math.max(WORDS_PER_PART * 0.6, Math.min(WORDS_PER_PART * 1.2, (TARGET_WORDS - written) / (PARTS - index))));
-    const text = await withRetries(`Part ${index + 1}`, () => writePart(groq, plan, bible, index, parts.join('\n\n'), budget));
+    let text = await withRetries(`Part ${index + 1}`, () => writePart(groq, plan, bible, index, parts.join('\n\n'), budget));
+    if (index === 0) text = await withSharpOpening(groq, plan, text);
     console.log(`Part ${index + 1}/${PARTS}: ${countWords(text)} words`);
     parts.push(text);
   }
@@ -590,13 +638,47 @@ function synthesize(text, output, subtitles) {
  * scene's art is planned from exactly the words spoken while it's on screen.
  */
 function segmentCues(cues, count, totalDuration) {
-  return Array.from({ length: count }, (_, i) => {
+  return paceOpening(cues, count, totalDuration) || Array.from({ length: count }, (_, i) => {
     const from = Math.floor((i * cues.length) / count);
     const to = Math.max(from + 1, Math.floor(((i + 1) * cues.length) / count));
     const start = i === 0 ? 0 : cues[from].start;
     const end = i === count - 1 ? totalDuration : cues[Math.min(to, cues.length - 1)].start;
     const text = cues.slice(from, to).map((c) => c.text).join(' ').trim();
     return { start, end, text };
+  });
+}
+
+// The first minute changes picture about every OPENING_SCENE_SEC instead
+// of every ~20s, out of the same number of pictures: the opening is when
+// viewers decide to stay, and a still that holds 20s reads as a slideshow.
+const OPENING_SEC = 60;
+const OPENING_SCENE_SEC = 7.5;
+
+/**
+ * segmentCues' segments with short scenes over the first OPENING_SEC and
+ * the rest spread evenly, each boundary on a sentence cue; null when there
+ * are too few cues or scenes for it (segmentCues then splits evenly).
+ */
+function paceOpening(cues, count, totalDuration) {
+  const fast = Math.floor(OPENING_SEC / OPENING_SCENE_SEC);
+  if (count < fast * 2 || cues.length < count * 2 || totalDuration < OPENING_SEC * 4) return null;
+  const restStep = (totalDuration - fast * OPENING_SCENE_SEC) / (count - fast);
+  const starts = [0];
+  for (let i = 1; i < count; i += 1) {
+    const target = i <= fast ? i * OPENING_SCENE_SEC : fast * OPENING_SCENE_SEC + (i - fast) * restStep;
+    // The first cue starting at or after the target, leaving at least one
+    // cue for each scene still to come.
+    let at = cues.findIndex((c, k) => k > starts[i - 1] && c.start >= target);
+    if (at < 0) at = starts[i - 1] + 1;
+    starts.push(Math.min(at, cues.length - (count - i)));
+  }
+  return starts.map((from, i) => {
+    const to = i === count - 1 ? cues.length : starts[i + 1];
+    return {
+      start: i === 0 ? 0 : cues[from].start,
+      end: i === count - 1 ? totalDuration : cues[to].start,
+      text: cues.slice(from, to).map((c) => c.text).join(' ').trim(),
+    };
   });
 }
 
