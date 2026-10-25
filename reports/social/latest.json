@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-25T05:30:39.384Z",
+  "generatedAt": "2026-10-25T05:38:50.443Z",
   "youtube": {
     "handle": "@LatestStories4u",
     "channelId": "UCV2KpSzvpHxLpDOMaj07Vhw",
@@ -9,7 +9,7 @@
         "format": "video",
         "title": "Ramayan | Season 1 Episode 2: Tataka's Fall",
         "views": 4,
-        "age": "16 hours ago",
+        "age": "17 hours ago",
         "length": "16:14"
       },
       {
@@ -533,6 +533,375 @@
         "format": "short",
         "title": "🔱 Miniature Mahadev 🕉️ | Tiny Shiva Idol Creation in Incredible Detail 😍 #shorts",
         "views": 32
+      }
+    ]
+  },
+  "retention": {
+    "range": {
+      "ids": "channel==MINE",
+      "startDate": "2026-07-27",
+      "endDate": "2026-10-25"
+    },
+    "videos": [
+      {
+        "id": "2NncO6NtSo4",
+        "title": "Maine tere hi bharo se #trending #hanuman #bhakti",
+        "published": "2026-09-29T11:30:18Z",
+        "format": "short",
+        "length": 16,
+        "views": 1351,
+        "avgViewSec": 14,
+        "avgViewPercent": 93,
+        "keptAt3s": 134,
+        "keptAtHalf": 95
+      },
+      {
+        "id": "tweif8lz7bo",
+        "title": "Ho Maine tere hi bharose Hanuman #Hanuman #bhakti #bajrangbali",
+        "published": "2026-09-30T11:30:08Z",
+        "format": "short",
+        "length": 16,
+        "views": 1336,
+        "avgViewSec": 14,
+        "avgViewPercent": 91,
+        "keptAt3s": 136,
+        "keptAtHalf": 88
+      },
+      {
+        "id": "F-Qpm9Okxpw",
+        "title": "O Maine tere hi bharose Hanuman sagar m bya daal dyi #hanuman #bhakti #trending",
+        "published": "2026-10-02T11:30:19Z",
+        "format": "short",
+        "length": 54,
+        "views": 1244,
+        "avgViewSec": 37,
+        "avgViewPercent": 70,
+        "keptAt3s": 132,
+        "keptAtHalf": 59
+      },
+      {
+        "id": "hNIGyEOiDnI",
+        "title": "Nature lovers #Nature #trending #shorts #viral",
+        "published": "2026-10-04T07:30:30Z",
+        "format": "short",
+        "length": 9,
+        "views": 1217,
+        "avgViewSec": 7,
+        "avgViewPercent": 89,
+        "keptAt3s": 120,
+        "keptAtHalf": 100
+      },
+      {
+        "id": "iNeG1EW4HSs",
+        "title": "Use this audio #trending #millionviews #shorts",
+        "published": "2026-10-03T07:30:33Z",
+        "format": "short",
+        "length": 7,
+        "views": 1216,
+        "avgViewSec": 8,
+        "avgViewPercent": 117,
+        "keptAt3s": 133,
+        "keptAtHalf": 132
+      },
+      {
+        "id": "3TIWby74QIs",
+        "title": "Maine Tere Hi Bharose Hanuman Sagar M Nya Daal dyi # #hanuman #bhakti #trending",
+        "published": "2026-10-01T11:30:31Z",
+        "format": "short",
+        "length": 11,
+        "views": 1195,
+        "avgViewSec": 13,
+        "avgViewPercent": 122,
+        "keptAt3s": 151,
+        "keptAtHalf": 127
+      },
+      {
+        "id": "ZFlTPQVM8dQ",
+        "title": "Long drive #comedy #shorts",
+        "published": "2026-10-02T07:30:22Z",
+        "format": "short",
+        "length": 15,
+        "views": 1148,
+        "avgViewSec": 41,
+        "avgViewPercent": 279,
+        "keptAt3s": 340,
+        "keptAtHalf": 293
+      },
+      {
+        "id": "VJDbmoCxtA4",
+        "title": "Bala NeemKaraoli Darshan #trending #shorts #neemkarolibaba",
+        "published": "2026-10-04T11:30:27Z",
+        "format": "short",
+        "length": 16,
+        "views": 437,
+        "avgViewSec": 14,
+        "avgViewPercent": 91,
+        "keptAt3s": 128,
+        "keptAtHalf": 100
+      },
+      {
+        "id": "GAuZGZI7eZ4",
+        "title": "Navaratri Day one #navratri #bhakti #trending #shorts",
+        "published": "2026-10-11T11:33:18Z",
+        "format": "short",
+        "length": 21,
+        "views": 343,
+        "avgViewSec": 14,
+        "avgViewPercent": 70,
+        "keptAt3s": 116,
+        "keptAtHalf": 67
+      },
+      {
+        "id": "tCfurpan4vA",
+        "title": "😲 जब शिव ने जटाओं में थामा गंगा का जल, बची पृथ्वी #shorts",
+        "published": "2026-10-05T02:37:08Z",
+        "format": "short",
+        "length": 152,
+        "views": 323,
+        "avgViewSec": 115,
+        "avgViewPercent": 76,
+        "keptAt3s": 127,
+        "keptAtHalf": 76
+      },
+      {
+        "id": "qrGrfyetg2U",
+        "title": "Jake sees pr Ganga aur gle me saap #mahadev #trending #shorts",
+        "published": "2026-10-03T11:30:22Z",
+        "format": "short",
+        "length": 16,
+        "views": 285,
+        "avgViewSec": 19,
+        "avgViewPercent": 122,
+        "keptAt3s": 172,
+        "keptAtHalf": 124
+      },
+      {
+        "id": "pKthTxOPgak",
+        "title": "मिट्टी से प्रकट हुए शेषनाग पर विराजमान भगवान विष्णु 🐚🌊 | Vishnu Murti Making #bhakti #trending",
+        "published": "2026-06-23T11:30:23Z",
+        "format": "short",
+        "length": 11,
+        "views": 281,
+        "avgViewSec": 14,
+        "avgViewPercent": 133,
+        "keptAt3s": 157,
+        "keptAtHalf": 139
+      },
+      {
+        "id": "DlkSf1QC2H0",
+        "title": "मिट्टी से प्रकट हुए भगवान नरसिंह 🦁🔥 | Narasimha Murti Making | Clay Sculpture #bhakti #shorts",
+        "published": "2026-06-20T07:30:24Z",
+        "format": "short",
+        "length": 11,
+        "views": 237,
+        "avgViewSec": 11,
+        "avgViewPercent": 104,
+        "keptAt3s": 124,
+        "keptAtHalf": 113
+      },
+      {
+        "id": "wwhheA9-NWM",
+        "title": null,
+        "published": null,
+        "format": "video",
+        "length": 0,
+        "views": 224,
+        "avgViewSec": 7,
+        "avgViewPercent": 48,
+        "keptAt3s": null,
+        "keptAtHalf": 40
+      },
+      {
+        "id": "ZXDZ1t5srmU",
+        "title": "Do you support me #trending #shorts",
+        "published": "2026-10-06T07:30:34Z",
+        "format": "short",
+        "length": 13,
+        "views": 200,
+        "avgViewSec": 11,
+        "avgViewPercent": 88,
+        "keptAt3s": 118,
+        "keptAtHalf": 91
+      },
+      {
+        "id": "u_rgaLHXcm0",
+        "title": "#youtubeshorts #aiart #art",
+        "published": "2026-08-19T16:32:47Z",
+        "format": "short",
+        "length": 10,
+        "views": 167,
+        "avgViewSec": 57,
+        "avgViewPercent": 580,
+        "keptAt3s": 1126,
+        "keptAtHalf": 1113
+      },
+      {
+        "id": "Rj0vUVDuO7o",
+        "title": "लकड़ी से प्रकट हुए गणपति बप्पा 😍 |    Giant Lord Ganesha Murti Making #bhakti #trending #ganesh",
+        "published": "2026-06-11T14:36:51Z",
+        "format": "short",
+        "length": 11,
+        "views": 125,
+        "avgViewSec": 9,
+        "avgViewPercent": 84,
+        "keptAt3s": 106,
+        "keptAtHalf": 100
+      },
+      {
+        "id": "EAz3FOKVz5U",
+        "title": "मिट्टी से प्रकट हुए नंदी महाराज 🔱 | महादेव के प्रिय वाहन की अद्भुत मूर्ति #bhakti #mahadev  #nandi",
+        "published": "2026-06-29T07:30:23Z",
+        "format": "short",
+        "length": 11,
+        "views": 98,
+        "avgViewSec": 13,
+        "avgViewPercent": 121,
+        "keptAt3s": 147,
+        "keptAtHalf": 126
+      },
+      {
+        "id": "JLqloDXoVoU",
+        "title": "🕉️ अर्धनारीश्वर मिट्टी से प्रकट हुए 🔱🌺 | Ardhanarishvara Murti Making  #bhakti #trending #mahadev",
+        "published": "2026-06-21T12:30:28Z",
+        "format": "short",
+        "length": 11,
+        "views": 85,
+        "avgViewSec": 9,
+        "avgViewPercent": 88,
+        "keptAt3s": 117,
+        "keptAtHalf": 86
+      },
+      {
+        "id": "uGVPKJpXdpA",
+        "title": "Powerful Hanuman Chalisa Chants 🚩 | Jai Hanuman Gyan Gun Sagar",
+        "published": "2026-05-26T03:10:06Z",
+        "format": "short",
+        "length": 56,
+        "views": 76,
+        "avgViewSec": 28,
+        "avgViewPercent": 51,
+        "keptAt3s": 100,
+        "keptAtHalf": 44
+      },
+      {
+        "id": "-pXXkFPe1ps",
+        "title": "⚔️ मिट्टी से दिव्य कल्कि अवतार बनने का अद्भुत सफर | Emotional Murti Making #bhakti #kalki #shorts",
+        "published": "2026-06-30T13:30:37Z",
+        "format": "short",
+        "length": 11,
+        "views": 76,
+        "avgViewSec": 9,
+        "avgViewPercent": 89,
+        "keptAt3s": 106,
+        "keptAtHalf": 91
+      },
+      {
+        "id": "O1EPVVB8ypo",
+        "title": "Mahabharata  | Season 1 Episode 1: अंधकार की पहली किरण",
+        "published": "2026-10-04T05:47:49Z",
+        "format": "video",
+        "length": 981,
+        "views": 70,
+        "avgViewSec": 64,
+        "avgViewPercent": 7,
+        "keptAt3s": 92,
+        "keptAtHalf": 4
+      },
+      {
+        "id": "zaQkTMPQEi8",
+        "title": "Mahabharata  | Season 1 Episode 5: Echoes of the Forgotten Verse",
+        "published": "2026-10-09T12:41:31Z",
+        "format": "video",
+        "length": 972,
+        "views": 70,
+        "avgViewSec": 35,
+        "avgViewPercent": 4,
+        "keptAt3s": 105,
+        "keptAtHalf": 5
+      },
+      {
+        "id": "1CX_Im4DFqY",
+        "title": "🚀 जब हनुमान ने किया समुद्र पार, लंका की खोज #shorts #hanuman",
+        "published": "2026-10-06T03:32:57Z",
+        "format": "short",
+        "length": 163,
+        "views": 69,
+        "avgViewSec": 86,
+        "avgViewPercent": 53,
+        "keptAt3s": 119,
+        "keptAtHalf": 46
+      },
+      {
+        "id": "O0G_8ultwVs",
+        "title": "Aap To Nirale Baba Roop Bhi Nirala Hai 🙏🌿❤️  | Har Har Mahadev #shorts #mahadev #bhakti #trending",
+        "published": "2026-05-31T13:00:13Z",
+        "format": "short",
+        "length": 14,
+        "views": 59,
+        "avgViewSec": 32,
+        "avgViewPercent": 234,
+        "keptAt3s": 269,
+        "keptAtHalf": 250
+      },
+      {
+        "id": "Y97M7bvn4i0",
+        "title": "पेड़ की टहनियों से बने गणपति बप्पा 😱🙏 | Ganesh Ji Natural Art | Amazing Wood Art #ganesh #shorts",
+        "published": "2026-07-12T11:00:21Z",
+        "format": "short",
+        "length": 11,
+        "views": 53,
+        "avgViewSec": 20,
+        "avgViewPercent": 183,
+        "keptAt3s": 224,
+        "keptAtHalf": 219
+      },
+      {
+        "id": "ZZ5bQ9-f7FI",
+        "title": "रात के बचे किराने से मेरी छोटी मेज़ पर शुरूआत हुई और अब वही एक ऑनलाइन ब्रांड बन गया। अगर मैं कर सकती",
+        "published": "2026-09-28T14:50:39Z",
+        "format": "short",
+        "length": 35,
+        "views": 51,
+        "avgViewSec": 10,
+        "avgViewPercent": 31,
+        "keptAt3s": 110,
+        "keptAtHalf": 10
+      },
+      {
+        "id": "_-MZHiQTMyY",
+        "title": "Mahabharata | Season 1 Episode 4: गुह्य गर्त में संघर्ष",
+        "published": "2026-10-08T15:04:17Z",
+        "format": "video",
+        "length": 1000,
+        "views": 50,
+        "avgViewSec": 58,
+        "avgViewPercent": 6,
+        "keptAt3s": null,
+        "keptAtHalf": null
+      },
+      {
+        "id": "BfoA1wucH_k",
+        "title": "😱 जब बाल कृष्ण के मुँह में माँ यशोदा ने देखा पूरा ब्रह्मांड #shorts",
+        "published": "2026-10-04T03:05:05Z",
+        "format": "short",
+        "length": 156,
+        "views": 49,
+        "avgViewSec": 283,
+        "avgViewPercent": 182,
+        "keptAt3s": 225,
+        "keptAtHalf": 182
+      },
+      {
+        "id": "7l6LVc5Ui1Y",
+        "title": "😲 माँ कूष्मांडा की मुस्कान से बना ब्रह्मांड #shorts",
+        "published": "2026-10-14T02:28:52Z",
+        "format": "short",
+        "length": 117,
+        "views": 49,
+        "avgViewSec": 64,
+        "avgViewPercent": 55,
+        "keptAt3s": 111,
+        "keptAtHalf": 46
       }
     ]
   },
@@ -3737,7 +4106,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-15_en_romance_a-love-rekindled",
@@ -3756,7 +4126,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_adventure_benny-s-forest-quest",
@@ -3775,7 +4146,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_adventure_lily-s-forest-adventure",
@@ -3794,7 +4166,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_adventure_lily-s-forest-quest",
@@ -3813,7 +4186,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_adventure_luna-s-forest",
@@ -3832,7 +4206,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_mystery_the-missing-heirloom",
@@ -3851,7 +4226,8 @@
         "likes": 1,
         "shares": 3,
         "rating": 3.5,
-        "ratingCount": 2
+        "ratingCount": 2,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_mystery_the-mysterious-disappearance",
@@ -3870,7 +4246,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_mystery_the-mysterious-heir",
@@ -3889,7 +4266,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_romance_love-unfolds",
@@ -3908,7 +4286,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_romance_love-unraveled",
@@ -3927,7 +4306,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_romance_love-unwritten",
@@ -3946,7 +4326,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_sleep_dreamy-night",
@@ -3965,7 +4346,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_sleep_moonlit-dreams",
@@ -3984,7 +4366,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_sleep_moonlit-serenade",
@@ -4003,7 +4386,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_en_sleep_moonlit-slumber",
@@ -4022,7 +4406,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_hi_drama_परिवार-का-प्यार",
@@ -4041,7 +4426,8 @@
         "likes": 0,
         "shares": 1,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-08-16_hi_drama_परिवार-की-डोर",
@@ -4060,7 +4446,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_hi_drama_परिवार-की-मूल्य",
@@ -4079,7 +4466,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-08-16_hi_drama_परिवार-की-मोहब्बत",
@@ -4098,7 +4486,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_hi_romance_प्यार-की-कहानी",
@@ -4117,7 +4506,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-16_hi_romance_प्यार-की-पहली-बारिश",
@@ -4136,7 +4526,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-17_en_adventure_lily-s-forest-adventure",
@@ -4155,7 +4546,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-17_en_mystery_the-mysterious-inheritance",
@@ -4174,7 +4566,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-17_en_romance_love-unfolds",
@@ -4193,7 +4586,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-17_en_sleep_dreamy-night",
@@ -4212,7 +4606,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-17_hi_drama_परिवार-की-डोर",
@@ -4231,7 +4626,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-17_hi_romance_प्रेम-की-कहानी",
@@ -4250,7 +4646,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-18_en_adventure_rosie-and-the-giving-tree",
@@ -4269,7 +4666,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-18_en_devotional_the-gift-of-forgiveness",
@@ -4288,7 +4686,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-18_en_motivation_rise-above-adversity",
@@ -4307,7 +4706,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-18_en_mystery_the-whispering-clock",
@@ -4326,7 +4726,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-18_en_romance_love-in-full-bloom",
@@ -4345,7 +4746,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-18_en_sleep_moonlit-meadow-lullaby",
@@ -4364,7 +4766,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-18_en_sleep_whispers-of-the-magical-forest",
@@ -4383,7 +4786,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-18_hi_drama_वापसी-की-राह",
@@ -4402,7 +4806,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-18_hi_romance_बारिश-की-बूंदों-में-बंधा-प्यार",
@@ -4421,7 +4826,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-19_en_adventure_maya-and-the-whispering-map",
@@ -4440,7 +4846,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-19_hi_sleep_चंदा-की-रोशनी-में-सुकून-भरी-रात",
@@ -4459,7 +4866,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-20_en_adventure_the-rainbow-treasure-hunt",
@@ -4478,7 +4886,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-20_hi_motivation_सफलता-की-राह-में-चुनौतियों-का-सामना",
@@ -4497,7 +4906,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-20_hi_mystery_रहस्यमयी-सर्दी-की-शाम",
@@ -4516,7 +4926,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-08-20_hi_sleep_सुकून-भरी-रात-का-सफ़र",
@@ -4535,7 +4946,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-21_hi_adventure_जादुई-जंगल-की-यात्रा",
@@ -4554,7 +4966,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-21_hi_motivation_सपनों-की-उड़ान",
@@ -4573,7 +4986,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 3,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-08-22_en_romance_brewed-beginnings",
@@ -4592,7 +5006,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-08-22_hi_mystery_सुरंग-के-भीतर-का-रहस्य",
@@ -4611,7 +5026,8 @@
         "likes": 3,
         "shares": 4,
         "rating": 3,
-        "ratingCount": 3
+        "ratingCount": 3,
+        "hookText": null
       },
       {
         "id": "2026-08-23_en_adventure_the-lost-treasure-of-whispering-woods",
@@ -4630,7 +5046,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-23_en_romance_midnight-in-the-library",
@@ -4649,7 +5066,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-24_en_adventure_the-forest-treasure-quest",
@@ -4668,7 +5086,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-08-24_en_devotional_the-lantern-on-the-hill",
@@ -4687,7 +5106,8 @@
         "likes": 1,
         "shares": 6,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-08-25_en_sleep_starlight-river",
@@ -4706,7 +5126,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-25_hi_drama_विरासत-की-धुन",
@@ -4725,7 +5146,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-26_en_mystery_the-whispering-walls-of-hawthorn-house",
@@ -4744,7 +5166,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-26_en_romance_when-the-library-lights-dim",
@@ -4763,7 +5186,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-27_en_adventure_the-giggling-gnome-and-the-lost-treasure",
@@ -4782,7 +5206,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-27_en_mystery_the-clockmaker-who-never-left",
@@ -4801,7 +5226,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-28_en_mystery_the-clockmaker-s-secret",
@@ -4820,7 +5246,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-28_hi_drama_सफर-ए-इक़रार",
@@ -4839,7 +5266,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-29_en_adventure_the-cloud-catcher-quest",
@@ -4858,7 +5286,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-29_hi_sleep_चाँदनी-बगीचा-की-नींद-कहानी",
@@ -4877,7 +5306,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-30_en_motivation_rise-beyond-the-horizon",
@@ -4896,7 +5326,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-30_hi_drama_सुनहरी-यादों-के-पथ-पर",
@@ -4915,7 +5346,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-31_en_adventure_the-magical-garden-of-sharing",
@@ -4934,7 +5366,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-08-31_en_mystery_the-midnight-ledger",
@@ -4953,7 +5386,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-01_en_adventure_the-cloud-catcher-s-quest",
@@ -4972,7 +5406,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-01_hi_sleep_सपनों-की-सुकून-भरी-यात्रा",
@@ -4991,7 +5426,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-02_en_romance_rainy-bus-encounter",
@@ -5010,7 +5446,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-02_hi_sleep_रात-की-नरम-हवा",
@@ -5029,7 +5466,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-03_en_romance_love-in-the-moment",
@@ -5048,7 +5486,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-03_hi_adventure_जंगल-की-प्यारी-खोज",
@@ -5067,7 +5506,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-04_en_mystery_the-eyes-of-ravenswood",
@@ -5086,7 +5526,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-04_hi_drama_सफर-की-पगडंडी",
@@ -5105,7 +5546,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-05_en_mystery_the-clockmaker-s-riddle",
@@ -5124,7 +5566,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-05_hi_adventure_खोया-हुआ-इंद्रधनुष",
@@ -5143,7 +5586,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-06_en_sleep_moonlit-meadow-of-whispering-pines",
@@ -5162,7 +5606,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-06_hi_devotional_भक्ति-का-दीपक",
@@ -5181,7 +5626,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-09-07_en_devotional_when-the-light-touches-the-shadow",
@@ -5200,7 +5646,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-07_hi_sleep_शांत-रात-की-कहानी",
@@ -5219,7 +5666,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-08_en_adventure_the-lost-lantern-of-lila-lake",
@@ -5238,7 +5686,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-08_en_motivation_rising-from-the-ashes-a-journey-of-resil",
@@ -5257,7 +5706,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-09_en_sleep_whispers-of-the-moonlit-meadow",
@@ -5276,7 +5726,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-09_hi_motivation_अडिग-इरादा-अजेय-सफलता",
@@ -5295,7 +5746,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-10_en_devotional_the-lamp-in-the-garden",
@@ -5314,7 +5766,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-10_en_motivation_rising-from-the-ashes",
@@ -5333,7 +5786,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-11_en_devotional_the-quiet-light-in-the-willow-tree",
@@ -5352,7 +5806,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-11_hi_drama_परिवार-की-धड़कन",
@@ -5371,7 +5826,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-12_en_adventure_the-quest-for-the-golden-acorn",
@@ -5390,7 +5846,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-12_hi_drama_वो-शाम-जो-बदल-गई-सबकुछ",
@@ -5409,7 +5866,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-13_en_devotional_a-journey-of-forgiveness",
@@ -5428,7 +5886,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-13_en_romance_a-chance-meeting-at-willow-bookshop",
@@ -5447,7 +5906,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-14_en_devotional_modak-dreams-and-the-river-ganesha",
@@ -5466,7 +5926,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-14_en_devotional_the-first-light-of-ganesh-chaturthi",
@@ -5485,7 +5946,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-14_en_devotional_the-sweet-offering-of-little-maya",
@@ -5504,7 +5966,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-14_hi_devotional_गणपति-की-दिव्य-प्रक्रिया",
@@ -5523,7 +5986,8 @@
         "likes": 1,
         "shares": 6,
         "rating": 3,
-        "ratingCount": 3
+        "ratingCount": 3,
+        "hookText": null
       },
       {
         "id": "2026-09-14_hi_devotional_गणेश-चतुर्थी-का-त्योहार-एक-परिवार-की-कहा",
@@ -5542,7 +6006,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-14_hi_devotional_गणेश-चतुर्थी-की-पवित्र-यात्रा",
@@ -5561,7 +6026,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-09-14_hi_devotional_गणेश-चतुर्थी-की-मधुर-यात्रा",
@@ -5580,7 +6046,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-14_hi_devotional_गणेश-चतुर्थी-की-मोदक-यात्रा",
@@ -5599,7 +6066,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-15_hi_devotional_गणेश-चतुर्थी-के-बाद-का-सवेरा",
@@ -5618,7 +6086,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-16_hi_devotional_गणेश-जी-के-दो-दिन-बाद-का-सन्देश",
@@ -5637,7 +6106,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-17_hi_devotional_किसान-रामू-की-आस्था-और-सरलता",
@@ -5656,7 +6126,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-18_en_devotional_the-shepherd-s-quiet-trust",
@@ -5675,7 +6146,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-19_hi_mystery_कुंजी-के-बिना-रहस्य",
@@ -5694,7 +6166,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-20_en_motivation_the-bridge-of-perseverance",
@@ -5713,7 +6186,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-21_hi_devotional_छोटा-दीपक-बड़ी-रौशनी",
@@ -5732,7 +6206,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-21_hi_mystery_अदृश्य-पेंच",
@@ -5751,7 +6226,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-22_hi_sleep_चांदनी-की-कहानी",
@@ -5770,7 +6246,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-23_en_mystery_the-clockmaker-s-secret",
@@ -5789,7 +6266,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-23_hi_mystery_छाया-वाले-कमरे-की-सच्चाई",
@@ -5808,7 +6286,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-24_en_devotional_the-lantern-in-the-storm",
@@ -5827,7 +6306,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-24_en_mystery_the-clockmaker-s-secret",
@@ -5846,7 +6326,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-24_hi_motivation_सफलता-की-सीढ़ी-संघर्ष-से-सफलता-तक",
@@ -5865,7 +6346,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-25_hi_drama_परिवार-की-परछाइयाँ",
@@ -5884,7 +6366,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-26_en_sleep_moonlit-meadow-whisper",
@@ -5903,7 +6386,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-27_en_devotional_the-quiet-light-in-the-storm",
@@ -5922,7 +6406,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-28_hi_mystery_भूलभुलैया-का-रहस्य",
@@ -5941,7 +6426,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-29_hi_drama_विरह-की-धुन",
@@ -5960,7 +6446,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-09-30_en_adventure_the-rainbow-river-quest",
@@ -5979,7 +6466,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-09-30_hi_devotional_गणेश-की-उत्पत्ति-माँ-पार्वती-की-अद्भुत-र",
@@ -5998,7 +6486,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-02_hi_devotional_समुद्र-मंथन-से-उभरी-माँ-लक्ष्मी-की-कथा",
@@ -6017,7 +6506,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-03_hi_devotional_शनि-देव-का-विक्रमादित्य-पर-परीक्षण",
@@ -6036,7 +6526,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-04_hi_devotional_यशोदा-ने-बाल-कृष्ण-के-मुँह-में-देखा-ब्रह",
@@ -6055,7 +6546,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-05_hi_devotional_शिव-ने-जटाओं-में-थामा-गंगा-का-जल",
@@ -6074,7 +6566,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-10-06_hi_devotional_हनुमान-की-लंका-यात्रा-समुद्र-पार-करने-की",
@@ -6093,7 +6586,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-07_hi_devotional_गणपति-बप्पा-की-कथा-माता-पिता-को-घुमा-कर-",
@@ -6112,7 +6606,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-08_hi_devotional_नरसिंह-अवतार-प्रह्लाद-की-रक्षा-की-अद्भुत",
@@ -6131,7 +6626,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-09_hi_devotional_नवरात्रि-के-9-दिल-छू-लेने-वाले-किस्से",
@@ -6150,7 +6646,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-10_hi_devotional_नवरात्रि-की-9-कहानियाँ-दुर्गा-के-साथ-जीव",
@@ -6169,7 +6666,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-11_hi_devotional_मां-शैलपुत्री-की-कथा-प्रथम-नववर्ष-का-रहस",
@@ -6188,7 +6686,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-10-12_hi_devotional_माँ-ब्रह्मचारिणी-की-कथा-द्वितीय-नवरात्रि",
@@ -6207,7 +6706,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 2
+        "ratingCount": 2,
+        "hookText": null
       },
       {
         "id": "2026-10-13_hi_devotional_माँ-चंद्रघंटा-की-कथा-दानवों-को-भयभित-करन",
@@ -6226,7 +6726,8 @@
         "likes": 1,
         "shares": 1,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-14_hi_devotional_माँ-कूष्मांडा-की-कथा-अंधकार-से-प्रकाश-तक",
@@ -6245,7 +6746,8 @@
         "likes": 2,
         "shares": 1,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-10-15_hi_devotional_माँ-स्कंदमाता-की-कथा-शरद-ने-टारकासुर-को-",
@@ -6264,7 +6766,8 @@
         "likes": 2,
         "shares": 1,
         "rating": 5,
-        "ratingCount": 2
+        "ratingCount": 2,
+        "hookText": null
       },
       {
         "id": "2026-10-16_hi_devotional_माँ-कात्यायनी-की-अद्भुत-कथा-नवरात्रि-का-",
@@ -6283,7 +6786,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 3,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-10-17_hi_devotional_माँ-कालरात्रि-की-कथा-रक्तबीज-का-अंत",
@@ -6302,7 +6806,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "2026-10-18_hi_devotional_माँ-महागौरी-की-कथा-अंधकार-से-प्रकाश-तक",
@@ -6321,7 +6826,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-19_hi_devotional_eve_दशहरा-की-कथा-राम-ने-कैसे-मारा-रावण",
@@ -6340,7 +6846,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-19_hi_devotional_माँ-सिद्धिदात्री-की-कथा-शिव-को-आठ-सिद्धि",
@@ -6359,7 +6866,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-20_hi_devotional_दशहरा-की-कथा-राम-ने-अपनी-आँख-का-कमल-दिया",
@@ -6378,7 +6886,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-21_hi_devotional_गणपति-बप्पा-की-कथा-चाँद-क्यों-नहीं-दिखता",
@@ -6397,7 +6906,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-23_hi_devotional_माँ-दुर्गा-की-कथा-दिवाली-रात-माँ-लक्ष्मी",
@@ -6416,7 +6926,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-24_hi_devotional_eve_शरद-पूर्णिमा-की-कथा-कृष्ण-का-महा-रास",
@@ -6435,7 +6946,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-24_hi_devotional_शनि-देव-की-कथा-ईमानदार-लकड़हारे-की-परीक्",
@@ -6454,7 +6966,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "2026-10-25_hi_devotional_शरद-पूर्णिमा-की-कथा-दो-बहनों-की-अद्भुत-क",
@@ -6473,7 +6986,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "community_1787177365112_SrMquZMWUfdPcegQ4oRvQqW7pRr2",
@@ -6492,7 +7006,8 @@
         "likes": 5,
         "shares": 1,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "community_1787249902306_SrMquZMWUfdPcegQ4oRvQqW7pRr2",
@@ -6511,7 +7026,8 @@
         "likes": 10,
         "shares": 1,
         "rating": 4.5,
-        "ratingCount": 2
+        "ratingCount": 2,
+        "hookText": null
       },
       {
         "id": "community_1787340603682_KhEwjgfXnIe4kS8BBzWQtq02teh1",
@@ -6530,7 +7046,8 @@
         "likes": 3,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 2
+        "ratingCount": 2,
+        "hookText": null
       },
       {
         "id": "community_1787342661122_SrMquZMWUfdPcegQ4oRvQqW7pRr2",
@@ -6549,7 +7066,8 @@
         "likes": 3,
         "shares": 1,
         "rating": 4,
-        "ratingCount": 3
+        "ratingCount": 3,
+        "hookText": null
       },
       {
         "id": "community_1787343267341_KhEwjgfXnIe4kS8BBzWQtq02teh1",
@@ -6568,7 +7086,8 @@
         "likes": 2,
         "shares": 3,
         "rating": 4.5,
-        "ratingCount": 2
+        "ratingCount": 2,
+        "hookText": null
       },
       {
         "id": "community_1787408417034_SrMquZMWUfdPcegQ4oRvQqW7pRr2",
@@ -6587,7 +7106,8 @@
         "likes": 2,
         "shares": 1,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "community_1787414190646_mRFBebXezchQ4EbYh9PzmjNUOv83",
@@ -6606,7 +7126,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "community_1787414542434_KhEwjgfXnIe4kS8BBzWQtq02teh1",
@@ -6625,7 +7146,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "community_1787415216160_mRFBebXezchQ4EbYh9PzmjNUOv83",
@@ -6644,7 +7166,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "community_1787416076240_KhEwjgfXnIe4kS8BBzWQtq02teh1",
@@ -6663,7 +7186,8 @@
         "likes": 0,
         "shares": 1,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "community_1787416966174_KhEwjgfXnIe4kS8BBzWQtq02teh1",
@@ -6682,7 +7206,8 @@
         "likes": 1,
         "shares": 1,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "community_1787418330619_KhEwjgfXnIe4kS8BBzWQtq02teh1",
@@ -6701,7 +7226,8 @@
         "likes": 1,
         "shares": 1,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "community_1787465260720_FwJFdXofL5bmfdmdfpg4wn27oBk2",
@@ -6720,7 +7246,8 @@
         "likes": 2,
         "shares": 4,
         "rating": 5,
-        "ratingCount": 2
+        "ratingCount": 2,
+        "hookText": null
       },
       {
         "id": "community_1789282740955_KhEwjgfXnIe4kS8BBzWQtq02teh1",
@@ -6739,7 +7266,8 @@
         "likes": 2,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "community_1789284141640_SrMquZMWUfdPcegQ4oRvQqW7pRr2",
@@ -6758,7 +7286,8 @@
         "likes": 1,
         "shares": 1,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "community_1789298076805_nMfZCz7XnqhFUC8e7TV3HuW3V2t2",
@@ -6777,7 +7306,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "community_1789299055672_nMfZCz7XnqhFUC8e7TV3HuW3V2t2",
@@ -6796,7 +7326,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "community_1789300220906_nMfZCz7XnqhFUC8e7TV3HuW3V2t2",
@@ -6815,7 +7346,8 @@
         "likes": 2,
         "shares": 1,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "community_1790873853159_LkXbJnufi4eUN1zEnehCKhc3Rj22",
@@ -6834,7 +7366,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "community_1792059494687_eD2elqa40vfAKo8qRhfyn8WhjKB2",
@@ -6853,7 +7386,8 @@
         "likes": 2,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "community_1792258316039_pgIy1f6sTfRKBJXG8mC4JB0TVZB3",
@@ -6872,7 +7406,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "yt_6LjTcmue9xU",
@@ -6891,7 +7426,8 @@
         "likes": 3,
         "shares": 2,
         "rating": 4,
-        "ratingCount": 3
+        "ratingCount": 3,
+        "hookText": null
       },
       {
         "id": "yt_74YMcueDFNE",
@@ -6910,7 +7446,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "yt_M3zXaIIcAZw",
@@ -6929,7 +7466,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "yt_O1EPVVB8ypo",
@@ -6948,7 +7486,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "yt_OlmARSUrvMU",
@@ -6967,7 +7506,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "yt_QtDia_x3sE0",
@@ -6986,7 +7526,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 4,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "yt_Vb6sy4wZApY",
@@ -7005,7 +7546,8 @@
         "likes": 2,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 2
+        "ratingCount": 2,
+        "hookText": null
       },
       {
         "id": "yt_XfGf4sKSxIw",
@@ -7024,7 +7566,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "yt__-MZHiQTMyY",
@@ -7043,7 +7586,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "yt_assQz_svY8M",
@@ -7062,7 +7606,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "yt_dap9qNOiUEI",
@@ -7081,7 +7626,8 @@
         "likes": 1,
         "shares": 1,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "yt_ef35oT5oZoE",
@@ -7100,7 +7646,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "yt_f1fMZy6_1es",
@@ -7119,7 +7666,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "yt_jmtN4kVPgH4",
@@ -7138,7 +7686,8 @@
         "likes": 1,
         "shares": 0,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       },
       {
         "id": "yt_rU2Wq7xHCKs",
@@ -7157,7 +7706,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "yt_tbd9mVDBdnM",
@@ -7176,7 +7726,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "yt_vWpk7MHETHo",
@@ -7195,7 +7746,8 @@
         "likes": 0,
         "shares": 0,
         "rating": 0,
-        "ratingCount": 0
+        "ratingCount": 0,
+        "hookText": null
       },
       {
         "id": "yt_yjLCo8CVWSE",
@@ -7214,7 +7766,8 @@
         "likes": 1,
         "shares": 1,
         "rating": 5,
-        "ratingCount": 2
+        "ratingCount": 2,
+        "hookText": null
       },
       {
         "id": "yt_zaQkTMPQEi8",
@@ -7233,7 +7786,8 @@
         "likes": 1,
         "shares": 4,
         "rating": 5,
-        "ratingCount": 1
+        "ratingCount": 1,
+        "hookText": null
       }
     ]
   }

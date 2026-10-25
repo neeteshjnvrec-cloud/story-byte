@@ -42,6 +42,45 @@ Re-cut a winner: Actions → Remake Short, with its story id.
 | 18 |  | devi | 5 | 2026-10-12_hi_devotional_माँ-ब्रह्मचारिणी-की-कथा-द्वितीय-नवरात्रि | 😲 माँ ब्रह्मचारिणी की तपस्या का रहस्य: नवरात्रि का दूसरा दिन #shorts |
 | 17 |  | devi | 0 | 2026-10-23_hi_devotional_माँ-दुर्गा-की-कथा-दिवाली-रात-माँ-लक्ष्मी | 😲 माँ दुर्गा: दिवाली रात माँ लक्ष्मी ने किया चमत्कार #shorts |
 
+## YouTube retention — where viewers leave
+Last 90 days, most-viewed first. "At 3s" is the share still watching after 3 seconds: the hook. "New hook" marks Shorts made with the on-screen hook and the checked opening.
+
+- **Shorts:** 186% still watching at 3s, 151% at half, 127% watched on average
+- **Long videos:** 99% still watching at 3s, 16% at half, 16% watched on average
+
+| Views | At 3s | At half | Watched | Length | New hook | Title |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1351 | 134% | 95% | 93% | 16s |  | Maine tere hi bharo se #trending #hanuman #bhakti |
+| 1336 | 136% | 88% | 91% | 16s |  | Ho Maine tere hi bharose Hanuman #Hanuman #bhakti #bajrangbali |
+| 1244 | 132% | 59% | 70% | 54s |  | O Maine tere hi bharose Hanuman sagar m bya daal dyi #hanuman #bhakti  |
+| 1217 | 120% | 100% | 89% | 9s |  | Nature lovers #Nature #trending #shorts #viral |
+| 1216 | 133% | 132% | 117% | 7s |  | Use this audio #trending #millionviews #shorts |
+| 1195 | 151% | 127% | 122% | 11s |  | Maine Tere Hi Bharose Hanuman Sagar M Nya Daal dyi # #hanuman #bhakti  |
+| 1148 | 340% | 293% | 279% | 15s |  | Long drive #comedy #shorts |
+| 437 | 128% | 100% | 91% | 16s |  | Bala NeemKaraoli Darshan #trending #shorts #neemkarolibaba |
+| 343 | 116% | 67% | 70% | 21s |  | Navaratri Day one #navratri #bhakti #trending #shorts |
+| 323 | 127% | 76% | 76% | 152s |  | 😲 जब शिव ने जटाओं में थामा गंगा का जल, बची पृथ्वी #shorts |
+| 285 | 172% | 124% | 122% | 16s |  | Jake sees pr Ganga aur gle me saap #mahadev #trending #shorts |
+| 281 | 157% | 139% | 133% | 11s |  | मिट्टी से प्रकट हुए शेषनाग पर विराजमान भगवान विष्णु 🐚🌊 / Vishnu Murt |
+| 237 | 124% | 113% | 104% | 11s |  | मिट्टी से प्रकट हुए भगवान नरसिंह 🦁🔥 / Narasimha Murti Making / Clay  |
+| 224 |  | 40% | 48% | 0s |  |  |
+| 200 | 118% | 91% | 88% | 13s |  | Do you support me #trending #shorts |
+| 167 | 1126% | 1113% | 580% | 10s |  | #youtubeshorts #aiart #art |
+| 125 | 106% | 100% | 84% | 11s |  | लकड़ी से प्रकट हुए गणपति बप्पा 😍 / Giant Lord Ganesha Murti Making #b |
+| 98 | 147% | 126% | 121% | 11s |  | मिट्टी से प्रकट हुए नंदी महाराज 🔱 / महादेव के प्रिय वाहन की अद्भुत मू |
+| 85 | 117% | 86% | 88% | 11s |  | 🕉️ अर्धनारीश्वर मिट्टी से प्रकट हुए 🔱🌺 / Ardhanarishvara Murti Maki |
+| 76 | 100% | 44% | 51% | 56s |  | Powerful Hanuman Chalisa Chants 🚩 / Jai Hanuman Gyan Gun Sagar |
+| 76 | 106% | 91% | 89% | 11s |  | ⚔️ मिट्टी से दिव्य कल्कि अवतार बनने का अद्भुत सफर / Emotional Murti Ma |
+| 70 | 92% | 4% | 7% | 981s |  | Mahabharata / Season 1 Episode 1: अंधकार की पहली किरण |
+| 70 | 105% | 5% | 4% | 972s |  | Mahabharata / Season 1 Episode 5: Echoes of the Forgotten Verse |
+| 69 | 119% | 46% | 53% | 163s |  | 🚀 जब हनुमान ने किया समुद्र पार, लंका की खोज #shorts #hanuman |
+| 59 | 269% | 250% | 234% | 14s |  | Aap To Nirale Baba Roop Bhi Nirala Hai 🙏🌿❤️ / Har Har Mahadev #short |
+| 53 | 224% | 219% | 183% | 11s |  | पेड़ की टहनियों से बने गणपति बप्पा 😱🙏 / Ganesh Ji Natural Art / Amaz |
+| 51 | 110% | 10% | 31% | 35s |  | रात के बचे किराने से मेरी छोटी मेज़ पर शुरूआत हुई और अब वही एक ऑनलाइन  |
+| 50 |  |  | 6% | 1000s |  | Mahabharata / Season 1 Episode 4: गुह्य गर्त में संघर्ष |
+| 49 | 225% | 182% | 182% | 156s |  | 😱 जब बाल कृष्ण के मुँह में माँ यशोदा ने देखा पूरा ब्रह्मांड #shorts |
+| 49 | 111% | 46% | 55% | 117s |  | 😲 माँ कूष्मांडा की मुस्कान से बना ब्रह्मांड #shorts |
+
 ## Instagram
 @cute_krishna.ai: 14 followers, 78 posts
 
