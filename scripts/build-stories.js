@@ -42,6 +42,7 @@ const { kathaOfDay, nextKatha, eveKathaOf, describeKatha, istDate, addDays, GENE
 const { appendSpokenTeaser, fallbackTeaser, endingCandidates } = require('./lib/teaser');
 const { withCloseUps, shortSceneCount } = require('./lib/close-ups');
 const { devotionalTrends } = require('./lib/trends');
+const { slowOpening, sharpenOpening, hookTextOf } = require('./lib/hooks');
 const { iconographyFor } = require('./lib/iconography');
 const { styleOfDay, fitShort, devotionalArtStyle, storyArtStyle, shortsStyleKey } = require('./lib/short-style');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
@@ -198,13 +199,17 @@ async function generateText(groq, slot) {
   // be complete — a real run posted only its first minute, cut off mid-story.
   const hookInstruction = slot.genre === 'devotional'
     ? ` The first two sentences must be a gripping hook — ${slot.look?.hook || 'the most astonishing moment or question of the story'} — ` +
-      'because the first seconds decide whether a Shorts viewer keeps watching.'
+      'because the first seconds decide whether a Shorts viewer keeps watching. Never open with slow scene-setting ' +
+      '(एक समय की बात है, बहुत समय पहले, एक बार…): the first sentence, at most 12 words, already holds the conflict, ' +
+      'the question or the astonishing moment.'
     : '';
   const socialTitleSpec = slot.genre === 'devotional'
     ? ',"socialTitle":"Hindi curiosity hook for YouTube Shorts/Reels, at most 60 characters: one fitting emoji, then the ' +
       'deity\'s name first (the word people search), then the hook, e.g. \\"😱 बाल कृष्ण के मुँह में यशोदा ने देखा ब्रह्मांड\\"",' +
       '"commentQuestion":"one warm Hindi question inviting viewers to reply in the comments about this katha, max 120 chars, ' +
       'ending with 🙏 — e.g. which moment moved them, or which katha they want next",' +
+      '"hookText":"the on-screen hook drawn big over the first 3 seconds: Hindi, at most 30 characters, a question ' +
+      'or a startling claim from this katha that stops a scrolling viewer, no emoji — e.g. \\"सूरज को फल समझकर निगल गए!\\"",' +
       '"searchTags":["8-12 short YouTube search tags for this katha, Hindi and Hinglish, e.g. the deity\'s name + कथा"]' +
       (slot.next ? `,"nextTeaser":"one Hindi line, max 90 chars, starting with कल सुनिए, that makes viewers want to come back ` +
         `tomorrow for the next katha — ${describeKatha(slot.next).replace(/"/g, "'")} — a curiosity hook, no spoilers"` : '')
@@ -266,6 +271,7 @@ async function generateText(groq, slot) {
           socialTitle: d.socialTitle ? capAtWord(String(d.socialTitle).replace(/^["']|["']$/g, '').trim(), 70) : null,
           nextTeaser: d.nextTeaser ? capAtWord(String(d.nextTeaser).replace(/^["']|["']$/g, '').trim(), 120) : null,
           commentQuestion: d.commentQuestion ? String(d.commentQuestion).trim().slice(0, 200) : null,
+          hookText: d.hookText ? String(d.hookText).replace(/^["']|["']$/g, '').trim().slice(0, 60) : null,
         searchTags: Array.isArray(d.searchTags) ? d.searchTags.map((t) => String(t).trim()).filter(Boolean).slice(0, 12) : [],
         };
       } catch (e) {
@@ -283,6 +289,46 @@ async function generateText(groq, slot) {
   // All models exhausted
   const modelSummaries = errors.map(e => `${e.model}(${e.error.slice(0, 30)})`).join(' | ');
   throw new Error(`All models failed: ${modelSummaries}`);
+}
+
+/** One JSON reply from the first model in the chain that gives one. */
+async function askJson(groq, system, user) {
+  let last;
+  for (const model of MODELS) {
+    try {
+      const c = await groq.chat.completions.create({
+        model, temperature: 0.7, max_tokens: 2500, response_format: { type: 'json_object' },
+        messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+      });
+      return extractJson(c.choices[0].message.content || '');
+    } catch (e) {
+      last = e;
+    }
+  }
+  throw last || new Error('no model answered');
+}
+
+/**
+ * A devotional katha whose opening is slow scene-setting gets its first two
+ * sentences rewritten into a hook (lib/hooks.js) before it's narrated: the
+ * Short's first seconds decide whether a viewer stays.
+ */
+async function withSharpHook(groq, slot, content) {
+  if (slot.genre !== 'devotional') return content;
+  const slow = slowOpening(content.text);
+  if (!slow) return content;
+  try {
+    const text = await sharpenOpening((sys, user) => askJson(groq, sys, user),
+      { title: content.title, text: content.text, hookStyle: slot.look?.hook });
+    if (text) {
+      console.log(`  🪝 Slow opening (${slow}) — rewritten: ${text.split(/(?<=[।!?.])\s+/)[0]}`);
+      return { ...content, text };
+    }
+    console.warn(`  ⚠️  Slow opening (${slow}); the rewrite didn't hook either, keeping it`);
+  } catch (e) {
+    console.warn(`  ⚠️  Slow opening (${slow}); rewrite failed, keeping it: ${e.message.slice(0, 120)}`);
+  }
+  return content;
 }
 
 function coverPrompt(slotOrStory, content) {
@@ -465,7 +511,7 @@ async function run() {
 
       try {
         // Step 1: Generate text
-        let content = await generateText(groq, slot);
+        let content = await withSharpHook(groq, slot, await generateText(groq, slot));
         if (slot.next && !content.nextTeaser) content.nextTeaser = fallbackTeaser(slot.next);
         const id = `${DATE}_${slot.language}_${slot.genre}_${EVE ? 'eve_' : ''}${slug(content.title)}`;
         const existing = await db.collection('stories').doc(id).get();
@@ -519,7 +565,7 @@ async function run() {
         if (slot.genre === 'devotional' && !fitShort(exactDuration(audio)).fits) {
           console.log(`  ✂️  ${Math.round(exactDuration(audio))}s is too long for a Short — rewriting it shorter`);
           try {
-            const shorter = await generateText(groq, { ...slot, maxWords: 260 });
+            const shorter = await withSharpHook(groq, slot, await generateText(groq, { ...slot, maxWords: 260 }));
             content = { ...content, text: shorter.text };
             synthResult = await narrate();
           } catch (e) {
@@ -654,7 +700,10 @@ async function run() {
               // Each picture as a wide shot, then a close-up of part of it
               // (lib/close-ups.js), before the captions are drawn on.
               scenes = await withCloseUps(scenes, { outDir: workDir });
-              if (cues) scenes = await bakeInCaptions(scenes, toCaptionLines(cues), workDir, total, { format: 'short', look });
+              if (cues) {
+                scenes = await bakeInCaptions(scenes, toCaptionLines(cues), workDir, total,
+                  { format: 'short', look, hookText: hookTextOf(content) });
+              }
               const videoPath = mixed &&
                 buildStoryVideo({ scenes, audioPath: mixed, outPath: path.join(outDir, 'story.mp4'), format: 'short', look });
               // Intermediates — don't let the daily commit carry them.
@@ -801,6 +850,7 @@ async function run() {
       // What the social posts were titled, so reports/social can tie each
       // YouTube/Instagram/Facebook post back to its story.
       socialTitle: p.content.socialTitle || null,
+      hookText: p.content.hookText || null,
       deity: p.slot.deity?.key || null,
       createdAt: admin.firestore.FieldValue.serverTimestamp(), updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };

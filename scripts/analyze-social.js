@@ -12,8 +12,11 @@
  *              it, so expect those to be absent).
  *   Facebook   FB_PAGE_ID + FB_PAGE_ACCESS_TOKEN — posts and videos with
  *              reactions/comments/shares (pages_read_engagement).
- *   YouTube    public channel pages + RSS feed (the pipeline's OAuth token
- *              is youtube.upload only, which can't read statistics).
+ *   YouTube    public channel pages + RSS feed for views and likes.
+ *   Retention  YOUTUBE_CLIENT_ID / _SECRET / _REFRESH_TOKEN, minted with the
+ *              yt-analytics.readonly scope (scripts/youtube-auth.js) — per
+ *              video, how many viewers are still there at 3 seconds and at
+ *              the halfway mark: whether the hook works.
  *   App        FIREBASE_SERVICE_ACCOUNT — per-story plays, likes, ratings,
  *              shares from Firestore, with genre/language/occasion.
  *
@@ -194,6 +197,75 @@ async function youtube() {
 
 // ---------------------------------------------------------------------------
 
+// How many of the most-viewed recent videos get a retention curve (one
+// Analytics request each).
+const RETENTION_VIDEOS = 30;
+const RETENTION_DAYS = 90;
+
+function isoSeconds(iso) {
+  const m = String(iso || '').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  return m ? (Number(m[1] || 0) * 3600) + (Number(m[2] || 0) * 60) + Number(m[3] || 0) : 0;
+}
+
+// The share of viewers still watching at `ratio` of the way through, read
+// off the retention curve ([[elapsedRatio, audienceWatchRatio], ...]).
+// audienceWatchRatio goes above 1 when a looping Short is rewatched.
+function keptAt(curve, ratio) {
+  if (!curve.length) return null;
+  const point = curve.reduce((best, p) => (Math.abs(p[0] - ratio) < Math.abs(best[0] - ratio) ? p : best));
+  return Math.round(point[1] * 100);
+}
+
+async function retention() {
+  const { YOUTUBE_CLIENT_ID: id, YOUTUBE_CLIENT_SECRET: secret, YOUTUBE_REFRESH_TOKEN: token } = process.env;
+  if (!id || !secret || !token) return { skipped: 'YOUTUBE_CLIENT_ID / _SECRET / _REFRESH_TOKEN not set' };
+  const { google } = require('googleapis');
+  const auth = new google.auth.OAuth2(id, secret);
+  auth.setCredentials({ refresh_token: token });
+  const analytics = google.youtubeAnalytics({ version: 'v2', auth });
+  const data = google.youtube({ version: 'v3', auth });
+  const day = (d) => d.toISOString().slice(0, 10);
+  const range = { ids: 'channel==MINE', startDate: day(new Date(Date.now() - RETENTION_DAYS * 864e5)), endDate: day(new Date()) };
+  let top;
+  try {
+    top = await analytics.reports.query({
+      ...range, dimensions: 'video', metrics: 'views,averageViewDuration,averageViewPercentage',
+      sort: '-views', maxResults: RETENTION_VIDEOS,
+    });
+  } catch (e) {
+    if (/insufficient|scope|permission|403/i.test(e.message)) {
+      return { skipped: 'the YouTube token has no Analytics access — re-mint YOUTUBE_REFRESH_TOKEN with scripts/youtube-auth.js' };
+    }
+    throw e;
+  }
+  const rows = top.data.rows || [];
+  if (!rows.length) return { videos: [] };
+  const details = await data.videos.list({ part: 'snippet,contentDetails', id: rows.map((r) => r[0]).join(','), maxResults: 50 });
+  const byId = new Map((details.data.items || []).map((v) => [v.id, v]));
+  const videos = [];
+  for (const [videoId, views, avgDuration, avgPercent] of rows) {
+    const v = byId.get(videoId);
+    const length = isoSeconds(v?.contentDetails?.duration);
+    let curve = [];
+    try {
+      const res = await analytics.reports.query({
+        ...range, dimensions: 'elapsedVideoTimeRatio', metrics: 'audienceWatchRatio', filters: `video==${videoId}`,
+      });
+      curve = res.data.rows || [];
+    } catch (e) { /* too few views for a curve */ }
+    videos.push({
+      id: videoId, title: v?.snippet?.title || null, published: v?.snippet?.publishedAt || null,
+      format: length && length <= 180 ? 'short' : 'video', length, views,
+      avgViewSec: avgDuration, avgViewPercent: Math.round(avgPercent),
+      keptAt3s: length ? keptAt(curve, Math.min(1, 3 / length)) : null,
+      keptAtHalf: keptAt(curve, 0.5),
+    });
+  }
+  return { range, videos };
+}
+
+// ---------------------------------------------------------------------------
+
 async function app() {
   if (!process.env.FIREBASE_SERVICE_ACCOUNT) return { skipped: 'FIREBASE_SERVICE_ACCOUNT not set' };
   const admin = require('firebase-admin');
@@ -209,7 +281,7 @@ async function app() {
       isDaily: Boolean(s.isDaily), isCommunityStory: Boolean(s.isCommunityStory), status: s.status,
       generatedDate: s.generatedDate || null, duration: s.duration || null,
       plays: s.plays || 0, likes: s.likesCount || 0, shares: s.sharesCount || 0,
-      rating: s.rating || 0, ratingCount: s.ratingCount || 0,
+      rating: s.rating || 0, ratingCount: s.ratingCount || 0, hookText: s.hookText || null,
     };
   });
   fs.rmSync(sa, { force: true });
@@ -263,6 +335,28 @@ function summary(report) {
         ['Plays in app', (r) => r.st.plays], ['Story id', (r) => r.st.id], ['Title', (r) => r.v.title]]), '');
     }
   }
+  const rt = report.retention;
+  if (rt?.videos?.length) {
+    const hooked = new Set((report.app?.stories || []).filter((st) => st.hookText && st.socialTitle).map((st) => st.socialTitle));
+    const hasHook = (v) => [...hooked].some((t) => String(v.title || '').startsWith(t));
+    const avg = (list, key) => {
+      const known = list.filter((v) => v[key] != null);
+      return known.length ? `${Math.round(sum(known, key) / known.length)}%` : '—';
+    };
+    out.push('## YouTube retention — where viewers leave',
+      `Last ${RETENTION_DAYS} days, most-viewed first. "At 3s" is the share still watching after 3 seconds: the hook. ` +
+      '"New hook" marks Shorts made with the on-screen hook and the checked opening.', '');
+    for (const [label, list] of [['Shorts', rt.videos.filter((v) => v.format === 'short')], ['Long videos', rt.videos.filter((v) => v.format === 'video')]]) {
+      if (!list.length) continue;
+      const withHook = list.filter(hasHook);
+      out.push(`- **${label}:** ${avg(list, 'keptAt3s')} still watching at 3s, ${avg(list, 'keptAtHalf')} at half, ${avg(list, 'avgViewPercent')} watched on average` +
+        (withHook.length ? ` · with the new hook (${withHook.length}): ${avg(withHook, 'keptAt3s')} at 3s, ${avg(withHook, 'avgViewPercent')} watched` : ''));
+    }
+    out.push('');
+    out.push(table(rt.videos, [['Views', (r) => r.views], ['At 3s', (r) => (r.keptAt3s == null ? '' : `${r.keptAt3s}%`)],
+      ['At half', (r) => (r.keptAtHalf == null ? '' : `${r.keptAtHalf}%`)], ['Watched', (r) => `${r.avgViewPercent}%`],
+      ['Length', (r) => `${r.length}s`], ['New hook', (r) => (hasHook(r) ? '✓' : '')], ['Title', (r) => r.title]]), '');
+  }
   const ig = report.instagram;
   if (ig?.media) {
     out.push('## Instagram', `@${ig.account.username}: ${ig.account.followers_count} followers, ${ig.media.length} posts` +
@@ -290,7 +384,7 @@ function summary(report) {
       .sort((a, b) => b.plays / b.n - a.plays / a.n),
     [['Group', (r) => r.k], ['Stories', (r) => r.n], ['Plays', (r) => r.plays], ['Plays/story', (r) => (r.plays / r.n).toFixed(1)], ['Likes', (r) => r.likes]]), '');
   }
-  for (const [name, s] of Object.entries({ youtube: yt, instagram: ig, facebook: fb, app: report.app })) {
+  for (const [name, s] of Object.entries({ youtube: yt, retention: rt, instagram: ig, facebook: fb, app: report.app })) {
     if (s?.error || s?.skipped) out.push(`- ${name}: ${s.error || s.skipped}`);
   }
   return out.join('\n') + '\n';
@@ -300,6 +394,7 @@ async function main() {
   const report = {
     generatedAt: new Date().toISOString(),
     youtube: await section('YouTube', youtube),
+    retention: await section('YouTube retention', retention),
     instagram: await section('Instagram', instagram),
     facebook: await section('Facebook', facebook),
     app: await section('App', app),

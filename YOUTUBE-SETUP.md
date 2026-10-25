@@ -40,8 +40,13 @@ Your Firebase project is already a Google Cloud project, so reuse it:
 3. Scopes: add `.../auth/youtube.upload` and `.../auth/youtube.force-ssl`
    (the second lets the pipeline post a question as the first comment on
    each Short; without it uploads still work and the comment is skipped).
-   If your refresh token was minted before `force-ssl` was added, re-run
-   `node scripts/youtube-auth.js` and update `YOUTUBE_REFRESH_TOKEN`.
+   Also add `.../auth/yt-analytics.readonly`: the weekly Social Analytics
+   report reads each video's retention (how many viewers are still there
+   at 3 seconds) with it; enable **YouTube Analytics API** under APIs &
+   Services → Library too.
+   If your refresh token was minted before `force-ssl` or
+   `yt-analytics.readonly` was added, re-run `node scripts/youtube-auth.js`
+   and update `YOUTUBE_REFRESH_TOKEN`.
 4. **Test users**: add the Google account that owns your YouTube channel.
 5. Save — leave the app in **Testing** publishing status (don't submit for
    verification for this quick path).

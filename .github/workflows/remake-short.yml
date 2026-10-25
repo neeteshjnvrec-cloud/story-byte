@@ -50,6 +50,8 @@ jobs:
           REMAKE_STORY_ID: ${{ inputs.story_id }}
           REMAKE_VARIANT: ${{ inputs.variant }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # Backup checker for the pictures (lib/image-check.js).
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
