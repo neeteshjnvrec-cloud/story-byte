@@ -54,7 +54,26 @@ async function drawCaptionFrame(imagePath, text) {
  * bottom — in the day's caption colour with a heavy outline instead of a
  * dark box.
  */
-async function drawShortCaptionFrame(imagePath, text, look = {}) {
+// The on-screen hook (lib/hooks.js) stays up for the opening seconds: big,
+// across the top, below the Shorts header and clear of the captions.
+const HOOK_SEC = 3;
+
+function hookSvg(hookText, look, w, h) {
+  if (!hookText) return '';
+  const lines = wrapLines(hookText, 15, 2);
+  const lineHeight = 104;
+  const startY = Math.round(h * 0.2);
+  // A colour that stands apart from the day's caption colour.
+  const fill = (look.captionColour || '#FFFFFF').toUpperCase() === '#FFFFFF' ? '#FFD54F' : '#FFFFFF';
+  return `
+    <rect x="0" y="${startY - lineHeight - 50}" width="${w}" height="${lines.length * lineHeight + 120}" fill="url(#hookScrim)"/>
+    <text font-family="'Noto Sans Devanagari', 'Lohit Devanagari', Helvetica, Arial, 'DejaVu Sans', sans-serif" font-weight="900" font-size="88"
+      fill="${fill}" stroke="#000000" stroke-width="12" paint-order="stroke" stroke-linejoin="round" text-anchor="middle">
+      ${tspans(lines, { x: w / 2, startY, lineHeight })}
+    </text>`;
+}
+
+async function drawShortCaptionFrame(imagePath, text, look = {}, hookText = null) {
   const w = 1080;
   const h = 1920;
   const base = await sharp(imagePath).resize(w, h, { fit: 'cover', position: sharp.strategy.attention }).toBuffer();
@@ -70,7 +89,13 @@ async function drawShortCaptionFrame(imagePath, text, look = {}) {
         <stop offset="50%" stop-color="#000000" stop-opacity="0.35"/>
         <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
       </linearGradient>
+      <linearGradient id="hookScrim" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="45%" stop-color="#000000" stop-opacity="0.45"/>
+        <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+      </linearGradient>
     </defs>
+    ${hookSvg(hookText, look, w, h)}
     <rect x="0" y="${startY - lineHeight - 60}" width="${w}" height="${(lines.length + 1) * lineHeight + 120}" fill="url(#scrim)"/>
     <text font-family="'Noto Sans Devanagari', 'Lohit Devanagari', Helvetica, Arial, 'DejaVu Sans', sans-serif" font-weight="800" font-size="64"
       fill="${look.captionColour || '#ffffff'}" stroke="#000000" stroke-width="8" paint-order="stroke" stroke-linejoin="round" text-anchor="middle">
@@ -97,9 +122,10 @@ async function drawShortCaptionFrame(imagePath, text, look = {}) {
  * instead of the animation restarting every time the caption text changes.
  *
  * `format: 'short'` draws full-screen 9:16 frames in the day's `look`
- * (drawShortCaptionFrame); otherwise the original 4:5 frames.
+ * (drawShortCaptionFrame); otherwise the original 4:5 frames. `hookText`
+ * (Shorts) is drawn over the frames that start in the first HOOK_SEC.
  */
-async function bakeInCaptions(scenes, captionLines, outDir, audioDurSec, { format, look } = {}) {
+async function bakeInCaptions(scenes, captionLines, outDir, audioDurSec, { format, look, hookText } = {}) {
   if (!scenes?.length || !captionLines?.length) return scenes;
   try {
     let t = 0;
@@ -114,11 +140,6 @@ async function bakeInCaptions(scenes, captionLines, outDir, audioDurSec, { forma
       const line = captionLines[i];
       const mid = (line.start + line.end) / 2;
       const scene = withRange.find((s) => mid >= s.start && mid < s.end) || withRange[withRange.length - 1];
-      const buf = format === 'short'
-        ? await drawShortCaptionFrame(scene.file, line.text, look)
-        : await drawCaptionFrame(scene.file, line.text);
-      const file = path.join(outDir, `caption-frame-${i + 1}.jpg`);
-      fs.writeFileSync(file, buf);
       const isLast = i === captionLines.length - 1;
       // Frames tile the timeline with no gaps: each runs from its line's
       // start (the first from 0) to the next line's start, so the pauses
@@ -126,6 +147,11 @@ async function bakeInCaptions(scenes, captionLines, outDir, audioDurSec, { forma
       // end dropped every pause, and over a long story the captions and
       // art drifted seconds ahead of the voice.
       const start = i === 0 ? 0 : line.start;
+      const buf = format === 'short'
+        ? await drawShortCaptionFrame(scene.file, line.text, look, start < HOOK_SEC ? hookText : null)
+        : await drawCaptionFrame(scene.file, line.text);
+      const file = path.join(outDir, `caption-frame-${i + 1}.jpg`);
+      fs.writeFileSync(file, buf);
       const end = isLast ? Math.max(line.end, audioDurSec || line.end) : captionLines[i + 1].start;
       frames.push({
         file,

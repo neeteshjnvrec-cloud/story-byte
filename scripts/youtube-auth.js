@@ -46,7 +46,13 @@ async function main() {
     prompt: 'consent',
     // youtube.force-ssl lets the pipeline post the first comment on each
     // Short (lib/youtube.js commentOnYouTube); upload alone can't.
-    scope: ['https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtube.force-ssl'],
+    // yt-analytics.readonly lets the weekly report read each video's
+    // retention curve (analyze-social.js).
+    scope: [
+      'https://www.googleapis.com/auth/youtube.upload',
+      'https://www.googleapis.com/auth/youtube.force-ssl',
+      'https://www.googleapis.com/auth/yt-analytics.readonly',
+    ],
   });
 
   console.log("\nOpen this URL in a browser signed into the YouTube channel's Google account:\n");

@@ -19,6 +19,7 @@ try {
   Groq = null;
 }
 const { fetchSceneImage, fillMissingImages, hashSeed } = require('./scene-image');
+const { drawChecked, checkSummary } = require('./image-check');
 const { theme } = require('./genre-theme');
 const { extractJson, callGroqJson } = require('./carousel-copy');
 const { renderFallbackCover } = require('./fallback-cover');
@@ -177,7 +178,12 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
     const request = [prompt, hashSeed(`${storyId}-video-${i}`),
       devotional ? { ...size, steps: 8, hq: { ...HQ_PORTRAIT, refs } } : undefined];
     requests.push(request);
-    const image = await fetchSceneImage(...request);
+    // Devotional pictures are checked for wrong anatomy and the wrong deity
+    // look, and redrawn when they fail (lib/image-check.js).
+    const image = devotional
+      ? await drawChecked((extra) => fetchSceneImage(extra ? `${prompt}. ${extra}` : prompt, request[1], request[2]),
+        { subject: planned[i].prompt, looks }, `Scene ${i + 1}`)
+      : await fetchSceneImage(...request);
     if (image && devotional && !mainRef && figures.length) {
       mainKey = figures[0].key;
       // References must be under 512x512.
@@ -228,6 +234,7 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
   }
   console.log(`  🖼️  Video pictures: ${Object.entries(sources).map(([k, n]) => `${n} ${k}`).join(', ')}` +
     (sources.hq === filled.length ? '' : ' (hq = FLUX.2; reused = a neighbouring picture reframed; the rest are lower quality)'));
+  if (checkSummary()) console.log(`  ${checkSummary()}`);
   return scenes.length ? scenes : null;
 }
 

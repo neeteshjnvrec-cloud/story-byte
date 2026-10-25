@@ -28,6 +28,7 @@ const os = require('os');
 const path = require('path');
 
 const { fetchSceneImage, fetchStoryImage, fillMissingImages, hashSeed } = require('./lib/scene-image');
+const { drawChecked, checkSummary } = require('./lib/image-check');
 const { renderLandscapeVideo, WIDTH, HEIGHT } = require('./lib/video-landscape');
 const { callGroqJson, extractJson } = require('./lib/carousel-copy');
 const { parseSrt } = require('./lib/subtitles');
@@ -888,8 +889,13 @@ async function main() {
       { width: WIDTH, height: HEIGHT, steps: IMAGE_STEPS, hq: HQ_LANDSCAPE },
     ];
     requests.push(request);
-    images.push(await fetchSceneImage(...request));
+    // Checked for wrong anatomy and redrawn when it fails (lib/image-check.js).
+    images.push(await drawChecked(
+      (extra) => fetchSceneImage(extra ? `${request[0]}. ${extra}` : request[0], request[1], request[2]),
+      { subject: description }, `Scene ${sceneNumber}`,
+    ));
   }
+  if (checkSummary()) console.log(checkSummary());
   // A failed picture gets another try, then a reframed neighbour — never a
   // gradient card in the middle of the episode (one only if no picture at all
   // came through). One failed image used to abort the whole episode.

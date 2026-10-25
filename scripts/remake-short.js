@@ -30,6 +30,7 @@ const { synthSarvam } = require('./lib/sarvam-tts');
 const { parseSrt, toCaptionLines } = require('./lib/subtitles');
 const { buildVideoScenes } = require('./lib/video-scenes');
 const { bakeInCaptions } = require('./lib/caption-frames');
+const { hookTextOf } = require('./lib/hooks');
 const { buildStoryVideo } = require('./lib/video');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
 const { styleOfDay, fitShort } = require('./lib/short-style');
@@ -112,7 +113,8 @@ async function main() {
   const frameDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sb-remake-frames-'));
   // Each picture as a wide shot, then a close-up of part of it.
   const shots = await withCloseUps(scenes, { outDir: frameDir });
-  const captioned = await bakeInCaptions(shots, toCaptionLines(cues), frameDir, total, { format: 'short', look });
+  const captioned = await bakeInCaptions(shots, toCaptionLines(cues), frameDir, total,
+    { format: 'short', look, hookText: hookTextOf(story) });
   buildStoryVideo({ scenes: captioned, audioPath: mix, outPath: path.join(outDir, 'short.mp4'), format: 'short', look });
   buildStoryVideo({ scenes: shots, audioPath: mix, outPath: path.join(outDir, 'short-clean.mp4'), format: 'short', look });
   fs.rmSync(frameDir, { recursive: true, force: true });
