@@ -44,17 +44,20 @@ function slowOpening(text) {
 }
 
 /**
- * `text` with its first two sentences rewritten into a hook, or null when
- * the rewrite failed or is still slow. `askJson(system, user)` → parsed
- * JSON reply; `hookStyle` is the day's opening style (lib/short-style.js).
+ * `text` with its first two sentences rewritten into a hook (the rest kept
+ * exactly, paragraph breaks and all), or null when the rewrite failed or is
+ * still slow. `askJson(system, user)` → parsed JSON reply; `hookStyle` is
+ * the opening style (for a Short, the day's: lib/short-style.js); `what`
+ * names the kind of video.
  */
-async function sharpenOpening(askJson, { title, text, hookStyle }) {
+async function sharpenOpening(askJson, { title, text, hookStyle, what = 'Hindi devotional katha for a YouTube Short' }) {
   const all = sentences(text);
   if (all.length < 4) return null;
   const opening = all.slice(0, 2).join(' ');
   const next = all[2];
-  const sys = 'You edit the opening of a narrated Hindi devotional katha for a YouTube Short. Viewers swipe away in ' +
-    'the first 3 seconds, and this opening is slow scene-setting. Rewrite ONLY these opening sentences into a ' +
+  const restAt = text.indexOf(all[1]) + all[1].length;
+  const sys = `You edit the opening of a narrated ${what}. Viewers leave in ` +
+    'the first seconds, and this opening is slow scene-setting. Rewrite ONLY these opening sentences into a ' +
     `gripping hook: ${hookStyle || 'open on the most astonishing moment of the katha, or a question the viewer must have answered'}. ` +
     `The first sentence has at most ${MAX_HOOK_WORDS - 6} words and already holds the conflict, the question or the ` +
     'astonishing moment. Never begin with एक समय, एक बार, बहुत समय पहले, प्राचीन काल, कहा जाता है or यह कथा. ' +
@@ -65,7 +68,7 @@ async function sharpenOpening(askJson, { title, text, hookStyle }) {
   const reply = await askJson(sys, user);
   const rewritten = String(reply?.opening || '').trim();
   if (rewritten.length < 20 || rewritten.length > 400 || slowOpening(rewritten)) return null;
-  return [rewritten, ...all.slice(2)].join(' ');
+  return `${rewritten}${text.slice(restAt)}`;
 }
 
 // The on-screen hook must read in a glance: about two short lines.

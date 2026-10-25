@@ -339,22 +339,30 @@ function summary(report) {
   if (rt?.videos?.length) {
     const hooked = new Set((report.app?.stories || []).filter((st) => st.hookText && st.socialTitle).map((st) => st.socialTitle));
     const hasHook = (v) => [...hooked].some((t) => String(v.title || '').startsWith(t));
+    // YouTube counts replays, so a looping Short reads above 100%: shown
+    // as 100%+ and capped in averages, where it would swamp the rest.
+    const pct = (n) => (n == null ? '' : n > 100 ? '100%+' : `${n}%`);
     const avg = (list, key) => {
       const known = list.filter((v) => v[key] != null);
-      return known.length ? `${Math.round(sum(known, key) / known.length)}%` : '—';
+      return known.length ? `${Math.round(known.reduce((t, v) => t + Math.min(100, v[key]), 0) / known.length)}%` : '—';
     };
     out.push('## YouTube retention — where viewers leave',
       `Last ${RETENTION_DAYS} days, most-viewed first. "At 3s" is the share still watching after 3 seconds: the hook. ` +
-      '"New hook" marks Shorts made with the on-screen hook and the checked opening.', '');
-    for (const [label, list] of [['Shorts', rt.videos.filter((v) => v.format === 'short')], ['Long videos', rt.videos.filter((v) => v.format === 'video')]]) {
+      '100%+ means viewers replayed it. "New hook" marks Shorts made with the on-screen hook and the checked opening.', '');
+    const groups = [
+      ['Katha Shorts (1-3 min)', rt.videos.filter((v) => v.format === 'short' && v.length >= 60)],
+      ['Short clips (under 1 min)', rt.videos.filter((v) => v.format === 'short' && v.length < 60)],
+      ['Long videos', rt.videos.filter((v) => v.format === 'video')],
+    ];
+    for (const [label, list] of groups) {
       if (!list.length) continue;
       const withHook = list.filter(hasHook);
       out.push(`- **${label}:** ${avg(list, 'keptAt3s')} still watching at 3s, ${avg(list, 'keptAtHalf')} at half, ${avg(list, 'avgViewPercent')} watched on average` +
         (withHook.length ? ` · with the new hook (${withHook.length}): ${avg(withHook, 'keptAt3s')} at 3s, ${avg(withHook, 'avgViewPercent')} watched` : ''));
     }
     out.push('');
-    out.push(table(rt.videos, [['Views', (r) => r.views], ['At 3s', (r) => (r.keptAt3s == null ? '' : `${r.keptAt3s}%`)],
-      ['At half', (r) => (r.keptAtHalf == null ? '' : `${r.keptAtHalf}%`)], ['Watched', (r) => `${r.avgViewPercent}%`],
+    out.push(table(rt.videos, [['Views', (r) => r.views], ['At 3s', (r) => pct(r.keptAt3s)],
+      ['At half', (r) => pct(r.keptAtHalf)], ['Watched', (r) => pct(r.avgViewPercent)],
       ['Length', (r) => `${r.length}s`], ['New hook', (r) => (hasHook(r) ? '✓' : '')], ['Title', (r) => r.title]]), '');
   }
   const ig = report.instagram;
