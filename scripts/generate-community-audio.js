@@ -41,6 +41,7 @@ const { mediaKey } = require('./lib/media-key');
 const { postStoryCarousel, postStoryReel } = require('./lib/instagram');
 const { postStoryToFacebook, postStoryVideo } = require('./lib/facebook');
 const { postStoryToYouTube } = require('./lib/youtube');
+const { postStoryToTelegram } = require('./lib/telegram');
 const { FIREBASE_TOOLS } = require('./lib/firebase-cli');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -514,6 +515,12 @@ async function main() {
             .catch((e) => console.warn(`  ⚠️  Video id not saved on ${item.id}: ${e.message}`));
         }
       }
+
+      // The Telegram channel (lib/telegram.js; skips until it's set up).
+      await postStoryToTelegram(socialStory, {
+        videoPath: item.videoUrl ? path.join(PUB, 'instagram', mediaKey(item.id), 'story.mp4') : null,
+        coverPath: path.join(PUB, 'covers', `${item.id}.jpg`),
+      });
     }
   }
 

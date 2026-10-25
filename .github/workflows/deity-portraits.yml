@@ -11,9 +11,14 @@ on:
         required: false
         type: string
       candidates:
-        description: 'Candidates per deity (1-4)'
+        description: 'Candidates per deity and model (1-4)'
         required: false
         default: '2'
+        type: string
+      models:
+        description: 'Models, comma-separated: 4b (~100 neurons a portrait), 9b (~1,400; sharper)'
+        required: false
+        default: '4b'
         type: string
       style:
         description: 'Art style for this run (blank = the DEVOTIONAL_STYLE variable, else realistic)'
@@ -42,6 +47,7 @@ jobs:
         env:
           PORTRAIT_KEYS: ${{ inputs.keys }}
           PORTRAIT_CANDIDATES: ${{ inputs.candidates }}
+          PORTRAIT_MODELS: ${{ inputs.models }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNTS: ${{ secrets.CLOUDFLARE_ACCOUNTS }}
