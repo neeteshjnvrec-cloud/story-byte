@@ -4,39 +4,39 @@
   "language": "hi",
   "characters": [
     {
-      "name": "Rama",
-      "nativeName": "राम",
-      "role": "protagonist",
-      "look": "blue-skinned, crown, bow, quiver of arrows, royal dhoti, sandalwood bracelets"
+      "name": "Veeravati",
+      "nativeName": "वीरावती",
+      "role": "Queen, devoted wife",
+      "look": "royal woman, saffron sari, gold jewelry, serene eyes"
     },
     {
-      "name": "Ravana",
-      "nativeName": "रावण",
-      "role": "antagonist",
-      "look": "ten-headed, ten-armed, dark skin, golden crown, mace, fierce expression"
+      "name": "King",
+      "nativeName": "राजा",
+      "role": "Veeravati's husband, king",
+      "look": "regal male, crown, sword, traditional royal attire"
     },
     {
-      "name": "Vibhishana",
-      "nativeName": "विभीषण",
-      "role": "advisor",
-      "look": "sage-like, white dhoti, simple crown, serene face, holding a staff"
+      "name": "Brothers",
+      "nativeName": "भाई",
+      "role": "Veeravati's brothers, tricksters",
+      "look": "three men, dark complexion, moustaches, dhoti, simple ornaments"
     },
     {
-      "name": "Brahma",
-      "nativeName": "ब्रह्मा",
-      "role": "divine source",
-      "look": "four-faced, four-armed, seated on a lotus, holding Vedas, white beard, radiating aura"
+      "name": "Parvati",
+      "nativeName": "पार्वती",
+      "role": "Goddess, mother of the universe",
+      "look": "dark complexion, green sari, three eyes, trident, lotus, crown"
     }
   ],
-  "setting": "The story unfolds in the ancient kingdoms of Ayodhya and Lanka during the epic battle of Vijayadashami.",
+  "setting": "The story unfolds in an ancient Indian kingdom during the Karva Chauth festival.",
   "episodes": [
     {
       "season": "2026",
-      "episode": "1018",
-      "title": "राम जी की कथा: विजय दशहरा — रावण का विनाश ब्रह्मा बाण से",
-      "description": "विजयदशमी की रात, जब अंधकार पर प्रकाश की जंग छेड़ती है, सुनिए वह अद्भुत कथा जिसमें राम जी ने ब्रह्मा बाण से रावण को पराजित किया। इस महाकाव्य में विभीषण के रहस्य और अमृत की शक्ति का उजागर होना दर्शाता है कि सत्य की जीत हमेशा होती है।",
-      "summary": "On the eve of Vijayadashami, the sky over Ayodhya shudders as the armies of Lanka march forward, and Rama prepares for the final confrontation. The tension rises when Vibhishana, torn between loyalty and righteousness, steps forward to reveal the secret of the amrit hidden in Ravana's navel, urging Rama to seek divine aid. This revelation sets the stage for a celestial intervention that promises to turn the tide of war. Guided by Vibhishana’s counsel, Rama ascends to the heavens where Brahma bestows upon him the radiant Brahma arrow, infused with the essence of the amrit. With the arrow in hand, Rama, accompanied by Lakshmana and the devoted Hanuman, leads the charge into the heart of Lanka, confronting Ravana amidst thunderous battle cries. The clash is fierce, emotions flare, and the fate of both realms hangs on the divine projectile’s flight. In a climactic moment, Rama releases the Brahma arrow, which pierces Ravana’s ten heads, ending the tyrant’s reign and restoring dharma. The battlefield falls silent as the victorious forces celebrate the triumph of good over evil, and Rama blesses all who uphold truth. The story concludes with a heartfelt benediction: may the light of Vijayadashami guide us all toward righteousness."
+      "episode": "1025",
+      "title": "पार्वती जी की कथा: करवा चौथ में वीरावती की परीक्षा",
+      "description": "एक सच्ची भक्ती की कहानी जहाँ वीरावती के व्रत को भाईयों ने छल से तोड़ा, पति को मृत्यु की कगार पर ले आया, और माँ पार्वती की कृपा से जीवन मिला। सुनिए इस अद्भुत कथा को और पाएँ आशीर्वाद।",
+      "summary": "On the eve of Karva Chauth, Queen Veeravati (वीरावती) prepares to begin her fast, her heart filled with love and resolve to protect her husband, the King (राजा). As the moon rises, her mischievous brothers (भाई) conspire, presenting a false moon to tempt her to break the vrata. The moment she tastes the sweet, the King collapses, lifeless, and darkness spreads over the palace. Veeravati, devastated, refuses to accept defeat and vows a year‑long devotion to Maa Parvati (पार्वती). She spends each day in prayer, offering flowers, chanting mantras, and performing austerities, while the kingdom watches her unwavering faith. The brothers, remorseful, witness her steadfastness and pray for her husband's return, hoping her devotion will move the divine. At the end of the year, Parvati appears in radiant form—dark complexion, green sari, three eyes, holding a trident and lotus—and grants Veeravati’s plea. The King awakens, restored to life, and the kingdom rejoices, honoring the power of a wife's devotion. The story closes with a blessing: may every Karva Chauth be filled with love, faith, and divine grace."
     }
   ],
-  "style": "cartoon3d"
+  "style": "realistic"
 }
