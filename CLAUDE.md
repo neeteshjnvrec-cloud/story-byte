@@ -25,4 +25,4 @@ Audio short-stories app: Expo SDK 57 / React Native 0.86 / React 19, Firebase on
 ## Commands
 - Run the app: `npx expo start`
 - Rules tests (needs Java): `cd firestore/tests && npm i --no-save @firebase/rules-unit-testing@4 firebase@11 firebase-tools@14 && npm test`
-- Android build: `eas build -p android --profile preview` (APK) or `--profile production`
+- Android build: `EAS_NO_VCS=1 eas build -p android --profile preview` (APK) or `--profile production`. `EAS_NO_VCS=1` keeps the git history (~210 MB of old audio) out of the upload; `.easignore` decides what goes in.

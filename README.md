@@ -49,9 +49,11 @@ Google Sign-In needs a development or release build, not Expo Go. Without an acc
 ## Build and release (Android)
 
 ```bash
-eas build -p android --profile preview      # APK to install and test
-eas build -p android --profile production   # AAB for Play Console
+EAS_NO_VCS=1 eas build -p android --profile preview      # APK to install and test
+EAS_NO_VCS=1 eas build -p android --profile production   # AAB for Play Console
 ```
+
+`EAS_NO_VCS=1` makes EAS upload the app folder as `.easignore` filters it (about 2 MB). Without it, EAS also packs the git history, and every audio file ever committed under `public/` comes with it (about 210 MB).
 
 Release builds shrink code and resources (`app.json` → `expo-build-properties`), so test a preview APK before uploading.
 
