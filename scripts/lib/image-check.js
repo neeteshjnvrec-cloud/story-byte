@@ -8,20 +8,25 @@
  * lib/iconography.js — so Durga's eight arms or Brahma's four heads are
  * expected, not flagged.
  *
- * Checkers, first that answers: Groq (GROQ_VISION_MODEL, default Llama 4
- * Scout, with GROQ_API_KEY), then Gemini (GEMINI_VISION_MODEL, default
- * gemini-2.5-flash, with GEMINI_API_KEY). With neither, or both failing,
- * pictures pass unchecked: a check must never stop a video. IMAGE_CHECK=0
- * turns it off.
+ * Checkers, first that answers: Groq (GROQ_VISION_MODEL, else the models in
+ * GROQ_MODELS, with GROQ_API_KEY), then Gemini (GEMINI_VISION_MODEL, else
+ * GEMINI_MODELS, with GEMINI_API_KEY). Each tries its models in order and
+ * drops one the provider has retired: in October 2026 Groq removed Llama 4
+ * Scout and Google closed gemini-2.5-flash to new keys, and with a single
+ * hard-coded name each, every picture went unchecked. With no checker
+ * answering, pictures pass unchecked: a check must never stop a video.
+ * IMAGE_CHECK=0 turns it off.
  */
 const sharp = require('sharp');
 
-const GROQ_MODEL = process.env.GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct';
-const GEMINI_MODEL = process.env.GEMINI_VISION_MODEL || 'gemini-2.5-flash';
+const models = (env, fallback) => [...new Set([env, ...fallback].map((m) => String(m || '').trim()).filter(Boolean))];
+const GROQ_MODELS = models(process.env.GROQ_VISION_MODEL, ['meta-llama/llama-4-maverick-17b-128e-instruct', 'meta-llama/llama-4-scout-17b-16e-instruct']);
+// Google's 404 for gemini-2.5-flash names gemini-3.8-flash as its replacement.
+const GEMINI_MODELS = models(process.env.GEMINI_VISION_MODEL, ['gemini-3.8-flash', 'gemini-2.5-flash']);
 // Redraws per picture after a failed check; each is one more image request.
 const MAX_REDRAWS = Math.max(0, Number(process.env.IMAGE_CHECK_REDRAWS ?? 2));
-// A checker that failed outright (bad model name, no key) isn't asked again
-// this run.
+// A model that failed outright (retired, or a bad key) isn't asked again
+// this run; a checker with none left is skipped.
 const dead = new Set();
 const stats = { checked: 0, failed: 0, redrawn: 0, fixed: 0, unchecked: 0 };
 
@@ -49,12 +54,12 @@ function parse(text) {
   return { ok: j.ok !== false, score: Number(j.score) || (j.ok === false ? 3 : 7), problems: Array.isArray(j.problems) ? j.problems.map(String) : [] };
 }
 
-async function askGroq(b64, prompt) {
+async function askGroq(b64, prompt, model) {
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: GROQ_MODEL, temperature: 0, max_tokens: 300, response_format: { type: 'json_object' },
+      model, temperature: 0, max_tokens: 300, response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: [
         { type: 'text', text: prompt },
         { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${b64}` } },
@@ -66,8 +71,8 @@ async function askGroq(b64, prompt) {
   return parse(json.choices?.[0]?.message?.content);
 }
 
-async function askGemini(b64, prompt) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+async function askGemini(b64, prompt, model) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'x-goog-api-key': process.env.GEMINI_API_KEY, 'Content-Type': 'application/json' },
@@ -82,8 +87,8 @@ async function askGemini(b64, prompt) {
 }
 
 const CHECKERS = [
-  { name: 'groq', ready: () => !!process.env.GROQ_API_KEY, ask: askGroq },
-  { name: 'gemini', ready: () => !!process.env.GEMINI_API_KEY, ask: askGemini },
+  { name: 'groq', ready: () => !!process.env.GROQ_API_KEY, ask: askGroq, models: GROQ_MODELS },
+  { name: 'gemini', ready: () => !!process.env.GEMINI_API_KEY, ask: askGemini, models: GEMINI_MODELS },
 ];
 
 /**
@@ -94,22 +99,26 @@ async function checkImage(buf, context = {}) {
   if (process.env.IMAGE_CHECK === '0' || !buf) return null;
   const b64 = (await sharp(buf).resize(768, 768, { fit: 'inside' }).jpeg({ quality: 85 }).toBuffer()).toString('base64');
   const prompt = instructions(context);
-  for (const c of CHECKERS) {
-    if (dead.has(c.name) || !c.ready()) continue;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        return { ...(await c.ask(b64, prompt)), checker: c.name };
-      } catch (e) {
-        // Rate limited: one wait, then the next checker.
-        if (e.status === 429 && attempt === 0) { await sleep(8000); continue; }
-        // A wrong model name or key won't fix itself this run.
-        if ([400, 401, 403, 404].includes(e.status)) {
-          console.warn(`    ⚠️  Picture check: ${c.name} unavailable (${e.message}); not asking it again this run`);
-          dead.add(c.name);
-        } else {
-          console.warn(`    ⚠️  Picture check: ${c.name} failed (${e.message.slice(0, 120)})`);
+  checkers: for (const c of CHECKERS) {
+    if (!c.ready()) continue;
+    for (const model of c.models) {
+      if (dead.has(model)) continue;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          return { ...(await c.ask(b64, prompt, model)), checker: `${c.name} ${model}` };
+        } catch (e) {
+          // Rate limited: one wait, then the next checker.
+          if (e.status === 429 && attempt === 0) { await sleep(8000); continue; }
+          // A retired model or a wrong key won't fix itself this run.
+          if ([400, 401, 403, 404].includes(e.status)) {
+            console.warn(`    ⚠️  Picture check: ${c.name} ${model} unavailable (${e.message.slice(0, 160)}); not asking it again this run`);
+            dead.add(model);
+            break;
+          }
+          // Anything else (a timeout, rate limited twice): the next checker.
+          console.warn(`    ⚠️  Picture check: ${c.name} ${model} failed (${e.message.slice(0, 120)})`);
+          continue checkers;
         }
-        break;
       }
     }
   }

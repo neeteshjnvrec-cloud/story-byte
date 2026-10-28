@@ -136,6 +136,10 @@ async function renderLandscapeVideo({ scenes, audioPath, outPath, captions = [],
       return { ...shot, n, frames, t0, t1: t0 + frames / FPS, output: path.join(tempDir, `clip-${n}.mp4`) };
     });
 
+    // Shots render CONCURRENCY at a time and finish out of order (a short one
+    // overtakes a long one), so the log counts finished shots; the video
+    // joins them in order below.
+    let done = 0;
     await pool(clips, CONCURRENCY, async (clip) => {
       const lines = clipCaptions(captions, clip.t0, clip.t1);
       let assFile = null;
@@ -144,7 +148,8 @@ async function renderLandscapeVideo({ scenes, audioPath, outPath, captions = [],
         fs.writeFileSync(assFile, buildAss(lines, { width: WIDTH, height: HEIGHT, font }), 'utf8');
       }
       await renderClip({ imageFile: clip.scene.file, frames: clip.frames, index: clip.index, output: clip.output, assFile, closeUp: clip.closeUp });
-      console.log(`  Rendered shot ${clip.n + 1}/${clips.length} (scene ${clip.index + 1}${clip.closeUp ? ', close-up' : ''})`);
+      done += 1;
+      console.log(`  ${done}/${clips.length} shots rendered (just finished: shot ${clip.n + 1}, scene ${clip.index + 1}${clip.closeUp ? ' close-up' : ''})`);
     });
 
     fs.writeFileSync(listFile, clips.map((c) => `file '${path.resolve(c.output)}'`).join('\n'));

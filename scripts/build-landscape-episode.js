@@ -93,7 +93,9 @@ const voice = process.env.EPISODE_VOICE || (language === 'hi'
 
 // ~15 minutes of narration: edge-tts runs ~140-160 words/minute depending on
 // voice and language (a real Hindi render measured 142 wpm).
-const TARGET_WORDS = 2200;
+// English narration is faster: the Life of Jesus's first episode measured
+// 175 wpm (1,987 words in 11.4 minutes), so it needs more words.
+const TARGET_WORDS = language === 'en' ? 2600 : 2200;
 // One model call asked for the whole 2,000-2,500 words came back with 1,292
 // in a real run (a 9-minute "15-minute" episode) — long-form output is
 // exactly what these models cut short. Planning an outline first and then
