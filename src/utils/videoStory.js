@@ -3,12 +3,19 @@
 //    YouTube's player on its story page.
 //  - a daily story with a Short: normal audio story plus youtubeId and
 //    youtubeKind "short"; its page also plays the Short.
+//  - a community story of 3+ minutes: youtubeKind "long", a 16:9 video
+//    (scripts/generate-community-audio.js); its page plays it wide.
 
 /** A story that is only a video (nothing to play as audio). */
 export const isVideoStory = (story) => !!story?.youtubeId && !story?.audioUrl;
 
-/** The Short's YouTube id of an audio story, if it has one. */
-export const shortIdOf = (story) => (story?.youtubeKind === 'short' && story?.audioUrl ? story.youtubeId : null);
+/** An audio story's own YouTube video, { id, vertical }, or null: a Short
+ *  plays in a tall player, a long (16:9) video in a wide one. */
+export const storyVideoOf = (story) => (
+  story?.audioUrl && story?.youtubeId && ['short', 'long'].includes(story?.youtubeKind)
+    ? { id: story.youtubeId, vertical: story.youtubeKind === 'short' }
+    : null
+);
 
 const millis = (t) => (t?.toMillis ? t.toMillis() : typeof t?.seconds === 'number' ? t.seconds * 1000 : Number(t) || 0);
 
