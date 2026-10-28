@@ -43,6 +43,42 @@ const { postStoryToFacebook, postStoryVideo } = require('./lib/facebook');
 const { postStoryToYouTube } = require('./lib/youtube');
 const { postStoryToTelegram } = require('./lib/telegram');
 const { FIREBASE_TOOLS } = require('./lib/firebase-cli');
+const { renderLandscapeVideo } = require('./lib/video-landscape');
+const { toCaptionChunks, captionFont } = require('./lib/landscape-captions');
+const { renderEpisodeThumbnail, renderShortThumbnail } = require('./lib/episode-thumbnail');
+const { theme } = require('./lib/genre-theme');
+
+// A story narrated for 3 minutes or more is past YouTube's Shorts limit, so
+// its vertical video would go up as an ordinary video in a tall frame (black
+// bars on desktop and TV). Those get a 16:9 video instead, with their own wide
+// pictures (one about every 20 seconds) and a thumbnail.
+const LANDSCAPE_MIN_SEC = 180;
+const WIDE_SCENE_SEC = 20;
+
+/** { videoPath, thumbnailPath } of a long story's 16:9 video, or null. */
+async function buildWideVideo({ storyId, story, cues, audioPath, dur, outDir }) {
+  const scenes = await buildVideoScenes({
+    storyId, title: story.title, text: story.text, genre: story.genre, description: story.description,
+    cues, audioDurSec: dur, outDir, orientation: 'wide',
+    sceneCount: Math.max(6, Math.min(24, Math.round(dur / WIDE_SCENE_SEC))),
+  });
+  if (!scenes) return null;
+  const videoPath = await renderLandscapeVideo({
+    scenes, audioPath, outPath: path.join(outDir, 'story-wide.mp4'),
+    captions: toCaptionChunks(cues), font: captionFont(story.language),
+  });
+  if (!videoPath || !fs.existsSync(videoPath)) return null;
+  const hi = story.language === 'hi';
+  const thumbnailPath = path.join(outDir, 'thumbnail.jpg');
+  fs.writeFileSync(thumbnailPath, await renderEpisodeThumbnail({
+    art: fs.readFileSync(scenes[Math.floor(scenes.length * 0.6)].file),
+    seriesTitle: story.title,
+    episodeTitle: story.authorName ? (hi ? `लेखक: ${story.authorName}` : `by ${story.authorName}`) : '',
+    badge: hi ? 'पूरी कहानी' : 'FULL STORY',
+    accent: theme(story.genre).accent,
+  }));
+  return { videoPath, thumbnailPath };
+}
 
 const ROOT = path.resolve(__dirname, '..');
 const PUB = path.join(ROOT, 'public');
@@ -324,6 +360,8 @@ async function main() {
       // Facebook, since the carousel above is silent and static.
       let videoUrl = null;
       let reelVideoUrl = null;
+      let wide = null;
+      let shortThumbPath = null;
       if (igSlideUrls.length) {
         try {
           const outDir = path.join(PUB, 'instagram', mediaKey(storyId));
@@ -368,6 +406,20 @@ async function main() {
             const per = Math.max(2, dur / scenes.length);
             scenes = scenes.map((s) => ({ file: s.file, duration: s.duration || per }));
           }
+          // A Short's YouTube thumbnail: its opening picture, before the
+          // captions are drawn on, under the title. (A 3-minute-plus story
+          // gets the 16:9 one from buildWideVideo instead.)
+          if (dur < LANDSCAPE_MIN_SEC) {
+            try {
+              shortThumbPath = path.join(os.tmpdir(), `sb-thumb-${storyId}.jpg`);
+              fs.writeFileSync(shortThumbPath, await renderShortThumbnail({
+                art: fs.readFileSync(scenes[0].file), title: story.title, accent: theme(story.genre).accent,
+              }));
+            } catch (e) {
+              shortThumbPath = null;
+              console.warn(`    ⚠️  Thumbnail failed: ${e.message}`);
+            }
+          }
           // Captions track the real narration regardless of which path
           // produced the backgrounds above — skipping this on the plain-
           // background fallback previously meant a fallback video played
@@ -400,6 +452,20 @@ async function main() {
               console.warn(`    ⚠️  Reel clip failed, Instagram will use the full video: ${e.message}`);
             }
           }
+
+          // 3 minutes or longer: YouTube, Facebook and Telegram get the 16:9
+          // video (see LANDSCAPE_MIN_SEC); Instagram keeps the vertical Reel.
+          if (cues && dur >= LANDSCAPE_MIN_SEC) {
+            try {
+              wide = await buildWideVideo({ storyId, story, cues, audioPath, dur, outDir });
+              if (wide) {
+                videoUrl = `${SITE}/instagram/${mediaKey(storyId)}/story-wide.mp4`;
+                console.log(`    ✅ Landscape video: ${Math.round(fs.statSync(wide.videoPath).size / 1024)}KB`);
+              }
+            } catch (e) {
+              console.warn(`    ⚠️  Landscape video failed, the vertical one goes out instead: ${e.message}`);
+            }
+          }
         } catch (e) {
           console.warn(`    ⚠️  Video render failed: ${e.message}`);
         }
@@ -412,6 +478,7 @@ async function main() {
         id: storyId, title: story.title, authorName: story.authorName,
         authorId: story.authorId, genre: story.genre, duration: dur, pageUrl,
         text: story.text, description: story.description, igSlideUrls, igHook, videoUrl, reelVideoUrl,
+        wideVideoPath: wide?.videoPath, thumbnailPath: wide?.thumbnailPath || shortThumbPath,
       });
     } catch (e) {
       console.error(`    ❌ Failed: ${e.message}`);
@@ -508,17 +575,20 @@ async function main() {
       // local disk, so it doesn't need the Firebase Hosting deploy above
       // to have happened first.
       if (item.videoUrl) {
-        const yt = await postStoryToYouTube(socialStory, path.join(PUB, 'instagram', mediaKey(item.id), 'story.mp4'));
-        // The story's page in the app plays the video too (StoryDetailScreen).
+        const yt = await postStoryToYouTube(socialStory,
+          item.wideVideoPath || path.join(PUB, 'instagram', mediaKey(item.id), 'story.mp4'),
+          { thumbnailPath: item.thumbnailPath });
+        // The story's page in the app plays the video too (StoryDetailScreen):
+        // "long" in a 16:9 player, "short" in a tall one.
         if (yt.posted && yt.videoId) {
-          await db.collection('stories').doc(item.id).update({ youtubeId: yt.videoId, youtubeKind: 'short' })
+          await db.collection('stories').doc(item.id).update({ youtubeId: yt.videoId, youtubeKind: item.wideVideoPath ? 'long' : 'short' })
             .catch((e) => console.warn(`  ⚠️  Video id not saved on ${item.id}: ${e.message}`));
         }
       }
 
       // The Telegram channel (lib/telegram.js; skips until it's set up).
       await postStoryToTelegram(socialStory, {
-        videoPath: item.videoUrl ? path.join(PUB, 'instagram', mediaKey(item.id), 'story.mp4') : null,
+        videoPath: item.videoUrl ? item.wideVideoPath || path.join(PUB, 'instagram', mediaKey(item.id), 'story.mp4') : null,
         coverPath: path.join(PUB, 'covers', `${item.id}.jpg`),
       });
     }

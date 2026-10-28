@@ -14,7 +14,7 @@ import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
 import { Cover } from '../components/story/Cover';
 import { YouTubePlayer } from '../components/story/YouTubePlayer';
-import { isVideoStory, shortIdOf } from '../utils/videoStory';
+import { isVideoStory, storyVideoOf } from '../utils/videoStory';
 import { fmtMin, fmtPlays } from '../components/story/StoryCard';
 import { CommentSheet } from '../components/comments/CommentSheet';
 import { shareStory } from '../utils/shareStory';
@@ -122,8 +122,9 @@ export const StoryDetailScreen = () => {
   // download give way to "Open in YouTube". Likes, saving, rating, comments
   // and shares work as on any story.
   const videoId = isVideoStory(story) ? story.youtubeId : null;
-  // A daily story whose Short is on YouTube: the Short plays on its page too.
-  const shortId = shortIdOf(story);
+  // A story whose own video is on YouTube plays it on its page too: a daily
+  // or community Short, or a long community story's 16:9 video.
+  const ownVideo = storyVideoOf(story);
   const authorName = authorOf(story, { uid: user?.uid, name: myAuthorName(user, userStats) });
   const authorStories = useAuthorStories(story);
 
@@ -414,13 +415,13 @@ export const StoryDetailScreen = () => {
           )}
         </View>
 
-        {shortId ? (
+        {ownVideo ? (
           <View style={styles.section}>
-            <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 12 }}>{story.isCommunityStory ? 'WATCH THE VIDEO' : 'WATCH THE SHORT'}</AppText>
+            <AppText variant="micro" color="textTertiary" style={{ letterSpacing: 1.2, marginBottom: 12 }}>{story.isCommunityStory || !ownVideo.vertical ? 'WATCH THE VIDEO' : 'WATCH THE SHORT'}</AppText>
             <YouTubePlayer
-              videoId={shortId}
-              vertical
-              width={Math.min(screenWidth - 40, 280)}
+              videoId={ownVideo.id}
+              vertical={ownVideo.vertical}
+              width={ownVideo.vertical ? Math.min(screenWidth - 40, 280) : screenWidth - 40}
               radius={18}
               poster={story.coverImage}
               autoplay={false}

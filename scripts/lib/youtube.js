@@ -69,7 +69,24 @@ function shortTitle(story) {
  * Uploads `videoPath` (a local file) as a video on the connected channel.
  * No-ops when YouTube isn't configured.
  */
-async function postStoryToYouTube(story, videoPath) {
+/** Sets `videoId`'s custom thumbnail; true when it worked. Custom thumbnails
+ *  need a phone-verified channel, so a failure is only a warning. */
+async function setThumbnail(youtube, videoId, thumbnailPath) {
+  if (!thumbnailPath || !fs.existsSync(thumbnailPath)) return false;
+  try {
+    await youtube.thumbnails.set({ videoId, media: { mimeType: 'image/jpeg', body: fs.createReadStream(thumbnailPath) } });
+    console.log('  ✅ YouTube thumbnail set');
+    return true;
+  } catch (e) {
+    console.warn(`  ⚠️  YouTube thumbnail failed (custom thumbnails need a phone-verified channel): ${e.message}`);
+    return false;
+  }
+}
+
+/** `thumbnailPath`: the story's thumbnail — 9:16 for a Short (shown on the
+ *  channel page, in search and the Shorts shelf; the Shorts feed itself
+ *  plays the video), 16:9 for a long community story. */
+async function postStoryToYouTube(story, videoPath, { thumbnailPath } = {}) {
   const youtube = client();
 
   if (!youtube) {
@@ -96,7 +113,8 @@ async function postStoryToYouTube(story, videoPath) {
     });
 
     console.log(`  ✅ YouTube video published (video id ${res.data.id})`);
-    return { posted: true, videoId: res.data.id };
+    const thumbnailSet = await setThumbnail(youtube, res.data.id, thumbnailPath);
+    return { posted: true, videoId: res.data.id, thumbnailSet };
   } catch (e) {
     console.warn(`  ⚠️  YouTube upload failed for "${story.title}": ${e.message}`);
     return { posted: false, reason: e.message };
@@ -180,16 +198,7 @@ async function uploadEpisodeToYouTube({ videoPath, thumbnailPath, title, descrip
     return { posted: false, reason: e.message };
   }
 
-  let thumbnailSet = false;
-  if (thumbnailPath && fs.existsSync(thumbnailPath)) {
-    try {
-      await youtube.thumbnails.set({ videoId, media: { mimeType: 'image/jpeg', body: fs.createReadStream(thumbnailPath) } });
-      thumbnailSet = true;
-      console.log('  ✅ YouTube thumbnail set');
-    } catch (e) {
-      console.warn(`  ⚠️  YouTube thumbnail failed (custom thumbnails need a phone-verified channel): ${e.message}`);
-    }
-  }
+  const thumbnailSet = await setThumbnail(youtube, videoId, thumbnailPath);
   return { posted: true, videoId, url: `https://youtu.be/${videoId}`, thumbnailSet, ...(scheduled && { publishAt }) };
 }
 

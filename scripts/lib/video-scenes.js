@@ -100,22 +100,29 @@ async function llmSceneList({ title, text, genre, description }, count) {
 
 // Devotional art style comes from DEVOTIONAL_STYLE (lib/short-style.js) —
 // a photorealistic epic-film look by default.
-function artStyle(genre) {
-  return storyArtStyle(genre);
+function artStyle(genre, orientation) {
+  return storyArtStyle(genre, { orientation });
 }
 
 // FLUX.2 renders the devotional Shorts' portrait frames natively at 9:16
 // (864x1536, scaled to 1080x1920 — 1.25x, not the 1.9x crop-and-blow-up of a
 // square). 864x1536 keeps each frame to ~6 of the model's 512px tiles.
 const HQ_PORTRAIT = { width: 864, height: 1536 };
+// 16:9 pictures for a long community story's landscape video: FLUX.2 at
+// 1344x768 (6 tiles), scaled to 1920x1080, as in build-landscape-episode.js.
+const HQ_LANDSCAPE = { width: 1344, height: 768 };
 
 /**
  * Returns [{ file, duration }] — real-content scene image files (written
  * under `outDir`) with durations aligned to the real narration — or null.
  * `sceneCount` overrides the default pacing (~6s a scene, capped at 8) —
  * the devotional Shorts ask for more so a ~3-minute story keeps moving.
+ * `orientation: 'wide'` draws 16:9 pictures (1920x1080) for a landscape
+ * video (lib/video-landscape.js), FLUX.2 for every genre, with no hook
+ * picture up front: that's for Shorts.
  */
-async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir, sceneCount, context = '' }) {
+async function buildVideoScenes({ storyId, title, text, genre, description, cues, audioDurSec, outDir, sceneCount, context = '', orientation = 'vertical' }) {
+  const wide = orientation === 'wide';
   if (!cues?.length || !audioDurSec) return null;
 
   const plan = await llmSceneList({ title, text, genre, description }, sceneCount || sceneCountFor(audioDurSec));
@@ -147,7 +154,7 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
   let mainKey = null;
   let mainRef = null;
   const devotional = genre === 'devotional';
-  const size = devotional ? { width: 1080, height: 1920 } : { width: 1080, height: 1350 };
+  const size = wide ? { width: 1920, height: 1080 } : devotional ? { width: 1080, height: 1920 } : { width: 1080, height: 1350 };
   const images = [];
   const requests = [];
   for (let i = 0; i < planned.length; i++) {
@@ -169,14 +176,15 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
       refs.push(mainRef);
       refNote = `${figures.find((f) => f.key === mainKey).look.split(':')[0]} must keep the same face, skin colour, costume and ornaments as in reference image 0`;
     }
-    const prompt = [planned[i].prompt, looks && `Traditional iconography: ${looks}`, refNote, `${t.mood}, ${artStyle(genre)}`]
+    const prompt = [planned[i].prompt, looks && `Traditional iconography: ${looks}`, refNote, `${t.mood}, ${artStyle(genre, wide ? 'wide' : undefined)}`]
       .filter(Boolean).join('. ');
     // A seed space distinct from the carousel's own scene art (`${storyId}-${i}`)
     // so a story's video doesn't just replay its carousel image set.
     // steps: 8 for when FLUX.2 is unavailable (daily allocation used up, or
     // an output it flags): the standard model's sharpest setting.
-    const request = [prompt, hashSeed(`${storyId}-video-${i}`),
-      devotional ? { ...size, steps: 8, hq: { ...HQ_PORTRAIT, refs } } : undefined];
+    const request = [prompt, hashSeed(`${storyId}-${wide ? 'wide' : 'video'}-${i}`),
+      wide ? { ...size, steps: 8, hq: { ...HQ_LANDSCAPE, refs } }
+        : devotional ? { ...size, steps: 8, hq: { ...HQ_PORTRAIT, refs } } : undefined];
     requests.push(request);
     // Devotional pictures are checked for wrong anatomy and the wrong deity
     // look, and redrawn when they fail (lib/image-check.js).
@@ -203,7 +211,7 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
   });
   const sources = {};
   filled.forEach((image, i) => {
-    const file = path.join(outDir, `video-scene-${i + 1}.jpg`);
+    const file = path.join(outDir, `${wide ? 'wide' : 'video'}-scene-${i + 1}.jpg`);
     fs.writeFileSync(file, image);
     const source = image.source || 'card';
     sources[source] = (sources[source] || 0) + 1;
@@ -219,7 +227,7 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
   // keeping at least a second: with sentence-long subtitle cues the first
   // picture alone can be under two seconds, and the hook used to be skipped.
   const hookAt = plan.hook;
-  if (devotional && scenes.length >= 4 && hookAt > 0) {
+  if (devotional && !wide && scenes.length >= 4 && hookAt > 0) {
     const hook = { file: scenes[hookAt].file, lowRes: scenes[hookAt].lowRes, duration: 0 };
     for (let i = 0; i < scenes.length && hook.duration < 2.2; i++) {
       const take = Math.min(2.2 - hook.duration, scenes[i].duration - 1);
