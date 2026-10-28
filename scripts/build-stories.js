@@ -43,6 +43,8 @@ const { appendSpokenTeaser, fallbackTeaser, endingCandidates } = require('./lib/
 const { withCloseUps, shortSceneCount } = require('./lib/close-ups');
 const { devotionalTrends } = require('./lib/trends');
 const { slowOpening, sharpenOpening, hookTextOf } = require('./lib/hooks');
+const { renderShortThumbnail } = require('./lib/episode-thumbnail');
+const { theme } = require('./lib/genre-theme');
 const { iconographyFor } = require('./lib/iconography');
 const { styleOfDay, fitShort, devotionalArtStyle, storyArtStyle, shortsStyleKey } = require('./lib/short-style');
 const { mixDevotionalMusic } = require('./lib/devotional-music');
@@ -605,6 +607,7 @@ async function run() {
         let videoUrl = null;
         let reelVideoUrl = null;
         let shortPath = null;
+        let thumbPath = null;
         let videoSec = 0;
         if (igSlideUrls.length) {
           try {
@@ -685,6 +688,19 @@ async function run() {
               const per = Math.max(2, videoDur / scenes.length);
               scenes = scenes.map((s) => ({ file: s.file, duration: s.duration || per }));
             }
+            // The YouTube thumbnail: the opening picture (before captions are
+            // drawn on it) under the hook line. A render input only, so it
+            // stays out of the committed public/ folder.
+            try {
+              thumbPath = path.join(os.tmpdir(), `sb-thumb-${id}.jpg`);
+              fs.writeFileSync(thumbPath, await renderShortThumbnail({
+                art: fs.readFileSync(scenes[0].file), title: hookTextOf(content) || content.title,
+                accent: theme(slot.genre).accent,
+              }));
+            } catch (e) {
+              thumbPath = null;
+              console.warn(`  ⚠️  Thumbnail failed for ${id}: ${e.message}`);
+            }
             if (devotional) {
               // The whole katha, full-screen 9:16 in the day's look, over a
               // soft devotional music bed that carries on for a moment after
@@ -753,7 +769,7 @@ async function run() {
           }
         }
 
-        generated = { id, slot, content, duration: dur, igSlideUrls, igHook, videoUrl, reelVideoUrl, shortPath, videoSec };
+        generated = { id, slot, content, duration: dur, igSlideUrls, igHook, videoUrl, reelVideoUrl, shortPath, thumbPath, videoSec };
         await markSlotSuccess(slot);
         usedSlots.add(slotKey);
       } catch (e) {
@@ -901,7 +917,7 @@ async function run() {
       // never costs another. Reads straight off local disk, so it doesn't
       // need the Firebase Hosting deploy above to have happened first.
       const ytVideo = p.shortPath || (p.videoUrl && path.join(PUB, 'instagram', mediaKey(p.id), 'story.mp4'));
-      const ytPost = ytVideo ? await postStoryToYouTube(socialStory, ytVideo) : { posted: false };
+      const ytPost = ytVideo ? await postStoryToYouTube(socialStory, ytVideo, { thumbnailPath: p.thumbPath }) : { posted: false };
       // The story's page in the app plays its Short too (StoryDetailScreen).
       if (ytPost.posted && ytPost.videoId) {
         await db.collection('stories').doc(p.id).update({ youtubeId: ytPost.videoId, youtubeKind: 'short' })

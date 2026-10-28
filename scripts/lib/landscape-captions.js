@@ -71,8 +71,17 @@ function assEscape(text) {
 }
 
 /** Captions font per narration language — both are installed by the workflow. */
+// Community stories come in every language the app offers (src/types/story.js
+// LANGUAGES); each script needs a font that has its glyphs (fonts-noto-core
+// and fonts-lohit-deva, installed by the workflows).
+const CAPTION_FONTS = {
+  hi: 'Lohit Devanagari', mr: 'Lohit Devanagari', bn: 'Noto Sans Bengali', ta: 'Noto Sans Tamil',
+  te: 'Noto Sans Telugu', gu: 'Noto Sans Gujarati', kn: 'Noto Sans Kannada', ml: 'Noto Sans Malayalam',
+  or: 'Noto Sans Oriya', ur: 'Noto Naskh Arabic',
+};
+
 function captionFont(language) {
-  return language === 'hi' ? 'Lohit Devanagari' : 'DejaVu Sans';
+  return CAPTION_FONTS[language] || 'DejaVu Sans';
 }
 
 function buildAss(lines, { width = 1920, height = 1080, font = 'DejaVu Sans' } = {}) {
