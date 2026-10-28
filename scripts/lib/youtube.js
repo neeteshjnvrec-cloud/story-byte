@@ -107,6 +107,27 @@ async function postStoryToYouTube(story, videoPath) {
 const ytSafe = (s) => String(s || '').replace(/[<>]/g, '');
 
 /**
+ * With YOUTUBE_CHANNEL_ID set (the Life of Jesus workflow), why the token
+ * can't be used — it belongs to another channel, or the check failed — else
+ * null. Stops a token minted on the wrong channel from posting there.
+ */
+async function wrongChannel(youtube) {
+  const expected = String(process.env.YOUTUBE_CHANNEL_ID || '').trim();
+  if (!expected) return null;
+  try {
+    const res = await youtube.channels.list({ part: ['snippet'], mine: true });
+    const mine = (res.data.items || [])[0];
+    if (mine?.id === expected) return null;
+    const reason = `the YouTube token is for ${mine ? `"${mine.snippet?.title}" (${mine.id})` : 'no channel'}, not ${expected}`;
+    console.warn(`  ⚠️  Not uploading: ${reason} — re-mint it on the right channel (YOUTUBE-SETUP.md)`);
+    return reason;
+  } catch (e) {
+    console.warn(`  ⚠️  Not uploading: couldn't check the token's channel: ${e.message}`);
+    return `channel check failed: ${e.message}`;
+  }
+}
+
+/**
  * Uploads a long-form landscape episode, then sets its custom thumbnail.
  * Separate from postStoryToYouTube (the daily Reels' upload) so the two
  * pipelines never change each other's behaviour.
@@ -126,6 +147,8 @@ async function uploadEpisodeToYouTube({ videoPath, thumbnailPath, title, descrip
     return { posted: false, reason: 'not_configured' };
   }
   if (!videoPath || !fs.existsSync(videoPath)) return { posted: false, reason: 'no_video' };
+  const wrong = await wrongChannel(youtube);
+  if (wrong) return { posted: false, reason: wrong };
 
   // Too close (or past) and YouTube rejects the time: publish right away.
   const scheduled = publishAt && new Date(publishAt).getTime() - Date.now() > 5 * 60e3;

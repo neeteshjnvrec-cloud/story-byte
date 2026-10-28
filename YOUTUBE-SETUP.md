@@ -121,6 +121,33 @@ Client ID and Client Secret from Google Cloud Console's Credentials
 page for that client, and a refresh token minted by running
 `youtube-auth.js` with those exact same two values.
 
+## 📺 A second channel (Life of Jesus)
+
+The Life of Jesus series (`.github/workflows/life-of-jesus.yml`) uploads to
+its own YouTube channel, [@TheMysteryJesus](https://www.youtube.com/channel/UCVAOB3qVcF_xeW0yuPEr5Pg),
+never StoryByte's: the workflow sets that channel's ID, and an upload stops
+if the token belongs to any other channel. It needs that channel's own
+refresh token; the Client ID and Secret above can be reused.
+
+1. If the channel is on a different Google account from StoryByte's, add
+   that account under **OAuth consent screen → Test users** first.
+2. Mint a token as in Step 4, but in the browser pick **TheMysteryJesus** when Google
+   asks which account or channel to use:
+   ```bash
+   cd scripts
+   YOUTUBE_CLIENT_ID=your-client-id YOUTUBE_CLIENT_SECRET=your-client-secret node youtube-auth.js
+   ```
+3. Add it as the GitHub secret **`JESUS_YOUTUBE_REFRESH_TOKEN`**. Only if
+   you made a separate OAuth client for it, also add
+   `JESUS_YOUTUBE_CLIENT_ID` and `JESUS_YOUTUBE_CLIENT_SECRET`.
+4. Verify the new channel's phone number (youtube.com/verify) so custom
+   thumbnails work.
+
+Like StoryByte's, this token expires about every 7 days while the app is in
+Testing mode: re-mint it the same way when the run fails with an auth error.
+Without the secret nothing is uploaded and the run fails; it never falls back
+to StoryByte's channel.
+
 ## 🎙️ Backup voice (free)
 
 Narration normally uses Microsoft's free edge-tts voice. That service is

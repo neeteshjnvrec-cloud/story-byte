@@ -26,7 +26,9 @@
  * e.g. ramayan.js). Each episode tells exactly its planned events with the
  * plan's cast, so nothing is invented or skipped, ends on the epic's own
  * turning point with a teaser of the next episode, and goes into one
- * YouTube playlist.
+ * YouTube playlist. A plan with `storybyte: false` (the Life of Jesus, on
+ * its own YouTube channel) leaves out the StoryByte app and channels, and
+ * its episodes stay out of the app and the website.
  */
 const Groq = require('groq-sdk');
 const { execFileSync } = require('child_process');
@@ -85,9 +87,9 @@ const { appLink } = require('./lib/app-link');
 const APP_CAMPAIGN = KATHA ? 'weekly_katha' : EPIC ? `${EPIC.key}_series` : 'long_episode';
 const APP_LINK = appLink('youtube', APP_CAMPAIGN);
 
-const voice = language === 'hi'
+const voice = process.env.EPISODE_VOICE || (language === 'hi'
   ? 'hi-IN-SwaraNeural'
-  : 'en-US-AriaNeural';
+  : 'en-US-AriaNeural');
 
 // ~15 minutes of narration: edge-tts runs ~140-160 words/minute depending on
 // voice and language (a real Hindi render measured 142 wpm).
@@ -335,8 +337,17 @@ async function bootstrapBible(groq, previous) {
  * (Sita isn't in the cast of Tataka's killing).
  */
 function epicCast() {
+  // Longest names first, each taking its words out of the text, so "Joseph of
+  // Arimathea" doesn't also bring in Joseph the carpenter.
+  let text = EPIC_EP.events;
+  const named = new Set();
+  for (const c of [...EPIC.cast].sort((a, b) => b.name.length - a.name.length)) {
+    const re = new RegExp(`\\b${c.name}\\b`, 'g');
+    if (re.test(text)) named.add(c.name);
+    text = text.replace(re, ' ');
+  }
   return EPIC.cast
-    .filter((c) => new RegExp(`\\b${c.name}\\b`).test(EPIC_EP.events))
+    .filter((c) => named.has(c.name))
     .map((c) => ({ name: c.name, nativeName: c.nativeName, role: c.role, look: c.look || iconographyFor(c.name)[0]?.look || '' }))
     .filter((c) => c.look);
 }
@@ -400,7 +411,7 @@ function kathaPlanPrompt() {
 function epicPlanPrompt(bible) {
   const n = Number(episode);
   const previous = EPIC.episodes[n - 2];
-  return `You plan episode ${n} of ${EPIC.episodes.length} of "${EPIC.hindiTitle}", a narrated Hindi YouTube series that ` +
+  return `You plan episode ${n} of ${EPIC.episodes.length} of "${EPIC.seriesName}", a narrated YouTube series in ${languageName()} that ` +
     `retells the ${EPIC.name} faithfully and in order, as told in ${EPIC.source}. ` +
     `This episode (${EPIC_EP.kand}, "${EPIC_EP.title}") tells exactly these events, from start to end, and nothing else: ` +
     `${EPIC_EP.events}\n` +
@@ -507,7 +518,7 @@ function trimToWords(text, maxWords, { keepEnding = false } = {}) {
 // plants an open question every minute and a half, ends each part on a
 // turn, and ends the episode on a cliffhanger with a teaser of the next.
 const COLD_OPEN = EPIC
-  ? 'Open cold — no greeting, no recap, no "एक समय की बात है", no scene-setting: the first 3-4 sentences (about 30 ' +
+  ? `Open cold — no greeting, no recap, no "${language === 'hi' ? 'एक समय की बात है' : 'Once upon a time'}", no scene-setting: the first 3-4 sentences (about 30 ` +
     'seconds) drop the listener into the most dramatic moment of this episode\'s events and end on the question it ' +
     'raises; then go back and tell how it came to this. The very first sentence has at most 12 words. '
   : KATHA
@@ -593,7 +604,7 @@ async function withSharpOpening(groq, plan, text) {
   try {
     const sharper = await sharpenOpening((sys, user) => groqJson(groq, sys, user, 2500), {
       title: plan.title, text,
-      what: KATHA ? 'long Hindi devotional katha video on YouTube' : EPIC ? `long Hindi ${EPIC.name} episode on YouTube` : `long ${genre} audio-drama episode on YouTube`,
+      what: KATHA ? 'long Hindi devotional katha video on YouTube' : EPIC ? `long ${language === 'hi' ? 'Hindi' : 'English'} ${EPIC.name} episode on YouTube` : `long ${genre} audio-drama episode on YouTube`,
       hookStyle: 'drop the listener into the most dramatic moment of the story, or a question they must have answered',
     });
     if (sharper) {
@@ -803,6 +814,9 @@ function looksFor(description, bible) {
 let seriesStyle = 'illustration';
 
 function styleText() {
+  // A plan can set its own look (the Life of Jesus: a biblical film still;
+  // the shared styles describe Indian mythology).
+  if (EPIC?.artStyle) return EPIC.artStyle;
   return seriesStyle === 'illustration'
     ? 'cinematic widescreen 16:9 illustration, no text, no captions, no letters, no logos, no words'
     : artStyleFor(seriesStyle, { orientation: 'wide' });
@@ -934,8 +948,10 @@ function epicMetadata({ plan, cues, parts }) {
   const previous = EPIC.episodes[n - 2];
   const previousUrl = previous && previousEpisodeUrl();
   const chapters = chapterMarks(cues, parts, plan.chapters);
-  const videoTitle = `${EPIC.hindiTitle} एपिसोड ${n}: ${plan.title} | ${EPIC.name} Episode ${n}`.slice(0, 100);
-  const tags = [`${EPIC.hindiTitle} एपिसोड ${n}`, `${EPIC.name} episode ${n}`, plan.title, ...EPIC.tags, 'StoryByte'];
+  const w = EPIC.words;
+  const videoTitle = EPIC.videoTitle(n, plan.title).slice(0, 100);
+  const tags = [`${EPIC.seriesName} ${w.episode} ${n}`, `${EPIC.name} episode ${n}`, plan.title, ...EPIC.tags,
+    ...(EPIC.storybyte ? ['StoryByte'] : [])];
   const cappedTags = [];
   for (const tag of [...new Set(tags)]) {
     if ([...cappedTags, tag].join(',').length > 450) break;
@@ -944,16 +960,15 @@ function epicMetadata({ plan, cues, parts }) {
   const description = [
     plan.description,
     '',
-    `📖 ${EPIC.hindiTitle} — एपिसोड ${n} / ${EPIC.episodes.length} (${EPIC_EP.kand})`,
-    ...(previous ? [`⏪ पिछला एपिसोड: ${previous.title}${previousUrl ? ` ${previousUrl}` : ''}`] : []),
-    ...(EPIC_NEXT ? [`⏩ अगला एपिसोड: ${EPIC_NEXT.title} — ${EPIC.schedule}`] : []),
-    ...(chapters.length ? ['', '⏱️ अध्याय', ...chapters.map((m) => `${timestamp(m.time)} ${m.label}`)] : []),
+    `📖 ${EPIC.seriesName} — ${w.episode} ${n} / ${EPIC.episodes.length} (${EPIC_EP.kand})`,
+    ...(previous ? [`${w.previous}: ${previous.title}${previousUrl ? ` ${previousUrl}` : ''}`] : []),
+    ...(EPIC_NEXT ? [`${w.next}: ${EPIC_NEXT.title} — ${EPIC.schedule}`] : []),
+    ...(chapters.length ? ['', w.chapters, ...chapters.map((m) => `${timestamp(m.time)} ${m.label}`)] : []),
     '',
-    `🙏 पूरी ${EPIC.hindiTitle} क्रम से देखने के लिए चैनल सब्सक्राइब करें`,
-    `📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: ${APP_LINK}`,
-    ...followLines(),
+    w.subscribe,
+    ...(EPIC.storybyte ? [`📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: ${APP_LINK}`, ...followLines()] : []),
     '',
-    [...new Set([...EPIC.hashtags, `#${EPIC.name}Episode${n}`, '#StoryByte'])].join(' '),
+    [...new Set([...EPIC.hashtags, `#${EPIC.name.replace(/\W+/g, '')}Episode${n}`, ...(EPIC.storybyte ? ['#StoryByte'] : [])])].join(' '),
   ].join('\n');
   return { title: videoTitle, description, tags: cappedTags, chapters };
 }
@@ -1154,7 +1169,7 @@ async function main() {
   fs.writeFileSync(thumbnailPath, await renderEpisodeThumbnail(KATHA
     ? { art, seriesTitle: KATHA_DEITY ? `${KATHA_DEITY} की कथा` : title, episodeTitle: plan.title.replace(/^[^:]*:\s*/, ''), accent, badge: 'पूरी कथा' }
     : EPIC
-      ? { art, seriesTitle: EPIC.hindiTitle, episodeTitle: plan.title, accent, badge: `एपिसोड ${episode}` }
+      ? { art, seriesTitle: EPIC.seriesName, episodeTitle: plan.title, accent, badge: `${EPIC.words.episode} ${episode}`.toUpperCase(), brand: EPIC.storybyte ? 'StoryByte' : '' }
       : { art, seriesTitle: title, season, episode, episodeTitle: plan.title, accent }));
 
   const metadata = buildMetadata({ plan, bible, cues: parsed, parts });
@@ -1172,7 +1187,7 @@ async function main() {
     if (EPIC && published.youtube?.posted) {
       bible.playlistId = await addToYouTubePlaylist(published.youtube.videoId, {
         playlistId: bible.playlistId, title: EPIC.playlistTitle,
-        description: `${EPIC.hindiTitle} की सम्पूर्ण कथा, क्रम से — ${EPIC.schedule} नया एपिसोड। StoryByte`,
+        description: EPIC.playlistDescription,
       }) || bible.playlistId;
       saveBible(bible, plan);
     }
@@ -1195,6 +1210,9 @@ async function main() {
         episode,
         // Read by scripts/prune-old-videos.js to age out episode.mp4.
         renderedAt: new Date().toISOString(),
+        // A series on its own channel stays out of the app and the website
+        // (lib/site-index.js readLongVideos).
+        ...(EPIC && !EPIC.storybyte && { inApp: false }),
         genre,
         language,
         generatedTitle: plan.title,
@@ -1244,7 +1262,10 @@ async function main() {
 
   // Rendering succeeded but a requested upload didn't — fail the job so it's
   // noticed, now that the rendered episode and bible are already saved.
-  if (publish && (!published.youtube?.posted || !published.facebook?.posted)) {
+  // A platform left unconfigured on purpose (the Life of Jesus has no
+  // Facebook page) isn't a failure; YouTube always has to work.
+  const unposted = (p) => !p?.posted && p?.reason !== 'not_configured';
+  if (publish && (!published.youtube?.posted || unposted(published.facebook))) {
     throw new Error('Episode rendered, but publishing failed — see the warnings above');
   }
 }

@@ -11,7 +11,7 @@ const W = 1280;
 const H = 720;
 const FONT = "'Noto Sans Devanagari', 'Lohit Devanagari', 'DejaVu Sans', sans-serif";
 
-async function renderEpisodeThumbnail({ art, seriesTitle, season = '1', episode, episodeTitle, accent = '#ffd54f', badge: badgeText }) {
+async function renderEpisodeThumbnail({ art, seriesTitle, season = '1', episode, episodeTitle, accent = '#ffd54f', badge: badgeText, brand = 'StoryByte' }) {
   const base = await sharp(art).resize(W, H, { fit: 'cover', position: 'attention' }).toBuffer();
 
   const titleLines = wrapLines(String(seriesTitle || '').toUpperCase(), 16, 3);
@@ -40,7 +40,7 @@ async function renderEpisodeThumbnail({ art, seriesTitle, season = '1', episode,
       ${tspans(titleLines, { x: 56, startY: titleY, lineHeight: titleLh })}
     </text>
     ${subLines.length ? `<text font-family="${FONT}" font-weight="700" font-size="40" fill="${accent}" stroke="#000" stroke-width="4" paint-order="stroke">${tspans(subLines, { x: 60, startY: subY, lineHeight: 50 })}</text>` : ''}
-    <text x="60" y="${H - 44}" font-family="${FONT}" font-weight="700" font-size="28" fill="#fff" fill-opacity="0.85">StoryByte</text>
+    ${brand ? `<text x="60" y="${H - 44}" font-family="${FONT}" font-weight="700" font-size="28" fill="#fff" fill-opacity="0.85">${brand}</text>` : ''}
   </svg>`;
 
   const overlay = await sharp(Buffer.from(svg)).png().toBuffer();

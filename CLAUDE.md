@@ -9,6 +9,7 @@ Audio short-stories app: Expo SDK 57 / React Native 0.86 / React 19, Firebase on
 - `firestore/firestore.rules.json` — the live Firestore rules (`firebase.json` points here).
 - `scripts/occasions.js` — festival days (2026–2027) with an `eveKatha` (posted the afternoon before by the 12:53 PM IST festival-eve run) and a morning `katha`; `scripts/lib/devotional-calendar.js` — weekday deities and Navratri. Add the next year's dates before January.
 - `scripts/epics/ramayan.js` — the Ramayan's fixed episode plan (events and cast per episode), rendered Mon/Wed/Fri by `epic-episode.js` (`.github/workflows/ramayan.yml`). Don't render Ramayan episodes with Test Landscape Episode: it would skip the plan.
+- `scripts/epics/life-of-jesus.js` — the same for the Life of Jesus (English, Tue/Thu/Sat, `.github/workflows/life-of-jesus.yml`) on its **own YouTube channel** (`JESUS_YOUTUBE_REFRESH_TOKEN`): `storybyte: false` keeps it out of the app, website, Facebook and Telegram, and off StoryByte's channel.
 - `firestore/tests/` — emulator tests for the rules. The **Deploy Firestore Rules** workflow runs them before deploying.
 
 ## Rules that aren't obvious from the code

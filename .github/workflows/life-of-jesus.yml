@@ -1,0 +1,110 @@
+name: Life of Jesus Episodes
+
+# The life of Jesus in 39 English episodes of ~15 minutes, in order from the
+# Gospels, every Tuesday, Thursday and Saturday, public at 18:00 IST on its
+# own YouTube channel (not StoryByte's: no Facebook, Telegram, app or
+# website). The episode plan is scripts/epics/life-of-jesus.js; see
+# scripts/epic-episode.js and YOUTUBE-SETUP.md → "A second channel".
+on:
+  schedule:
+    # Tue/Thu/Sat 16:37 IST (11:07 UTC): rendering takes 30-60 minutes, and
+    # the video is scheduled for 18:00 (07:30 in New York, 12:30 in London).
+    - cron: '7 11 * * 2,4,6'
+  workflow_dispatch:
+    inputs:
+      episode:
+        description: 'Episode number (blank = the next one; a number remakes that episode)'
+        required: false
+        default: ''
+        type: string
+      publish:
+        description: 'Publish to the Life of Jesus YouTube channel'
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: life-of-jesus
+  cancel-in-progress: false
+
+jobs:
+  episode:
+    runs-on: ubuntu-latest
+    # About 30-40 minutes end to end on a standard runner.
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install rendering tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install edge-tts uv
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-lohit-deva fonts-dejavu-core
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Install pipeline dependencies
+        working-directory: scripts
+        run: npm install
+      - name: Render and publish the next episode
+        working-directory: scripts
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNTS: ${{ secrets.CLOUDFLARE_ACCOUNTS }}
+          # Backup narration if Microsoft's free voice keeps refusing
+          # (scripts/lib/backup-voice.js).
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          EPIC: life-of-jesus
+          EPIC_EPISODE: ${{ inputs.episode }}
+          # Scheduled runs go public on YouTube at 18:00 IST; a manual run right away.
+          PUBLISH_HOUR_IST: ${{ github.event_name == 'schedule' && '18' || '' }}
+          # A scheduled run has no inputs — publish then too.
+          EPISODE_PUBLISH: ${{ github.event_name == 'schedule' || inputs.publish }}
+          # The Life of Jesus channel's own login (YOUTUBE-SETUP.md → "A second
+          # channel"). Never StoryByte's token: without JESUS_YOUTUBE_REFRESH_TOKEN
+          # nothing is uploaded and the run fails.
+          YOUTUBE_CLIENT_ID: ${{ secrets.JESUS_YOUTUBE_CLIENT_ID || secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.JESUS_YOUTUBE_CLIENT_SECRET || secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.JESUS_YOUTUBE_REFRESH_TOKEN }}
+          # @TheMysteryJesus: uploads stop if the token is for any other channel.
+          YOUTUBE_CHANNEL_ID: UCVAOB3qVcF_xeW0yuPEr5Pg
+        run: node epic-episode.js
+      # The mp4 is over GitHub's file limit and YouTube/Facebook keep their
+      # own copies; it's downloadable from the run page for a day.
+      - name: Keep the rendered video for a day
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: life-of-jesus-episode
+          path: public/episodes/life-of-jesus/**/*.mp4
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: ignore
+      - name: Save the episode's text, captions and thumbnail
+        if: always()
+        run: |
+          git config user.name "storybyte-life-of-jesus"
+          git config user.email "bot@storybyte.app"
+          # A failed run leaves empty files (e.g. a 0-byte audio.mp3) — never commit those.
+          find public/episodes -type f -size 0 -delete 2>/dev/null || true
+          git add public/episodes/life-of-jesus 2>/dev/null || true
+          git commit -m "chore: Life of Jesus episode $(date -u +%F)" || echo "nothing to commit"
+          for delay in 2 4 8 16; do
+            git pull --rebase --autostash || true
+            git push && exit 0
+            sleep "$delay"
+          done
+          exit 1
+

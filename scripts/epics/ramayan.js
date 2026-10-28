@@ -21,12 +21,23 @@ module.exports = {
   // The series folder (public/episodes/ramayan) is named from this.
   title: 'Ramayan',
   name: 'Ramayan',
-  hindiTitle: 'रामायण',
+  seriesName: 'रामायण',
+  language: 'hi',
+  genre: 'devotional mythology',
   source: 'Valmiki Ramayana and Goswami Tulsidas\'s Ramcharitmanas (where they differ, the version Hindi-speaking ' +
     'families know from the Ramcharitmanas)',
   closing: 'जय श्री राम',
   schedule: 'हर सोमवार, बुधवार और शुक्रवार सुबह 10 बजे',
   playlistTitle: 'रामायण — सम्पूर्ण कथा | Ramayan All Episodes in Hindi',
+  playlistDescription: 'रामायण की सम्पूर्ण कथा, क्रम से — हर सोमवार, बुधवार और शुक्रवार सुबह 10 बजे नया एपिसोड। StoryByte',
+  // A StoryByte series: app link and channels in the description, and the
+  // episodes in the app and on the website.
+  storybyte: true,
+  words: {
+    episode: 'एपिसोड', previous: '⏪ पिछला एपिसोड', next: '⏩ अगला एपिसोड', chapters: '⏱️ अध्याय',
+    subscribe: '🙏 पूरी रामायण क्रम से देखने के लिए चैनल सब्सक्राइब करें',
+  },
+  videoTitle: (n, title) => `रामायण एपिसोड ${n}: ${title} | Ramayan Episode ${n}`,
   hashtags: ['#Ramayan', '#रामायण', '#JaiShriRam', '#RamKatha', '#SanatanDharma'],
   tags: ['रामायण', 'Ramayan', 'ramayan in hindi', 'ramayan katha', 'ram katha', 'रामायण कथा', 'jai shri ram',
     'ramayan full story', 'valmiki ramayan', 'ramcharitmanas'],
