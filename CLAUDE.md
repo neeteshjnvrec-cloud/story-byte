@@ -8,6 +8,7 @@ Audio short-stories app: Expo SDK 57 / React Native 0.86 / React 19, Firebase on
 - `public/` — Firebase Hosting: the website plus story audio (`public/audio`) and covers (`public/covers`), committed so each deploy keeps them.
 - `firestore/firestore.rules.json` — the live Firestore rules (`firebase.json` points here).
 - `scripts/occasions.js` — festival days (2026–2027) with an `eveKatha` (posted the afternoon before by the 12:53 PM IST festival-eve run) and a morning `katha`; `scripts/lib/devotional-calendar.js` — weekday deities and Navratri. Add the next year's dates before January.
+- `scripts/epics/ramayan.js` — the Ramayan's fixed episode plan (events and cast per episode), rendered Mon/Wed/Fri by `epic-episode.js` (`.github/workflows/ramayan.yml`). Don't render Ramayan episodes with Test Landscape Episode: it would skip the plan.
 - `firestore/tests/` — emulator tests for the rules. The **Deploy Firestore Rules** workflow runs them before deploying.
 
 ## Rules that aren't obvious from the code

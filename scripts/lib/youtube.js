@@ -114,8 +114,12 @@ const ytSafe = (s) => String(s || '').replace(/[<>]/g, '');
  * The thumbnail step can fail on its own — YouTube only allows custom
  * thumbnails on phone-verified channels — so the video is still reported as
  * published and `thumbnailSet` says whether the thumbnail made it.
+ *
+ * `publishAt` (an ISO time at least a few minutes ahead) uploads the video
+ * private and lets YouTube make it public then, so a series goes up at the
+ * same time each day however long the render took.
  */
-async function uploadEpisodeToYouTube({ videoPath, thumbnailPath, title, description, tags = [], language, privacy = 'public' }) {
+async function uploadEpisodeToYouTube({ videoPath, thumbnailPath, title, description, tags = [], language, privacy = 'public', publishAt }) {
   const youtube = client();
   if (!youtube) {
     console.log('  ℹ️  YouTube not configured — skipping (see YOUTUBE-SETUP.md).');
@@ -123,6 +127,8 @@ async function uploadEpisodeToYouTube({ videoPath, thumbnailPath, title, descrip
   }
   if (!videoPath || !fs.existsSync(videoPath)) return { posted: false, reason: 'no_video' };
 
+  // Too close (or past) and YouTube rejects the time: publish right away.
+  const scheduled = publishAt && new Date(publishAt).getTime() - Date.now() > 5 * 60e3;
   let videoId;
   try {
     const res = await youtube.videos.insert({
@@ -136,12 +142,16 @@ async function uploadEpisodeToYouTube({ videoPath, thumbnailPath, title, descrip
           defaultLanguage: language,
           defaultAudioLanguage: language,
         },
-        status: { privacyStatus: privacy, selfDeclaredMadeForKids: false },
+        status: scheduled
+          ? { privacyStatus: 'private', publishAt, selfDeclaredMadeForKids: false }
+          : { privacyStatus: privacy, selfDeclaredMadeForKids: false },
       },
       media: { body: fs.createReadStream(videoPath) },
     });
     videoId = res.data.id;
-    console.log(`  ✅ YouTube episode published: https://youtu.be/${videoId}`);
+    console.log(scheduled
+      ? `  ✅ YouTube episode uploaded, public at ${publishAt}: https://youtu.be/${videoId}`
+      : `  ✅ YouTube episode published: https://youtu.be/${videoId}`);
   } catch (e) {
     console.warn(`  ⚠️  YouTube episode upload failed: ${e.message}`);
     return { posted: false, reason: e.message };
@@ -157,7 +167,36 @@ async function uploadEpisodeToYouTube({ videoPath, thumbnailPath, title, descrip
       console.warn(`  ⚠️  YouTube thumbnail failed (custom thumbnails need a phone-verified channel): ${e.message}`);
     }
   }
-  return { posted: true, videoId, url: `https://youtu.be/${videoId}`, thumbnailSet };
+  return { posted: true, videoId, url: `https://youtu.be/${videoId}`, thumbnailSet, ...(scheduled && { publishAt }) };
+}
+
+/**
+ * Adds `videoId` to the playlist `playlistId`, or to a new public playlist
+ * titled `title` when there's no id yet. Returns the playlist id (to keep for
+ * the next episode), or null. Needs the youtube.force-ssl scope, like
+ * commentOnYouTube; never fails the upload.
+ */
+async function addToYouTubePlaylist(videoId, { playlistId, title, description = '' }) {
+  const youtube = client();
+  if (!youtube || !videoId) return null;
+  try {
+    let id = playlistId;
+    if (!id) {
+      const res = await youtube.playlists.insert({
+        part: ['snippet', 'status'],
+        requestBody: { snippet: { title: ytSafe(title).slice(0, 150), description: ytSafe(description).slice(0, 5000) }, status: { privacyStatus: 'public' } },
+      });
+      id = res.data.id;
+      console.log(`  📃 YouTube playlist created: https://www.youtube.com/playlist?list=${id}`);
+    }
+    await youtube.playlistItems.insert({ part: ['snippet'], requestBody: { snippet: { playlistId: id, resourceId: { kind: 'youtube#video', videoId } } } });
+    console.log('  📃 Added to the YouTube playlist');
+    return id;
+  } catch (e) {
+    const scope = /insufficient|permission|scope/i.test(e.message) ? ' — re-mint YOUTUBE_REFRESH_TOKEN with the youtube.force-ssl scope (YOUTUBE-SETUP.md)' : '';
+    console.warn(`  ⚠️  YouTube playlist failed: ${e.message}${scope}`);
+    return playlistId || null;
+  }
 }
 
 /**
@@ -184,4 +223,4 @@ async function commentOnYouTube(videoId, text) {
   }
 }
 
-module.exports = { postStoryToYouTube, uploadEpisodeToYouTube, commentOnYouTube };
+module.exports = { postStoryToYouTube, uploadEpisodeToYouTube, commentOnYouTube, addToYouTubePlaylist };
