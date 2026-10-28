@@ -268,6 +268,8 @@ function readLongVideos(pubDir) {
         } catch {
           continue;
         }
+        // A series on its own YouTube channel (scripts/epics/, storybyte: false).
+        if (story.inApp === false) continue;
         const yt = story.published?.youtube;
         const id = (String(yt?.url || '').match(/youtu\.be\/([\w-]{11})/) || [])[1] || yt?.videoId;
         if (!yt?.posted || !id) continue;

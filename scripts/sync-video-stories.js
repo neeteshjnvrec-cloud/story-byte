@@ -18,6 +18,9 @@
  *      (reports/social/latest.json), matching the Short's title to the
  *      story's socialTitle the same way scripts/analyze-social.js does.
  *
+ * A video story whose episode is no longer in public/episodes (a remade or
+ * withdrawn episode) gets status "removed", which hides it in the app.
+ *
  * Idempotent; counters (plays, likes, ratings…) are only set when a video
  * story is first created. Credentials: FIREBASE_SERVICE_ACCOUNT, or a local
  * functions/firebase-service-account.json (git-ignored), as for
@@ -154,6 +157,18 @@ async function main() {
       };
       if (DRY) { console.log(`  ${existing.exists ? 'update' : 'create'} ${v.id}  ${v.data.title}`); continue; }
       await ref.set({ ...v.data, updatedAt: FieldValue.serverTimestamp(), ...counters }, { merge: true });
+    }
+
+    // Video stories whose episode was removed from public/episodes. Never
+    // when the list is empty: that's a missing checkout, not a withdrawal.
+    if (videos.length) {
+      const listed = new Set(videos.map((v) => v.id));
+      const live = await db.collection('stories').where('status', '==', 'video').get();
+      for (const d of live.docs.filter((doc) => !listed.has(doc.id))) {
+        if (DRY) { console.log(`  remove ${d.id}  ${d.data().title}`); continue; }
+        await d.ref.update({ status: 'removed', updatedAt: FieldValue.serverTimestamp() });
+        console.log(`  🗑️  ${d.id} hidden (${d.data().title})`);
+      }
     }
 
     // 2. Older Shorts onto their daily stories, and community stories' videos.

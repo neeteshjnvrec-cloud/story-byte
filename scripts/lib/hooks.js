@@ -62,7 +62,7 @@ async function sharpenOpening(askJson, { title, text, hookStyle, what = 'Hindi d
     `The first sentence has at most ${MAX_HOOK_WORDS - 6} words and already holds the conflict, the question or the ` +
     'astonishing moment. Never begin with एक समय, एक बार, बहुत समय पहले, प्राचीन काल, कहा जाता है or यह कथा. ' +
     'Then bridge in one short sentence so the story carries on naturally into its next sentence, which stays as it is. ' +
-    'Same language and spoken style; faithful to the traditional katha, no invented events. ' +
+    'Same language and spoken style; faithful to the traditional story, no invented events. ' +
     'Reply with JSON only: {"opening": string}.';
   const user = `Title: ${title}\nOpening to rewrite: ${opening}\nThe sentence that follows it (unchanged): ${next}`;
   const reply = await askJson(sys, user);

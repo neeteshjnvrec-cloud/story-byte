@@ -20,6 +20,15 @@
  * katha under the Hindi title people search for ("शिव जी की कथा: …") —
  * long-form videos are what YouTube search ranks and what builds watch
  * hours, which Shorts mostly don't. Standalone: no bible, no cliffhanger.
+ *
+ * Epic mode (EPISODE_EPIC set, run Mon/Wed/Fri by epic-episode.js): a
+ * series that retells an epic in order from a fixed plan (scripts/epics/,
+ * e.g. ramayan.js). Each episode tells exactly its planned events with the
+ * plan's cast, so nothing is invented or skipped, ends on the epic's own
+ * turning point with a teaser of the next episode, and goes into one
+ * YouTube playlist. A plan with `storybyte: false` (the Life of Jesus, on
+ * its own YouTube channel) leaves out the StoryByte app and channels, and
+ * its episodes stay out of the app and the website.
  */
 const Groq = require('groq-sdk');
 const { execFileSync } = require('child_process');
@@ -38,13 +47,14 @@ const { GENRE_THEME, theme } = require('./lib/genre-theme');
 const { artStyleFor, styleKey, shortsStyleKey } = require('./lib/short-style');
 const { iconographyFor } = require('./lib/iconography');
 const { renderEpisodeThumbnail, THUMB_WIDTH, THUMB_HEIGHT } = require('./lib/episode-thumbnail');
-const { uploadEpisodeToYouTube } = require('./lib/youtube');
+const { uploadEpisodeToYouTube, addToYouTubePlaylist } = require('./lib/youtube');
 const { uploadEpisodeToFacebook } = require('./lib/facebook');
 const { postEpisodeToTelegram } = require('./lib/telegram');
 const { pause, RETRY_WAITS_SEC } = require('./lib/narrate');
 const { synthSarvam } = require('./lib/sarvam-tts');
 const { synthBackup } = require('./lib/backup-voice');
 const { slowOpening, sharpenOpening } = require('./lib/hooks');
+const { deityReference } = require('./lib/video-scenes');
 
 const ROOT = path.resolve(__dirname, '..');
 const PUBLIC = path.join(ROOT, 'public');
@@ -64,14 +74,22 @@ const KATHA_DEITY = String(process.env.EPISODE_DEITY || '').trim();
 const KATHA_SEARCHES = String(process.env.EPISODE_SEARCHES || '').split('\n').map((s) => s.trim()).filter(Boolean).slice(0, 8);
 const KATHA_HASHTAGS = String(process.env.EPISODE_HASHTAGS || '').split(/\s+/).filter((t) => t.startsWith('#'));
 
+// Epic mode (see the header): the plan, and this episode's entry in it.
+// EPISODE_PUBLISH_AT schedules the YouTube video (an ISO time).
+const EPIC = process.env.EPISODE_EPIC ? require(`./epics/${process.env.EPISODE_EPIC}`) : null;
+const EPIC_EP = EPIC && EPIC.episodes[Number(episode) - 1];
+if (EPIC && !EPIC_EP) throw new Error(`${EPIC.name} has no episode ${episode} (its plan has ${EPIC.episodes.length})`);
+const EPIC_NEXT = EPIC && EPIC.episodes[Number(episode)];
+const PUBLISH_AT = String(process.env.EPISODE_PUBLISH_AT || '').trim() || undefined;
+
 const { appLink } = require('./lib/app-link');
 // Tagged for YouTube; the Facebook upload swaps in its own (see publish below).
-const APP_CAMPAIGN = KATHA ? 'weekly_katha' : 'long_episode';
+const APP_CAMPAIGN = KATHA ? 'weekly_katha' : EPIC ? `${EPIC.key}_series` : 'long_episode';
 const APP_LINK = appLink('youtube', APP_CAMPAIGN);
 
-const voice = language === 'hi'
+const voice = process.env.EPISODE_VOICE || (language === 'hi'
   ? 'hi-IN-SwaraNeural'
-  : 'en-US-AriaNeural';
+  : 'en-US-AriaNeural');
 
 // ~15 minutes of narration: edge-tts runs ~140-160 words/minute depending on
 // voice and language (a real Hindi render measured 142 wpm).
@@ -312,9 +330,38 @@ async function bootstrapBible(groq, previous) {
   };
 }
 
+/**
+ * An epic episode's cast: the plan's characters its events name, each with
+ * the plan's look or else their traditional one (lib/iconography.js). Only
+ * these are offered to the writer, so nobody turns up where they weren't
+ * (Sita isn't in the cast of Tataka's killing).
+ */
+function epicCast() {
+  // Longest names first, each taking its words out of the text, so "Joseph of
+  // Arimathea" doesn't also bring in Joseph the carpenter.
+  let text = EPIC_EP.events;
+  const named = new Set();
+  for (const c of [...EPIC.cast].sort((a, b) => b.name.length - a.name.length)) {
+    const re = new RegExp(`\\b${c.name}\\b`, 'g');
+    if (re.test(text)) named.add(c.name);
+    text = text.replace(re, ' ');
+  }
+  return EPIC.cast
+    .filter((c) => named.has(c.name))
+    .map((c) => ({ name: c.name, nativeName: c.nativeName, role: c.role, look: c.look || iconographyFor(c.name)[0]?.look || '' }))
+    .filter((c) => c.look);
+}
+
 async function loadBible(groq) {
   // Each katha stands alone — no characters or "story so far" carried over.
   if (KATHA) return null;
+  // An epic's cast comes from its plan every time, so fixing a look there
+  // fixes it from the next episode on; the bible keeps the episode summaries,
+  // the art style and the playlist.
+  if (EPIC) {
+    const saved = readJson(biblePath) || { seriesTitle: title, genre, language, episodes: [] };
+    return { ...saved, characters: epicCast(), setting: EPIC.setting };
+  }
   const existing = readJson(biblePath);
   if (existing?.characters?.length) return existing;
   const previous = previousEpisodes();
@@ -361,6 +408,26 @@ function kathaPlanPrompt() {
     'Refer to characters by name in the parts.';
 }
 
+function epicPlanPrompt(bible) {
+  const n = Number(episode);
+  const previous = EPIC.episodes[n - 2];
+  return `You plan episode ${n} of ${EPIC.episodes.length} of "${EPIC.seriesName}", a narrated YouTube series in ${languageName()} that ` +
+    `retells the ${EPIC.name} faithfully and in order, as told in ${EPIC.source}. ` +
+    `This episode (${EPIC_EP.kand}, "${EPIC_EP.title}") tells exactly these events, from start to end, and nothing else: ` +
+    `${EPIC_EP.events}\n` +
+    (previous ? `The previous episode told: ${previous.events}\n` : 'This is the first episode of the series.\n') +
+    (EPIC_NEXT ? `The next episode will tell: ${EPIC_NEXT.events} Tell none of it in this episode.\n` : 'This is the last episode of the series.\n') +
+    'Never invent characters, objects, powers or events, and nobody appears who isn\'t in these events: add only the ' +
+    'dialogue, feeling and detail of the traditional telling.\n' +
+    `Characters (use exactly these names):\n${characterBlock(bible)}\n${storySoFarBlock(bible)}\n\n` +
+    'Reply with JSON only: {"description": string, "chapters": [string, ...], "parts": [string, ...], ' +
+    '"newCharacters": [{"name": string, "nativeName": string, "role": string, "look": string}]}. ' +
+    `"description" is 1-2 enticing sentences and "chapters" exactly ${PARTS} short chapter titles, both in ${languageName()}. ` +
+    `"parts" has exactly ${PARTS} English entries, in order, each a 3-5 sentence summary; together they tell these events ` +
+    'from start to end, and the last part ends where these events end. "newCharacters" lists any other figure of the ' +
+    'traditional story who appears in these events (usually none), "look" their traditional appearance in English.';
+}
+
 async function planEpisode(groq, bible) {
   const continuity = bible
     ? `Series bible — recurring characters. Use these EXACT names with EXACT spellings; never rename anyone:\n` +
@@ -385,7 +452,9 @@ async function planEpisode(groq, bible) {
     'Refer to characters by name in the parts.';
   const plan = KATHA
     ? await groqJson(groq, kathaPlanPrompt(), `Plan the video of this katha now: ${KATHA}`, 5000)
-    : await groqJson(groq, system, `Plan season ${season} episode ${episode} now.`, 5000);
+    : EPIC
+      ? { ...await groqJson(groq, epicPlanPrompt(bible), `Plan episode ${episode} now.`, 5000), title: EPIC_EP.title }
+      : await groqJson(groq, system, `Plan season ${season} episode ${episode} now.`, 5000);
   const parts = Array.isArray(plan.parts) ? plan.parts.map((p) => String(p || '').trim()).filter(Boolean) : [];
   if (!plan.title || parts.length < PARTS) throw new Error('episode plan is missing a title or parts');
   const chapters = Array.isArray(plan.chapters) ? plan.chapters.map((c) => String(c || '').trim()).filter(Boolean) : [];
@@ -448,7 +517,11 @@ function trimToWords(text, maxWords, { keepEnding = false } = {}) {
 // of the way on average). So it opens cold on its most dramatic moment,
 // plants an open question every minute and a half, ends each part on a
 // turn, and ends the episode on a cliffhanger with a teaser of the next.
-const COLD_OPEN = KATHA
+const COLD_OPEN = EPIC
+  ? `Open cold — no greeting, no recap, no "${language === 'hi' ? 'एक समय की बात है' : 'Once upon a time'}", no scene-setting: the first 3-4 sentences (about 30 ` +
+    'seconds) drop the listener into the most dramatic moment of this episode\'s events and end on the question it ' +
+    'raises; then go back and tell how it came to this. The very first sentence has at most 12 words. '
+  : KATHA
   ? 'Open cold — no greeting, no "एक समय की बात है", no scene-setting: the first 3-4 sentences (about 30 seconds) drop ' +
     'the listener into the most astonishing moment of this katha and end on the question it raises; then go back and ' +
     'tell how it came to this. The very first sentence has at most 12 words. '
@@ -457,17 +530,30 @@ const COLD_OPEN = KATHA
     'end on the question it raises; then go back and tell how it came to this. The very first sentence has at most 12 words. ';
 const RE_HOOKS = 'Keep the listener from leaving: about every 200 words (roughly every 90 seconds of narration), end a ' +
   'paragraph on an open loop — a danger closing in, a secret about to come out, a question, or a turn like "but the ' +
-  'real test had not even begun" — and pay it off later. Vary them; never reuse a phrase. ';
+  'real test had not even begun" — and pay it off later. Vary them; never reuse a phrase. ' +
+  (EPIC ? 'Every open loop is something that really happens later in this episode\'s events. ' : '');
 const TEASER = language === 'hi' ? '"अगले एपिसोड में…"' : '"Next time…"';
 
 async function writePart(groq, plan, bible, index, storySoFar, budget) {
   const isLast = index === PARTS - 1;
   const outline = plan.parts.map((summary, i) => `Part ${i + 1}: ${summary}`).join('\n');
-  const intro = KATHA
+  const intro = EPIC
+    ? `You retell the ${EPIC.name} for narration, faithful to ${EPIC.source}, told vividly with devotion, emotion and ` +
+      `dialogue. Episode ${episode} of ${EPIC.episodes.length}: "${plan.title}". This episode tells exactly these events ` +
+      `and nothing beyond them: ${EPIC_EP.events} Never invent characters, objects, powers or events, and nobody ` +
+      'appears who isn\'t in these events. '
+    : KATHA
     ? 'You retell traditional Hindu kathas for narration — faithful to the Puranas / Ramayana / Mahabharata, told ' +
       `vividly with devotion, emotion and dialogue. Katha: "${KATHA}". `
     : `You write serialized audio fiction for narration. Series: "${title}", season ${season}, episode ${episode}, genre: ${genre}. `;
-  const ending = KATHA
+  const ending = EPIC
+    ? (EPIC_NEXT
+      ? 'This is the final part: end where this episode\'s events end, on that moment of the story — never an ' +
+        `invented cliffhanger. Then one short line beginning ${TEASER} that teases "${EPIC_NEXT.title}" without telling ` +
+        `it, and a last line: "${EPIC.closing}". `
+      : 'This is the final part of the whole series: tell the end fully, then a few lines on what the story teaches ' +
+        `and a blessing for every listener, and a last line: "${EPIC.closing}". `)
+    : KATHA
     ? 'This is the final part: tell the resolution fully, then close with the katha\'s lesson and one line of blessing, ' +
       'and a last line asking listeners to write in the comments which katha they want to hear next. ' +
       'The story must be complete — never a cliffhanger. '
@@ -518,7 +604,7 @@ async function withSharpOpening(groq, plan, text) {
   try {
     const sharper = await sharpenOpening((sys, user) => groqJson(groq, sys, user, 2500), {
       title: plan.title, text,
-      what: KATHA ? 'long Hindi devotional katha video on YouTube' : `long ${genre} audio-drama episode on YouTube`,
+      what: KATHA ? 'long Hindi devotional katha video on YouTube' : EPIC ? `long ${language === 'hi' ? 'Hindi' : 'English'} ${EPIC.name} episode on YouTube` : `long ${genre} audio-drama episode on YouTube`,
       hookStyle: 'drop the listener into the most dramatic moment of the story, or a question they must have answered',
     });
     if (sharper) {
@@ -694,7 +780,9 @@ async function planScenes(groq, plan, bible, segments) {
     `Given numbered narration segments (in order), reply with JSON only: {"scenes": [string, ...]} with exactly ` +
     `${segments.length} English entries, one per segment in the same order, each a 12-25 word visual description ` +
     'of what is happening in that segment — who is there (by their English name), what they are doing, where, and ' +
-    'the mood. Never describe text, signs or words.';
+    'the mood. Never describe text, signs or words.' +
+    (EPIC ? ' Name only the figures physically present in the segment, and call objects by their own names ' +
+      '("the great bow Pinaka", not "Shiva\'s bow"), since every figure named is drawn.' : '');
   const user =
     `Series: ${title}\nEpisode: ${plan.title}\nSetting: ${bible.setting}\n\n` +
     segments.map((s, i) => `${i + 1}. ${s.text.slice(0, 280)}`).join('\n');
@@ -726,6 +814,9 @@ function looksFor(description, bible) {
 let seriesStyle = 'illustration';
 
 function styleText() {
+  // A plan can set its own look (the Life of Jesus: a biblical film still;
+  // the shared styles describe Indian mythology).
+  if (EPIC?.artStyle) return EPIC.artStyle;
   return seriesStyle === 'illustration'
     ? 'cinematic widescreen 16:9 illustration, no text, no captions, no letters, no logos, no words'
     : artStyleFor(seriesStyle, { orientation: 'wide' });
@@ -752,6 +843,30 @@ function scenePrompt(description, bible) {
     `${clean(description)}. ${looks ? `${looks}. ` : ''}` +
     `${mood}, consistent character design, detailed environment, ${styleText()}.`
   );
+}
+
+/**
+ * Epic and katha pictures: each figure named that has an approved portrait
+ * (assets/deities/) is drawn from it as a reference image, as in the daily
+ * Shorts (lib/video-scenes.js), so Ram looks the same in every episode and
+ * every Short. Stickman pictures draw without them: lifelike references
+ * would pull them toward realism.
+ */
+async function portraitsFor(description) {
+  const none = { refs: [], note: '', looks: '' };
+  if (!(EPIC || KATHA) || seriesStyle === 'stickman') return none;
+  const figures = iconographyFor(description, { context: `${title} ${genre} ${KATHA}` });
+  const approved = [];
+  for (const f of figures) {
+    const ref = await deityReference(f.key);
+    if (ref) approved.push({ f, ref });
+  }
+  const top = approved.slice(0, 3);
+  return {
+    refs: top.map((a) => a.ref),
+    note: top.map((a, k) => `${a.f.look.split(':')[0]} must look exactly like reference image ${k}`).join('; '),
+    looks: figures.map((f) => f.look).join('. '),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -822,8 +937,45 @@ function kathaMetadata({ plan, cues, parts }) {
   return { title: plan.title.slice(0, 100), description, tags: cappedTags, chapters };
 }
 
+/** The previous episode's YouTube link, for "⏪ पिछला एपिसोड". */
+function previousEpisodeUrl() {
+  const last = previousEpisodes().slice(-1)[0];
+  return Number(last?.episode) === Number(episode) - 1 ? last?.published?.youtube?.url : undefined;
+}
+
+function epicMetadata({ plan, cues, parts }) {
+  const n = Number(episode);
+  const previous = EPIC.episodes[n - 2];
+  const previousUrl = previous && previousEpisodeUrl();
+  const chapters = chapterMarks(cues, parts, plan.chapters);
+  const w = EPIC.words;
+  const videoTitle = EPIC.videoTitle(n, plan.title).slice(0, 100);
+  const tags = [`${EPIC.seriesName} ${w.episode} ${n}`, `${EPIC.name} episode ${n}`, plan.title, ...EPIC.tags,
+    ...(EPIC.storybyte ? ['StoryByte'] : [])];
+  const cappedTags = [];
+  for (const tag of [...new Set(tags)]) {
+    if ([...cappedTags, tag].join(',').length > 450) break;
+    cappedTags.push(tag);
+  }
+  const description = [
+    plan.description,
+    '',
+    `📖 ${EPIC.seriesName} — ${w.episode} ${n} / ${EPIC.episodes.length} (${EPIC_EP.kand})`,
+    ...(previous ? [`${w.previous}: ${previous.title}${previousUrl ? ` ${previousUrl}` : ''}`] : []),
+    ...(EPIC_NEXT ? [`${w.next}: ${EPIC_NEXT.title} — ${EPIC.schedule}`] : []),
+    ...(chapters.length ? ['', w.chapters, ...chapters.map((m) => `${timestamp(m.time)} ${m.label}`)] : []),
+    '',
+    w.subscribe,
+    ...(EPIC.storybyte ? [`📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: ${APP_LINK}`, ...followLines()] : []),
+    '',
+    [...new Set([...EPIC.hashtags, `#${EPIC.name.replace(/\W+/g, '')}Episode${n}`, ...(EPIC.storybyte ? ['#StoryByte'] : [])])].join(' '),
+  ].join('\n');
+  return { title: videoTitle, description, tags: cappedTags, chapters };
+}
+
 function buildMetadata({ plan, bible, cues, parts }) {
   if (KATHA) return kathaMetadata({ plan, cues, parts });
+  if (EPIC) return epicMetadata({ plan, cues, parts });
   const full = `${title} | ${seasonEpisode}: ${plan.title}`;
   const videoTitle = full.length <= 100 ? full : `${title} | S${season} E${episode}: ${plan.title}`.slice(0, 100);
 
@@ -857,13 +1009,14 @@ function buildMetadata({ plan, bible, cues, parts }) {
 
 async function thumbnailArt(plan, bible, fallbackImage) {
   const leads = bible.characters.slice(0, 2).map((c) => `${c.name}: ${clean(c.look)}`).join('; ');
+  const portraits = await portraitsFor(`${plan.parts[0]} ${leads}`);
   const prompt =
     `Dramatic cinematic key art for the ${genre} series "${title}": ${clean(plan.parts[0]).slice(0, 220)}. ` +
     `${leads}. Characters on the right half of the frame, darker empty space on the left, intense emotional ` +
-    `expressions, ${mood}, movie poster lighting, ${styleText()}.`;
+    `expressions, ${mood}, movie poster lighting, ${styleText()}.${portraits.note ? ` ${portraits.note}.` : ''}`;
   try {
     return await fetchStoryImage(prompt, hashSeed(`${title}-s${season}-${episode}-thumbnail`), {
-      width: THUMB_WIDTH, height: THUMB_HEIGHT, steps: IMAGE_STEPS, hq: HQ_LANDSCAPE,
+      width: THUMB_WIDTH, height: THUMB_HEIGHT, steps: IMAGE_STEPS, hq: { ...HQ_LANDSCAPE, refs: portraits.refs },
     });
   } catch (error) {
     console.warn(`Thumbnail art failed, using a scene image instead: ${error.message}`);
@@ -963,18 +1116,20 @@ async function main() {
     scenePrompts.push(description);
 
     console.log(`Generating scene ${sceneNumber}/${sceneCount}...`);
+    const portraits = await portraitsFor(description);
     const request = [
-      scenePrompt(description, bible),
+      `${scenePrompt(description, bible)}${portraits.note ? ` ${portraits.note}.` : ''}`,
       hashSeed(`${title}-s${season}-${episode}-${sceneNumber}`),
       // Native 16:9 from FLUX.2 (lib/cloudflare-image.js), scaled 1.43x to
       // 1920x1080 — not a 1024 square cropped to a 576px strip and blown up.
-      { width: WIDTH, height: HEIGHT, steps: IMAGE_STEPS, hq: HQ_LANDSCAPE },
+      { width: WIDTH, height: HEIGHT, steps: IMAGE_STEPS, hq: { ...HQ_LANDSCAPE, refs: portraits.refs } },
     ];
     requests.push(request);
-    // Checked for wrong anatomy and redrawn when it fails (lib/image-check.js).
+    // Checked for wrong anatomy (and, for deities, the wrong look) and
+    // redrawn when it fails (lib/image-check.js).
     images.push(await drawChecked(
       (extra) => fetchSceneImage(extra ? `${request[0]}. ${extra}` : request[0], request[1], request[2]),
-      { subject: description }, `Scene ${sceneNumber}`,
+      { subject: description, looks: portraits.looks }, `Scene ${sceneNumber}`,
     ));
   }
   if (checkSummary()) console.log(checkSummary());
@@ -1013,7 +1168,9 @@ async function main() {
   const art = await thumbnailArt(plan, bible, scenes[Math.floor(scenes.length / 2)].file);
   fs.writeFileSync(thumbnailPath, await renderEpisodeThumbnail(KATHA
     ? { art, seriesTitle: KATHA_DEITY ? `${KATHA_DEITY} की कथा` : title, episodeTitle: plan.title.replace(/^[^:]*:\s*/, ''), accent, badge: 'पूरी कथा' }
-    : { art, seriesTitle: title, season, episode, episodeTitle: plan.title, accent }));
+    : EPIC
+      ? { art, seriesTitle: EPIC.seriesName, episodeTitle: plan.title, accent, badge: `${EPIC.words.episode} ${episode}`.toUpperCase(), brand: EPIC.storybyte ? 'StoryByte' : '' }
+      : { art, seriesTitle: title, season, episode, episodeTitle: plan.title, accent }));
 
   const metadata = buildMetadata({ plan, bible, cues: parsed, parts });
   saveBible(bible, plan);
@@ -1023,8 +1180,17 @@ async function main() {
     console.log('Publishing...');
     published.youtube = await uploadEpisodeToYouTube({
       videoPath, thumbnailPath, title: metadata.title, description: metadata.description,
-      tags: metadata.tags, language, privacy: 'public',
+      tags: metadata.tags, language, privacy: 'public', publishAt: PUBLISH_AT,
     });
+    // Every episode of an epic in one playlist, created with the first one;
+    // its id is kept in the bible for the next.
+    if (EPIC && published.youtube?.posted) {
+      bible.playlistId = await addToYouTubePlaylist(published.youtube.videoId, {
+        playlistId: bible.playlistId, title: EPIC.playlistTitle,
+        description: EPIC.playlistDescription,
+      }) || bible.playlistId;
+      saveBible(bible, plan);
+    }
     published.facebook = await uploadEpisodeToFacebook({
       videoPath, thumbnailPath, title: metadata.title,
       description: metadata.description.split(APP_LINK).join(appLink('facebook', APP_CAMPAIGN)),
@@ -1044,6 +1210,9 @@ async function main() {
         episode,
         // Read by scripts/prune-old-videos.js to age out episode.mp4.
         renderedAt: new Date().toISOString(),
+        // A series on its own channel stays out of the app and the website
+        // (lib/site-index.js readLongVideos).
+        ...(EPIC && !EPIC.storybyte && { inApp: false }),
         genre,
         language,
         generatedTitle: plan.title,
@@ -1093,7 +1262,10 @@ async function main() {
 
   // Rendering succeeded but a requested upload didn't — fail the job so it's
   // noticed, now that the rendered episode and bible are already saved.
-  if (publish && (!published.youtube?.posted || !published.facebook?.posted)) {
+  // A platform left unconfigured on purpose (the Life of Jesus has no
+  // Facebook page) isn't a failure; YouTube always has to work.
+  const unposted = (p) => !p?.posted && p?.reason !== 'not_configured';
+  if (publish && (!published.youtube?.posted || unposted(published.facebook))) {
     throw new Error('Episode rendered, but publishing failed — see the warnings above');
   }
 }

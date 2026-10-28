@@ -23,7 +23,8 @@
       "**/node_modules/**",
       "episodes/**/*.mp4",
       "episodes/**/scene-*.jpg",
-      "episodes/**/audio.mp3"
+      "episodes/**/audio.mp3",
+      "episodes/life-of-jesus/**"
     ],
     "predeploy": [
       "node \"$PROJECT_DIR/scripts/check-hosting-deploy.js\"",

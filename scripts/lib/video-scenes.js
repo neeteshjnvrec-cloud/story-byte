@@ -238,4 +238,4 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
   return scenes.length ? scenes : null;
 }
 
-module.exports = { buildVideoScenes };
+module.exports = { buildVideoScenes, deityReference };
