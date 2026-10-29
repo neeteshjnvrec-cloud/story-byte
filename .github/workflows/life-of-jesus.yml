@@ -7,9 +7,11 @@ name: Life of Jesus Episodes
 # scripts/epic-episode.js and YOUTUBE-SETUP.md → "A second channel".
 on:
   schedule:
-    # Tue/Thu/Sat 16:37 IST (11:07 UTC): rendering takes 30-60 minutes, and
-    # the video is scheduled for 18:00 (07:30 in New York, 12:30 in London).
-    - cron: '7 11 * * 2,4,6'
+    # Tue/Thu/Sat 11:07 IST (05:37 UTC). Rendering takes 30-60 minutes and
+    # the video is scheduled for 18:00 (07:30 in New York, 12:30 in London),
+    # so a run GitHub's scheduler starts hours late (it has: 7h) still makes
+    # it. After the 05:17 daily run, so the two don't share Cloudflare quota.
+    - cron: '37 5 * * 2,4,6'
   workflow_dispatch:
     inputs:
       episode:
