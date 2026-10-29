@@ -9,6 +9,13 @@
       "title": "The Angel's Message to Mary",
       "description": "From a silent temple to a humble hillside, the first episode follows the angelic messages that herald the births of John the Baptist and the promised Messiah. Witness Mary's faithful response and Zechariah’s restored voice as the story of salvation begins.",
       "summary": "In the temple of the Lord, the priest Zechariah offers incense when the angel Gabriel appears, bathed in radiant light. Gabriel says, \"Do not be afraid, Zechariah; your prayer has been heard. Your wife Elizabeth will bear you a son, and you shall name him John.\" Zechariah, remembering his old age, questions, \"How can this be, since I am old and my wife is past childbearing?\" Gabriel replies that the child will be \"great in the sight of the Lord\" and will be filled with the Holy Spirit. Because of his doubt, Zechariah is rendered mute until the fulfillment of the promise. The angelic messenger returns six months later to a young woman named Mary in Nazareth, a virgin betrothed to Joseph. He announces, \"You will conceive in your womb and bear a son, and you shall call his name Jesus; he will be great and called the Son of the Most High.\" Mary responds with humble obedience, \"Behold, I am the servant of the Lord; let it be to me according to your word.\" Soon after, Mary travels to the hill country to visit her relative Elizabeth, and when she greets her, the baby in Elizabeth’s womb leaps for joy. Elizabeth, filled with the Holy Spirit, exclaims, \"Blessed are you among women, and blessed is the fruit of your womb,\" and Mary lifts her voice in the Magnificat, praising God. Elizabeth gives birth to a son, and when the time comes for his naming, Zechariah, now able to speak, takes up a pen and declares, \"His name shall be John... He will be a prophet of the Most High, preparing the way for the Lord.\" The people rejoice, and Zechariah prophesies, \"The Lord has visited his people and given them salvation.\" Meanwhile, Joseph learns from a trusted source that Mary is with child, and his heart is troubled, setting the stage for the divine guidance that will follow."
+    },
+    {
+      "season": "1",
+      "episode": "2",
+      "title": "The Birth of Jesus in Bethlehem",
+      "description": "Joseph’s doubts are answered by a heavenly messenger, and a humble journey leads to the miraculous birth of the promised Messiah.",
+      "summary": "Joseph, troubled by Mary's unexpected pregnancy, resolves to quietly end their betrothal. That night an angel appears to him in a dream, saying, \"Take Mary as your wife, for that which is conceived in her is from the Holy Spirit\" (Matt 1:20) and \"She will bear a son, and you shall call his name Jesus, for he will save his people from their sins\" (Matt 1:21). Joseph rises, filled with awe, and obeys the divine instruction. Caesar Augustus issues a decree that all should be registered for a census, requiring each person to travel to his ancestral town. Joseph, a carpenter of Nazareth, takes Mary, who is now with child, and they journey to Bethlehem, the city of David. Upon arrival they find no room in the inn, and Mary gives birth to her firstborn son, laying him in a humble manger among the straw. While shepherds tend their flocks nearby, an angel of the Lord appears, proclaiming, \"Do not be afraid; I bring you good news of great joy, which shall be to all people. For unto you is born this day in the city of David a Savior, who is Christ the Lord\" (Lk 2:10‑11). A host of heavenly beings then fills the night sky, singing, \"Glory to God in the highest, and on earth peace among those with whom He is pleased!\" (Lk 2:13‑14). The shepherds look up, trembling with wonder at the celestial proclamation."
     }
   ],
   "characters": [
@@ -28,24 +35,10 @@
       "look": "Joseph: a humble, strong carpenter in his thirties with a dark beard, olive skin and a brown woollen robe"
     },
     {
-      "name": "Gabriel",
-      "role": "the angel of the Lord",
-      "look": "the angel Gabriel: a radiant angelic figure in shining white robes with great white wings, surrounded by soft light"
-    },
-    {
-      "name": "Elizabeth",
-      "role": "Mary's relative, mother of John the Baptist",
-      "look": "Elizabeth: an elderly Jewish woman with a kind face in a beige robe and head covering"
-    },
-    {
-      "name": "Zechariah",
-      "role": "a priest, father of John the Baptist",
-      "look": "Zechariah: an elderly priest with a white beard in white priestly robes"
-    },
-    {
-      "name": "John the Baptist",
-      "role": "the prophet who prepares the way",
-      "look": "John the Baptist: a lean, intense prophet with long wild dark hair and a beard, a rough camel-hair garment and a leather belt"
+      "name": "Angel",
+      "nativeName": "ἄγγελος",
+      "role": "Messenger of God",
+      "look": "Radiant, clothed in brilliant white, with a shining presence"
     }
   ],
   "setting": "First-century Judea and Galilee under Roman rule: the village of Nazareth, Bethlehem, the shores and fishing boats of the Sea of Galilee, the Jordan river, the desert wilderness and Jerusalem with its great temple.",
