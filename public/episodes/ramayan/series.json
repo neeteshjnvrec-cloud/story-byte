@@ -4,25 +4,43 @@
   "language": "hi",
   "characters": [
     {
-      "name": "Rama",
+      "name": "Ram",
       "nativeName": "राम",
-      "role": "Prince of Ayodhya, avatar of Vishnu",
-      "look": "Early 20s, noble face, dark hair tied in a simple knot, wearing golden dhoti and a tiger-skin mantle"
+      "role": "prince of Ayodhya, eldest son of Dasharath, Lord Vishnu's avatar",
+      "look": "Lord Ram: a calm, youthful prince with smooth dark blue (neel-shyam) skin, a tall gold crown, a yellow silk dhoti and a gold-bordered angavastram draped over his shoulders, gold necklaces, a long bow (Kodanda) in hand and a quiver of arrows on his back"
     },
     {
-      "name": "Sita",
-      "nativeName": "सीता",
-      "role": "Princess of Mithila, devoted wife",
-      "look": "Late teens, gentle face, long black hair braided, wearing a red sari with gold embroidery"
-    },
-    {
-      "name": "Lakshmana",
+      "name": "Lakshman",
       "nativeName": "लक्ष्मण",
-      "role": "Rama’s younger brother, steadfast guardian",
-      "look": "Early 20s, determined face, short curly hair, dressed in a green dhoti and a simple cloth turban"
+      "role": "Ram's devoted younger brother, son of Sumitra",
+      "look": "Lakshman: a fair-skinned young prince with a gold crown, a yellow dhoti and angavastram over his shoulders, gold necklaces and a bow, always beside Ram"
+    },
+    {
+      "name": "Dasharath",
+      "nativeName": "दशरथ",
+      "role": "king of Ayodhya, father of Ram",
+      "look": "King Dasharath: an elderly, dignified king with a white beard and moustache, a tall gold crown, rich maroon and gold silk robes and gold jewellery"
+    },
+    {
+      "name": "Vasishtha",
+      "nativeName": "वशिष्ठ",
+      "role": "royal guru of Ayodhya",
+      "look": "Guru Vasishtha: an old, serene sage with a long white beard and a topknot, saffron robes and rudraksha beads"
+    },
+    {
+      "name": "Vishwamitra",
+      "nativeName": "विश्वामित्र",
+      "role": "the great sage who takes Ram and Lakshman to guard his yagya",
+      "look": "Sage Vishwamitra: a tall, stern sage with a long grey beard and matted hair, a fiery gaze, saffron robes and a wooden staff"
+    },
+    {
+      "name": "Tataka",
+      "nativeName": "ताड़का",
+      "role": "the demoness of the forest",
+      "look": "Tataka: a huge, fearsome demoness with dark skin, wild hair, fangs and blazing eyes"
     }
   ],
-  "setting": "Ancient Ayodhya, its royal palace, and the dense, sacred forests bordering the kingdom.",
+  "setting": "Ancient India in the Treta Yuga: the golden city of Ayodhya on the Saryu river, the dense forests of the south, the vanara kingdom of Kishkindha and the golden island city of Lanka.",
   "episodes": [
     {
       "season": "1",
@@ -37,6 +55,13 @@
       "title": "Tataka's Fall",
       "description": "Rama confronts the ferocious demon Tataka, testing his divine resolve and the trio’s unity.",
       "summary": "The forest trembles as Tataka roars, sending shivers through the ancient trees. राम, bow drawn, steps forward with fierce determination, while सीता clutches her talisman, whispering a protective mantra. लक्ष्मण stays close, his hand on राम’s shoulder, ready to intervene at the first sign of danger. The demon lunges, its massive claws tearing at the foliage and threatening to crush the siblings. लक्ष्मण leaps to block the strike, his blade flashing, but Tataka’s dark aura sears his arm, forcing him to retreat. In desperation, सीता chants an ancient hymn, the talisman glowing bright and momentarily weakening Tataka’s power, giving राम a chance to aim. Rama steadies his breath, feeling the divine wind guide his arrow. With a thunderous release, राम lets loose a celestial arrow that pierces Tataka’s heart, and the demon lets out a final, earth‑shaking scream. The forest falls silent as Tataka collapses, but her dying roar reveals a hidden cavern opening beneath the roots, glowing with an eerie crimson light. As राम, सीता, and लक्ष्मण approach the cavern, a cold wind carries a whisper of a far greater menace, leaving them poised on the brink of a new peril."
+    },
+    {
+      "season": "1",
+      "episode": "3",
+      "title": "विश्वामित्र और ताड़का वध",
+      "description": "विवेक और कर्तव्य की परीक्षा—विश्वामित्र की यज्ञ रक्षा में राम‑लक्ष्मण का पवित्र यात्रा।",
+      "summary": "Vishwamitra arrives at King Dasharath's court, pleading that the young prince Ram protect his upcoming yajna from the marauding rakshasas. Dasharath, torn by fatherly love, first offers his seasoned army, feeling his heart break at the thought of sending his son away. Sage Vasishtha intervenes, reminding the king of Ram’s divine purpose, and convinces him to send only Ram and Lakshman with the sage. At the serene banks of the Saryu, Vishwamitra sits with Ram and Lakshman and imparts the powerful Bala and Atibala mantras, chanting them in rhythmic cadence. The brothers repeat the verses, feeling an inner fire kindle and their resolve sharpen under the sage’s guidance. The river’s gentle flow mirrors the rising strength within them, preparing them for the trials ahead. Entering the foreboding forest, Vishwamitra recounts the terror of the demoness Tataka, who haunts the sages and disrupts the sacred rites. Ram hesitates, troubled by the idea of killing a woman, but the sage sternly explains that dharma demands protection of the sages above all. With a calm breath, Ram draws his bow, releases a single divine arrow, and Tataka falls; Vishwamitra, pleased, signals that he will soon bestow upon Ram the celestial weapons destined for his future deeds."
     }
   ],
   "style": "realistic"
