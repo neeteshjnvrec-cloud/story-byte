@@ -1,6 +1,20 @@
 {
- "updatedAt": "2026-10-30T03:19:06.142Z",
+ "updatedAt": "2026-10-30T14:08:33.003Z",
  "videos": [
+  {
+   "id": "tnBOmGbNyxw",
+   "youtubeUrl": "https://youtu.be/tnBOmGbNyxw",
+   "thumbnail": "https://i.ytimg.com/vi/tnBOmGbNyxw/mqdefault.jpg",
+   "thumbnailHd": "https://i.ytimg.com/vi/tnBOmGbNyxw/maxresdefault.jpg",
+   "title": "रामायण एपिसोड 3: विश्वामित्र और ताड़का वध | Ramayan Episode 3",
+   "seriesTitle": "Ramayan",
+   "season": "1",
+   "episode": "3",
+   "description": "विवेक और कर्तव्य की परीक्षा—विश्वामित्र की यज्ञ रक्षा में राम‑लक्ष्मण का पवित्र यात्रा।",
+   "language": "hi",
+   "durationSec": 930,
+   "publishedAt": "2026-10-30T11:04:30.575Z"
+  },
   {
    "id": "8o0wnI2w7FI",
    "youtubeUrl": "https://youtu.be/8o0wnI2w7FI",
