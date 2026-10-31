@@ -203,16 +203,26 @@ async function uploadEpisodeToYouTube({ videoPath, thumbnailPath, title, descrip
 }
 
 /**
- * Adds `videoId` to the playlist `playlistId`, or to a new public playlist
- * titled `title` when there's no id yet. Returns the playlist id (to keep for
- * the next episode), or null. Needs the youtube.force-ssl scope, like
- * commentOnYouTube; never fails the upload.
+ * Makes the playlist hold `videoIds` (the series' episodes, in order): adds
+ * the ones it lacks, each at its place in that order. The playlist is
+ * `playlistId`, else the channel's playlist titled `title`, else a new
+ * public one. Returns its id (to keep for the next episode) even when an
+ * add fails, or null. A failed add is retried, then left for the next run:
+ * in October 2026 the Ramayan's first add failed right after the playlist
+ * was created, the id was dropped and the playlist stayed empty. Needs the
+ * youtube.force-ssl scope, like commentOnYouTube; never fails the upload.
  */
-async function addToYouTubePlaylist(videoId, { playlistId, title, description = '' }) {
+async function addToYouTubePlaylist(videoIds, { playlistId, title, description = '' }) {
   const youtube = client();
-  if (!youtube || !videoId) return null;
+  const wanted = [videoIds].flat().filter(Boolean);
+  if (!youtube || !wanted.length) return playlistId || null;
+  let id = playlistId;
   try {
-    let id = playlistId;
+    if (!id) {
+      const mine = await youtube.playlists.list({ part: ['snippet'], mine: true, maxResults: 50 });
+      id = (mine.data.items || []).find((p) => p.snippet?.title === ytSafe(title).slice(0, 150))?.id;
+      if (id) console.log(`  📃 Using the existing YouTube playlist: https://www.youtube.com/playlist?list=${id}`);
+    }
     if (!id) {
       const res = await youtube.playlists.insert({
         part: ['snippet', 'status'],
@@ -221,13 +231,35 @@ async function addToYouTubePlaylist(videoId, { playlistId, title, description = 
       id = res.data.id;
       console.log(`  📃 YouTube playlist created: https://www.youtube.com/playlist?list=${id}`);
     }
-    await youtube.playlistItems.insert({ part: ['snippet'], requestBody: { snippet: { playlistId: id, resourceId: { kind: 'youtube#video', videoId } } } });
-    console.log('  📃 Added to the YouTube playlist');
+    const present = new Set();
+    let pageToken;
+    do {
+      const res = await youtube.playlistItems.list({ part: ['snippet'], playlistId: id, maxResults: 50, pageToken });
+      for (const it of res.data.items || []) present.add(it.snippet?.resourceId?.videoId);
+      pageToken = res.data.nextPageToken;
+    } while (pageToken);
+    for (const videoId of wanted) {
+      if (present.has(videoId)) continue;
+      // After the ones before it in the series, so the order holds even when
+      // a missed episode is added later.
+      const position = wanted.slice(0, wanted.indexOf(videoId)).filter((v) => present.has(v)).length;
+      for (let attempt = 1; ; attempt++) {
+        try {
+          await youtube.playlistItems.insert({ part: ['snippet'], requestBody: { snippet: { playlistId: id, position, resourceId: { kind: 'youtube#video', videoId } } } });
+          present.add(videoId);
+          console.log(`  📃 Added ${videoId} to the YouTube playlist`);
+          break;
+        } catch (e) {
+          if (attempt >= 3) throw e;
+          await new Promise((r) => setTimeout(r, 5000 * attempt));
+        }
+      }
+    }
     return id;
   } catch (e) {
     const scope = /insufficient|permission|scope/i.test(e.message) ? ' — re-mint YOUTUBE_REFRESH_TOKEN with the youtube.force-ssl scope (YOUTUBE-SETUP.md)' : '';
     console.warn(`  ⚠️  YouTube playlist failed: ${e.message}${scope}`);
-    return playlistId || null;
+    return id || null;
   }
 }
 
