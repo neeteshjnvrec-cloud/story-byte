@@ -1026,6 +1026,22 @@ async function thumbnailArt(plan, bible, fallbackImage) {
   }
 }
 
+/** The YouTube ids of this season's published episodes in order, with
+ *  this episode's new `videoId` in its place. */
+function episodeVideoIds(videoId) {
+  const dir = path.join(seriesDirectory, `season-${season}`);
+  const ids = new Map([[Number(episode), videoId]]);
+  for (const d of fs.existsSync(dir) ? fs.readdirSync(dir) : []) {
+    const n = Number((d.match(/^episode-(\d+)$/) || [])[1]);
+    if (!n || ids.has(n)) continue;
+    try {
+      const id = JSON.parse(fs.readFileSync(path.join(dir, d, 'story.json'), 'utf8')).published?.youtube?.videoId;
+      if (id) ids.set(n, id);
+    } catch { /* not published */ }
+  }
+  return [...ids].sort((a, b) => a[0] - b[0]).map(([, id]) => id);
+}
+
 function saveBible(bible, plan) {
   const entry = { season, episode, title: plan.title, description: plan.description, summary: plan.parts.join(' ') };
   const same = (e) => String(e.season || '1') === season && String(e.episode) === episode;
@@ -1185,9 +1201,10 @@ async function main() {
       tags: metadata.tags, language, privacy: 'public', publishAt: PUBLISH_AT,
     });
     // Every episode of an epic in one playlist, created with the first one;
-    // its id is kept in the bible for the next.
+    // its id is kept in the bible for the next. Earlier episodes missing from
+    // it (a failed add, a remake) are put back in their place each time.
     if (EPIC && published.youtube?.posted) {
-      bible.playlistId = await addToYouTubePlaylist(published.youtube.videoId, {
+      bible.playlistId = await addToYouTubePlaylist(episodeVideoIds(published.youtube.videoId), {
         playlistId: bible.playlistId, title: EPIC.playlistTitle,
         description: EPIC.playlistDescription,
       }) || bible.playlistId;

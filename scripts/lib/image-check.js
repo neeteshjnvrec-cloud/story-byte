@@ -13,7 +13,13 @@
  * GEMINI_MODELS, with GEMINI_API_KEY). Each tries its models in order and
  * drops one the provider has retired: in October 2026 Groq removed Llama 4
  * Scout and Google closed gemini-2.5-flash to new keys, and with a single
- * hard-coded name each, every picture went unchecked. With no checker
+ * hard-coded name each, every picture went unchecked. Once those are used
+ * up, each provider's own model list is read (discover) for others to try:
+ * by late October Groq had removed both Llama 4 models too.
+ *
+ * A model that keeps failing (overloaded, out of its daily quota) is set
+ * aside after STRIKES failures in a row, so the run moves on to the next
+ * model instead of waiting on it for every picture. With no checker
  * answering, pictures pass unchecked: a check must never stop a video.
  * IMAGE_CHECK=0 turns it off.
  */
@@ -28,6 +34,9 @@ const MAX_REDRAWS = Math.max(0, Number(process.env.IMAGE_CHECK_REDRAWS ?? 2));
 // A model that failed outright (retired, or a bad key) isn't asked again
 // this run; a checker with none left is skipped.
 const dead = new Set();
+// Failures in a row per model; at STRIKES it's set aside for the run.
+const STRIKES = 3;
+const strikes = new Map();
 const stats = { checked: 0, failed: 0, redrawn: 0, fixed: 0, unchecked: 0 };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -86,10 +95,45 @@ async function askGemini(b64, prompt, model) {
   return parse(json.candidates?.[0]?.content?.parts?.map((p) => p.text).join(''));
 }
 
+/** Groq's models that can see pictures, by name (its list doesn't say). */
+async function listGroq() {
+  const res = await fetch('https://api.groq.com/openai/v1/models', { headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` } });
+  if (!res.ok) return [];
+  const json = await res.json();
+  return (json.data || []).map((m) => m.id).filter((id) => /vision|vl\b|-vl-|llama-4|scout|maverick|gemma-3/i.test(id));
+}
+
+/** Gemini's Flash models that take a prompt, newest first (lite ones have
+ *  their own daily quota). */
+async function listGemini() {
+  const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers: { 'x-goog-api-key': process.env.GEMINI_API_KEY } });
+  if (!res.ok) return [];
+  const json = await res.json();
+  return (json.models || [])
+    .filter((m) => m.supportedGenerationMethods?.includes('generateContent'))
+    .map((m) => m.name.replace(/^models\//, ''))
+    .filter((n) => /flash/.test(n) && !/image|tts|audio|live|embed|thinking/.test(n))
+    .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+}
+
 const CHECKERS = [
-  { name: 'groq', ready: () => !!process.env.GROQ_API_KEY, ask: askGroq, models: GROQ_MODELS },
-  { name: 'gemini', ready: () => !!process.env.GEMINI_API_KEY, ask: askGemini, models: GEMINI_MODELS },
+  { name: 'groq', ready: () => !!process.env.GROQ_API_KEY, ask: askGroq, models: GROQ_MODELS, list: listGroq },
+  { name: 'gemini', ready: () => !!process.env.GEMINI_API_KEY, ask: askGemini, models: GEMINI_MODELS, list: listGemini },
 ];
+
+/** Once a checker's named models are all set aside, adds the others its
+ *  provider lists (once per run). */
+async function discover(c) {
+  if (c.listed) return;
+  c.listed = true;
+  try {
+    const more = (await c.list()).filter((m) => !c.models.includes(m));
+    if (more.length) console.log(`    🔎 Picture check: also trying ${c.name} ${more.join(', ')}`);
+    c.models.push(...more);
+  } catch (e) {
+    console.warn(`    ⚠️  Picture check: couldn't list ${c.name}'s models: ${e.message}`);
+  }
+}
 
 /**
  * Checks one picture. Returns { ok, score, problems, checker } or null when
@@ -99,25 +143,36 @@ async function checkImage(buf, context = {}) {
   if (process.env.IMAGE_CHECK === '0' || !buf) return null;
   const b64 = (await sharp(buf).resize(768, 768, { fit: 'inside' }).jpeg({ quality: 85 }).toBuffer()).toString('base64');
   const prompt = instructions(context);
-  checkers: for (const c of CHECKERS) {
+  for (const c of CHECKERS) {
     if (!c.ready()) continue;
-    for (const model of c.models) {
+    if (c.models.every((m) => dead.has(m))) await discover(c);
+    // Indexed: discover() can add models while this loop runs.
+    for (let i = 0; i < c.models.length; i++) {
+      const model = c.models[i];
       if (dead.has(model)) continue;
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          return { ...(await c.ask(b64, prompt, model)), checker: `${c.name} ${model}` };
+          const verdict = await c.ask(b64, prompt, model);
+          strikes.delete(model);
+          return { ...verdict, checker: `${c.name} ${model}` };
         } catch (e) {
-          // Rate limited: one wait, then the next checker.
+          // Rate limited: one wait, then try again.
           if (e.status === 429 && attempt === 0) { await sleep(8000); continue; }
           // A retired model or a wrong key won't fix itself this run.
           if ([400, 401, 403, 404].includes(e.status)) {
             console.warn(`    ⚠️  Picture check: ${c.name} ${model} unavailable (${e.message.slice(0, 160)}); not asking it again this run`);
             dead.add(model);
-            break;
+          } else {
+            // Overloaded, out of quota, a timeout: the next model, and after
+            // STRIKES in a row this one is set aside.
+            const n = (strikes.get(model) || 0) + 1;
+            strikes.set(model, n);
+            console.warn(`    ⚠️  Picture check: ${c.name} ${model} failed (${e.message.slice(0, 120)})` +
+              (n >= STRIKES ? `; ${n} in a row, not asking it again this run` : ''));
+            if (n >= STRIKES) dead.add(model);
           }
-          // Anything else (a timeout, rate limited twice): the next checker.
-          console.warn(`    ⚠️  Picture check: ${c.name} ${model} failed (${e.message.slice(0, 120)})`);
-          continue checkers;
+          if (c.models.slice(i + 1).every((m) => dead.has(m))) await discover(c);
+          break;
         }
       }
     }
