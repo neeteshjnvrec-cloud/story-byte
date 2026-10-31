@@ -1147,7 +1147,7 @@ async function main() {
     // redrawn when it fails (lib/image-check.js).
     images.push(await drawChecked(
       (extra) => fetchSceneImage(extra ? `${request[0]}. ${extra}` : request[0], request[1], request[2]),
-      { subject: description, looks: portraits.looks }, `Scene ${sceneNumber}`,
+      { subject: description, looks: portraits.looks, style: seriesStyle }, `Scene ${sceneNumber}`,
     ));
   }
   if (checkSummary()) console.log(checkSummary());

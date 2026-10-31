@@ -41,7 +41,26 @@ const stats = { checked: 0, failed: 0, redrawn: 0, fixed: 0, unchecked: 0 };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-function instructions({ subject, looks }) {
+// The stickman style is deliberately bare: stick figures, a few props, no
+// iconography. Judged by the usual rules, a checker failed nearly every
+// stickman picture for "simplified line art" or "only two of Surya's seven
+// horses" and each scene was drawn three times for nothing.
+const STICKMAN_RULES = [
+  'This is the deliberately minimalist STICKMAN style: simple black stick figures, round heads, plain background, few props.',
+  'Simple line art, missing details, missing traditional iconography, counts of animals or objects, and figures from the description that are left out are all FINE.',
+  'Fail the picture only for clear defects:',
+  '- a broken or unreadable picture (garbled shapes, a figure fused into another, a face or head growing from a body part)',
+  '- a stick figure with clearly extra heads or limbs that the story does not call for',
+  '- text, letters, watermarks or logos in the picture',
+  '- blood, gore or nudity',
+  'Reply with JSON only: {"ok": true|false, "score": 1-10 (overall quality), "problems": ["short description", ...]}',
+];
+
+function instructions({ subject, looks, style }) {
+  if (style === 'stickman') {
+    return ['You check AI-generated pictures for a devotional story channel before they are published.',
+      subject && `The picture should roughly show: ${subject}`, ...STICKMAN_RULES].filter(Boolean).join('\n');
+  }
   return [
     'You check AI-generated pictures for a devotional story channel before they are published.',
     subject && `The picture should show: ${subject}`,
@@ -91,7 +110,12 @@ async function askGemini(b64, prompt, model) {
     }),
   });
   const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw Object.assign(new Error(`Gemini ${res.status}: ${JSON.stringify(json.error || json).slice(0, 160)}`), { status: res.status });
+  // `daily`: the free tier's per-day quota is spent (its quotaId says
+  // PerDay), which won't come back this run, unlike a per-minute limit.
+  if (!res.ok) {
+    throw Object.assign(new Error(`Gemini ${res.status}: ${JSON.stringify(json.error || json).slice(0, 160)}`),
+      { status: res.status, daily: res.status === 429 && /PerDay/i.test(JSON.stringify(json)) });
+  }
   return parse(json.candidates?.[0]?.content?.parts?.map((p) => p.text).join(''));
 }
 
@@ -156,10 +180,10 @@ async function checkImage(buf, context = {}) {
           strikes.delete(model);
           return { ...verdict, checker: `${c.name} ${model}` };
         } catch (e) {
-          // Rate limited: one wait, then try again.
-          if (e.status === 429 && attempt === 0) { await sleep(8000); continue; }
+          // Rate limited: one wait, then try again; out of today's quota: next model.
+          if (e.status === 429 && attempt === 0 && !e.daily) { await sleep(8000); continue; }
           // A retired model or a wrong key won't fix itself this run.
-          if ([400, 401, 403, 404].includes(e.status)) {
+          if ([400, 401, 403, 404].includes(e.status) || e.daily) {
             console.warn(`    ⚠️  Picture check: ${c.name} ${model} unavailable (${e.message.slice(0, 160)}); not asking it again this run`);
             dead.add(model);
           } else {
