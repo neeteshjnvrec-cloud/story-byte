@@ -190,7 +190,7 @@ async function buildVideoScenes({ storyId, title, text, genre, description, cues
     // look, and redrawn when they fail (lib/image-check.js).
     const image = devotional
       ? await drawChecked((extra) => fetchSceneImage(extra ? `${prompt}. ${extra}` : prompt, request[1], request[2]),
-        { subject: planned[i].prompt, looks }, `Scene ${i + 1}`)
+        { subject: planned[i].prompt, looks, style: shortsStyleKey() }, `Scene ${i + 1}`)
       : await fetchSceneImage(...request);
     if (image && devotional && !mainRef && figures.length) {
       mainKey = figures[0].key;
