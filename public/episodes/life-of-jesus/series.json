@@ -16,6 +16,13 @@
       "title": "The Birth of Jesus in Bethlehem",
       "description": "Joseph’s doubts are answered by a heavenly messenger, and a humble journey leads to the miraculous birth of the promised Messiah.",
       "summary": "Joseph, troubled by Mary's unexpected pregnancy, resolves to quietly end their betrothal. That night an angel appears to him in a dream, saying, \"Take Mary as your wife, for that which is conceived in her is from the Holy Spirit\" (Matt 1:20) and \"She will bear a son, and you shall call his name Jesus, for he will save his people from their sins\" (Matt 1:21). Joseph rises, filled with awe, and obeys the divine instruction. Caesar Augustus issues a decree that all should be registered for a census, requiring each person to travel to his ancestral town. Joseph, a carpenter of Nazareth, takes Mary, who is now with child, and they journey to Bethlehem, the city of David. Upon arrival they find no room in the inn, and Mary gives birth to her firstborn son, laying him in a humble manger among the straw. While shepherds tend their flocks nearby, an angel of the Lord appears, proclaiming, \"Do not be afraid; I bring you good news of great joy, which shall be to all people. For unto you is born this day in the city of David a Savior, who is Christ the Lord\" (Lk 2:10‑11). A host of heavenly beings then fills the night sky, singing, \"Glory to God in the highest, and on earth peace among those with whom He is pleased!\" (Lk 2:13‑14). The shepherds look up, trembling with wonder at the celestial proclamation."
+    },
+    {
+      "season": "1",
+      "episode": "3",
+      "title": "The Shepherds and the Wise Men",
+      "description": "Shepherds hear the heavenly proclamation and find the newborn Messiah, while Mary and Joseph present Him at the temple and the Magi journey from the east to worship the King of kings.",
+      "summary": "An angel appears to shepherds in the fields, saying, \"Do not be afraid; I bring you good news of great joy, which will be to all people. For unto you is born this day in the city of David a Savior, who is Christ the Lord\" (Luke 2:10‑11). A host of heavenly beings then fills the night sky, singing, \"Glory to God in the highest, and on earth peace among those with whom He is pleased!\" (Luke 2:13‑14). The shepherds hurried to Bethlehem, found Mary, Joseph, and the baby lying in a manger, and worshipped Him, sharing what they had heard and seen. Mary and Joseph bring the infant Jesus to the temple in Jerusalem to fulfill the Law. The devout elder Simeon, guided by the Spirit, takes the child in his arms and blesses God, saying, \"Lord, now lettest thou thy servant depart in peace, according to thy word; for mine eyes have seen thy salvation\" (Luke 2:29‑30). He continues, \"A sword will pierce through your own soul also,\" foretelling the future suffering of His mother. The family also encounters the prophetess Anna, who gives thanks to God and speaks of the child to all who were looking for redemption. Wise men from the east observe a new star and journey to Jerusalem, saying, \"We have seen his star in the east and have come to worship him\" (Matthew 2:2). King Herod, troubled, summons them and asks, \"Where is the child who is born king of the Jews?\"; he then sends them to Bethlehem. Finding the child with Mary, they present gifts of gold, frankincense, and myrrh (Matthew 2:11). That night an angel warns them in a dream, \"Do not return to Herod,\" and they depart by another route. Soon after, an angel appears to Joseph in a dream, saying, \"Rise, take the child and his mother, and flee to Egypt, for Herod will seek the child to destroy him\" (Matthew 2:13)."
     }
   ],
   "characters": [
@@ -35,10 +42,26 @@
       "look": "Joseph: a humble, strong carpenter in his thirties with a dark beard, olive skin and a brown woollen robe"
     },
     {
+      "name": "King Herod",
+      "role": "Herod the Great, king of Judea",
+      "look": "King Herod: an old, suspicious king with a grey beard, a gold crown and rich purple robes"
+    },
+    {
+      "name": "Simeon",
+      "role": "the old, devout man in the temple",
+      "look": "Simeon: a very old, devout man with a long white beard and a white robe"
+    },
+    {
       "name": "Angel",
-      "nativeName": "ἄγγελος",
-      "role": "Messenger of God",
-      "look": "Radiant, clothed in brilliant white, with a shining presence"
+      "nativeName": "Angel",
+      "role": "Heavenly messenger who announces the birth and later warns Joseph",
+      "look": "Radiant, clothed in brilliant white robes, often depicted with shining light and wings"
+    },
+    {
+      "name": "Magi",
+      "nativeName": "Magi",
+      "role": "Wise men from the east who follow the star to worship the newborn king",
+      "look": "Dignified travelers dressed in rich, colorful robes, bearing gifts of gold, frankincense, and myrrh"
     }
   ],
   "setting": "First-century Judea and Galilee under Roman rule: the village of Nazareth, Bethlehem, the shores and fishing boats of the Sea of Galilee, the Jordan river, the desert wilderness and Jerusalem with its great temple.",
