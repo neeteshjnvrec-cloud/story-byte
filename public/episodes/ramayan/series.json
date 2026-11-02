@@ -16,28 +16,28 @@
       "look": "Lakshman: a fair-skinned young prince with a gold crown, a yellow dhoti and angavastram over his shoulders, gold necklaces and a bow, always beside Ram"
     },
     {
-      "name": "Dasharath",
-      "nativeName": "दशरथ",
-      "role": "king of Ayodhya, father of Ram",
-      "look": "King Dasharath: an elderly, dignified king with a white beard and moustache, a tall gold crown, rich maroon and gold silk robes and gold jewellery"
-    },
-    {
-      "name": "Vasishtha",
-      "nativeName": "वशिष्ठ",
-      "role": "royal guru of Ayodhya",
-      "look": "Guru Vasishtha: an old, serene sage with a long white beard and a topknot, saffron robes and rudraksha beads"
-    },
-    {
       "name": "Vishwamitra",
       "nativeName": "विश्वामित्र",
       "role": "the great sage who takes Ram and Lakshman to guard his yagya",
       "look": "Sage Vishwamitra: a tall, stern sage with a long grey beard and matted hair, a fiery gaze, saffron robes and a wooden staff"
     },
     {
-      "name": "Tataka",
-      "nativeName": "ताड़का",
-      "role": "the demoness of the forest",
-      "look": "Tataka: a huge, fearsome demoness with dark skin, wild hair, fangs and blazing eyes"
+      "name": "Janak",
+      "nativeName": "जनक",
+      "role": "king of Mithila, Sita's father",
+      "look": "King Janak: a wise, gentle king with a grey beard, a gold crown and white and gold silk robes"
+    },
+    {
+      "name": "Mareech",
+      "nativeName": "मारीच",
+      "role": "Tataka's son, later the golden deer",
+      "look": "Mareech: a rakshasa with a dark face, fangs and dark armour; disguised, a shining golden deer with silver spots"
+    },
+    {
+      "name": "Subahu",
+      "nativeName": "सुबाहु",
+      "role": "Tataka's son",
+      "look": "Subahu: a huge rakshasa with fangs, wild hair and dark armour"
     }
   ],
   "setting": "Ancient India in the Treta Yuga: the golden city of Ayodhya on the Saryu river, the dense forests of the south, the vanara kingdom of Kishkindha and the golden island city of Lanka.",
@@ -62,7 +62,15 @@
       "title": "विश्वामित्र और ताड़का वध",
       "description": "विवेक और कर्तव्य की परीक्षा—विश्वामित्र की यज्ञ रक्षा में राम‑लक्ष्मण का पवित्र यात्रा।",
       "summary": "Vishwamitra arrives at King Dasharath's court, pleading that the young prince Ram protect his upcoming yajna from the marauding rakshasas. Dasharath, torn by fatherly love, first offers his seasoned army, feeling his heart break at the thought of sending his son away. Sage Vasishtha intervenes, reminding the king of Ram’s divine purpose, and convinces him to send only Ram and Lakshman with the sage. At the serene banks of the Saryu, Vishwamitra sits with Ram and Lakshman and imparts the powerful Bala and Atibala mantras, chanting them in rhythmic cadence. The brothers repeat the verses, feeling an inner fire kindle and their resolve sharpen under the sage’s guidance. The river’s gentle flow mirrors the rising strength within them, preparing them for the trials ahead. Entering the foreboding forest, Vishwamitra recounts the terror of the demoness Tataka, who haunts the sages and disrupts the sacred rites. Ram hesitates, troubled by the idea of killing a woman, but the sage sternly explains that dharma demands protection of the sages above all. With a calm breath, Ram draws his bow, releases a single divine arrow, and Tataka falls; Vishwamitra, pleased, signals that he will soon bestow upon Ram the celestial weapons destined for his future deeds."
+    },
+    {
+      "season": "1",
+      "episode": "4",
+      "title": "दिव्यास्त्र और यज्ञ की रक्षा",
+      "description": "राम और लक्ष्मण के अद्भुत शस्त्रों की प्राप्ति और यज्ञ की रक्षा की महाकाव्य कथा। देखिए कैसे दो भाई राक्षसों के आक्रमण को पराजित कर यज्ञ को सफल बनाते हैं।",
+      "summary": "Vishwamitra bestows the divine Manav and Agneyastras upon Ram, explaining their power and purpose. Ram receives the celestial weapons with humility and reverence. The sage then leads the brothers to Siddhashram where the sages commence a six‑day yajna, and Ram and Lakshman vow to guard it day and night. The first five days pass with serene vigilance as the brothers meditate, tend the sacred fire, and fend off minor disturbances. On the sixth day, the demon Mareech, now appearing as a golden deer, joins his brother Subahu and a horde of rakshasas to assault the yajna. Dark clouds gather over the ashram as tension mounts. At the climax, Ram invokes his Manav Astra, hurling Mareech a hundred yojanas into the ocean, then unleashes his Agneyastra to incinerate Subahu. Lakshman, with his bow, slays the remaining demons, securing the yajna’s completion. Vishwamitra, delighted, announces the forthcoming bow‑ceremony of King Janak in Mithila, setting the stage for the next journey."
     }
   ],
-  "style": "realistic"
+  "style": "realistic",
+  "playlistId": "PLY2I-BvM6jYk"
 }
