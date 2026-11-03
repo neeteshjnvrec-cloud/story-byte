@@ -1,6 +1,20 @@
 {
- "updatedAt": "2026-11-02T03:21:35.334Z",
+ "updatedAt": "2026-11-03T04:33:55.688Z",
  "videos": [
+  {
+   "id": "GvCdWVB8mpU",
+   "youtubeUrl": "https://youtu.be/GvCdWVB8mpU",
+   "thumbnail": "https://i.ytimg.com/vi/GvCdWVB8mpU/mqdefault.jpg",
+   "thumbnailHd": "https://i.ytimg.com/vi/GvCdWVB8mpU/maxresdefault.jpg",
+   "title": "रामायण एपिसोड 4: दिव्यास्त्र और यज्ञ की रक्षा | Ramayan Episode 4",
+   "seriesTitle": "Ramayan",
+   "season": "1",
+   "episode": "4",
+   "description": "राम और लक्ष्मण के अद्भुत शस्त्रों की प्राप्ति और यज्ञ की रक्षा की महाकाव्य कथा। देखिए कैसे दो भाई राक्षसों के आक्रमण को पराजित कर यज्ञ को सफल बनाते हैं।",
+   "language": "hi",
+   "durationSec": 947,
+   "publishedAt": "2026-11-02T11:27:31.360Z"
+  },
   {
    "id": "tnBOmGbNyxw",
    "youtubeUrl": "https://youtu.be/tnBOmGbNyxw",
