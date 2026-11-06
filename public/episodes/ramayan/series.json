@@ -16,28 +16,28 @@
       "look": "Lakshman: a fair-skinned young prince with a gold crown, a yellow dhoti and angavastram over his shoulders, gold necklaces and a bow, always beside Ram"
     },
     {
+      "name": "Indra",
+      "nativeName": "इंद्र",
+      "role": "king of the gods",
+      "look": "Indra: the king of the gods with a gold crown, holding the thunderbolt (vajra), riding the white elephant Airavata"
+    },
+    {
       "name": "Vishwamitra",
       "nativeName": "विश्वामित्र",
       "role": "the great sage who takes Ram and Lakshman to guard his yagya",
       "look": "Sage Vishwamitra: a tall, stern sage with a long grey beard and matted hair, a fiery gaze, saffron robes and a wooden staff"
     },
     {
-      "name": "Janak",
-      "nativeName": "जनक",
-      "role": "king of Mithila, Sita's father",
-      "look": "King Janak: a wise, gentle king with a grey beard, a gold crown and white and gold silk robes"
+      "name": "Gautam",
+      "nativeName": "गौतम ऋषि",
+      "role": "the sage, Ahalya's husband",
+      "look": "Sage Gautam: an old sage with a long white beard, matted hair and white robes"
     },
     {
-      "name": "Mareech",
-      "nativeName": "मारीच",
-      "role": "Tataka's son, later the golden deer",
-      "look": "Mareech: a rakshasa with a dark face, fangs and dark armour; disguised, a shining golden deer with silver spots"
-    },
-    {
-      "name": "Subahu",
-      "nativeName": "सुबाहु",
-      "role": "Tataka's son",
-      "look": "Subahu: a huge rakshasa with fangs, wild hair and dark armour"
+      "name": "Ahalya",
+      "nativeName": "अहल्या",
+      "role": "Gautam's wife, freed from his curse by Ram",
+      "look": "Ahalya: a serene woman sage in a simple white saree, her hands folded"
     }
   ],
   "setting": "Ancient India in the Treta Yuga: the golden city of Ayodhya on the Saryu river, the dense forests of the south, the vanara kingdom of Kishkindha and the golden island city of Lanka.",
@@ -69,6 +69,13 @@
       "title": "दिव्यास्त्र और यज्ञ की रक्षा",
       "description": "राम और लक्ष्मण के अद्भुत शस्त्रों की प्राप्ति और यज्ञ की रक्षा की महाकाव्य कथा। देखिए कैसे दो भाई राक्षसों के आक्रमण को पराजित कर यज्ञ को सफल बनाते हैं।",
       "summary": "Vishwamitra bestows the divine Manav and Agneyastras upon Ram, explaining their power and purpose. Ram receives the celestial weapons with humility and reverence. The sage then leads the brothers to Siddhashram where the sages commence a six‑day yajna, and Ram and Lakshman vow to guard it day and night. The first five days pass with serene vigilance as the brothers meditate, tend the sacred fire, and fend off minor disturbances. On the sixth day, the demon Mareech, now appearing as a golden deer, joins his brother Subahu and a horde of rakshasas to assault the yajna. Dark clouds gather over the ashram as tension mounts. At the climax, Ram invokes his Manav Astra, hurling Mareech a hundred yojanas into the ocean, then unleashes his Agneyastra to incinerate Subahu. Lakshman, with his bow, slays the remaining demons, securing the yajna’s completion. Vishwamitra, delighted, announces the forthcoming bow‑ceremony of King Janak in Mithila, setting the stage for the next journey."
+    },
+    {
+      "season": "1",
+      "episode": "5",
+      "title": "अहल्या उद्धार",
+      "description": "राम और लक्ष्मण की यात्रा में गंगा के अवतरण की कथा और अहल्या की मुक्ति का अद्भुत दृश्य, अंत में मिथिला की नगरी की पहली झलक।",
+      "summary": "On their journey toward Mithila, Sage Vishwamitra pauses to recount the legend of Bhagiratha’s arduous penance that coaxed the Ganga down from the heavens, describing how the river’s descent purified the world. The brothers listen intently, feeling the weight of destiny and the power of devotion that shaped the cosmos. This story deepens their reverence for dharma and prepares them for the trials ahead. Arriving at the deserted hermitage of Gautam, Vishwamitra explains how Indra, disguised as a sage, deceived Ahalya and how Gautam, enraged, cursed her to become a stone. As Ram gently places his divine feet upon the stone, a radiant glow surrounds it, and Ahalya is liberated, rising in serene white garments. She bows deeply to Ram, thanking him, and is reunited with her husband Gautam, who greets the brothers with gratitude and blessing. With Ahalya’s liberation complete, Ram, Lakshman, and Vishwamitra resume their march. The horizon soon reveals the shining towers and bustling streets of Janakpur, its golden domes glittering under the sun. The princes stand in awe, their hearts swelling with anticipation for the forthcoming bow‑ceremony, concluding the episode."
     }
   ],
   "style": "realistic",
