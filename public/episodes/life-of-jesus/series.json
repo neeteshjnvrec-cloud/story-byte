@@ -37,6 +37,13 @@
       "title": "John the Baptist and the Baptism of Jesus",
       "description": "John the Baptist's urgent call awakens the world, and the Son of God steps into the Jordan to be baptized, marking the launch of His public ministry.",
       "summary": "John the Baptist, dressed in a rough camel‑hair garment, stands on the banks of the Jordan, proclaiming, “Repent, for the kingdom of heaven is near” (Matt 3:2). He baptizes crowds, telling them, “I have baptized you with water, but he who comes after me is mightier than I… He will baptize you with the Holy Spirit” (Matt 3:11). The people listen, and many come to be baptized, hearing his promise that one far greater is about to appear. Jesus, about thirty, arrives at the Jordan and asks John to baptize Him. John protests, “I need to be baptized by you, and do you come to me?” (John 1:26), but Jesus replies, “Let it be so now; for thus it is fitting for us to fulfill all righteousness” (Matt 3:15). As Jesus rises from the water, the heavens open, the Spirit descends like a dove, and a voice declares, “This is my beloved Son, with whom I am well pleased” (Mark 1:11). Immediately after the voice, the Spirit drives Jesus into the wilderness (Mark 1:12), where He will be led to begin His mission. The episode ends with the Holy Spirit guiding the newly anointed Messiah into the desert, setting the stage for the trials and triumphs to come."
+    },
+    {
+      "season": "1",
+      "episode": "6",
+      "title": "Jesus Tempted in the Wilderness",
+      "description": "After His baptism, Jesus faces the ultimate test in the desert, confronting Satan’s lies with Scripture and emerging victorious.",
+      "summary": "Led by the Holy Spirit, Jesus is driven into the wilderness. He fasts for forty days and forty nights, feeling intense hunger. During this time He remains in prayer, trusting the Father. Satan, the shadowy tempter, approaches and first tempts Him to turn stones into bread, saying “If you are the Son of God, command these stones to become food.” Jesus answers, “It is written, ‘Man shall not live by bread alone, but by every word that proceeds out of the mouth of God’.” Next Satan challenges Him to throw Himself from the temple, quoting Scripture, “If you are the Son of God, jump, for the angels will rescue you.” Jesus replies, “It is written, ‘You shall not put the Lord your God to the test’.” Finally Satan offers all the kingdoms of the world if Jesus will bow and worship him; Jesus retorts, “It is written, ‘You shall worship the Lord your God, and Him only shall you serve’.” With those words Satan departs, and angels descend to minister to the weary Son. Jesus rises from the desert, his spirit renewed, and walks back toward the Jordan. There John the Baptist sees Him and declares, “Behold the Lamb of God!”"
     }
   ],
   "characters": [
@@ -49,6 +56,11 @@
       "name": "John the Baptist",
       "role": "the prophet who prepares the way",
       "look": "John the Baptist: a lean, intense prophet with long wild dark hair and a beard, a rough camel-hair garment and a leather belt"
+    },
+    {
+      "name": "Satan",
+      "role": "the tempter",
+      "look": "Satan: a shadowy tempter, a tall cloaked figure in darkness whose face is never seen"
     }
   ],
   "setting": "First-century Judea and Galilee under Roman rule: the village of Nazareth, Bethlehem, the shores and fishing boats of the Sea of Galilee, the Jordan river, the desert wilderness and Jerusalem with its great temple.",
