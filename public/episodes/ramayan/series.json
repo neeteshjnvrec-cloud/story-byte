@@ -10,16 +10,16 @@
       "look": "Lord Ram: a calm, youthful prince with smooth dark blue (neel-shyam) skin, a tall gold crown, a yellow silk dhoti and a gold-bordered angavastram draped over his shoulders, gold necklaces, a long bow (Kodanda) in hand and a quiver of arrows on his back"
     },
     {
+      "name": "Sita",
+      "nativeName": "सीता",
+      "role": "princess of Mithila, daughter of Janak, Ram's wife",
+      "look": "Mother Sita: a youthful, radiant goddess with a divine glow and serene face, a small jewelled gold crown and maang tikka, a red silk saree with gold border, rich gold jewellery, head modestly covered with the end of the saree"
+    },
+    {
       "name": "Lakshman",
       "nativeName": "लक्ष्मण",
       "role": "Ram's devoted younger brother, son of Sumitra",
       "look": "Lakshman: a fair-skinned young prince with a gold crown, a yellow dhoti and angavastram over his shoulders, gold necklaces and a bow, always beside Ram"
-    },
-    {
-      "name": "Indra",
-      "nativeName": "इंद्र",
-      "role": "king of the gods",
-      "look": "Indra: the king of the gods with a gold crown, holding the thunderbolt (vajra), riding the white elephant Airavata"
     },
     {
       "name": "Vishwamitra",
@@ -28,16 +28,10 @@
       "look": "Sage Vishwamitra: a tall, stern sage with a long grey beard and matted hair, a fiery gaze, saffron robes and a wooden staff"
     },
     {
-      "name": "Gautam",
-      "nativeName": "गौतम ऋषि",
-      "role": "the sage, Ahalya's husband",
-      "look": "Sage Gautam: an old sage with a long white beard, matted hair and white robes"
-    },
-    {
-      "name": "Ahalya",
-      "nativeName": "अहल्या",
-      "role": "Gautam's wife, freed from his curse by Ram",
-      "look": "Ahalya: a serene woman sage in a simple white saree, her hands folded"
+      "name": "Janak",
+      "nativeName": "जनक",
+      "role": "king of Mithila, Sita's father",
+      "look": "King Janak: a wise, gentle king with a grey beard, a gold crown and white and gold silk robes"
     }
   ],
   "setting": "Ancient India in the Treta Yuga: the golden city of Ayodhya on the Saryu river, the dense forests of the south, the vanara kingdom of Kishkindha and the golden island city of Lanka.",
@@ -76,6 +70,13 @@
       "title": "अहल्या उद्धार",
       "description": "राम और लक्ष्मण की यात्रा में गंगा के अवतरण की कथा और अहल्या की मुक्ति का अद्भुत दृश्य, अंत में मिथिला की नगरी की पहली झलक।",
       "summary": "On their journey toward Mithila, Sage Vishwamitra pauses to recount the legend of Bhagiratha’s arduous penance that coaxed the Ganga down from the heavens, describing how the river’s descent purified the world. The brothers listen intently, feeling the weight of destiny and the power of devotion that shaped the cosmos. This story deepens their reverence for dharma and prepares them for the trials ahead. Arriving at the deserted hermitage of Gautam, Vishwamitra explains how Indra, disguised as a sage, deceived Ahalya and how Gautam, enraged, cursed her to become a stone. As Ram gently places his divine feet upon the stone, a radiant glow surrounds it, and Ahalya is liberated, rising in serene white garments. She bows deeply to Ram, thanking him, and is reunited with her husband Gautam, who greets the brothers with gratitude and blessing. With Ahalya’s liberation complete, Ram, Lakshman, and Vishwamitra resume their march. The horizon soon reveals the shining towers and bustling streets of Janakpur, its golden domes glittering under the sun. The princes stand in awe, their hearts swelling with anticipation for the forthcoming bow‑ceremony, concluding the episode."
+    },
+    {
+      "season": "1",
+      "episode": "6",
+      "title": "पुष्प वाटिका: राम-सीता का प्रथम दर्शन",
+      "description": "जनकपुर में राजसी स्वागत, प्रथम दृष्टि और भाग्य की पहली आशा। फूलवाटिका में प्रेम की प्रार्थना, और पिनाक धनुष को उठाने की चिंता के साथ नई सुबह की शुरुआत।",
+      "summary": "The episode opens as Sage Vishwamitra, accompanied by Rama and Lakshman, arrives at the splendid city of Mithila. King Janak greets them with reverent bows, offering fragrant garlands and a grand feast, while expressing deep admiration for the two princes. He invites the sage to stay and promises to honor him during the upcoming ceremony. Rama and Lakshman wander through the bustling streets, marveling at the golden towers and the scent of jasmine in the air. They enter the royal flower garden to collect blossoms for their guru, where they catch sight of Sita for the first time, radiant in a red sari. Sita, moved by the sight, folds her hands and prays to Mother Gauri, asking the goddess to bless Rama as her husband, and a gentle divine breeze signals the goddess’s benediction. King Janak, observing the awe‑struck princes, worries aloud that no mortal king has yet been able to lift the mighty bow Pinaka, fearing his kingdom may lack a true hero. He confides his concern to Vishwamitra, who reassures him that destiny will reveal the worthy. As night gives way to dawn, the palace prepares for the bow‑lifting ceremony, and the episode ends on the quiet morning before the ritual begins, filled with hopeful anticipation."
     }
   ],
   "style": "realistic",
