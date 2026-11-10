@@ -44,6 +44,13 @@
       "title": "Jesus Tempted in the Wilderness",
       "description": "After His baptism, Jesus faces the ultimate test in the desert, confronting Satan’s lies with Scripture and emerging victorious.",
       "summary": "Led by the Holy Spirit, Jesus is driven into the wilderness. He fasts for forty days and forty nights, feeling intense hunger. During this time He remains in prayer, trusting the Father. Satan, the shadowy tempter, approaches and first tempts Him to turn stones into bread, saying “If you are the Son of God, command these stones to become food.” Jesus answers, “It is written, ‘Man shall not live by bread alone, but by every word that proceeds out of the mouth of God’.” Next Satan challenges Him to throw Himself from the temple, quoting Scripture, “If you are the Son of God, jump, for the angels will rescue you.” Jesus replies, “It is written, ‘You shall not put the Lord your God to the test’.” Finally Satan offers all the kingdoms of the world if Jesus will bow and worship him; Jesus retorts, “It is written, ‘You shall worship the Lord your God, and Him only shall you serve’.” With those words Satan departs, and angels descend to minister to the weary Son. Jesus rises from the desert, his spirit renewed, and walks back toward the Jordan. There John the Baptist sees Him and declares, “Behold the Lamb of God!”"
+    },
+    {
+      "season": "1",
+      "episode": "7",
+      "title": "The First Disciples",
+      "description": "Jesus gathers his first followers, calling them to a new purpose, and leads them toward the miracle of a wedding at Cana.",
+      "summary": "Andrew, a former disciple of John the Baptist, follows Jesus and spends the day listening to His teaching. He brings his brother Simon to meet the Messiah, and Jesus looks at Simon and says, \"You are Simon, son of John; you shall be called Cephas (Peter).\" Meanwhile, Philip, moved by what he has heard, comes to Jesus and brings his friend Nathanael, who skeptically asks, \"Can anything good come out of Nazareth?\" Jesus replies, \"Before Philip called you, when you were under the fig tree I saw you,\" convincing Nathanael of His divine insight. That evening, on the shore of the Sea of Galilee, the disciples have spent the night without a single catch. Jesus stands by the water and says, \"Put out into deep water, and let down the nets for a catch.\" Peter obeys, and the nets fill so abundantly that they begin to tear. Jesus looks at the astonished fishermen and declares, \"Come, follow me, and I will make you fishers of men.\" Peter, Andrew, James, and John leave their boats at once, following Him. As the new disciples gather with the risen sun, Jesus turns to them and says, \"Let us go to the wedding at Cana.\" The invitation points them toward the first sign that will reveal His glory, setting the stage for the miracle to come."
     }
   ],
   "characters": [
@@ -53,14 +60,34 @@
       "look": "Jesus: a man of about thirty with a gentle, compassionate face, warm olive skin, shoulder-length dark brown hair and a short beard, kind dark eyes, a simple off-white linen robe with a deep red mantle over one shoulder, sandals"
     },
     {
-      "name": "John the Baptist",
-      "role": "the prophet who prepares the way",
-      "look": "John the Baptist: a lean, intense prophet with long wild dark hair and a beard, a rough camel-hair garment and a leather belt"
+      "name": "Peter",
+      "role": "Simon Peter, a fisherman, the leading disciple",
+      "look": "Peter: a sturdy fisherman in his thirties with curly greying dark hair, a thick beard and a brown tunic"
     },
     {
-      "name": "Satan",
-      "role": "the tempter",
-      "look": "Satan: a shadowy tempter, a tall cloaked figure in darkness whose face is never seen"
+      "name": "Andrew",
+      "role": "Peter's brother, a fisherman and disciple",
+      "look": "Andrew: a lean fisherman with dark hair and a short beard in a grey tunic"
+    },
+    {
+      "name": "James",
+      "role": "son of Zebedee, a fisherman and disciple",
+      "look": "James: a strong young fisherman with dark hair and a beard in a dark blue tunic"
+    },
+    {
+      "name": "Apostle John",
+      "role": "son of Zebedee, the youngest disciple, \"the disciple Jesus loved\"",
+      "look": "Apostle John: a young man in his early twenties with wavy dark hair, barely a beard, in a green tunic"
+    },
+    {
+      "name": "Philip",
+      "role": "a disciple from Bethsaida",
+      "look": "Philip: a thoughtful young man with short dark hair and a short beard in a tan tunic"
+    },
+    {
+      "name": "Nathanael",
+      "role": "a disciple",
+      "look": "Nathanael: a young man with a neat beard in a light grey robe"
     }
   ],
   "setting": "First-century Judea and Galilee under Roman rule: the village of Nazareth, Bethlehem, the shores and fishing boats of the Sea of Galilee, the Jordan river, the desert wilderness and Jerusalem with its great temple.",
