@@ -32,6 +32,12 @@
       "nativeName": "जनक",
       "role": "king of Mithila, Sita's father",
       "look": "King Janak: a wise, gentle king with a grey beard, a gold crown and white and gold silk robes"
+    },
+    {
+      "name": "Parshuram",
+      "nativeName": "परशुराम",
+      "role": "the fierce warrior-sage, an avatar of Vishnu",
+      "look": "Parshuram: a fierce, muscular warrior-sage with matted hair and a beard, a saffron dhoti, an axe (parshu) on his shoulder and a great bow"
     }
   ],
   "setting": "Ancient India in the Treta Yuga: the golden city of Ayodhya on the Saryu river, the dense forests of the south, the vanara kingdom of Kishkindha and the golden island city of Lanka.",
@@ -77,6 +83,13 @@
       "title": "पुष्प वाटिका: राम-सीता का प्रथम दर्शन",
       "description": "जनकपुर में राजसी स्वागत, प्रथम दृष्टि और भाग्य की पहली आशा। फूलवाटिका में प्रेम की प्रार्थना, और पिनाक धनुष को उठाने की चिंता के साथ नई सुबह की शुरुआत।",
       "summary": "The episode opens as Sage Vishwamitra, accompanied by Rama and Lakshman, arrives at the splendid city of Mithila. King Janak greets them with reverent bows, offering fragrant garlands and a grand feast, while expressing deep admiration for the two princes. He invites the sage to stay and promises to honor him during the upcoming ceremony. Rama and Lakshman wander through the bustling streets, marveling at the golden towers and the scent of jasmine in the air. They enter the royal flower garden to collect blossoms for their guru, where they catch sight of Sita for the first time, radiant in a red sari. Sita, moved by the sight, folds her hands and prays to Mother Gauri, asking the goddess to bless Rama as her husband, and a gentle divine breeze signals the goddess’s benediction. King Janak, observing the awe‑struck princes, worries aloud that no mortal king has yet been able to lift the mighty bow Pinaka, fearing his kingdom may lack a true hero. He confides his concern to Vishwamitra, who reassures him that destiny will reveal the worthy. As night gives way to dawn, the palace prepares for the bow‑lifting ceremony, and the episode ends on the quiet morning before the ritual begins, filled with hopeful anticipation."
+    },
+    {
+      "season": "1",
+      "episode": "7",
+      "title": "शिव धनुष भंग",
+      "description": "राजाओं की भीड़, शिव धनुष की परीक्षा और राम का अद्भुत पराक्रम—देखिए कैसे धनुष टूटता है और सीता की माला राम पर बंधती है।",
+      "summary": "The grand bow‑lifting ceremony begins as kings from every corner of the earth arrive at Janak’s palace, each eager to demonstrate their might. One by one they grasp the mighty Pinaka, but none can even budge it, and the king’s heart sinks in despair. Lakshman, inflamed by the mounting failure, fumes loudly, but Ram gently restrains his brother with calm words, reminding him of dharma. At Vishwamitra’s gentle command, Ram bows reverently to his guru before the assembled crowd. With a steady breath he lifts the colossal bow, his divine strength evident, and as he draws the string the tension builds to a deafening roar. The bow snaps cleanly, shattering into pieces with a thunderous crash that reverberates through the hall, echoing like the roar of a celestial storm. In the stunned silence that follows, Sita steps forward, her eyes shining with devotion, and places a fragrant garland around Ram’s neck, proclaiming him her husband. The reverberation of the broken bow carries far, its echo summoning the fierce sage Parshuram, whose fury is now awakened. The episode ends as the thunder of the shattered bow heralds Parshuram’s impending arrival."
     }
   ],
   "style": "realistic",
