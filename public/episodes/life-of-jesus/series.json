@@ -51,6 +51,13 @@
       "title": "The First Disciples",
       "description": "Jesus gathers his first followers, calling them to a new purpose, and leads them toward the miracle of a wedding at Cana.",
       "summary": "Andrew, a former disciple of John the Baptist, follows Jesus and spends the day listening to His teaching. He brings his brother Simon to meet the Messiah, and Jesus looks at Simon and says, \"You are Simon, son of John; you shall be called Cephas (Peter).\" Meanwhile, Philip, moved by what he has heard, comes to Jesus and brings his friend Nathanael, who skeptically asks, \"Can anything good come out of Nazareth?\" Jesus replies, \"Before Philip called you, when you were under the fig tree I saw you,\" convincing Nathanael of His divine insight. That evening, on the shore of the Sea of Galilee, the disciples have spent the night without a single catch. Jesus stands by the water and says, \"Put out into deep water, and let down the nets for a catch.\" Peter obeys, and the nets fill so abundantly that they begin to tear. Jesus looks at the astonished fishermen and declares, \"Come, follow me, and I will make you fishers of men.\" Peter, Andrew, James, and John leave their boats at once, following Him. As the new disciples gather with the risen sun, Jesus turns to them and says, \"Let us go to the wedding at Cana.\" The invitation points them toward the first sign that will reveal His glory, setting the stage for the miracle to come."
+    },
+    {
+      "season": "1",
+      "episode": "8",
+      "title": "Jesus Turns Water into Wine",
+      "description": "From turning water into wine at a humble wedding to driving out the merchants from the holy Temple, Jesus begins His public ministry with bold signs and daring action, culminating in a secret night visit from the curious Pharisee Nicodemus.",
+      "summary": "The episode opens at a wedding in Cana of Galilee where the hosts run out of wine. Mother Mary approaches Jesus, saying, \"Do whatever he tells you,\" and He instructs the servants to fill six stone jars with water. He then tells them to draw some out and bring it to the master of the banquet, and the water has become the finest wine, revealing His first sign and causing the disciples to believe in Him. During Passover in Jerusalem, Jesus enters the Temple courts and finds merchants and money changers profiting from the holy place. He overturns the tables, scattering the coins, and declares, \"Do not make my Father's house a market.\" The crowd is stunned as the Temple is cleansed, underscoring His authority over religious practice. Later that night, Nicodemus, a respected Pharisee, comes to Jesus in secret, seeking understanding. He approaches quietly, and the episode ends with his arrival, setting the stage for a deep conversation about the Kingdom of God."
     }
   ],
   "characters": [
@@ -60,34 +67,14 @@
       "look": "Jesus: a man of about thirty with a gentle, compassionate face, warm olive skin, shoulder-length dark brown hair and a short beard, kind dark eyes, a simple off-white linen robe with a deep red mantle over one shoulder, sandals"
     },
     {
-      "name": "Peter",
-      "role": "Simon Peter, a fisherman, the leading disciple",
-      "look": "Peter: a sturdy fisherman in his thirties with curly greying dark hair, a thick beard and a brown tunic"
+      "name": "Mother Mary",
+      "role": "the mother of Jesus",
+      "look": "Mother Mary: a young Jewish woman with a gentle, serene face and olive skin, a light blue head covering over a simple cream robe"
     },
     {
-      "name": "Andrew",
-      "role": "Peter's brother, a fisherman and disciple",
-      "look": "Andrew: a lean fisherman with dark hair and a short beard in a grey tunic"
-    },
-    {
-      "name": "James",
-      "role": "son of Zebedee, a fisherman and disciple",
-      "look": "James: a strong young fisherman with dark hair and a beard in a dark blue tunic"
-    },
-    {
-      "name": "Apostle John",
-      "role": "son of Zebedee, the youngest disciple, \"the disciple Jesus loved\"",
-      "look": "Apostle John: a young man in his early twenties with wavy dark hair, barely a beard, in a green tunic"
-    },
-    {
-      "name": "Philip",
-      "role": "a disciple from Bethsaida",
-      "look": "Philip: a thoughtful young man with short dark hair and a short beard in a tan tunic"
-    },
-    {
-      "name": "Nathanael",
-      "role": "a disciple",
-      "look": "Nathanael: a young man with a neat beard in a light grey robe"
+      "name": "Nicodemus",
+      "role": "a Pharisee and member of the council",
+      "look": "Nicodemus: an older Pharisee with a grey beard in fine blue and white robes with a prayer shawl"
     }
   ],
   "setting": "First-century Judea and Galilee under Roman rule: the village of Nazareth, Bethlehem, the shores and fishing boats of the Sea of Galilee, the Jordan river, the desert wilderness and Jerusalem with its great temple.",
