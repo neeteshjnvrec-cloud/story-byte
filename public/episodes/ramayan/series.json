@@ -10,22 +10,16 @@
       "look": "Lord Ram: a calm, youthful prince with smooth dark blue (neel-shyam) skin, a tall gold crown, a yellow silk dhoti and a gold-bordered angavastram draped over his shoulders, gold necklaces, a long bow (Kodanda) in hand and a quiver of arrows on his back"
     },
     {
-      "name": "Sita",
-      "nativeName": "सीता",
-      "role": "princess of Mithila, daughter of Janak, Ram's wife",
-      "look": "Mother Sita: a youthful, radiant goddess with a divine glow and serene face, a small jewelled gold crown and maang tikka, a red silk saree with gold border, rich gold jewellery, head modestly covered with the end of the saree"
-    },
-    {
       "name": "Lakshman",
       "nativeName": "लक्ष्मण",
       "role": "Ram's devoted younger brother, son of Sumitra",
       "look": "Lakshman: a fair-skinned young prince with a gold crown, a yellow dhoti and angavastram over his shoulders, gold necklaces and a bow, always beside Ram"
     },
     {
-      "name": "Vishwamitra",
-      "nativeName": "विश्वामित्र",
-      "role": "the great sage who takes Ram and Lakshman to guard his yagya",
-      "look": "Sage Vishwamitra: a tall, stern sage with a long grey beard and matted hair, a fiery gaze, saffron robes and a wooden staff"
+      "name": "Dasharath",
+      "nativeName": "दशरथ",
+      "role": "king of Ayodhya, father of Ram",
+      "look": "King Dasharath: an elderly, dignified king with a white beard and moustache, a tall gold crown, rich maroon and gold silk robes and gold jewellery"
     },
     {
       "name": "Janak",
@@ -90,6 +84,13 @@
       "title": "शिव धनुष भंग",
       "description": "राजाओं की भीड़, शिव धनुष की परीक्षा और राम का अद्भुत पराक्रम—देखिए कैसे धनुष टूटता है और सीता की माला राम पर बंधती है।",
       "summary": "The grand bow‑lifting ceremony begins as kings from every corner of the earth arrive at Janak’s palace, each eager to demonstrate their might. One by one they grasp the mighty Pinaka, but none can even budge it, and the king’s heart sinks in despair. Lakshman, inflamed by the mounting failure, fumes loudly, but Ram gently restrains his brother with calm words, reminding him of dharma. At Vishwamitra’s gentle command, Ram bows reverently to his guru before the assembled crowd. With a steady breath he lifts the colossal bow, his divine strength evident, and as he draws the string the tension builds to a deafening roar. The bow snaps cleanly, shattering into pieces with a thunderous crash that reverberates through the hall, echoing like the roar of a celestial storm. In the stunned silence that follows, Sita steps forward, her eyes shining with devotion, and places a fragrant garland around Ram’s neck, proclaiming him her husband. The reverberation of the broken bow carries far, its echo summoning the fierce sage Parshuram, whose fury is now awakened. The episode ends as the thunder of the shattered bow heralds Parshuram’s impending arrival."
+    },
+    {
+      "season": "1",
+      "episode": "8",
+      "title": "परशुराम-लक्ष्मण संवाद",
+      "description": "परशुराम का प्रचंड गुस्सा, लक्ष्मण की तीखी प्रतिक्रिया और राम की विनम्रता का संगम—एक अद्भुत संवाद! यह दृश्य महाकाव्य के सबसे महत्त्वपूर्ण मोड़ को उजागर करता है।",
+      "summary": "Parshuram bursts into the hall, furious that the sacred bow Pinaka has been broken. He confronts the princes, his voice thundering, demanding the one responsible. Lakshman steps forward, eyes blazing, while Ram remains composed. Lakshman answers Parshuram with fearless, sharp words, accusing the world of failing dharma, which only fuels Parshuram’s anger. Ram intervenes, speaking with humility, acknowledging Parshuram’s stature and offering respect. Pleased, Parshuram presents his own divine bow to Ram, who effortlessly strings it in a single breath. Parshuram, seeing the divine light, bows and declares Ram the Supreme Lord. After the revelation, Parshuram lowers his axe, bows deeply, and departs for the mountains, his wrath dissolved. King Janak, witnessing the event, sends swift messengers to Ayodhya to inform Dasharath of the auspicious sign. With hearts full of joy, Dasharath gathers the wedding procession and sets out toward Mithila, the kingdom bathed in celebration."
     }
   ],
   "style": "realistic",
