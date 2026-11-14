@@ -58,6 +58,13 @@
       "title": "Jesus Turns Water into Wine",
       "description": "From turning water into wine at a humble wedding to driving out the merchants from the holy Temple, Jesus begins His public ministry with bold signs and daring action, culminating in a secret night visit from the curious Pharisee Nicodemus.",
       "summary": "The episode opens at a wedding in Cana of Galilee where the hosts run out of wine. Mother Mary approaches Jesus, saying, \"Do whatever he tells you,\" and He instructs the servants to fill six stone jars with water. He then tells them to draw some out and bring it to the master of the banquet, and the water has become the finest wine, revealing His first sign and causing the disciples to believe in Him. During Passover in Jerusalem, Jesus enters the Temple courts and finds merchants and money changers profiting from the holy place. He overturns the tables, scattering the coins, and declares, \"Do not make my Father's house a market.\" The crowd is stunned as the Temple is cleansed, underscoring His authority over religious practice. Later that night, Nicodemus, a respected Pharisee, comes to Jesus in secret, seeking understanding. He approaches quietly, and the episode ends with his arrival, setting the stage for a deep conversation about the Kingdom of God."
+    },
+    {
+      "season": "1",
+      "episode": "9",
+      "title": "Nicodemus and the Woman at the Well",
+      "description": "Jesus reveals the mystery of rebirth, offers living water to a Samaritan woman, and heals a royal official's dying son, sparking faith across nations.",
+      "summary": "One night Nicodemers approaches Jesus in secret. Jesus tells him, \"Truly, truly, I say to you, unless one is born again he cannot see the kingdom of God,\" and then adds, \"For God so loved the world that he gave his only Son, that whoever believes in him should not perish but have eternal life.\" Nicodemus is left pondering this profound truth. Jesus passes through Samaria and rests at Jacob’s well. He asks the Samaritan woman for a drink, saying, \"If you knew the gift of God and who it is that asks you for a drink, you would have asked him and he would have given you living water.\" He reveals her past, declares, \"I, who speak to you, am he,\" and she runs to tell the townspeople, \"Come, see a man who told me everything I have ever done! Could this be the Messiah?\" Many believe because of her testimony. Returning to Galilee, a royal official begs Jesus, \"Sir, my son is near death; please come before he dies.\" Jesus replies, \"Go; your son will live,\" and the boy is healed at that very hour. The official and his household come to believe in Jesus, sealing another miracle of the Messiah’s power."
     }
   ],
   "characters": [
@@ -67,14 +74,21 @@
       "look": "Jesus: a man of about thirty with a gentle, compassionate face, warm olive skin, shoulder-length dark brown hair and a short beard, kind dark eyes, a simple off-white linen robe with a deep red mantle over one shoulder, sandals"
     },
     {
-      "name": "Mother Mary",
-      "role": "the mother of Jesus",
-      "look": "Mother Mary: a young Jewish woman with a gentle, serene face and olive skin, a light blue head covering over a simple cream robe"
-    },
-    {
       "name": "Nicodemus",
       "role": "a Pharisee and member of the council",
       "look": "Nicodemus: an older Pharisee with a grey beard in fine blue and white robes with a prayer shawl"
+    },
+    {
+      "name": "Samaritan Woman",
+      "nativeName": "Samaritan Woman",
+      "role": "Woman at Jacob’s well who encounters Jesus",
+      "look": "A Samaritan woman in simple dress, weathered hands, carrying a water jar"
+    },
+    {
+      "name": "Royal Official",
+      "nativeName": "Royal Official",
+      "role": "A dignified official who seeks Jesus to heal his dying son",
+      "look": "A dignified man in fine robes, bearing a seal of authority, with a worried expression"
     }
   ],
   "setting": "First-century Judea and Galilee under Roman rule: the village of Nazareth, Bethlehem, the shores and fishing boats of the Sea of Galilee, the Jordan river, the desert wilderness and Jerusalem with its great temple.",
