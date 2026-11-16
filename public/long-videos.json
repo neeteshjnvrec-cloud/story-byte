@@ -1,6 +1,20 @@
 {
- "updatedAt": "2026-11-15T03:26:12.242Z",
+ "updatedAt": "2026-11-16T03:40:00.848Z",
  "videos": [
+  {
+   "id": "xO5iD0v3axU",
+   "youtubeUrl": "https://youtu.be/xO5iD0v3axU",
+   "thumbnail": "https://i.ytimg.com/vi/xO5iD0v3axU/mqdefault.jpg",
+   "thumbnailHd": "https://i.ytimg.com/vi/xO5iD0v3axU/maxresdefault.jpg",
+   "title": "छठ माँ की कथा: राजा प्रियव्रत के शिशु को जीवन मिला",
+   "seriesTitle": "Bhakti Katha",
+   "season": "2026",
+   "episode": "1115",
+   "description": "एक भावनात्मक कथा जहाँ राजा प्रियव्रत की निराशा, दिव्य करुणा और छठी माँ की असीम शक्ति एकत्रित होती है। सुनिए कैसे एक मृत शिशु को जीवन का उपहार मिला और छठ व्रत की उत्पत्ति हुई।",
+   "language": "hi",
+   "durationSec": 927,
+   "publishedAt": "2026-11-15T13:24:21.742Z"
+  },
   {
    "id": "djFNMnfhDxM",
    "youtubeUrl": "https://youtu.be/djFNMnfhDxM",
