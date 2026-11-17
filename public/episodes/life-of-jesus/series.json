@@ -65,6 +65,13 @@
       "title": "Nicodemus and the Woman at the Well",
       "description": "Jesus reveals the mystery of rebirth, offers living water to a Samaritan woman, and heals a royal official's dying son, sparking faith across nations.",
       "summary": "One night Nicodemers approaches Jesus in secret. Jesus tells him, \"Truly, truly, I say to you, unless one is born again he cannot see the kingdom of God,\" and then adds, \"For God so loved the world that he gave his only Son, that whoever believes in him should not perish but have eternal life.\" Nicodemus is left pondering this profound truth. Jesus passes through Samaria and rests at Jacob’s well. He asks the Samaritan woman for a drink, saying, \"If you knew the gift of God and who it is that asks you for a drink, you would have asked him and he would have given you living water.\" He reveals her past, declares, \"I, who speak to you, am he,\" and she runs to tell the townspeople, \"Come, see a man who told me everything I have ever done! Could this be the Messiah?\" Many believe because of her testimony. Returning to Galilee, a royal official begs Jesus, \"Sir, my son is near death; please come before he dies.\" Jesus replies, \"Go; your son will live,\" and the boy is healed at that very hour. The official and his household come to believe in Jesus, sealing another miracle of the Messiah’s power."
+    },
+    {
+      "season": "1",
+      "episode": "10",
+      "title": "Rejected in Nazareth",
+      "description": "In this episode Jesus confronts rejection in Nazareth yet demonstrates His authority by healing the official’s son, Peter’s mother‑in‑law, the town’s sick, and even a leper, launching the public ministry.",
+      "summary": "Jesus is approached by a royal official pleading, \"Sir, my son is near death; please come before he dies.\" Jesus replies, \"Go; your son will live.\" At that very hour the boy rises and is healed, and the official and his household believe in Him. In the synagogue of Nazareth Jesus reads, \"The Spirit of the Lord is upon me, because He has anointed me to bring good news to the poor…\" He adds, \"Today this scripture is fulfilled in your hearing.\" The townspeople are enraged, seize Him and try to cast Him down a cliff, but He walks right through the crowd and departs unharmed. Jesus enters Capernaum and finds Simon’s mother‑in‑law ill. He says, \"Take her away; she is healed,\" and she rises at once. At sunset the whole town brings the sick to the door, and He heals them all. A man with leprosy kneels and says, \"If you are willing, you can make me clean.\" Jesus answers, \"I am willing. Be clean,\" and the leper is instantly cleansed."
     }
   ],
   "characters": [
@@ -74,21 +81,21 @@
       "look": "Jesus: a man of about thirty with a gentle, compassionate face, warm olive skin, shoulder-length dark brown hair and a short beard, kind dark eyes, a simple off-white linen robe with a deep red mantle over one shoulder, sandals"
     },
     {
-      "name": "Nicodemus",
-      "role": "a Pharisee and member of the council",
-      "look": "Nicodemus: an older Pharisee with a grey beard in fine blue and white robes with a prayer shawl"
-    },
-    {
-      "name": "Samaritan Woman",
-      "nativeName": "Samaritan Woman",
-      "role": "Woman at Jacob’s well who encounters Jesus",
-      "look": "A Samaritan woman in simple dress, weathered hands, carrying a water jar"
+      "name": "Peter",
+      "role": "Simon Peter, a fisherman, the leading disciple",
+      "look": "Peter: a sturdy fisherman in his thirties with curly greying dark hair, a thick beard and a brown tunic"
     },
     {
       "name": "Royal Official",
-      "nativeName": "Royal Official",
-      "role": "A dignified official who seeks Jesus to heal his dying son",
-      "look": "A dignified man in fine robes, bearing a seal of authority, with a worried expression"
+      "nativeName": "Nasi",
+      "role": "A dignified official who begs Jesus to heal his dying son",
+      "look": "A man of respectable bearing, wearing a fine tunic and sandals, with a concerned expression"
+    },
+    {
+      "name": "Leper",
+      "nativeName": "Sārī",
+      "role": "A man afflicted with leprosy who seeks Jesus’ mercy",
+      "look": "A gaunt man covered in sores, wearing tattered clothing, trembling with hope"
     }
   ],
   "setting": "First-century Judea and Galilee under Roman rule: the village of Nazareth, Bethlehem, the shores and fishing boats of the Sea of Galilee, the Jordan river, the desert wilderness and Jerusalem with its great temple.",
