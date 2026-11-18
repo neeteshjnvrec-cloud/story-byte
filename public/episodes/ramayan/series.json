@@ -16,10 +16,10 @@
       "look": "Mother Sita: a youthful, radiant goddess with a divine glow and serene face, a small jewelled gold crown and maang tikka, a red silk saree with gold border, rich gold jewellery, head modestly covered with the end of the saree"
     },
     {
-      "name": "Lakshman",
-      "nativeName": "लक्ष्मण",
-      "role": "Ram's devoted younger brother, son of Sumitra",
-      "look": "Lakshman: a fair-skinned young prince with a gold crown, a yellow dhoti and angavastram over his shoulders, gold necklaces and a bow, always beside Ram"
+      "name": "Ravana",
+      "nativeName": "रावण",
+      "role": "the ten-headed rakshasa king of Lanka",
+      "look": "Ravana: the demon king of Lanka with ten crowned heads in a row and many arms, golden armour and weapons"
     },
     {
       "name": "Dasharath",
@@ -40,46 +40,22 @@
       "look": "Queen Kaikeyi: a beautiful, proud queen in a deep green and gold silk saree, rich gold jewellery and a gold crown"
     },
     {
-      "name": "Sumitra",
-      "nativeName": "सुमित्रा",
-      "role": "mother of Lakshman and Shatrughna",
-      "look": "Queen Sumitra: a calm, kind middle-aged queen in a light blue and gold silk saree with a small gold crown"
+      "name": "Vasishtha",
+      "nativeName": "वशिष्ठ",
+      "role": "royal guru of Ayodhya",
+      "look": "Guru Vasishtha: an old, serene sage with a long white beard and a topknot, saffron robes and rudraksha beads"
     },
     {
-      "name": "Bharat",
-      "nativeName": "भरत",
-      "role": "Ram's devoted younger brother, son of Kaikeyi",
-      "look": "Bharat: a young prince with dusky dark skin, a gentle devoted face, a gold crown, a saffron dhoti and angavastram; after Ram's exile, plain ascetic bark clothes and matted hair"
+      "name": "Manthara",
+      "nativeName": "मंथरा",
+      "role": "Kaikeyi's old maid",
+      "look": "Manthara: an old hunchbacked maid with grey hair, a cunning face and a plain brown saree"
     },
     {
-      "name": "Shatrughna",
-      "nativeName": "शत्रुघ्न",
-      "role": "youngest brother, always with Bharat",
-      "look": "Shatrughna: a fair young prince with a gold crown, a red dhoti and angavastram and a bow"
-    },
-    {
-      "name": "Urmila",
-      "nativeName": "उर्मिला",
-      "role": "Sita's sister, Lakshman's wife",
-      "look": "Urmila: a young princess in a pink and gold silk saree with gold jewellery"
-    },
-    {
-      "name": "Janak",
-      "nativeName": "जनक",
-      "role": "king of Mithila, Sita's father",
-      "look": "King Janak: a wise, gentle king with a grey beard, a gold crown and white and gold silk robes"
-    },
-    {
-      "name": "Mandavi",
-      "nativeName": "मांडवी",
-      "role": "Bharat's wife",
-      "look": "A graceful princess of Mithila, wearing a red silk saree with gold border and elegant jewelry, a small gold crown on her head."
-    },
-    {
-      "name": "Shrutakirti",
-      "nativeName": "श्रुताकृति",
-      "role": "Shatrughna's wife",
-      "look": "A lovely maiden of Mithila, dressed in a pink silk saree with gold trim, adorned with gold necklaces and a modest crown."
+      "name": "Saraswati",
+      "nativeName": "सरस्वती",
+      "role": "goddess who turns Manthara’s mind",
+      "look": "Goddese Saraswati: a serene figure dressed in white, seated on a lotus, holding a veena, with white hair and a crown of flowers"
     }
   ],
   "setting": "Ancient India in the Treta Yuga: the golden city of Ayodhya on the Saryu river, the dense forests of the south, the vanara kingdom of Kishkindha and the golden island city of Lanka.",
@@ -146,6 +122,13 @@
       "title": "सीता-राम विवाह",
       "description": "राजा दशरथ की बारात मिथिला पहुंचती है, जहाँ चार वैवाहिक बंधन बनते हैं और फिर खुशियों के साथ अयोध्या लौटते हैं।",
       "summary": "The royal procession, led by King Dasharath and accompanied by Bharat and Shatrughna, arrives at the splendid city of Mithila. The palace courtyards are festooned with garlands and lamps, and the people rejoice at the sight of the Ayodhya princes. All preparations for the upcoming weddings are completed under the watchful eyes of King Janak and the sages. The grand ceremony sees Rama wed Sita, Lakshman wed Urmila, Bharat wed Mandavi, and Shatrughna wed Shrutakirti. Sacred vows are exchanged, garlands placed, and the divine couple are blessed by Janak, who weeps tearfully as he bids farewell to his beloved daughters. Joyful music fills the air, and the newly united families share a sumptuous feast before departing. The bridal parties return to Ayodhya where Queens Kaushalya, Kaikeyi and Sumitra greet the brides with heartfelt embraces. Years pass in prosperity and harmony, with Rama and Sita’s household flourishing in virtue. Eventually Bharat and Shatrughna set out for Kekaya to visit their grandfather, leaving the kingdom in peaceful celebration."
+    },
+    {
+      "season": "1",
+      "episode": "10",
+      "title": "राम राज्याभिषेक की घोषणा",
+      "description": "दशरथ के वृद्धावस्था में राम को युवराज घोषित करने की घोषणा, अयोध्या में उल्लास और देवताओं की चिंताएँ।",
+      "summary": "King Dasharath, feeling the weight of his years, publicly declares that Prince Ram will be crowned as the heir to the throne. The royal court and the gathered citizens erupt in joyous applause, and Sage Vasishtha is asked to set the coronation for the following dawn. Kaushalya, overwhelmed with motherly pride, embraces Ram and Sita, sharing tears of happiness. Throughout the night, Ayodhya is transformed with lamps, garlands, and fragrant flowers as every street glitters in anticipation. Ram and Sita observe a solemn fast, offering prayers to the divine for the kingdom’s welfare, while Kaushalya watches them with a serene smile. The city buzzes with music and dance, the people chanting blessings for the future king. High above the mortal realm, the gods sense that crowning Ram might postpone his destined battle against Ravana, stirring their concern. Goddess Saraswati, moved by the divine plan, gently influences the old maid Manthara, planting a seed of unease. Seeing the grand celebrations, Manthara slips away from the festivities and hurries to inform Kaikeyi, setting the next intrigue in motion."
     }
   ],
   "style": "realistic",
