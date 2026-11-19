@@ -1,6 +1,20 @@
 {
- "updatedAt": "2026-11-18T05:08:16.844Z",
+ "updatedAt": "2026-11-19T04:56:13.783Z",
  "videos": [
+  {
+   "id": "JFw2qdA9md0",
+   "youtubeUrl": "https://youtu.be/JFw2qdA9md0",
+   "thumbnail": "https://i.ytimg.com/vi/JFw2qdA9md0/mqdefault.jpg",
+   "thumbnailHd": "https://i.ytimg.com/vi/JFw2qdA9md0/maxresdefault.jpg",
+   "title": "रामायण एपिसोड 10: राम राज्याभिषेक की घोषणा | Ramayan Episode 10",
+   "seriesTitle": "Ramayan",
+   "season": "1",
+   "episode": "10",
+   "description": "दशरथ के वृद्धावस्था में राम को युवराज घोषित करने की घोषणा, अयोध्या में उल्लास और देवताओं की चिंताएँ।",
+   "language": "hi",
+   "durationSec": 903,
+   "publishedAt": "2026-11-18T12:12:44.552Z"
+  },
   {
    "id": "u6qMDedpRA0",
    "youtubeUrl": "https://youtu.be/u6qMDedpRA0",
