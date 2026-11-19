@@ -72,6 +72,13 @@
       "title": "Rejected in Nazareth",
       "description": "In this episode Jesus confronts rejection in Nazareth yet demonstrates His authority by healing the official’s son, Peter’s mother‑in‑law, the town’s sick, and even a leper, launching the public ministry.",
       "summary": "Jesus is approached by a royal official pleading, \"Sir, my son is near death; please come before he dies.\" Jesus replies, \"Go; your son will live.\" At that very hour the boy rises and is healed, and the official and his household believe in Him. In the synagogue of Nazareth Jesus reads, \"The Spirit of the Lord is upon me, because He has anointed me to bring good news to the poor…\" He adds, \"Today this scripture is fulfilled in your hearing.\" The townspeople are enraged, seize Him and try to cast Him down a cliff, but He walks right through the crowd and departs unharmed. Jesus enters Capernaum and finds Simon’s mother‑in‑law ill. He says, \"Take her away; she is healed,\" and she rises at once. At sunset the whole town brings the sick to the door, and He heals them all. A man with leprosy kneels and says, \"If you are willing, you can make me clean.\" Jesus answers, \"I am willing. Be clean,\" and the leper is instantly cleansed."
+    },
+    {
+      "season": "1",
+      "episode": "11",
+      "title": "The Leper and the Man Through the Roof",
+      "description": "Jesus heals a leper and a paralytic in Capernaum, confronting doubts and revealing His authority, before spotting Matthew at his tax booth.",
+      "summary": "Jesus meets a man afflicted with leprosy at the town gate. The leper falls before Him, saying, “Lord, if you are willing, you can make me clean.” Jesus reaches out, touches him and declares, “I am willing. Be clean.” Instantly the disease leaves, and the man is restored. The scene shifts to a crowded house in Capernaum where four friends carry a paralytic on a mat. Unable to get through the crowd, they remove part of the roof and lower him before Jesus. Seeing their faith, He says, “Your sins are forgiven.” The teachers of the law murmur in offense, but Jesus challenges them, then commands the man, “Take up your mat and walk.” The paralytic rises, his legs strong, and walks out before the amazed crowd. The episode closes as Jesus steps out of the house and looks toward the market street. There, at a tax booth, he sees Matthew, a neatly dressed man in a fine blue robe, counting coins. The camera lingers on Matthew’s thoughtful gaze, hinting at the call that will soon follow."
     }
   ],
   "characters": [
@@ -81,21 +88,9 @@
       "look": "Jesus: a man of about thirty with a gentle, compassionate face, warm olive skin, shoulder-length dark brown hair and a short beard, kind dark eyes, a simple off-white linen robe with a deep red mantle over one shoulder, sandals"
     },
     {
-      "name": "Peter",
-      "role": "Simon Peter, a fisherman, the leading disciple",
-      "look": "Peter: a sturdy fisherman in his thirties with curly greying dark hair, a thick beard and a brown tunic"
-    },
-    {
-      "name": "Royal Official",
-      "nativeName": "Nasi",
-      "role": "A dignified official who begs Jesus to heal his dying son",
-      "look": "A man of respectable bearing, wearing a fine tunic and sandals, with a concerned expression"
-    },
-    {
-      "name": "Leper",
-      "nativeName": "Sārī",
-      "role": "A man afflicted with leprosy who seeks Jesus’ mercy",
-      "look": "A gaunt man covered in sores, wearing tattered clothing, trembling with hope"
+      "name": "Matthew",
+      "role": "a tax collector who becomes a disciple",
+      "look": "Matthew: a neatly dressed man with a trimmed beard in a fine blue robe"
     }
   ],
   "setting": "First-century Judea and Galilee under Roman rule: the village of Nazareth, Bethlehem, the shores and fishing boats of the Sea of Galilee, the Jordan river, the desert wilderness and Jerusalem with its great temple.",
