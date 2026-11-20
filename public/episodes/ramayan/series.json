@@ -10,18 +10,6 @@
       "look": "Lord Ram: a calm, youthful prince with smooth dark blue (neel-shyam) skin, a tall gold crown, a yellow silk dhoti and a gold-bordered angavastram draped over his shoulders, gold necklaces, a long bow (Kodanda) in hand and a quiver of arrows on his back"
     },
     {
-      "name": "Sita",
-      "nativeName": "सीता",
-      "role": "princess of Mithila, daughter of Janak, Ram's wife",
-      "look": "Mother Sita: a youthful, radiant goddess with a divine glow and serene face, a small jewelled gold crown and maang tikka, a red silk saree with gold border, rich gold jewellery, head modestly covered with the end of the saree"
-    },
-    {
-      "name": "Ravana",
-      "nativeName": "रावण",
-      "role": "the ten-headed rakshasa king of Lanka",
-      "look": "Ravana: the demon king of Lanka with ten crowned heads in a row and many arms, golden armour and weapons"
-    },
-    {
       "name": "Dasharath",
       "nativeName": "दशरथ",
       "role": "king of Ayodhya, father of Ram",
@@ -40,10 +28,10 @@
       "look": "Queen Kaikeyi: a beautiful, proud queen in a deep green and gold silk saree, rich gold jewellery and a gold crown"
     },
     {
-      "name": "Vasishtha",
-      "nativeName": "वशिष्ठ",
-      "role": "royal guru of Ayodhya",
-      "look": "Guru Vasishtha: an old, serene sage with a long white beard and a topknot, saffron robes and rudraksha beads"
+      "name": "Bharat",
+      "nativeName": "भरत",
+      "role": "Ram's devoted younger brother, son of Kaikeyi",
+      "look": "Bharat: a young prince with dusky dark skin, a gentle devoted face, a gold crown, a saffron dhoti and angavastram; after Ram's exile, plain ascetic bark clothes and matted hair"
     },
     {
       "name": "Manthara",
@@ -52,10 +40,10 @@
       "look": "Manthara: an old hunchbacked maid with grey hair, a cunning face and a plain brown saree"
     },
     {
-      "name": "Saraswati",
-      "nativeName": "सरस्वती",
-      "role": "goddess who turns Manthara’s mind",
-      "look": "Goddese Saraswati: a serene figure dressed in white, seated on a lotus, holding a veena, with white hair and a crown of flowers"
+      "name": "Sumantra",
+      "nativeName": "सुमन्तर",
+      "role": "Chief minister of Ayodhya, messenger of the king",
+      "look": "An elderly, dignified minister wearing a simple white dhoti, a saffron shawl, a thin silver crown, and a well‑kept beard, carrying a royal staff."
     }
   ],
   "setting": "Ancient India in the Treta Yuga: the golden city of Ayodhya on the Saryu river, the dense forests of the south, the vanara kingdom of Kishkindha and the golden island city of Lanka.",
@@ -129,6 +117,13 @@
       "title": "राम राज्याभिषेक की घोषणा",
       "description": "दशरथ के वृद्धावस्था में राम को युवराज घोषित करने की घोषणा, अयोध्या में उल्लास और देवताओं की चिंताएँ।",
       "summary": "King Dasharath, feeling the weight of his years, publicly declares that Prince Ram will be crowned as the heir to the throne. The royal court and the gathered citizens erupt in joyous applause, and Sage Vasishtha is asked to set the coronation for the following dawn. Kaushalya, overwhelmed with motherly pride, embraces Ram and Sita, sharing tears of happiness. Throughout the night, Ayodhya is transformed with lamps, garlands, and fragrant flowers as every street glitters in anticipation. Ram and Sita observe a solemn fast, offering prayers to the divine for the kingdom’s welfare, while Kaushalya watches them with a serene smile. The city buzzes with music and dance, the people chanting blessings for the future king. High above the mortal realm, the gods sense that crowning Ram might postpone his destined battle against Ravana, stirring their concern. Goddess Saraswati, moved by the divine plan, gently influences the old maid Manthara, planting a seed of unease. Seeing the grand celebrations, Manthara slips away from the festivities and hurries to inform Kaikeyi, setting the next intrigue in motion."
+    },
+    {
+      "season": "1",
+      "episode": "11",
+      "title": "मंथरा और कैकेयी",
+      "description": "कैकेयी के कष्टदायक निर्णय और दशरथ की हार्दिक शपथ, जो अयोध्या के भाग्य को बदल देती है। रात की अंधेरी गहराई में दो वचन की मांग, और नई सुबह का संदेश।",
+      "summary": "King Dasharath, trembling with worry, discovers Queen Kaikeyi collapsed on the cold floor of the kop bhavan. The hall is dim, incense still lingering, and the queen’s silk sari is strewn about. Overcome with fear for his beloved daughter, Dasharath clasps his hands to the sky and swears by Lord Ram that he will grant any wish she declares. His voice echoes through the silent chambers, trembling with the weight of his oath. Kaikeyi, eyes hardened by Manthara’s whispers, calmly invokes the two boons Dasharath promised her long ago. She demands that Bharat be crowned king and that Ram be sent into exile for fourteen years. The king collapses onto the cold stone, his heart breaking as he pleads through the night, offering wealth and life to spare his son. Yet Kaikeyi remains unmoved, her resolve as cold as the night air. As the first light of dawn brushes the palace walls, Sumantra, the chief minister, is summoned to the king’s side. Dasharath, still trembling, commands him to go swiftly to the forest and bring Ram back to Ayodhya. The minister bows deeply, his mind heavy with the grave task ahead. The episode ends with Sumantra stepping out into the early morning, the kingdom holding its breath."
     }
   ],
   "style": "realistic",
