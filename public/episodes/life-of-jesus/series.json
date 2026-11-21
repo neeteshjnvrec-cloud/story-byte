@@ -79,6 +79,13 @@
       "title": "The Leper and the Man Through the Roof",
       "description": "Jesus heals a leper and a paralytic in Capernaum, confronting doubts and revealing His authority, before spotting Matthew at his tax booth.",
       "summary": "Jesus meets a man afflicted with leprosy at the town gate. The leper falls before Him, saying, “Lord, if you are willing, you can make me clean.” Jesus reaches out, touches him and declares, “I am willing. Be clean.” Instantly the disease leaves, and the man is restored. The scene shifts to a crowded house in Capernaum where four friends carry a paralytic on a mat. Unable to get through the crowd, they remove part of the roof and lower him before Jesus. Seeing their faith, He says, “Your sins are forgiven.” The teachers of the law murmur in offense, but Jesus challenges them, then commands the man, “Take up your mat and walk.” The paralytic rises, his legs strong, and walks out before the amazed crowd. The episode closes as Jesus steps out of the house and looks toward the market street. There, at a tax booth, he sees Matthew, a neatly dressed man in a fine blue robe, counting coins. The camera lingers on Matthew’s thoughtful gaze, hinting at the call that will soon follow."
+    },
+    {
+      "season": "1",
+      "episode": "12",
+      "title": "Matthew Called and the Twelve Chosen",
+      "description": "Jesus calls Matthew, heals a man on the Sabbath, and selects his twelve disciples as crowds gather on the hill. The episode shows the Messiah’s invitation, compassion, and preparation for the work ahead.",
+      "summary": "Jesus walks through the market and sees Matthew at his tax booth. He says, “Follow me,” and Matthew rises, leaves his ledger, and follows. That evening Matthew hosts a banquet with other tax collectors and sinners, and the Pharisees mutter, “Why does He eat with them?” Jesus replies, “Those who are well do not need a physician, but those who are sick. I have not come to call the righteous, but sinners.” On the Sabbath Jesus enters a synagogue in Capernaum. He sees a man whose hand is withered and asks, “Is it lawful on the Sabbath to do good or to do evil, to save life or to kill?” He then stretches out his hand and says, “Stretch out your hand.” The man’s hand is restored, and the crowd marvels. The Pharisees, angry at this breach, begin to plot how they might destroy Him. After the Sabbath, Jesus climbs a solitary mountain and prays through the night, asking the Father for strength. At dawn He calls his followers forward and says, “You, Simon, I call you Peter; you, Andrew, you are my first‑born; James and John, you are the sons of thunder; Philip, Matthew, Thomas, Judas…” and they become the twelve. The newly chosen apostles stand beside Him as a great crowd of listeners gathers on the mountainside, eager to hear what comes next."
     }
   ],
   "characters": [
@@ -88,9 +95,44 @@
       "look": "Jesus: a man of about thirty with a gentle, compassionate face, warm olive skin, shoulder-length dark brown hair and a short beard, kind dark eyes, a simple off-white linen robe with a deep red mantle over one shoulder, sandals"
     },
     {
+      "name": "Peter",
+      "role": "Simon Peter, a fisherman, the leading disciple",
+      "look": "Peter: a sturdy fisherman in his thirties with curly greying dark hair, a thick beard and a brown tunic"
+    },
+    {
+      "name": "Andrew",
+      "role": "Peter's brother, a fisherman and disciple",
+      "look": "Andrew: a lean fisherman with dark hair and a short beard in a grey tunic"
+    },
+    {
+      "name": "James",
+      "role": "son of Zebedee, a fisherman and disciple",
+      "look": "James: a strong young fisherman with dark hair and a beard in a dark blue tunic"
+    },
+    {
+      "name": "Apostle John",
+      "role": "son of Zebedee, the youngest disciple, \"the disciple Jesus loved\"",
+      "look": "Apostle John: a young man in his early twenties with wavy dark hair, barely a beard, in a green tunic"
+    },
+    {
+      "name": "Philip",
+      "role": "a disciple from Bethsaida",
+      "look": "Philip: a thoughtful young man with short dark hair and a short beard in a tan tunic"
+    },
+    {
       "name": "Matthew",
       "role": "a tax collector who becomes a disciple",
       "look": "Matthew: a neatly dressed man with a trimmed beard in a fine blue robe"
+    },
+    {
+      "name": "Thomas",
+      "role": "a disciple",
+      "look": "Thomas: a serious young man with dark hair and a short beard in a brown robe"
+    },
+    {
+      "name": "Judas",
+      "role": "Judas Iscariot, the disciple who betrays Jesus",
+      "look": "Judas Iscariot: a man with a dark beard, a guarded face and a dark red robe, a money bag at his belt"
     }
   ],
   "setting": "First-century Judea and Galilee under Roman rule: the village of Nazareth, Bethlehem, the shores and fishing boats of the Sea of Galilee, the Jordan river, the desert wilderness and Jerusalem with its great temple.",
