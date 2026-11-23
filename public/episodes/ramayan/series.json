@@ -16,12 +16,6 @@
       "look": "King Dasharath: an elderly, dignified king with a white beard and moustache, a tall gold crown, rich maroon and gold silk robes and gold jewellery"
     },
     {
-      "name": "Kaushalya",
-      "nativeName": "कौशल्या",
-      "role": "Ram's mother, Dasharath's eldest queen",
-      "look": "Queen Kaushalya: a gentle, graceful middle-aged queen in a cream and gold silk saree, a small gold crown, her head covered with the end of the saree"
-    },
-    {
       "name": "Kaikeyi",
       "nativeName": "कैकेयी",
       "role": "Bharat's mother, Dasharath's favourite queen",
@@ -34,16 +28,10 @@
       "look": "Bharat: a young prince with dusky dark skin, a gentle devoted face, a gold crown, a saffron dhoti and angavastram; after Ram's exile, plain ascetic bark clothes and matted hair"
     },
     {
-      "name": "Manthara",
-      "nativeName": "मंथरा",
-      "role": "Kaikeyi's old maid",
-      "look": "Manthara: an old hunchbacked maid with grey hair, a cunning face and a plain brown saree"
-    },
-    {
       "name": "Sumantra",
-      "nativeName": "सुमन्तर",
-      "role": "Chief minister of Ayodhya, messenger of the king",
-      "look": "An elderly, dignified minister wearing a simple white dhoti, a saffron shawl, a thin silver crown, and a well‑kept beard, carrying a royal staff."
+      "nativeName": "सुमंत्र",
+      "role": "Dasharath's minister and charioteer",
+      "look": "Sumantra: an elderly minister and charioteer with a white moustache, a white turban and simple robes"
     }
   ],
   "setting": "Ancient India in the Treta Yuga: the golden city of Ayodhya on the Saryu river, the dense forests of the south, the vanara kingdom of Kishkindha and the golden island city of Lanka.",
@@ -124,6 +112,13 @@
       "title": "मंथरा और कैकेयी",
       "description": "कैकेयी के कष्टदायक निर्णय और दशरथ की हार्दिक शपथ, जो अयोध्या के भाग्य को बदल देती है। रात की अंधेरी गहराई में दो वचन की मांग, और नई सुबह का संदेश।",
       "summary": "King Dasharath, trembling with worry, discovers Queen Kaikeyi collapsed on the cold floor of the kop bhavan. The hall is dim, incense still lingering, and the queen’s silk sari is strewn about. Overcome with fear for his beloved daughter, Dasharath clasps his hands to the sky and swears by Lord Ram that he will grant any wish she declares. His voice echoes through the silent chambers, trembling with the weight of his oath. Kaikeyi, eyes hardened by Manthara’s whispers, calmly invokes the two boons Dasharath promised her long ago. She demands that Bharat be crowned king and that Ram be sent into exile for fourteen years. The king collapses onto the cold stone, his heart breaking as he pleads through the night, offering wealth and life to spare his son. Yet Kaikeyi remains unmoved, her resolve as cold as the night air. As the first light of dawn brushes the palace walls, Sumantra, the chief minister, is summoned to the king’s side. Dasharath, still trembling, commands him to go swiftly to the forest and bring Ram back to Ayodhya. The minister bows deeply, his mind heavy with the grave task ahead. The episode ends with Sumantra stepping out into the early morning, the kingdom holding its breath."
+    },
+    {
+      "season": "1",
+      "episode": "12",
+      "title": "कैकेयी के दो वरदान",
+      "description": "कैकेयी के दो वरदान की घातक प्रतिज्ञा, राजपरिवार के भाग्य को बदल देती है। राजा दशरथ की हृदय‑विदारक दुविधा और सुबह की नयी आशा को देखें।",
+      "summary": "King Dasharath rushes to the dimly lit kop bhavan and finds Queen Kaikeyi collapsed on the cold stone floor, her silk sari scattered around her. The silence is broken only by the echo of his own panicked breath as he kneels beside her, clutching his crown in trembling hands. Overcome with fear for his beloved queen, he raises his voice to the heavens, swearing by Lord Ram that he will grant any wish she declares, his oath reverberating through the silent hall. Kaikeyi, eyes hardened by Manthara’s counsel, calmly reminds Dasharath of the two boons he promised her long ago during the war of the gods and asuras. She demands that her son Bharat be crowned king and that Ram be sent into exile for fourteen years, her voice steady as stone. The king collapses onto the floor, his heart breaking as he pleads through the night, offering wealth, life, and even his own throne to spare his beloved son, yet Kaikeyi remains unmoved, her resolve as cold as the night air. As the first light of dawn paints the palace walls with a pale glow, Dasharath, still trembling, summons his loyal minister Sumantra. He commands Sumantra to ride swiftly to the forest and bring Ram back to Ayodhya, his voice hoarse with desperation. Sumantra bows deeply, his mind heavy with the grave task, and steps out into the early morning, the kingdom holding its breath for the journey ahead."
     }
   ],
   "style": "realistic",
