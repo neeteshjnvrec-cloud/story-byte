@@ -1,15 +1,45 @@
 {
-  "generatedAt": "2026-11-16T11:01:29.309Z",
+  "generatedAt": "2026-11-23T12:19:08.776Z",
   "youtube": {
     "handle": "@LatestStories4u",
     "channelId": "UCV2KpSzvpHxLpDOMaj07Vhw",
     "videos": [
       {
+        "id": "5jM8CYeUOdo",
+        "format": "video",
+        "title": "रामायण एपिसोड 11: मंथरा और कैकेयी | Ramayan Episode 11",
+        "views": 56,
+        "age": "2 days ago",
+        "length": "15:50",
+        "published": "2026-11-20T12:19:11+00:00",
+        "likes": 0
+      },
+      {
+        "id": "JFw2qdA9md0",
+        "format": "video",
+        "title": "रामायण एपिसोड 10: राम राज्याभिषेक की घोषणा | Ramayan Episode 10",
+        "views": 56,
+        "age": "5 days ago",
+        "length": "15:04",
+        "published": "2026-11-18T12:12:15+00:00",
+        "likes": 0
+      },
+      {
+        "id": "u6qMDedpRA0",
+        "format": "video",
+        "title": "रामायण एपिसोड 9: सीता-राम विवाह | Ramayan Episode 9",
+        "views": 2,
+        "age": "7 days ago",
+        "length": "16:10",
+        "published": "2026-11-16T12:17:24+00:00",
+        "likes": 0
+      },
+      {
         "id": "xO5iD0v3axU",
         "format": "video",
         "title": "छठ माँ की कथा: राजा प्रियव्रत के शिशु को जीवन मिला",
         "views": 0,
-        "age": "21 hours ago",
+        "age": "7 days ago",
         "length": "15:28",
         "published": "2026-11-15T13:24:06+00:00",
         "likes": 0
@@ -19,37 +49,31 @@
         "format": "video",
         "title": "रामायण एपिसोड 8: परशुराम-लक्ष्मण संवाद | Ramayan Episode 8",
         "views": 15,
-        "age": "2 days ago",
-        "length": "15:26",
-        "published": "2026-11-13T11:47:30+00:00",
-        "likes": 0
+        "age": "10 days ago",
+        "length": "15:26"
       },
       {
         "id": "xI1UzE3uzIM",
         "format": "video",
         "title": "रामायण एपिसोड 7: शिव धनुष भंग | Ramayan Episode 7",
-        "views": 5,
-        "age": "4 days ago",
-        "length": "15:20",
-        "published": "2026-11-11T11:39:09+00:00",
-        "likes": 0
+        "views": 7,
+        "age": "12 days ago",
+        "length": "15:20"
       },
       {
         "id": "Iip0Dtqfm2c",
         "format": "video",
         "title": "रामायण एपिसोड 6: पुष्प वाटिका: राम-सीता का प्रथम दर्शन | Ramayan Episode 6",
         "views": 5,
-        "age": "6 days ago",
-        "length": "15:43",
-        "published": "2026-11-09T12:24:53+00:00",
-        "likes": 0
+        "age": "13 days ago",
+        "length": "15:43"
       },
       {
         "id": "75Jws17zXWo",
         "format": "video",
         "title": "रामायण एपिसोड 5: अहल्या उद्धार | Ramayan Episode 5",
         "views": 14,
-        "age": "9 days ago",
+        "age": "2 weeks ago",
         "length": "16:01"
       },
       {
@@ -57,7 +81,7 @@
         "format": "video",
         "title": "दीपावली की कहानी: रोशनी और विश्वास",
         "views": 4,
-        "age": "10 days ago",
+        "age": "2 weeks ago",
         "length": "5:01"
       },
       {
@@ -65,23 +89,23 @@
         "format": "video",
         "title": "रामायण एपिसोड 5: अहल्या उद्धार | Ramayan Episode 5",
         "views": 2,
-        "age": "11 days ago",
+        "age": "2 weeks ago",
         "length": "15:32"
       },
       {
         "id": "GvCdWVB8mpU",
         "format": "video",
         "title": "रामायण एपिसोड 4: दिव्यास्त्र और यज्ञ की रक्षा | Ramayan Episode 4",
-        "views": 4,
-        "age": "13 days ago",
+        "views": 5,
+        "age": "3 weeks ago",
         "length": "15:48"
       },
       {
         "id": "tnBOmGbNyxw",
         "format": "video",
         "title": "रामायण एपिसोड 3: विश्वामित्र और ताड़का वध | Ramayan Episode 3",
-        "views": 9,
-        "age": "2 weeks ago",
+        "views": 10,
+        "age": "3 weeks ago",
         "length": "15:31"
       },
       {
@@ -89,7 +113,7 @@
         "format": "video",
         "title": "The Friendship Files: Modi, Adani and the Rise of an Empire | Viral Documentary | Must Watch",
         "views": 90,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "36:10"
       },
       {
@@ -97,7 +121,7 @@
         "format": "video",
         "title": "The Key to Every Door",
         "views": 4,
-        "age": "2 weeks ago",
+        "age": "3 weeks ago",
         "length": "4:46"
       },
       {
@@ -105,7 +129,7 @@
         "format": "video",
         "title": "पार्वती जी की कथा: करवा चौथ में वीरावती की परीक्षा",
         "views": 2,
-        "age": "3 weeks ago",
+        "age": "4 weeks ago",
         "length": "16:50"
       },
       {
@@ -113,7 +137,7 @@
         "format": "video",
         "title": "Ramayan | Season 1 Episode 2: Tataka's Fall",
         "views": 9,
-        "age": "3 weeks ago",
+        "age": "4 weeks ago",
         "length": "16:14"
       },
       {
@@ -121,7 +145,7 @@
         "format": "video",
         "title": "Ramayan | Season 1 Episode 1: Divine Call: Rama's Forest Journey",
         "views": 11,
-        "age": "3 weeks ago",
+        "age": "4 weeks ago",
         "length": "16:46"
       },
       {
@@ -129,7 +153,7 @@
         "format": "video",
         "title": "Navratri | Season 1 Episode Day 9: Echoes of the Sacred Flame",
         "views": 4,
-        "age": "4 weeks ago",
+        "age": "1 month ago",
         "length": "16:55"
       },
       {
@@ -137,7 +161,7 @@
         "format": "video",
         "title": "Navratri | Season 1 Episode Day 8: Echoes of the First Sacred Fire",
         "views": 17,
-        "age": "4 weeks ago",
+        "age": "1 month ago",
         "length": "16:28"
       },
       {
@@ -145,7 +169,7 @@
         "format": "video",
         "title": "राम जी की कथा: विजय दशहरा — रावण का विनाश ब्रह्मा बाण से",
         "views": 27,
-        "age": "4 weeks ago",
+        "age": "1 month ago",
         "length": "16:22"
       },
       {
@@ -153,7 +177,7 @@
         "format": "video",
         "title": "रेल की खिड़की से झलकता प्यार",
         "views": 3,
-        "age": "4 weeks ago",
+        "age": "1 month ago",
         "length": "4:12"
       },
       {
@@ -161,7 +185,7 @@
         "format": "video",
         "title": "Navratri | Season 1 Episode Day 7: Shadows Over the Sacred Flame",
         "views": 2,
-        "age": "4 weeks ago",
+        "age": "1 month ago",
         "length": "16:39"
       },
       {
@@ -169,7 +193,7 @@
         "format": "video",
         "title": "Navratri Maa Katyayani, the sixth form of Goddess Durga | S1 EDay 6: Katyayani’s Blessing of Courage",
         "views": 5,
-        "age": "4 weeks ago",
+        "age": "1 month ago",
         "length": "16:48"
       },
       {
@@ -227,46 +251,86 @@
         "views": 71,
         "age": "1 month ago",
         "length": "16:12"
-      },
-      {
-        "id": "_-MZHiQTMyY",
-        "format": "video",
-        "title": "Mahabharata | Season 1 Episode 4: गुह्य गर्त में संघर्ष",
-        "views": 52,
-        "age": "1 month ago",
-        "length": "16:40"
-      },
-      {
-        "id": "rU2Wq7xHCKs",
-        "format": "video",
-        "title": "Mahabharata  | Season 1 Episode 3: Echoes of the Timeless Vault",
-        "views": 6,
-        "age": "1 month ago",
-        "length": "17:05"
-      },
-      {
-        "id": "assQz_svY8M",
-        "format": "video",
-        "title": "Mahabharata | Season 1 Episode 2: छायाओं की पुकार",
-        "views": 6,
-        "age": "1 month ago",
-        "length": "16:40"
       }
     ],
     "shorts": [
       {
+        "id": "mPH73Gi3-y0",
+        "format": "short",
+        "title": "😱 महादेव ने पी लिया विष, बना नीलकंठ! #shorts",
+        "views": 95,
+        "published": "2026-11-23T04:16:23+00:00",
+        "likes": 3
+      },
+      {
+        "id": "7d-FmxxWATc",
+        "format": "short",
+        "title": "😲 कृष्णा की बाल लीला: मक्खन चुराते हुए यशोदा ने पकड़ा! #shorts",
+        "views": 5,
+        "published": "2026-11-22T04:01:05+00:00",
+        "likes": 0
+      },
+      {
+        "id": "VXJ_HomcR_s",
+        "format": "short",
+        "title": "😱 शनि देव की कथा: हनुमान ने कैसे बचाई शनि? #shorts",
+        "views": 26,
+        "published": "2026-11-21T04:39:50+00:00",
+        "likes": 2
+      },
+      {
+        "id": "xR7G1t87fPw",
+        "format": "short",
+        "title": "😱 विष्णु जी का जागरण: कैसे शुरू होते हैं शुभ कार्य? #shorts",
+        "views": 7,
+        "published": "2026-11-20T04:39:03+00:00",
+        "likes": 2
+      },
+      {
+        "id": "y1P23HMKlHw",
+        "format": "short",
+        "title": "😱 विष्णु शालिग्राम में बदलते ही धरती काँपी! #shorts",
+        "views": 157,
+        "published": "2026-11-19T17:29:30+00:00",
+        "likes": 4
+      },
+      {
+        "id": "DZIMeITJme4",
+        "format": "short",
+        "title": "😲 भगवान विष्णु की कथा: मत्स्य अवतार ने बाढ़ में मनु को बचाया #shorts",
+        "views": 303,
+        "published": "2026-11-19T04:56:38+00:00",
+        "likes": 5
+      },
+      {
+        "id": "zmEHMFw6WV4",
+        "format": "short",
+        "title": "😲 गणपति बप्पा की कथा: कावेरी को झुका दिया! #shorts",
+        "views": 211,
+        "published": "2026-11-18T05:08:37+00:00",
+        "likes": 5
+      },
+      {
+        "id": "7RV7WdzdRis",
+        "format": "short",
+        "title": "😲 हनुमान जी: किष्किंधा में पहली बार राम से मिलेंगे? #shorts",
+        "views": 356,
+        "published": "2026-11-17T05:46:49+00:00",
+        "likes": 15
+      },
+      {
         "id": "Nulpu6jLv_4",
         "format": "short",
         "title": "😇 महादेव: नंदी की अद्भुत भक्ति, कैसे बना वह वाहन? #shorts",
-        "views": 131,
+        "views": 141,
         "published": "2026-11-16T03:40:05+00:00",
-        "likes": 5
+        "likes": 7
       },
       {
         "id": "U_kbGLGwX5M",
         "format": "short",
         "title": "🌅 सूर्य की कथा: द्रौपदी ने चढ़ाया अर्घ्य, राज वापसी? #shorts",
-        "views": 45,
+        "views": 46,
         "published": "2026-11-15T03:26:22+00:00",
         "likes": 2
       },
@@ -274,7 +338,7 @@
         "id": "pLrrBeztSPY",
         "format": "short",
         "title": "🌅 छठ माँ: क्या थी बचपन की मौत की कहानी? #shorts",
-        "views": 355,
+        "views": 354,
         "published": "2026-11-14T14:40:30+00:00",
         "likes": 4
       },
@@ -282,65 +346,49 @@
         "id": "2UUbWGY1LbA",
         "format": "short",
         "title": "😲 शनि देव की कथा – पिप्पलादा ने पूछा ग्रहों की सच्चाई? #shorts",
-        "views": 42,
-        "published": "2026-11-14T04:10:30+00:00",
-        "likes": 2
+        "views": 42
       },
       {
         "id": "W6clZohvJFY",
         "format": "short",
         "title": "😱 माँ दुर्गा क्यों देखी विष्णु को समुद्र मंथन में? #shorts",
-        "views": 91,
-        "published": "2026-11-13T04:04:56+00:00",
-        "likes": 8
+        "views": 92
       },
       {
         "id": "kwSqjAFy-_8",
         "format": "short",
         "title": "⚔️ विष्णु का कैल्कि अवतार: अंत समय में आया श्वेत घोड़े पर #shorts",
-        "views": 101,
-        "published": "2026-11-12T04:40:56+00:00",
-        "likes": 3
+        "views": 101
       },
       {
         "id": "6R06U0bzZdk",
         "format": "short",
         "title": "😊 कृष्ण: भाई दूज पर अनकही तिलक की कहानी #shorts",
-        "views": 6,
-        "published": "2026-11-11T03:38:56+00:00",
-        "likes": 0
+        "views": 6
       },
       {
         "id": "HNyN4Lf1W3I",
         "format": "short",
         "title": "😇 यमराज की भाई दूज कथा: टिलक से बंधी सुरक्षा #shorts",
-        "views": 19,
-        "published": "2026-11-10T15:56:54+00:00",
-        "likes": 1
+        "views": 19
       },
       {
         "id": "SECq53JKRyA",
         "format": "short",
         "title": "😲 गोवर्धन पूजा: बाल कृष्ण ने उठाया पहाड़, अन्नकूट का चमत्कार #shorts",
-        "views": 27,
-        "published": "2026-11-10T05:00:13+00:00",
-        "likes": 1
+        "views": 27
       },
       {
         "id": "UdtSL48R7Xc",
         "format": "short",
         "title": "😲 कृष्ण की गोवर्धन लीला, इंद्र को कैसे झुका दिया? #shorts",
-        "views": 1,
-        "published": "2026-11-09T17:55:43+00:00",
-        "likes": 1
+        "views": 1
       },
       {
         "id": "51U6w2y8jtU",
         "format": "short",
         "title": "😲 महादेव की कथा: रावण ने उठाई किलास, क्या हुआ? #shorts",
-        "views": 163,
-        "published": "2026-11-09T03:38:59+00:00",
-        "likes": 2
+        "views": 163
       },
       {
         "id": "vvQuAxMUkd4",
@@ -376,7 +424,7 @@
         "id": "KT9uBwoMO7I",
         "format": "short",
         "title": "🪔 धन्वन्तरि की अमृत कथा: समुद्र से उभरा देव दाता #shorts",
-        "views": 15
+        "views": 16
       },
       {
         "id": "PkckhriLzjE",
@@ -412,7 +460,7 @@
         "id": "bDDhGihkN9E",
         "format": "short",
         "title": "😲 अहोई माता: दही में छुपा रहस्य कौन सुलझाएगा? #shorts",
-        "views": 6
+        "views": 7
       },
       {
         "id": "cGBNPNs5YnA",
@@ -515,62 +563,14 @@
         "format": "short",
         "title": "😲 माँ सिद्धिदात्री ने कैसे दी शिव को आठ सिद्धियाँ? #shorts",
         "views": 38
-      },
-      {
-        "id": "ApZifLZrj_s",
-        "format": "short",
-        "title": "✨ माँ महागौरी: कैसे काली त्वचा बनी शुद्ध श्वेत? #shorts",
-        "views": 22
-      },
-      {
-        "id": "3UENcEuEp5w",
-        "format": "short",
-        "title": "😱 माँ कालरात्रि ने कैसे किया रक्तबीज को नष्ट? #shorts",
-        "views": 6
-      },
-      {
-        "id": "21jtMh3WvzQ",
-        "format": "short",
-        "title": "🕉️ माँ कात्यायनी क्या थी वह रहस्य? #shorts",
-        "views": 24
-      },
-      {
-        "id": "VOxecTn-ZEM",
-        "format": "short",
-        "title": "😲 माँ स्कंदमाता की कथा: शरद ने टारकासुर को कैसे मारा? #shorts",
-        "views": 11
-      },
-      {
-        "id": "7l6LVc5Ui1Y",
-        "format": "short",
-        "title": "😲 माँ कूष्मांडा की मुस्कान से बना ब्रह्मांड #shorts",
-        "views": 49
-      },
-      {
-        "id": "2-3GaOTdWBs",
-        "format": "short",
-        "title": "😱 माँ चंद्रघंटा की गर्जना से दानव भागे #shorts",
-        "views": 8
-      },
-      {
-        "id": "pR5ZOjeZHBc",
-        "format": "short",
-        "title": "😲 माँ ब्रह्मचारिणी की तपस्या का रहस्य: नवरात्रि का दूसरा दिन #shorts",
-        "views": 18
-      },
-      {
-        "id": "GAuZGZI7eZ4",
-        "format": "short",
-        "title": "Navaratri Day one #navratri #bhakti #trending #shorts",
-        "views": 343
       }
     ]
   },
   "retention": {
     "range": {
       "ids": "channel==MINE",
-      "startDate": "2026-08-18",
-      "endDate": "2026-11-16"
+      "startDate": "2026-08-25",
+      "endDate": "2026-11-23"
     },
     "videos": [
       {
@@ -579,7 +579,7 @@
         "published": "2026-09-29T11:30:18Z",
         "format": "short",
         "length": 16,
-        "views": 1354,
+        "views": 1355,
         "avgViewSec": 14,
         "avgViewPercent": 93,
         "keptAt3s": 135,
@@ -591,7 +591,7 @@
         "published": "2026-09-30T11:30:08Z",
         "format": "short",
         "length": 16,
-        "views": 1336,
+        "views": 1337,
         "avgViewSec": 14,
         "avgViewPercent": 91,
         "keptAt3s": 136,
@@ -651,7 +651,7 @@
         "published": "2026-10-02T07:30:22Z",
         "format": "short",
         "length": 15,
-        "views": 1150,
+        "views": 1151,
         "avgViewSec": 41,
         "avgViewPercent": 278,
         "keptAt3s": 339,
@@ -675,11 +675,11 @@
         "published": "2026-06-23T11:30:23Z",
         "format": "short",
         "length": 11,
-        "views": 449,
+        "views": 518,
         "avgViewSec": 13,
-        "avgViewPercent": 123,
-        "keptAt3s": 150,
-        "keptAtHalf": 130
+        "avgViewPercent": 125,
+        "keptAt3s": 151,
+        "keptAtHalf": 132
       },
       {
         "id": "VJDbmoCxtA4",
@@ -706,6 +706,18 @@
         "keptAtHalf": 105
       },
       {
+        "id": "DlkSf1QC2H0",
+        "title": "मिट्टी से प्रकट हुए भगवान नरसिंह 🦁🔥 | Narasimha Murti Making | Clay Sculpture #bhakti #shorts",
+        "published": "2026-06-20T07:30:24Z",
+        "format": "short",
+        "length": 11,
+        "views": 414,
+        "avgViewSec": 11,
+        "avgViewPercent": 103,
+        "keptAt3s": 124,
+        "keptAtHalf": 111
+      },
+      {
         "id": "p4URdGTbTBo",
         "title": "😱 गणपति बप्पा की कथा: कुबेर की दावत में सब कुछ निगला! #shorts",
         "published": "2026-10-28T02:52:32Z",
@@ -723,23 +735,35 @@
         "published": "2026-11-08T10:21:59Z",
         "format": "short",
         "length": 21,
-        "views": 397,
+        "views": 396,
         "avgViewSec": 11,
         "avgViewPercent": 56,
         "keptAt3s": 112,
         "keptAtHalf": 48
       },
       {
-        "id": "DlkSf1QC2H0",
-        "title": "मिट्टी से प्रकट हुए भगवान नरसिंह 🦁🔥 | Narasimha Murti Making | Clay Sculpture #bhakti #shorts",
-        "published": "2026-06-20T07:30:24Z",
+        "id": "7RV7WdzdRis",
+        "title": "😲 हनुमान जी: किष्किंधा में पहली बार राम से मिलेंगे? #shorts",
+        "published": "2026-11-17T05:46:49Z",
         "format": "short",
-        "length": 11,
-        "views": 368,
-        "avgViewSec": 10,
-        "avgViewPercent": 97,
-        "keptAt3s": 117,
-        "keptAtHalf": 104
+        "length": 133,
+        "views": 356,
+        "avgViewSec": 100,
+        "avgViewPercent": 75,
+        "keptAt3s": 126,
+        "keptAtHalf": 76
+      },
+      {
+        "id": "pLrrBeztSPY",
+        "title": "🌅 छठ माँ: क्या थी बचपन की मौत की कहानी? #shorts",
+        "published": "2026-11-14T14:40:30Z",
+        "format": "short",
+        "length": 157,
+        "views": 354,
+        "avgViewSec": 130,
+        "avgViewPercent": 83,
+        "keptAt3s": 147,
+        "keptAtHalf": 80
       },
       {
         "id": "GAuZGZI7eZ4",
@@ -766,6 +790,18 @@
         "keptAtHalf": 76
       },
       {
+        "id": "DZIMeITJme4",
+        "title": "😲 भगवान विष्णु की कथा: मत्स्य अवतार ने बाढ़ में मनु को बचाया #shorts",
+        "published": "2026-11-19T04:56:38Z",
+        "format": "short",
+        "length": 132,
+        "views": 303,
+        "avgViewSec": 81,
+        "avgViewPercent": 62,
+        "keptAt3s": 122,
+        "keptAtHalf": 57
+      },
+      {
         "id": "qrGrfyetg2U",
         "title": "Jake sees pr Ganga aur gle me saap #mahadev #trending #shorts",
         "published": "2026-10-03T11:30:22Z",
@@ -776,6 +812,18 @@
         "avgViewPercent": 122,
         "keptAt3s": 172,
         "keptAtHalf": 124
+      },
+      {
+        "id": "zmEHMFw6WV4",
+        "title": "😲 गणपति बप्पा की कथा: कावेरी को झुका दिया! #shorts",
+        "published": "2026-11-18T05:08:37Z",
+        "format": "short",
+        "length": 147,
+        "views": 211,
+        "avgViewSec": 117,
+        "avgViewPercent": 80,
+        "keptAt3s": 124,
+        "keptAtHalf": 85
       },
       {
         "id": "ZXDZ1t5srmU",
@@ -795,11 +843,11 @@
         "published": "2026-08-19T16:32:47Z",
         "format": "short",
         "length": 10,
-        "views": 189,
-        "avgViewSec": 52,
-        "avgViewPercent": 522,
-        "keptAt3s": 1009,
-        "keptAtHalf": 998
+        "views": 171,
+        "avgViewSec": 66,
+        "avgViewPercent": 660,
+        "keptAt3s": 1303,
+        "keptAtHalf": 1294
       },
       {
         "id": "51U6w2y8jtU",
@@ -812,6 +860,30 @@
         "avgViewPercent": 50,
         "keptAt3s": 110,
         "keptAtHalf": 54
+      },
+      {
+        "id": "y1P23HMKlHw",
+        "title": "😱 विष्णु शालिग्राम में बदलते ही धरती काँपी! #shorts",
+        "published": "2026-11-19T17:29:30Z",
+        "format": "short",
+        "length": 155,
+        "views": 156,
+        "avgViewSec": 131,
+        "avgViewPercent": 85,
+        "keptAt3s": 129,
+        "keptAtHalf": 84
+      },
+      {
+        "id": "Nulpu6jLv_4",
+        "title": "😇 महादेव: नंदी की अद्भुत भक्ति, कैसे बना वह वाहन? #shorts",
+        "published": "2026-11-16T03:40:05Z",
+        "format": "short",
+        "length": 147,
+        "views": 141,
+        "avgViewSec": 91,
+        "avgViewPercent": 63,
+        "keptAt3s": 113,
+        "keptAtHalf": 63
       },
       {
         "id": "RL1QHRxugAw",
@@ -850,114 +922,162 @@
         "keptAtHalf": 58
       },
       {
-        "id": "kwSqjAFy-_8",
-        "title": "⚔️ विष्णु का कैल्कि अवतार: अंत समय में आया श्वेत घोड़े पर #shorts",
-        "published": "2026-11-12T04:40:56Z",
-        "format": "short",
-        "length": 140,
-        "views": 100,
-        "avgViewSec": 98,
-        "avgViewPercent": 70,
-        "keptAt3s": 124,
-        "keptAtHalf": 69
-      },
-      {
         "id": "JLqloDXoVoU",
         "title": "🕉️ अर्धनारीश्वर मिट्टी से प्रकट हुए 🔱🌺 | Ardhanarishvara Murti Making  #bhakti #trending #mahadev",
         "published": "2026-06-21T12:30:28Z",
         "format": "short",
         "length": 11,
-        "views": 94,
-        "avgViewSec": 9,
-        "avgViewPercent": 83,
-        "keptAt3s": 114,
-        "keptAtHalf": 81
-      },
-      {
-        "id": "-pXXkFPe1ps",
-        "title": "⚔️ मिट्टी से दिव्य कल्कि अवतार बनने का अद्भुत सफर | Emotional Murti Making #bhakti #kalki #shorts",
-        "published": "2026-06-30T13:30:37Z",
-        "format": "short",
-        "length": 11,
-        "views": 94,
-        "avgViewSec": 8,
-        "avgViewPercent": 80,
-        "keptAt3s": 108,
-        "keptAtHalf": 84
-      },
-      {
-        "id": "EAz3FOKVz5U",
-        "title": "मिट्टी से प्रकट हुए नंदी महाराज 🔱 | महादेव के प्रिय वाहन की अद्भुत मूर्ति #bhakti #mahadev  #nandi",
-        "published": "2026-06-29T07:30:23Z",
-        "format": "short",
-        "length": 11,
-        "views": 92,
-        "avgViewSec": 13,
-        "avgViewPercent": 120,
-        "keptAt3s": 144,
-        "keptAtHalf": 128
-      },
-      {
-        "id": "W6clZohvJFY",
-        "title": "😱 माँ दुर्गा क्यों देखी विष्णु को समुद्र मंथन में? #shorts",
-        "published": "2026-11-13T04:04:56Z",
-        "format": "short",
-        "length": 142,
-        "views": 91,
-        "avgViewSec": 83,
-        "avgViewPercent": 59,
-        "keptAt3s": 109,
-        "keptAtHalf": 56
-      },
-      {
-        "id": "uGVPKJpXdpA",
-        "title": "Powerful Hanuman Chalisa Chants 🚩 | Jai Hanuman Gyan Gun Sagar",
-        "published": "2026-05-26T03:10:06Z",
-        "format": "short",
-        "length": 56,
-        "views": 91,
-        "avgViewSec": 69,
-        "avgViewPercent": 125,
-        "keptAt3s": 177,
-        "keptAtHalf": 118
-      },
-      {
-        "id": "OmK3Afji290",
-        "title": "The Friendship Files: Modi, Adani and the Rise of an Empire | Viral Documentary | Must Watch",
-        "published": "2026-10-29T16:17:12Z",
-        "format": "video",
-        "length": 2170,
-        "views": 90,
-        "avgViewSec": 394,
-        "avgViewPercent": 18,
-        "keptAt3s": 78,
-        "keptAtHalf": 17
+        "views": 103,
+        "avgViewSec": 10,
+        "avgViewPercent": 98,
+        "keptAt3s": 133,
+        "keptAtHalf": 98
       }
     ]
   },
   "instagram": {
     "account": {
       "id": "17841411923308355",
-      "followers_count": 15,
+      "followers_count": 16,
       "follows_count": 0,
-      "media_count": 106,
+      "media_count": 115,
       "username": "cute_krishna.ai"
     },
     "media": [
       {
-        "id": "18092129528697749",
-        "caption": "😇 महादेव: नंदी की अद्भुत भक्ति, कैसे बना वह वाहन?\n\nक्या नंदी ने शूल से बचाया शिव को, और बना उनका वाहन?\n\n🔔 कल सुनिए, हनुमान जी की पहली मुलाक़ात राम से, जंगल में!\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-b4c0f7\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#mahadev #harharmahadev #shiva #bholenath #bhakti #sanatandharma #hindu #storybyte",
+        "id": "17936717730410427",
+        "caption": "😱 महादेव ने पी लिया विष, बना नीलकंठ!\n\nक्या आप जानते हैं कैसे विष ने बना दिया शंकर को नीलकंठ?\n\n🔔 कल सुनिए, कैसे भरतगिरि की तपस्या ने लायी माँ गंगा पृथ्वी पर।\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-d0578e\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#mahadev #harharmahadev #shiva #bholenath #bhakti #sanatandharma #hindu #storybyte",
+        "comments_count": 1,
+        "like_count": 3,
+        "media_product_type": "REELS",
+        "media_type": "VIDEO",
+        "permalink": "https://www.instagram.com/reel/DgEf3fmjcWk/",
+        "timestamp": "2026-11-23T04:15:30+0000",
+        "reach": 111,
+        "saved": 0,
+        "shares": 2,
+        "total_interactions": 6,
+        "views": 117
+      },
+      {
+        "id": "18131249593852146",
+        "caption": "😲 कृष्णा की बाल लीला: मक्खन चुराते हुए यशोदा ने पकड़ा!\n\nजब छोटा कृष्ण ने देखा मक्खन, तब क्या हुआ?\n\n🔔 कल सुनिए, महादेव की नेलकण्ठ लीला, जो समुद्र मंथन में हुई!\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-559082\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#krishna #radhekrishna #jaishreekrishna #balkrishna #bhakti #sanatandharma #hindu #storybyte",
+        "comments_count": 1,
+        "like_count": 3,
+        "media_product_type": "REELS",
+        "media_type": "VIDEO",
+        "permalink": "https://www.instagram.com/reel/DgB5QsVAsQo/",
+        "timestamp": "2026-11-22T04:00:01+0000",
+        "reach": 111,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 4,
+        "views": 124
+      },
+      {
+        "id": "18176371258454385",
+        "caption": "😱 शनि देव की कथा: हनुमान ने कैसे बचाई शनि?\n\nजब हनुमान ने अंधकार की जंजीरों को तोड़ा, शनि की किस्मत बदल गई?\n\n🔔 कल सुनिए, कृष्ण बचाए गाँव को बुरे दानव से—एक और अद्भुत कथा!\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-fe055f\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#shanidev #jaishanidev #hanuman #bhakti #sanatandharma #hindu #storybyte",
+        "comments_count": 0,
+        "like_count": 1,
+        "media_product_type": "FEED",
+        "media_type": "CAROUSEL_ALBUM",
+        "permalink": "https://www.instagram.com/p/Df_ZC1bGgoy/",
+        "timestamp": "2026-11-21T04:38:59+0000",
+        "reach": 2,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 7
+      },
+      {
+        "id": "18036479372895716",
+        "caption": "😱 विष्णु जी का जागरण: कैसे शुरू होते हैं शुभ कार्य?\n\nक्या चार महीने की योग‑निद्रा के बाद विष्णु जी जागेंगे?\n\n🔔 कल सुनिए शनि देव की कथा, कैसे हनुमान ने उन्हें रावण की कैद से मुक्त किया।\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-76c896\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#devuthaniekadashi #tulsivivah #prabodhiniekadashi #vishnu #bhakti #sanatandharma #hindu #storybyte #DevUthaniEkadashi",
         "comments_count": 1,
         "like_count": 4,
         "media_product_type": "REELS",
         "media_type": "VIDEO",
-        "permalink": "https://www.instagram.com/reel/DfyaFEREfm1/",
-        "timestamp": "2026-11-16T03:39:29+0000",
-        "reach": 119,
+        "permalink": "https://www.instagram.com/reel/Df8z_wNle6y/",
+        "timestamp": "2026-11-20T04:38:06+0000",
+        "reach": 120,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 6,
+        "views": 128
+      },
+      {
+        "id": "18120129772820386",
+        "caption": "😱 विष्णु शालिग्राम में बदलते ही धरती काँपी!\n\nक्या व्रिंदा का विश्वास विष्णु को फिर शक्ति दिला पाएगा?\n\n🔔 कल सुनिए, कैसे विष्णु शेषनाग पर जागे और नई आशा का संचार करें।\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-ae3966\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#devuthaniekadashi #tulsivivah #prabodhiniekadashi #vishnu #bhakti #sanatandharma #hindu #storybyte #DevUthaniEkadashi",
+        "comments_count": 1,
+        "like_count": 6,
+        "media_product_type": "REELS",
+        "media_type": "VIDEO",
+        "permalink": "https://www.instagram.com/reel/Df7nafFkTld/",
+        "timestamp": "2026-11-19T17:28:34+0000",
+        "reach": 129,
+        "saved": 0,
+        "shares": 2,
+        "total_interactions": 9,
+        "views": 145
+      },
+      {
+        "id": "18486961465119869",
+        "caption": "😲 भगवान विष्णु की कथा: मत्स्य अवतार ने बाढ़ में मनु को बचाया\n\nक्या विशाल मछली बचा पाएगी मनु और पवित्र वेदों को?\n\n🔔 कल सुनिए देवउठनी एकादशी की अद्भुत कथा, जहाँ विष्णु जागते हैं\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-8ee851\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#vishnu #narayan #harinarayan #dashavatar #bhakti #sanatandharma #hindu #storybyte",
+        "comments_count": 1,
+        "like_count": 4,
+        "media_product_type": "REELS",
+        "media_type": "VIDEO",
+        "permalink": "https://www.instagram.com/reel/Df6RQKBAvBh/",
+        "timestamp": "2026-11-19T04:55:42+0000",
+        "reach": 131,
         "saved": 0,
         "shares": 0,
         "total_interactions": 5,
-        "views": 124
+        "views": 137
+      },
+      {
+        "id": "18139118974655136",
+        "caption": "😲 गणपति बप्पा की कथा: कावेरी को झुका दिया!\n\nक्या गणपति ने गर्वीली कावेरी को झुका दिया?\n\n🔔 कल सुनिए, विष्णु के मत्स्य अवतार की अद्भुत कहानी।\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-503f09\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#ganpatibappamorya #ganesha #ganpati #vighnaharta #bhakti #sanatandharma #hindu #storybyte",
+        "comments_count": 1,
+        "like_count": 1,
+        "media_product_type": "REELS",
+        "media_type": "VIDEO",
+        "permalink": "https://www.instagram.com/reel/Df3t01JiYr7/",
+        "timestamp": "2026-11-18T05:07:35+0000",
+        "reach": 66,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 73
+      },
+      {
+        "id": "18132760630693653",
+        "caption": "😲 हनुमान जी: किष्किंधा में पहली बार राम से मिलेंगे?\n\nक्या किष्किंधा के जंगल में राम और हनुमान की पहली मुलाकात होगी?\n\n🔔 कल सुनिए, गणपति बप्पा कैसे कावेरी को झुकाए\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-fa3ad6\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#hanuman #jaishreeram #bajrangbali #hanumanji #bhakti #sanatandharma #hindu #storybyte",
+        "comments_count": 1,
+        "like_count": 9,
+        "media_product_type": "REELS",
+        "media_type": "VIDEO",
+        "permalink": "https://www.instagram.com/reel/Df1NblgkUka/",
+        "timestamp": "2026-11-17T05:46:03+0000",
+        "reach": 123,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 10,
+        "views": 133
+      },
+      {
+        "id": "18092129528697749",
+        "caption": "😇 महादेव: नंदी की अद्भुत भक्ति, कैसे बना वह वाहन?\n\nक्या नंदी ने शूल से बचाया शिव को, और बना उनका वाहन?\n\n🔔 कल सुनिए, हनुमान जी की पहली मुलाक़ात राम से, जंगल में!\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-b4c0f7\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#mahadev #harharmahadev #shiva #bholenath #bhakti #sanatandharma #hindu #storybyte",
+        "comments_count": 1,
+        "like_count": 5,
+        "media_product_type": "REELS",
+        "media_type": "VIDEO",
+        "permalink": "https://www.instagram.com/reel/DfyaFEREfm1/",
+        "timestamp": "2026-11-16T03:39:29+0000",
+        "reach": 124,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 6,
+        "views": 130
       },
       {
         "id": "18121192087979147",
@@ -972,13 +1092,13 @@
         "saved": 2,
         "shares": 0,
         "total_interactions": 5,
-        "views": 161
+        "views": 162
       },
       {
         "id": "18084248825391981",
         "caption": "🌅 छठ माँ: क्या थी बचपन की मौत की कहानी?\n\nक्या चहठ माँ ने शिशु की मृत्यु को कैसे रोका?\n\n🔔 कल सुनिए, कैसे द्रौपदी ने चहठ व्रत से पांडवों को जीत दिलाई।\n\n▶️ Play the full story — free, fully narrated:\nhttps://storybyte-76716.web.app/s/devotional-0defa2\n(or tap the link in bio)\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#chhathpuja #chhathimaiya #suryadev #chhath #bhakti #sanatandharma #hindu #storybyte #ChhathPuja",
         "comments_count": 0,
-        "like_count": 0,
+        "like_count": 1,
         "media_product_type": "FEED",
         "media_type": "CAROUSEL_ALBUM",
         "permalink": "https://www.instagram.com/p/DfucNvLk-yb/",
@@ -986,8 +1106,8 @@
         "reach": 1,
         "saved": 0,
         "shares": 0,
-        "total_interactions": 0,
-        "views": 1
+        "total_interactions": 1,
+        "views": 3
       },
       {
         "id": "18131394845506574",
@@ -1017,7 +1137,7 @@
         "saved": 1,
         "shares": 1,
         "total_interactions": 11,
-        "views": 162
+        "views": 163
       },
       {
         "id": "18082043681394226",
@@ -1047,7 +1167,7 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 2,
-        "views": 2
+        "views": 3
       },
       {
         "id": "17983821318133582",
@@ -1062,7 +1182,7 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 3,
-        "views": 108
+        "views": 109
       },
       {
         "id": "18115388726033520",
@@ -1107,7 +1227,7 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 2,
-        "views": 112
+        "views": 113
       },
       {
         "id": "18149485831497009",
@@ -2142,7 +2262,7 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 6,
-        "views": 126
+        "views": 127
       },
       {
         "id": "18028972649814324",
@@ -2495,11 +2615,121 @@
   "facebook": {
     "page": {
       "name": "Littlekrishna.ai",
-      "followers_count": 4198,
-      "fan_count": 4198,
+      "followers_count": 4191,
+      "fan_count": 4191,
       "id": "1036212629585326"
     },
     "posts": [
+      {
+        "id": "1036212629585326_122119564911332133",
+        "message": "😱 महादेव ने पी लिया विष, बना नीलकंठ!\n\nक्या आप जानते हैं कैसे विष ने बना दिया शंकर को नीलकंठ?\n\n🔔 कल सुनिए, कैसे भरतगिरि की तपस्या ने लायी माँ गंगा पृथ्वी पर।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-d0578e\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#mahadev #harharmahadev #shiva #bholenath #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-23T04:16:37+0000",
+        "permalink_url": "https://www.facebook.com/reel/1740478134166357/",
+        "status_type": "added_video",
+        "reactions": 6,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122119486899332133",
+        "message": "😲 कृष्णा की बाल लीला: मक्खन चुराते हुए यशोदा ने पकड़ा!\n\nजब छोटा कृष्ण ने देखा मक्खन, तब क्या हुआ?\n\n🔔 कल सुनिए, महादेव की नेलकण्ठ लीला, जो समुद्र मंथन में हुई!\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-559082\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#krishna #radhekrishna #jaishreekrishna #balkrishna #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-22T04:01:11+0000",
+        "permalink_url": "https://www.facebook.com/reel/1153640343689065/",
+        "status_type": "added_video",
+        "reactions": 5,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122119412265332133",
+        "message": "😱 शनि देव की कथा: हनुमान ने कैसे बचाई शनि?\n\nजब हनुमान ने अंधकार की जंजीरों को तोड़ा, शनि की किस्मत बदल गई?\n\n🔔 कल सुनिए, कृष्ण बचाए गाँव को बुरे दानव से—एक और अद्भुत कथा!\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-fe055f\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#shanidev #jaishanidev #hanuman #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-21T04:40:16+0000",
+        "permalink_url": "https://www.facebook.com/reel/1665469545280660/",
+        "status_type": "added_video",
+        "reactions": 3,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122119341885332133",
+        "message": "कैकेयी के कष्टदायक निर्णय और दशरथ की हार्दिक शपथ, जो अयोध्या के भाग्य को बदल देती है। रात की अंधेरी गहराई में दो वचन की मांग, और नई सुबह का संदेश।\n\n📖 रामायण — एपिसोड 11 / 55 (अयोध्याकाण्ड)\n⏪ पिछला एपिसोड: राम राज्याभिषेक की घोषणा https://youtu.be/JFw2qdA9md0\n⏩ अगला एपिसोड: कैकेयी के दो वरदान — हर सोमवार, बुधवार और शुक्रवार सुबह 10 बजे\n\n⏱️ अध्याय\n0:00 कॉप भवन में कैकेयी\n4:09 दशरथ की शपथ\n10:08 भविष्य का संदेश\n\n🙏 पूरी रामायण क्रम से देखने के लिए चैनल सब्सक्राइब करें\n📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dramayan_series\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#Ramayan #रामायण #JaiShriRam #RamKatha #SanatanDharma #RamayanEpisode11 #StoryByte",
+        "created_time": "2026-11-20T12:25:38+0000",
+        "permalink_url": "https://www.facebook.com/reel/1502211691763368/",
+        "status_type": "added_video",
+        "reactions": 1,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122119312197332133",
+        "message": "😱 विष्णु जी का जागरण: कैसे शुरू होते हैं शुभ कार्य?\n\nक्या चार महीने की योग‑निद्रा के बाद विष्णु जी जागेंगे?\n\n🔔 कल सुनिए शनि देव की कथा, कैसे हनुमान ने उन्हें रावण की कैद से मुक्त किया।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-76c896\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#devuthaniekadashi #tulsivivah #prabodhiniekadashi #vishnu #bhakti #sanatandharma #hindu #storybyte #DevUthaniEkadashi",
+        "created_time": "2026-11-20T04:39:20+0000",
+        "permalink_url": "https://www.facebook.com/reel/1136913265875996/",
+        "status_type": "added_video",
+        "reactions": 2,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122119254201332133",
+        "message": "😱 विष्णु शालिग्राम में बदलते ही धरती काँपी!\n\nक्या व्रिंदा का विश्वास विष्णु को फिर शक्ति दिला पाएगा?\n\n🔔 कल सुनिए, कैसे विष्णु शेषनाग पर जागे और नई आशा का संचार करें।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-ae3966\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#devuthaniekadashi #tulsivivah #prabodhiniekadashi #vishnu #bhakti #sanatandharma #hindu #storybyte #DevUthaniEkadashi",
+        "created_time": "2026-11-19T17:29:46+0000",
+        "permalink_url": "https://www.facebook.com/reel/1449187600716772/",
+        "status_type": "added_video",
+        "reactions": 10,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122119210533332133",
+        "message": "😲 भगवान विष्णु की कथा: मत्स्य अवतार ने बाढ़ में मनु को बचाया\n\nक्या विशाल मछली बचा पाएगी मनु और पवित्र वेदों को?\n\n🔔 कल सुनिए देवउठनी एकादशी की अद्भुत कथा, जहाँ विष्णु जागते हैं\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-8ee851\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#vishnu #narayan #harinarayan #dashavatar #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-19T04:56:42+0000",
+        "permalink_url": "https://www.facebook.com/reel/2271119607118137/",
+        "status_type": "added_video",
+        "reactions": 5,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122119138557332133",
+        "message": "दशरथ के वृद्धावस्था में राम को युवराज घोषित करने की घोषणा, अयोध्या में उल्लास और देवताओं की चिंताएँ।\n\n📖 रामायण — एपिसोड 10 / 55 (अयोध्याकाण्ड)\n⏪ पिछला एपिसोड: सीता-राम विवाह https://youtu.be/u6qMDedpRA0\n⏩ अगला एपिसोड: मंथरा और कैकेयी — हर सोमवार, बुधवार और शुक्रवार सुबह 10 बजे\n\n⏱️ अध्याय\n0:00 राजा का निर्णय\n4:50 रात्रि सजावट और उपवास\n9:56 देवताओं की चिंता और मंथरा की चाल\n\n🙏 पूरी रामायण क्रम से देखने के लिए चैनल सब्सक्राइब करें\n📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dramayan_series\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#Ramayan #रामायण #JaiShriRam #RamKatha #SanatanDharma #RamayanEpisode10 #StoryByte",
+        "created_time": "2026-11-18T12:17:41+0000",
+        "permalink_url": "https://www.facebook.com/reel/1435667995429507/",
+        "status_type": "added_video",
+        "reactions": 1,
+        "comments": 0,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122119117905332133",
+        "message": "😲 गणपति बप्पा की कथा: कावेरी को झुका दिया!\n\nक्या गणपति ने गर्वीली कावेरी को झुका दिया?\n\n🔔 कल सुनिए, विष्णु के मत्स्य अवतार की अद्भुत कहानी।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-503f09\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#ganpatibappamorya #ganesha #ganpati #vighnaharta #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-18T05:08:47+0000",
+        "permalink_url": "https://www.facebook.com/reel/1091639583909676/",
+        "status_type": "added_video",
+        "reactions": 5,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122119020171332133",
+        "message": "😲 हनुमान जी: किष्किंधा में पहली बार राम से मिलेंगे?\n\nक्या किष्किंधा के जंगल में राम और हनुमान की पहली मुलाकात होगी?\n\n🔔 कल सुनिए, गणपति बप्पा कैसे कावेरी को झुकाए\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-fa3ad6\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#hanuman #jaishreeram #bajrangbali #hanumanji #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-17T05:47:35+0000",
+        "permalink_url": "https://www.facebook.com/reel/1167165619179008/",
+        "status_type": "added_video",
+        "reactions": 3,
+        "comments": 1,
+        "shares": 0
+      },
+      {
+        "id": "1036212629585326_122118937875332133",
+        "message": "राजा दशरथ की बारात मिथिला पहुंचती है, जहाँ चार वैवाहिक बंधन बनते हैं और फिर खुशियों के साथ अयोध्या लौटते हैं।\n\n📖 रामायण — एपिसोड 9 / 55 (बालकाण्ड)\n⏪ पिछला एपिसोड: परशुराम-लक्ष्मण संवाद https://youtu.be/djFNMnfhDxM\n⏩ अगला एपिसोड: राम राज्याभिषेक की घोषणा — हर सोमवार, बुधवार और शुक्रवार सुबह 10 बजे\n\n⏱️ अध्याय\n0:00 बारात का आगमन\n6:03 चार वैवाहिक बंधन\n11:23 अयोध्या में स्वागत\n\n🙏 पूरी रामायण क्रम से देखने के लिए चैनल सब्सक्राइब करें\n📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dramayan_series\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#Ramayan #रामायण #JaiShriRam #RamKatha #SanatanDharma #RamayanEpisode9 #StoryByte",
+        "created_time": "2026-11-16T12:25:18+0000",
+        "permalink_url": "https://www.facebook.com/reel/1883049486036167/",
+        "status_type": "added_video",
+        "reactions": 3,
+        "comments": 0,
+        "shares": 0
+      },
       {
         "id": "1036212629585326_122118903843332133",
         "message": "😇 महादेव: नंदी की अद्भुत भक्ति, कैसे बना वह वाहन?\n\nक्या नंदी ने शूल से बचाया शिव को, और बना उनका वाहन?\n\n🔔 कल सुनिए, हनुमान जी की पहली मुलाक़ात राम से, जंगल में!\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-b4c0f7\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#mahadev #harharmahadev #shiva #bholenath #bhakti #sanatandharma #hindu #storybyte",
@@ -3989,6 +4219,86 @@
       }
     ],
     "videos": [
+      {
+        "id": "1740478134166357",
+        "description": "😱 महादेव ने पी लिया विष, बना नीलकंठ!\n\nक्या आप जानते हैं कैसे विष ने बना दिया शंकर को नीलकंठ?\n\n🔔 कल सुनिए, कैसे भरतगिरि की तपस्या ने लायी माँ गंगा पृथ्वी पर।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-d0578e\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#mahadev #harharmahadev #shiva #bholenath #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-23T04:15:36+0000",
+        "length": 121.399,
+        "permalink_url": "/reel/1740478134166357/"
+      },
+      {
+        "id": "1153640343689065",
+        "description": "😲 कृष्णा की बाल लीला: मक्खन चुराते हुए यशोदा ने पकड़ा!\n\nजब छोटा कृष्ण ने देखा मक्खन, तब क्या हुआ?\n\n🔔 कल सुनिए, महादेव की नेलकण्ठ लीला, जो समुद्र मंथन में हुई!\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-559082\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#krishna #radhekrishna #jaishreekrishna #balkrishna #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-22T04:00:09+0000",
+        "length": 142.423,
+        "permalink_url": "/reel/1153640343689065/"
+      },
+      {
+        "id": "1665469545280660",
+        "description": "😱 शनि देव की कथा: हनुमान ने कैसे बचाई शनि?\n\nजब हनुमान ने अंधकार की जंजीरों को तोड़ा, शनि की किस्मत बदल गई?\n\n🔔 कल सुनिए, कृष्ण बचाए गाँव को बुरे दानव से—एक और अद्भुत कथा!\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-fe055f\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#shanidev #jaishanidev #hanuman #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-21T04:39:05+0000",
+        "length": 135.007,
+        "permalink_url": "/reel/1665469545280660/"
+      },
+      {
+        "id": "1502211691763368",
+        "title": "रामायण एपिसोड 11: मंथरा और कैकेयी | Ramayan Episode 11",
+        "description": "कैकेयी के कष्टदायक निर्णय और दशरथ की हार्दिक शपथ, जो अयोध्या के भाग्य को बदल देती है। रात की अंधेरी गहराई में दो वचन की मांग, और नई सुबह का संदेश।\n\n📖 रामायण — एपिसोड 11 / 55 (अयोध्याकाण्ड)\n⏪ पिछला एपिसोड: राम राज्याभिषेक की घोषणा https://youtu.be/JFw2qdA9md0\n⏩ अगला एपिसोड: कैकेयी के दो वरदान — हर सोमवार, बुधवार और शुक्रवार सुबह 10 बजे\n\n⏱️ अध्याय\n0:00 कॉप भवन में कैकेयी\n4:09 दशरथ की शपथ\n10:08 भविष्य का संदेश\n\n🙏 पूरी रामायण क्रम से देखने के लिए चैनल सब्सक्राइब करें\n📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dramayan_series\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#Ramayan #रामायण #JaiShriRam #RamKatha #SanatanDharma #RamayanEpisode11 #StoryByte",
+        "created_time": "2026-11-20T12:18:26+0000",
+        "length": 949.497,
+        "permalink_url": "/reel/1502211691763368/"
+      },
+      {
+        "id": "1136913265875996",
+        "description": "😱 विष्णु जी का जागरण: कैसे शुरू होते हैं शुभ कार्य?\n\nक्या चार महीने की योग‑निद्रा के बाद विष्णु जी जागेंगे?\n\n🔔 कल सुनिए शनि देव की कथा, कैसे हनुमान ने उन्हें रावण की कैद से मुक्त किया।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-76c896\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#devuthaniekadashi #tulsivivah #prabodhiniekadashi #vishnu #bhakti #sanatandharma #hindu #storybyte #DevUthaniEkadashi",
+        "created_time": "2026-11-20T04:38:12+0000",
+        "length": 158.9,
+        "permalink_url": "/reel/1136913265875996/"
+      },
+      {
+        "id": "1449187600716772",
+        "description": "😱 विष्णु शालिग्राम में बदलते ही धरती काँपी!\n\nक्या व्रिंदा का विश्वास विष्णु को फिर शक्ति दिला पाएगा?\n\n🔔 कल सुनिए, कैसे विष्णु शेषनाग पर जागे और नई आशा का संचार करें।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-ae3966\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#devuthaniekadashi #tulsivivah #prabodhiniekadashi #vishnu #bhakti #sanatandharma #hindu #storybyte #DevUthaniEkadashi",
+        "created_time": "2026-11-19T17:28:40+0000",
+        "length": 154.279,
+        "permalink_url": "/reel/1449187600716772/"
+      },
+      {
+        "id": "2271119607118137",
+        "description": "😲 भगवान विष्णु की कथा: मत्स्य अवतार ने बाढ़ में मनु को बचाया\n\nक्या विशाल मछली बचा पाएगी मनु और पवित्र वेदों को?\n\n🔔 कल सुनिए देवउठनी एकादशी की अद्भुत कथा, जहाँ विष्णु जागते हैं\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-8ee851\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#vishnu #narayan #harinarayan #dashavatar #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-19T04:55:49+0000",
+        "length": 131.1,
+        "permalink_url": "/reel/2271119607118137/"
+      },
+      {
+        "id": "1435667995429507",
+        "title": "रामायण एपिसोड 10: राम राज्याभिषेक की घोषणा | Ramayan Episode 10",
+        "description": "दशरथ के वृद्धावस्था में राम को युवराज घोषित करने की घोषणा, अयोध्या में उल्लास और देवताओं की चिंताएँ।\n\n📖 रामायण — एपिसोड 10 / 55 (अयोध्याकाण्ड)\n⏪ पिछला एपिसोड: सीता-राम विवाह https://youtu.be/u6qMDedpRA0\n⏩ अगला एपिसोड: मंथरा और कैकेयी — हर सोमवार, बुधवार और शुक्रवार सुबह 10 बजे\n\n⏱️ अध्याय\n0:00 राजा का निर्णय\n4:50 रात्रि सजावट और उपवास\n9:56 देवताओं की चिंता और मंथरा की चाल\n\n🙏 पूरी रामायण क्रम से देखने के लिए चैनल सब्सक्राइब करें\n📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dramayan_series\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#Ramayan #रामायण #JaiShriRam #RamKatha #SanatanDharma #RamayanEpisode10 #StoryByte",
+        "created_time": "2026-11-18T12:11:30+0000",
+        "length": 903.024,
+        "permalink_url": "/reel/1435667995429507/"
+      },
+      {
+        "id": "1091639583909676",
+        "description": "😲 गणपति बप्पा की कथा: कावेरी को झुका दिया!\n\nक्या गणपति ने गर्वीली कावेरी को झुका दिया?\n\n🔔 कल सुनिए, विष्णु के मत्स्य अवतार की अद्भुत कहानी।\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-503f09\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#ganpatibappamorya #ganesha #ganpati #vighnaharta #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-18T05:07:40+0000",
+        "length": 145.966,
+        "permalink_url": "/reel/1091639583909676/"
+      },
+      {
+        "id": "1167165619179008",
+        "description": "😲 हनुमान जी: किष्किंधा में पहली बार राम से मिलेंगे?\n\nक्या किष्किंधा के जंगल में राम और हनुमान की पहली मुलाकात होगी?\n\n🔔 कल सुनिए, गणपति बप्पा कैसे कावेरी को झुकाए\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-fa3ad6\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#hanuman #jaishreeram #bajrangbali #hanumanji #bhakti #sanatandharma #hindu #storybyte",
+        "created_time": "2026-11-17T05:46:11+0000",
+        "length": 132.1,
+        "permalink_url": "/reel/1167165619179008/"
+      },
+      {
+        "id": "1883049486036167",
+        "title": "रामायण एपिसोड 9: सीता-राम विवाह | Ramayan Episode 9",
+        "description": "राजा दशरथ की बारात मिथिला पहुंचती है, जहाँ चार वैवाहिक बंधन बनते हैं और फिर खुशियों के साथ अयोध्या लौटते हैं।\n\n📖 रामायण — एपिसोड 9 / 55 (बालकाण्ड)\n⏪ पिछला एपिसोड: परशुराम-लक्ष्मण संवाद https://youtu.be/djFNMnfhDxM\n⏩ अगला एपिसोड: राम राज्याभिषेक की घोषणा — हर सोमवार, बुधवार और शुक्रवार सुबह 10 बजे\n\n⏱️ अध्याय\n0:00 बारात का आगमन\n6:03 चार वैवाहिक बंधन\n11:23 अयोध्या में स्वागत\n\n🙏 पूरी रामायण क्रम से देखने के लिए चैनल सब्सक्राइब करें\n📱 StoryByte ऐप पर सभी कथाएँ मुफ़्त: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Dramayan_series\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#Ramayan #रामायण #JaiShriRam #RamKatha #SanatanDharma #RamayanEpisode9 #StoryByte",
+        "created_time": "2026-11-16T12:16:28+0000",
+        "length": 968.964,
+        "permalink_url": "/reel/1883049486036167/"
+      },
       {
         "id": "1642758587864032",
         "description": "😇 महादेव: नंदी की अद्भुत भक्ति, कैसे बना वह वाहन?\n\nक्या नंदी ने शूल से बचाया शिव को, और बना उनका वाहन?\n\n🔔 कल सुनिए, हनुमान जी की पहली मुलाक़ात राम से, जंगल में!\n\n▶️ Listen free — full story, fully narrated: https://storybyte-76716.web.app/s/devotional-b4c0f7\n\n📱 Get the app: https://play.google.com/store/apps/details?id=com.storybyte.app&referrer=utm_source%3Dfacebook%26utm_medium%3Dsocial%26utm_campaign%3Ddaily_short\n💬 रोज़ नई कथा WhatsApp पर: https://whatsapp.com/channel/0029VbEOIuxAojZ0Wgg11J2l\n✈️ Telegram पर: https://t.me/storybytes\n\n#mahadev #harharmahadev #shiva #bholenath #bhakti #sanatandharma #hindu #storybyte",
@@ -8537,6 +8847,166 @@
         "hookText": "नंदी ने शूल उठाया, शिव बचाए!"
       },
       {
+        "id": "2026-11-17_hi_devotional_हनुमान-जी-की-कथा-किष्किंधा-में-प्रथम-मिल",
+        "title": "हनुमान जी की कथा: किष्किंधा में प्रथम मिलन",
+        "socialTitle": "😲 हनुमान जी: किष्किंधा में पहली बार राम से मिलेंगे?",
+        "deity": "hanuman",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-11-17",
+        "duration": 119,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0,
+        "hookText": "क्या हनुमान ने राम को पहचाना?"
+      },
+      {
+        "id": "2026-11-18_hi_devotional_गणपति-बप्पा-की-कथा-कावेरी-को-झुका-कर-सबक",
+        "title": "गणपति बप्पा की कथा: कावेरी को झुका कर सबक",
+        "socialTitle": "😲 गणपति बप्पा की कथा: कावेरी को झुका दिया!",
+        "deity": "ganesh",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-11-18",
+        "duration": 132,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0,
+        "hookText": "गणपति ने कावेरी को झुका दिया!"
+      },
+      {
+        "id": "2026-11-19_hi_devotional_eve_देवउठनी-एकादशी-की-अद्भुत-तुलसी-विवाह-कथा",
+        "title": "देवउठनी एकादशी की अद्भुत तुलसी विवाह कथा",
+        "socialTitle": "😱 विष्णु शालिग्राम में बदलते ही धरती काँपी!",
+        "deity": "vishnu",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Dev Uthani Ekadashi",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-11-19",
+        "duration": 139,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0,
+        "hookText": "विष्णु शालिग्राम में बदलते ही?"
+      },
+      {
+        "id": "2026-11-19_hi_devotional_भगवान-विष्णु-का-मत्स्य-अवतार-महा-बाढ़-से",
+        "title": "भगवान विष्णु का मत्स्य अवतार | महा बाढ़ से बचाव",
+        "socialTitle": "😲 भगवान विष्णु की कथा: मत्स्य अवतार ने बाढ़ में मनु को बचाया",
+        "deity": "vishnu",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-11-19",
+        "duration": 116,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0,
+        "hookText": "बाढ़ में विशाल मछली ने मनु को उठाया!"
+      },
+      {
+        "id": "2026-11-20_hi_devotional_देवउठनी-एकादशी-विष्णु-जी-का-जागरण-और-शुभ",
+        "title": "देवउठनी एकादशी: विष्णु जी का जागरण और शुभ कार्य",
+        "socialTitle": "😱 विष्णु जी का जागरण: कैसे शुरू होते हैं शुभ कार्य?",
+        "deity": "vishnu",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": "Dev Uthani Ekadashi",
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-11-20",
+        "duration": 143,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0,
+        "hookText": "विष्णु जी चार महीने बाद कैसे जागे?"
+      },
+      {
+        "id": "2026-11-21_hi_devotional_शनि-देव-की-कथा-हनुमान-ने-बचाई-शनि-की-मुक",
+        "title": "शनि देव की कथा: हनुमान ने बचाई शनि की मुक्ति",
+        "socialTitle": "😱 शनि देव की कथा: हनुमान ने कैसे बचाई शनि?",
+        "deity": "shani",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-11-21",
+        "duration": 120,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0,
+        "hookText": "शनि को रावण की जेल से कौन बचाएगा?"
+      },
+      {
+        "id": "2026-11-22_hi_devotional_बाल-कृष्ण-की-मक्खन-चोरी-की-क़था-यशोदा-की",
+        "title": "बाल कृष्ण की मक्खन चोरी की क़था – यशोदा की पकड़",
+        "socialTitle": "😲 कृष्णा की बाल लीला: मक्खन चुराते हुए यशोदा ने पकड़ा!",
+        "deity": "krishna",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-11-22",
+        "duration": 128,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0,
+        "hookText": "कृष्ण ने क्यों छुपाया मक्खन?"
+      },
+      {
+        "id": "2026-11-23_hi_devotional_महादेव-की-कथा-नीलकंठ-बनते-हुए-शंकर",
+        "title": "महादेव की कथा: नीलकंठ बनते हुए शंकर",
+        "socialTitle": "😱 महादेव ने पी लिया विष, बना नीलकंठ!",
+        "deity": "shiva",
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": true,
+        "isCommunityStory": false,
+        "status": "published",
+        "generatedDate": "2026-11-23",
+        "duration": 107,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0,
+        "hookText": "शिव ने विष पीकर नीलकंठ बना?"
+      },
+      {
         "id": "community_1787177365112_SrMquZMWUfdPcegQ4oRvQqW7pRr2",
         "title": "Sunset Whispers on the Shore",
         "socialTitle": null,
@@ -8997,6 +9467,26 @@
         "hookText": null
       },
       {
+        "id": "yt_5jM8CYeUOdo",
+        "title": "रामायण एपिसोड 11: मंथरा और कैकेयी | Ramayan Episode 11",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 949,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0,
+        "hookText": null
+      },
+      {
         "id": "yt_6LjTcmue9xU",
         "title": "Navratri | Season 1 Episode Day 4: अग्नि की प्रतिध्वनि",
         "socialTitle": null,
@@ -9109,6 +9599,26 @@
         "status": "video",
         "generatedDate": null,
         "duration": 942,
+        "plays": 0,
+        "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0,
+        "hookText": null
+      },
+      {
+        "id": "yt_JFw2qdA9md0",
+        "title": "रामायण एपिसोड 10: राम राज्याभिषेक की घोषणा | Ramayan Episode 10",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 903,
         "plays": 0,
         "likes": 0,
         "shares": 0,
@@ -9431,6 +9941,26 @@
         "duration": 930,
         "plays": 0,
         "likes": 0,
+        "shares": 0,
+        "rating": 0,
+        "ratingCount": 0,
+        "hookText": null
+      },
+      {
+        "id": "yt_u6qMDedpRA0",
+        "title": "रामायण एपिसोड 9: सीता-राम विवाह | Ramayan Episode 9",
+        "socialTitle": null,
+        "deity": null,
+        "genre": "devotional",
+        "language": "hi",
+        "occasion": null,
+        "isDaily": false,
+        "isCommunityStory": false,
+        "status": "video",
+        "generatedDate": null,
+        "duration": 968,
+        "plays": 1,
+        "likes": 1,
         "shares": 0,
         "rating": 0,
         "ratingCount": 0,
