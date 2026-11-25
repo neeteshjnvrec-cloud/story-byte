@@ -10,10 +10,28 @@
       "look": "Lord Ram: a calm, youthful prince with smooth dark blue (neel-shyam) skin, a tall gold crown, a yellow silk dhoti and a gold-bordered angavastram draped over his shoulders, gold necklaces, a long bow (Kodanda) in hand and a quiver of arrows on his back"
     },
     {
+      "name": "Sita",
+      "nativeName": "सीता",
+      "role": "princess of Mithila, daughter of Janak, Ram's wife",
+      "look": "Mother Sita: a youthful, radiant goddess with a divine glow and serene face, a small jewelled gold crown and maang tikka, a red silk saree with gold border, rich gold jewellery, head modestly covered with the end of the saree"
+    },
+    {
+      "name": "Lakshman",
+      "nativeName": "लक्ष्मण",
+      "role": "Ram's devoted younger brother, son of Sumitra",
+      "look": "Lakshman: a fair-skinned young prince with a gold crown, a yellow dhoti and angavastram over his shoulders, gold necklaces and a bow, always beside Ram"
+    },
+    {
       "name": "Dasharath",
       "nativeName": "दशरथ",
       "role": "king of Ayodhya, father of Ram",
       "look": "King Dasharath: an elderly, dignified king with a white beard and moustache, a tall gold crown, rich maroon and gold silk robes and gold jewellery"
+    },
+    {
+      "name": "Kaushalya",
+      "nativeName": "कौशल्या",
+      "role": "Ram's mother, Dasharath's eldest queen",
+      "look": "Queen Kaushalya: a gentle, graceful middle-aged queen in a cream and gold silk saree, a small gold crown, her head covered with the end of the saree"
     },
     {
       "name": "Kaikeyi",
@@ -22,16 +40,16 @@
       "look": "Queen Kaikeyi: a beautiful, proud queen in a deep green and gold silk saree, rich gold jewellery and a gold crown"
     },
     {
+      "name": "Sumitra",
+      "nativeName": "सुमित्रा",
+      "role": "mother of Lakshman and Shatrughna",
+      "look": "Queen Sumitra: a calm, kind middle-aged queen in a light blue and gold silk saree with a small gold crown"
+    },
+    {
       "name": "Bharat",
       "nativeName": "भरत",
       "role": "Ram's devoted younger brother, son of Kaikeyi",
       "look": "Bharat: a young prince with dusky dark skin, a gentle devoted face, a gold crown, a saffron dhoti and angavastram; after Ram's exile, plain ascetic bark clothes and matted hair"
-    },
-    {
-      "name": "Sumantra",
-      "nativeName": "सुमंत्र",
-      "role": "Dasharath's minister and charioteer",
-      "look": "Sumantra: an elderly minister and charioteer with a white moustache, a white turban and simple robes"
     }
   ],
   "setting": "Ancient India in the Treta Yuga: the golden city of Ayodhya on the Saryu river, the dense forests of the south, the vanara kingdom of Kishkindha and the golden island city of Lanka.",
@@ -119,6 +137,13 @@
       "title": "कैकेयी के दो वरदान",
       "description": "कैकेयी के दो वरदान की घातक प्रतिज्ञा, राजपरिवार के भाग्य को बदल देती है। राजा दशरथ की हृदय‑विदारक दुविधा और सुबह की नयी आशा को देखें।",
       "summary": "King Dasharath rushes to the dimly lit kop bhavan and finds Queen Kaikeyi collapsed on the cold stone floor, her silk sari scattered around her. The silence is broken only by the echo of his own panicked breath as he kneels beside her, clutching his crown in trembling hands. Overcome with fear for his beloved queen, he raises his voice to the heavens, swearing by Lord Ram that he will grant any wish she declares, his oath reverberating through the silent hall. Kaikeyi, eyes hardened by Manthara’s counsel, calmly reminds Dasharath of the two boons he promised her long ago during the war of the gods and asuras. She demands that her son Bharat be crowned king and that Ram be sent into exile for fourteen years, her voice steady as stone. The king collapses onto the floor, his heart breaking as he pleads through the night, offering wealth, life, and even his own throne to spare his beloved son, yet Kaikeyi remains unmoved, her resolve as cold as the night air. As the first light of dawn paints the palace walls with a pale glow, Dasharath, still trembling, summons his loyal minister Sumantra. He commands Sumantra to ride swiftly to the forest and bring Ram back to Ayodhya, his voice hoarse with desperation. Sumantra bows deeply, his mind heavy with the grave task, and steps out into the early morning, the kingdom holding its breath for the journey ahead."
+    },
+    {
+      "season": "1",
+      "episode": "13",
+      "title": "राम का वनवास",
+      "description": "राम का धैर्य और कर्तव्य पर बलिदान, जब वह अपने पिता की वचनबद्धता को स्वीकार करता है। सिता और लक्ष्मण के साथ बंधन और परिवार की आँसू इस क्षण को और भावनात्मक बनाते हैं।",
+      "summary": "Ram listens to Kaikeyi’s reminder of the king’s oath and, with serene composure, accepts the fourteen‑year exile. He smiles, seeing Bharat’s coronation as destiny’s will, and declares his resolve to uphold dharma without hesitation. He approaches his mother Kaushalya, whose heart shatters at the news, and then comforts an angry Lakshman who threatens to fight the decree. Ram gently reminds Lakshman of righteous duty, yet Lakshman insists on accompanying his brother. Sita, with quiet dignity, refuses to stay behind, declaring that a wife’s place is beside her husband in all hardships. Lakshman seeks Sumitra’s blessing, receiving her tearful yet steadfast approval. Together Ram, Sita, and Lakshman don simple bark garments, symbolizing renunciation. They bow before a grieving Dasharath, take his tear‑stained farewell, and set forth toward the forest, their resolve firm."
     }
   ],
   "style": "realistic",
