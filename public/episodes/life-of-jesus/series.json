@@ -93,6 +93,13 @@
       "title": "The Sermon on the Mount",
       "description": "Jesus ascends the mount to deliver the timeless Sermon on the Mount, unveiling the Beatitudes and radical teachings that turn the world’s values upside‑down. He then guides the crowd in the true heart of prayer, laying the foundation for the Lord’s Prayer.",
       "summary": "Jesus climbs the hillside and the multitudes settle at His feet. He opens with the Beatitudes, declaring, “Blessed are the poor in spirit… Blessed are the peacemakers, for they shall be called children of God.” The crowd listens as He promises comfort, inheritance, and mercy to those who embody these virtues. He continues, saying, “You are the salt of the earth… you are the light of the world,” urging them to let their good works shine before men. Jesus then teaches a radical love: “Love your enemies and pray for those who persecute you,” and commands, “If anyone strikes you on the right cheek, turn the other also.” He warns against public displays of piety, urging giving, fasting, and praying in secret so that the Father who sees in secret will reward openly. Jesus draws the lesson to prayer, inviting the listeners to pray with humility and sincerity. He begins, “Our Father in heaven, hallowed be your name,” teaching them to seek God’s kingdom first and to trust Him for daily needs. The sermon ends as He exhorts them to pray openly yet quietly, planting the seed of the Lord’s Prayer that will be fully revealed later."
+    },
+    {
+      "season": "1",
+      "episode": "14",
+      "title": "The Lord's Prayer and the House on the Rock",
+      "description": "Jesus teaches the Lord’s Prayer, reveals how to trust God over worry, shares the golden rule, and illustrates true discipleship with the wise builder—ending with a centurion’s urgent plea for his dying servant.",
+      "summary": "Jesus gathers the crowd on the hill and begins, “Our Father in heaven, hallowed be your name. Your kingdom come, your will be done, on earth as it is in heaven. Give us this day our daily bread, and forgive us our debts, as we also have forgiven our debtors. And lead us not into temptation, but deliver us from evil.” He explains that this prayer aligns hearts with God’s purpose and meets daily needs. He continues, “Therefore I tell you, do not be anxious about your life—what you will eat or what you will wear. Look at the birds of the air; they do not sow or reap yet your Father feeds them. Consider the lilies of the field, how they grow without labor, and yet Solomon in all his splendor was not clothed like one of these.” He adds, “Seek first the kingdom of God and his righteousness, and all these things will be given to you.” Then he teaches, “Ask, and it will be given to you; seek, and you will find; knock, and it will be opened,” and concludes with the golden rule, “Do to others what you would have them do to you.” Jesus tells the parable, “Everyone who hears these words of mine and puts them into practice is like a wise man who built his house on the rock; the rain fell, the floods came, but the house did not fall, because it was founded on the rock. But everyone who hears and does not obey is like a foolish man who built his house on sand; when the floods came, it fell with a great crash.” The crowd watches, understanding the need for a firm foundation in obedience. As the teaching ends, a Roman centurion arrives with a messenger, saying, “Lord, my servant is dying; please come and heal him,” setting the stage for the next miracle."
     }
   ],
   "characters": [
@@ -100,6 +107,12 @@
       "name": "Jesus",
       "role": "the Son of God, the Messiah",
       "look": "Jesus: a man of about thirty with a gentle, compassionate face, warm olive skin, shoulder-length dark brown hair and a short beard, kind dark eyes, a simple off-white linen robe with a deep red mantle over one shoulder, sandals"
+    },
+    {
+      "name": "Centurion",
+      "nativeName": "Centurio",
+      "role": "Roman centurion",
+      "look": "A Roman officer in bronze armor, wearing a plumed helmet, a red cloak, and a sword at his side"
     }
   ],
   "setting": "First-century Judea and Galilee under Roman rule: the village of Nazareth, Bethlehem, the shores and fishing boats of the Sea of Galilee, the Jordan river, the desert wilderness and Jerusalem with its great temple.",
