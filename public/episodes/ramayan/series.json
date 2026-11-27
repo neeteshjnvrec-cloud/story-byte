@@ -22,34 +22,22 @@
       "look": "Lakshman: a fair-skinned young prince with a gold crown, a yellow dhoti and angavastram over his shoulders, gold necklaces and a bow, always beside Ram"
     },
     {
-      "name": "Dasharath",
-      "nativeName": "दशरथ",
-      "role": "king of Ayodhya, father of Ram",
-      "look": "King Dasharath: an elderly, dignified king with a white beard and moustache, a tall gold crown, rich maroon and gold silk robes and gold jewellery"
+      "name": "Sumantra",
+      "nativeName": "सुमंत्र",
+      "role": "Dasharath's minister and charioteer",
+      "look": "Sumantra: an elderly minister and charioteer with a white moustache, a white turban and simple robes"
     },
     {
-      "name": "Kaushalya",
-      "nativeName": "कौशल्या",
-      "role": "Ram's mother, Dasharath's eldest queen",
-      "look": "Queen Kaushalya: a gentle, graceful middle-aged queen in a cream and gold silk saree, a small gold crown, her head covered with the end of the saree"
+      "name": "Guh",
+      "nativeName": "निषादराज गुह",
+      "role": "chief of the Nishad boatmen, Ram's friend",
+      "look": "Nishadraj Guh: a strong tribal chief with dark skin and a beard, a simple dhoti and a headband"
     },
     {
-      "name": "Kaikeyi",
-      "nativeName": "कैकेयी",
-      "role": "Bharat's mother, Dasharath's favourite queen",
-      "look": "Queen Kaikeyi: a beautiful, proud queen in a deep green and gold silk saree, rich gold jewellery and a gold crown"
-    },
-    {
-      "name": "Sumitra",
-      "nativeName": "सुमित्रा",
-      "role": "mother of Lakshman and Shatrughna",
-      "look": "Queen Sumitra: a calm, kind middle-aged queen in a light blue and gold silk saree with a small gold crown"
-    },
-    {
-      "name": "Bharat",
-      "nativeName": "भरत",
-      "role": "Ram's devoted younger brother, son of Kaikeyi",
-      "look": "Bharat: a young prince with dusky dark skin, a gentle devoted face, a gold crown, a saffron dhoti and angavastram; after Ram's exile, plain ascetic bark clothes and matted hair"
+      "name": "Kevat",
+      "nativeName": "केवट",
+      "role": "the boatman who ferries Ram across the Ganga",
+      "look": "Kevat: a humble, cheerful thin boatman in a simple white dhoti, barefoot, beside his wooden boat"
     }
   ],
   "setting": "Ancient India in the Treta Yuga: the golden city of Ayodhya on the Saryu river, the dense forests of the south, the vanara kingdom of Kishkindha and the golden island city of Lanka.",
@@ -144,6 +132,13 @@
       "title": "राम का वनवास",
       "description": "राम का धैर्य और कर्तव्य पर बलिदान, जब वह अपने पिता की वचनबद्धता को स्वीकार करता है। सिता और लक्ष्मण के साथ बंधन और परिवार की आँसू इस क्षण को और भावनात्मक बनाते हैं।",
       "summary": "Ram listens to Kaikeyi’s reminder of the king’s oath and, with serene composure, accepts the fourteen‑year exile. He smiles, seeing Bharat’s coronation as destiny’s will, and declares his resolve to uphold dharma without hesitation. He approaches his mother Kaushalya, whose heart shatters at the news, and then comforts an angry Lakshman who threatens to fight the decree. Ram gently reminds Lakshman of righteous duty, yet Lakshman insists on accompanying his brother. Sita, with quiet dignity, refuses to stay behind, declaring that a wife’s place is beside her husband in all hardships. Lakshman seeks Sumitra’s blessing, receiving her tearful yet steadfast approval. Together Ram, Sita, and Lakshman don simple bark garments, symbolizing renunciation. They bow before a grieving Dasharath, take his tear‑stained farewell, and set forth toward the forest, their resolve firm."
+    },
+    {
+      "season": "1",
+      "episode": "14",
+      "title": "अयोध्या से विदाई",
+      "description": "अयोध्या की शोकभरी विदाई, शृंगवेरपुर में निशादराज की मेहमाननवाज़ी, और गंगा किनारे केवट की प्रतीक्षा—एक भावनात्मक यात्रा का आरम्भ।",
+      "summary": "The people of Ayodhya weep as they follow Rama’s chariot, driven by the faithful Sumantra. Their mournful cries echo through the city streets, yet the prince remains composed. At the banks of the Tamsa River, Rama decides to depart quietly under the cover of night, allowing the grieving crowd to return home. Reaching Shringverpur, the chief of the Nishads, Nishadraj Guh, greets Rama, Sita and Lakshman with heartfelt hospitality. Rama and Sita sit on the ground and rest, while Lakshman and Guh keep vigilant watch through the night. The calm of the riverbank offers a brief respite from the sorrow of exile. Rama instructs Sumantra to return to Ayodhya and convey their farewell to the kingdom. The trio then proceeds towards the banks of the Ganga, where the humble boatman Kevat waits with his vessel. The episode concludes as they stand at the river’s edge, ready to cross the sacred waters."
     }
   ],
   "style": "realistic",
